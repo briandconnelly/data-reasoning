@@ -1,6 +1,6 @@
 # data-reasoning
 
-A Claude Code plugin for reasoning from data: structured exploration that generates honest leads, and hypothesis-driven investigation that adjudicates them.
+A Claude Code and Codex plugin for reasoning from data: structured exploration that generates honest leads, and hypothesis-driven investigation that adjudicates them.
 
 ## Skills
 
@@ -15,10 +15,23 @@ Both carry the same authorization gate, and `skills/exploratory-data-analysis/de
 
 ## Installation
 
+### Claude Code
+
 ```
 /plugin marketplace add briandconnelly/briandconnelly-plugins
 /plugin install data-reasoning
 ```
+
+### Codex
+
+Add this repository as a marketplace, then install the plugin from it:
+
+```bash
+codex plugin marketplace add briandconnelly/data-reasoning
+codex plugin add data-reasoning@data-reasoning
+```
+
+Start a new Codex session after installation so the bundled skills are available.
 
 ## Development
 
