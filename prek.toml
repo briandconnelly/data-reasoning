@@ -1,0 +1,44 @@
+minimum_prek_version = "0.3.0"
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  { id = "mixed-line-ending" },
+  { id = "check-merge-conflict" },
+  { id = "check-added-large-files" },
+  { id = "check-yaml" },
+  { id = "check-toml" },
+]
+
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.15.21"
+hooks = [
+  { id = "ruff-check", args = ["--fix"] },
+  { id = "ruff-format" },
+]
+
+[[repos]]
+repo = "meta"
+hooks = [
+  { id = "check-hooks-apply" },
+  { id = "check-useless-excludes" },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "check-skill-frontmatter", name = "Validate SKILL.md frontmatter against agentskills.io spec", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-skill-frontmatter.py", files = "(?:^|/)SKILL\\.md$", pass_filenames = true },
+  { id = "check-citations", name = "hypothesis-driven-analysis: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/hypothesis-driven-analysis/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
+  # The instruments' own unit suite. Nothing ran it before, so an edit to
+  # score_ledger.py landed unchecked. The whole tests tree is collected; the
+  # deliberately-broken scenario-3 fixture is held out by
+  # skills/hypothesis-driven-analysis/tests/conftest.py, which travels with the
+  # directory and so is honored whatever cwd pytest is invoked from.
+  { id = "hda-instrument-tests", name = "hypothesis-driven-analysis: the ledger instruments' own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/hypothesis-driven-analysis/tests", files = "^skills/hypothesis-driven-analysis/tests/.*\\.py$", pass_filenames = false },
+  { id = "validate-s15-fixture", name = "hypothesis-driven-analysis: s15 fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/hypothesis-driven-analysis/tests/fixtures/validate_s15.py skills/hypothesis-driven-analysis/tests/fixtures/s15-assist-rollout", files = "^skills/hypothesis-driven-analysis/tests/fixtures/(generate\\.py|validate_s15\\.py|s15-assist-rollout/)", pass_filenames = false },
+  { id = "validate-s21-fixture", name = "hypothesis-driven-analysis: s21 packets keep every property they set", language = "python", language_version = "python3", entry = "python skills/hypothesis-driven-analysis/tests/fixtures/validate_s21.py skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition", files = "^skills/hypothesis-driven-analysis/tests/fixtures/(generate\\.py|validate_s21\\.py|s21-status-disposition/)", pass_filenames = false },
+  { id = "eda-gate-parity", name = "exploratory-data-analysis: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/exploratory-data-analysis/tests", files = "^(skills/exploratory-data-analysis/(SKILL\\.md|tests/.*\\.py)|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
+]
