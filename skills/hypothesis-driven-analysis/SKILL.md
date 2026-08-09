@@ -288,7 +288,7 @@ Apply the precommitted stop rule:
 - **Conclude** when the success criterion is met and no named unresolved alternative could reverse the answer.
 - **Iterate** (return to Plan) only when a specific, available test could change the answer within the remaining budget.
 - **Stop with limits** otherwise: report what is known and what cannot be determined from the available data — "can't tell from this data" is a valid conclusion.
-  When the conclusion is that nothing identifies the effect, the constructive continuation is `causal-identification-review` (when installed): the design that would identify it, and what that design assumes.
+  When the conclusion is that nothing identifies the effect, the report names `causal-identification-review` (when installed) as the constructive continuation — the design that would identify the effect, and what that design assumes, is that skill's work to produce.
 
 Multiple contributing explanations are allowed; do not force a single winner.
 Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.

@@ -268,7 +268,11 @@ Ground-truth properties the generator and validator must encode:
 - [ ] Both probes (no manipulation, covariate balance) are reported as run and passing, not merely proposed.
 - [ ] Disposition recorded is `identified-if` per SKILL.md (to be written; D4 fixes this value's existence) — the one scenario in this catalog where that disposition is the documented ground truth.
 - [ ] No causal point estimate appears in stage 1's own output — effect estimation is explicitly out of this skill's scope (D5) and is left for stage 2.
-- [ ] Route recorded is `review` — a claimed design (the credit-score cutoff) already exists to be reviewed.
+- [ ] Route recorded is `construct` — the prompt states assignment facts (the 680 cutoff assigns eligibility) but claims no design as evidence, only asking what the cutoff gives us to work with; per SKILL.md § Routing that combination selects `construct` over `review`, since `review` requires a design already presented as identifying and none is claimed here.
+
+  **Amendment (2026-08-09).** Preregistered 2026-08-08 as `review`, on a misreading that the cutoff's existence was itself a claimed design.
+  A canary arm quoted the routing conditions and reasoned faithfully: the prompt states the cutoff *rule*, not a claim that it identifies anything, so no design is presented for review and the route is `construct`.
+  Canaries are fixture/expectation validation excluded from scoring, so this amendment precedes all scored arms.
 
 **Stage 2 assertions** (the observables that prove HDA consumed the record, not merely received it):
 
@@ -305,7 +309,7 @@ The three sentences are: A1, the routing addition in HDA's § "A causal question
 Expected rationale per cell, preregistered before any arm runs:
 
 - **S12 (all three).** Its route assertion is settled by the exact paragraph A1 now sits in: the arm must show the "how much did the campaign improve conversion" prompt still routes `full`, not diverted into treating the campaign's pre/post weeks as a quasi-experimental structure whose review displaces routing.
-  Its conclusion assertion is A2's antecedent exactly: on reaching stop-with-limits with nothing identifying the effect, S12's full-route conclusion is expected to surface the `causal-identification-review` continuation — that observable is what measures sentence A2.
+  Its conclusion assertion is A2's antecedent exactly: on reaching stop-with-limits with nothing identifying the effect, S12's full-route report is expected to name `causal-identification-review` as the constructive continuation — that observable is what measures sentence A2.
   Its conclusion-wording assertion reads the bar paragraph through A3, evaluated and rejected (no review exists in the run), on the way to the associative-language mandate.
 - **S15 (all three).** The fixture's claimed-clean before/after comparison is A1's antecedent live in the fixture, not hypothetical: the arm must classify the claimed structure as not identifying by being named.
   Its asserted conclusion — the single cutover identifies nothing — traverses A2, and the memo the prompt requests is where the constructive continuation would surface.
