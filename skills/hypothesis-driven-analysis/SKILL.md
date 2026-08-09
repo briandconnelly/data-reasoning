@@ -42,6 +42,7 @@ Ask what assigned the exposure, and route on what you are *told* assigned it —
 Randomization stated, or assignment stated to be plausibly independent of the outcome, with a comparison group that would have moved the same way had the cause been absent: the effect is identified and no rival explanations need telling apart, so the work is **estimation** — or `mini`, if someone has already stated a claim, numeric or qualitative, for you to check.
 "Is B better than A, and by how much" over an assignment you have been told was random is an estimation task, however causal it sounds — the design already did the discriminating that the loop would otherwise have to do.
 Assigned by anything else — someone launched it, it shipped to whoever got it, it happened in a week when other things also happened: nothing identifies the effect, every co-occurring change is a live rival, and that is **full**.
+A stated quasi-experimental structure — a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: route its review through `causal-identification-review` when installed, and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
 "How much did launching the campaign improve conversion" is the second case wearing the first one's clothes: a causal question carrying a number, with no design behind it.
 The loop's job there is not to produce the number — it is to establish that the number is not available from this data, and to report what is.
 
@@ -287,11 +288,13 @@ Apply the precommitted stop rule:
 - **Conclude** when the success criterion is met and no named unresolved alternative could reverse the answer.
 - **Iterate** (return to Plan) only when a specific, available test could change the answer within the remaining budget.
 - **Stop with limits** otherwise: report what is known and what cannot be determined from the available data — "can't tell from this data" is a valid conclusion.
+  When the conclusion is that nothing identifies the effect, the constructive continuation is `causal-identification-review` (when installed): the design that would identify it, and what that design assumes.
 
 Multiple contributing explanations are allowed; do not force a single winner.
 Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.
 Controlling the intervention is not identifying its effect — you can own a global rollout end to end and still have no idea what would have happened without it, because time, concurrent changes, seasonality, and selection all moved too.
 Observational adjustment does not clear the bar either: temporal ordering and controlling for the confounders you happened to measure say nothing about unmeasured confounding, selection, or interference.
+A quasi-experimental design clears the bar only through an identification review ending `identified-if` with its probes run — the review names the assumptions the causal wording then carries as conditions.
 Absent such a design, associative language is mandatory and the limitations name which of those threats remain open.
 Do not invent numeric confidence values.
 Report the answer first, then the per-hypothesis evidence summary, then limitations, then a pointer to the ledger when a durable artifact exists.
