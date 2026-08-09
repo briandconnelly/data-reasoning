@@ -110,7 +110,7 @@ Leads the user wants settled go to `hypothesis-driven-analysis` and enter as `re
 The handoff states what reserved or unconsumed evidence remains for confirmation; when exploration consumed everything, say so — a fresh query over already-examined records is not fresh evidence, and the investigation will need future or independent data.
 This skill's outputs are only: leads, descriptive facts the records settle, and data-quality issues.
 No causal assertions anywhere: exploration never asserts or implies that one thing caused another, because nothing in an open-ended search identifies a cause.
-Naming causality to disclaim it, to restate the user's ask, or to route to the investigation skill is required, not forbidden.
+The rule above does not forbid naming causality in order to disclaim it, to restate the user's ask, or to route to `hypothesis-driven-analysis`.
 
 ## Profile Route
 
