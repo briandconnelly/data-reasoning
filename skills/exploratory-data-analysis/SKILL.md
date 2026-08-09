@@ -54,7 +54,7 @@ Refusing work a valid grant plainly covers is its own failure. This gate exists 
 
 ### Costly collection (modifier, not a route)
 
-Collection is costly when the user, the tool, or the configuration states a cost — a price, a quota, a rate limit, a latency, a size — or when you observe the cost directly.
+Collection is costly when the user, the tool, or the configuration states a cost — a price, a quota, a rate limit, a latency, a size — when you observe the cost directly, or when the pull exceeds a budget they set.
 A suspected cost is not a trigger; a stated or measured one is, and a number you cannot classify is treated as costly.
 Cost never changes the route: a metered warehouse makes profiling more expensive, not more inferential.
 Before any costly pull, on any route, write down: what the pull serves, the exact source and action, why this is the cheapest adequate collection, a budget in the metered unit, the authorization covering it (or `BLOCKED`), and the condition under which you stop or pull again.

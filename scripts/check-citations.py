@@ -45,17 +45,26 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # fixtures, and point-in-time implementation plans under docs/ are excluded --
 # they are records of what was true when written, not claims about now.
 #
-# Widening to the other skills is a follow-up, not an oversight:
-# agent-friendly-mcp/tests/scenarios.md carries 7 line-number citations into
-# live reference files, and those need converting before the rule can bind
-# there without failing on work this check was not part of.
+# exploratory-data-analysis joined the scope on 2026-08-08, when
+# decisions/002 landed a record quoting SKILL.md and scenarios.md into a
+# directory no gate was watching. It was clean on entry, verified in both
+# directions: a planted bad quote fails, real content passes.
+#
+# Only `tests/scenarios.md` is in scope under that skill, not `tests/*.md`.
+# Widening the glob was tried and reverted: the prek `files` regex then matches
+# the whole archived `tests/runs/` tree, which this module skips one file at a
+# time, burying a real failure under hundreds of skip notices. A preregistration
+# belongs in the scenario catalog, which is already in scope.
 #
 # `decisions/*.md` is in scope because those records quote SKILL.md verbatim to
 # say what was decided about it -- decisions/005 quotes it three times -- and a
 # decision record whose quote no longer matches the body misreports the state of
 # the rule it settles. That is exactly the drift channel decisions/004 polices,
 # and it was outside every instrument until 2026-08-08.
-DEFAULT_SCOPE = ("skills/hypothesis-driven-analysis",)
+DEFAULT_SCOPE = (
+    "skills/hypothesis-driven-analysis",
+    "skills/exploratory-data-analysis",
+)
 SCOPE_PATTERNS = ("SKILL.md", "references/*.md", "tests/scenarios.md", "decisions/*.md")
 
 # Citations into these directories are frozen and may carry line numbers.
