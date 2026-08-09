@@ -207,7 +207,8 @@ Do not estimate whether delegation "saves tokens" against an inline run you have
 Degrade gracefully: a harness without subagents runs the same tests serially.
 Record each test outcome as `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with evidence pointers.
 Look at the data before summarizing it: distributions, outliers, missingness.
-Prefer effect sizes over bare significance, and watch for confounds and aggregation reversals.
+Prefer effect sizes over bare significance.
+For each comparison the conclusion relies on, record in that test's `Evidence` cell the confound and aggregation-reversal check performed, or that none was available.
 When two quantities you compare differ in denominator, weighting, aggregation, or censoring, name what each one measures rather than presenting them as versions of the same number.
 A sign change between a marginal and a standardized quantity shows sensitivity to composition and estimand; it is not the standardized quantity correcting the marginal one, and claiming that requires stating the standardization assumptions — including that the stratifier is not itself downstream of the exposure.
 An absent record does not by itself establish the absence of the event: establish the source's completeness semantics before inferring either event status or the direction of a bias.
