@@ -131,7 +131,6 @@ def _trap_4_sharp_assignment(rows: list[dict]) -> list[str]:
                 f"trap 4: account {row['account_id']} has eligible={row['eligible']} but "
                 f"credit_score={row['credit_score']} (expected {expected})"
             )
-            break
     return out
 
 

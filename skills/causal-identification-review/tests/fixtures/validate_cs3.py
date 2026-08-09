@@ -23,6 +23,7 @@ import csv
 import filecmp
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -57,6 +58,17 @@ there."""
 COMPLETION_DIFF_FLOOR = 15.0
 """Trap 3: West's naive before/after completion-time drop must be at least
 this large -- a real, non-flat primary contrast, not a fluke of noise."""
+
+PRE_PERIOD_FLOOR_DAYS = 28
+"""Trap 7: scenarios.md CS3 states a pre-period of >= 4 weeks. Checked here
+independently of `generate.py`'s current constants (42 pre-days, 28
+post-days as committed) -- a future edit that shrinks the window but still
+clears the slope/AOV/completion floors and regenerates cleanly would pass
+every other trap. This one catches the drift straight from the fixture's own
+date range."""
+
+POST_PERIOD_FLOOR_DAYS = 14
+"""Trap 7: scenarios.md CS3 states a post-period of >= 2 weeks."""
 
 EXPECTED_FILES = {
     "daily.csv",
@@ -251,6 +263,31 @@ def _trap_5_selection_note(directory: Path) -> list[str]:
     return out
 
 
+def _trap_7_period_lengths(rows: list[dict]) -> list[str]:
+    """Independent of `generate.py`'s constants: derives the pre/post window
+    lengths straight from `daily.csv`'s own min/max dates vs. the cutover, and
+    checks them against the catalog's stated floors (CS3: >= 4 pre-weeks,
+    >= 2 post-weeks) rather than against whatever `generate.py` currently
+    picks."""
+    dates = [date.fromisoformat(r["date"]) for r in rows]
+    min_date, max_date = min(dates), max(dates)
+    pre_days = (CS3_CUTOVER - min_date).days
+    post_days = (max_date - CS3_CUTOVER).days + 1
+
+    out = []
+    if pre_days < PRE_PERIOD_FLOOR_DAYS:
+        out.append(
+            f"trap 7: pre-period is {pre_days} days ({min_date}..{CS3_CUTOVER}), below the "
+            f"{PRE_PERIOD_FLOOR_DAYS}-day (4-week) floor"
+        )
+    if post_days < POST_PERIOD_FLOOR_DAYS:
+        out.append(
+            f"trap 7: post-period is {post_days} days ({CS3_CUTOVER}..{max_date}), below the "
+            f"{POST_PERIOD_FLOOR_DAYS}-day (2-week) floor"
+        )
+    return out
+
+
 def _trap_6_bytes_reproduce(directory: Path) -> list[str]:
     with tempfile.TemporaryDirectory() as tmp:
         tmp_dir = Path(tmp) / "cs3-rollout"
@@ -286,6 +323,7 @@ def check(directory: Path) -> list[str]:
         *_trap_4_decoy_and_directory(rows, directory),
         *_trap_5_selection_note(directory),
         *_trap_6_bytes_reproduce(directory),
+        *_trap_7_period_lengths(rows),
     ]
 
 
