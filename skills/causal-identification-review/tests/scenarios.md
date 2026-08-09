@@ -48,6 +48,57 @@ Per `decisions/006`, the skill is built complete on `feat/causal-identification-
 So "do not ship" is reached, if it is reached at all, entirely from arms scored on unmerged content; the branch then simply does not merge, and the row was never gated on the merge already having happened.
 A row that could only be selected after merging would not be a gate — `PROTOCOL.md` names the same failure mode for an abort gate keyed on post-edit arms.
 
+### Resolution (2026-08-09, measurement wave 1)
+
+The preregistered rows above are unchanged; this subsection records which row the wave's results select and why.
+Run records: `tests/runs/2026-08-09-*.md`; evidence: `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`.
+
+Per-cell totals (assertion tables in the run records; seam cells count scenario assertions plus seam observables):
+
+| Cell | Arm(s) | Total |
+| --- | --- | --- |
+| CS1 trigger | sc-cs1 | 2/2 |
+| CS2 trigger | sc-cs2 | 2/2 |
+| CS6a trigger | sc-cs6a | 2/2 |
+| CS3 | sc-cs3-base 2/6 · sc-cs3-ws | 6/6 |
+| CS4 (amended, sc2 re-run) | sc2-cs4-base 5/7 · sc2-cs4-ws | 7/7 |
+| CS5 | sc-cs5-base 3/4 · sc-cs5-ws | 4/4 |
+| CS6b | sc-cs6b-base 0/4 · sc-cs6b-ws | 4/4 |
+| CS7 stage 1 (amended, sc2 re-run) | sc2-cs7-base 1/5 · sc2-cs7-ws | 5/5 |
+| CS7 stage 2 | sc2-cs7s2 | 4/4 |
+| S9 seam | sc-s9 | 4/4 (3 + A1) |
+| S12 seam | sc-s12 | 8/8 (5 + A1/A2/A3) |
+| S1 seam | sc-s1 | **5/8** (4/7 + A3) |
+| S15 seam | sc-s15 | **10/13** (7/10 + A1/A2/A3) |
+
+Every assertion that failed anywhere, with its consequence:
+
+- S1 seam, assertions 1/6/7 (ledger before analysis; no queries outside the plan; preregistration ordering): one defect at three observation points — the arm analyzed first and wrote the ledger last (`check_prereg.py`: prereg write at ordinal 20 of 20), then self-flagged the reconstruction.
+  Consequence: a finding against `hypothesis-driven-analysis`'s standing preregistration discipline, whose decision points traverse no amendment sentence; first S1 measurement under the ordering instrument, so no before-state exists; filed to HDA's suite (see the owed-measurements note), owed no fix by this branch's changes.
+- S15 seam, assertion 6 (completeness semantics): establishment claimed from the source's own missingness pattern plus internal age consistency, with still-open status language and a direction claim resting on it; `score_ledger.py` C3b fails on the missing `S2: UNKNOWN` declaration.
+  Consequence: reproduces the documented pre-amendment failure (0/6 arms passed this assertion's rewritten letter across HDA's Tenth-wave and Post-strengthening records on the same fixture); a standing HDA finding already tracked by HDA's own suite (the C3 instrument exists because of it), not a regression this branch caused or can fix.
+- S15 seam, assertion 9 (handoffs aggregation reversal): never interpreted.
+  Consequence: matches the 0-for-6 pre-amendment record on this assertion; same standing-HDA disposition as above.
+- S15 seam, assertion 11 (preregistration ordering): ledger written at ordinal 23 of 37, after three analysis scripts; a machine-confirmed reconstruction.
+  Consequence: matches the modal pre-amendment S15 profile (4 of 6 pre-amendment arms were reconstructions); same standing-HDA disposition.
+- Baseline-arm failures (CS3 2/6, CS4 5/7, CS5 3/4, CS6b 0/4, CS7 1/5) are the preregistered differentiation, not defects; CS5's baseline independently computed correct Lee bounds, so that cell differentiates on one assertion at n=1 (thin margin, recorded honestly).
+
+Defects found in post-arm review, each with its rerun scoping recorded (none assumed):
+
+- `check_review.py` fails 5 of 7 with-skill records on formatting-class parses (backtick-wrapped closed-set tokens, sub-list slot values, `none` followed by a rationale, named-only design blocks); content is semantically compliant on manual read in all five.
+  Scoping: the fix is checker-side (or template-side, deliberately not taken); a checker change is not agent-read prose and owes no arm.
+- CS2's record carries a genuine closed-set violation (a conditional compound disposition); outside CS2's preregistered scope (trigger-only depth), no wording change adopted, watch item for the next disposition-depth wave; owes nothing now.
+- CS4 fixture-wording ambiguity: both the baseline and with-skill arms independently read "only the 90 days following each merchant's own enrollment date exist" as leaving no outcome window below the cutoff, landing RD `not-constructible` where this catalog's fixture prose expected RD's data requirements "even potentially completable"; no assertion keys on RD's disposition, so nothing failed.
+  Scoping: a clarifying fixture edit is agent-read fixture prose and would owe fresh CS4 arms per this catalog's own amendment precedent — deferred, recorded here rather than patched.
+- CS7 stage-1's probe table reports raw outcome-jump magnitudes (a stricter reading of the no-point-estimate assertion could count them); scored PASS because the fixture's own entanglement check requires verifying the discontinuity is non-flat and the record explicitly refuses to promote the number; doubt recorded.
+- CS7 stage-2's estimand is a matching-terms reuse, not a byte copy, of stage 1's string ("Carried verbatim" overstated); the distinctive core phrase greps into stage 1's record and the conditions/bandwidths are demonstrably consumed; scored PASS-borderline with both strings quoted in the artifact.
+
+**Row selected: "Ship with formatting-only fixes owing no re-arms" — for this skill's own cells and the three seam sentences — with the S1/S15 standing-HDA failures recorded as out-of-scope findings, not waived.**
+Reasoning: every CS1–CS7 arm passes its assertion table against the frozen wording (SKILL.md digests re-hashed byte-identical to c5f4755; the catalog's own hash moved only by the preregistered 2026-08-09 amendments); every seam observable the three sentences owe (A1 in S9/S12/S15, A2 in S12/S15, A3 in S1/S12/S15) passed in every cell; and every defect found in post-arm review is scoped above as owing no arm.
+The "ship as drafted" row is unreachable because the S1/S15 seam-cell tables contain failures; those failures' decision points traverse only HDA sentences the amendment never edited, and the S15 failure profile is identical to the documented pre-amendment before-state, so the redesign row's condition — a failure whose fix is scoped as owing an arm of this change — is not met: no change on this branch caused them, and no redesign of the three sentences could pass a bar the before-state never met (a gate no wording could pass is not a gate, per `PROTOCOL.md` step 1's converse).
+The stricter reading — this section's no-change row taken literally, "a failed cell sends the sentences back through design" — is recorded as the alternative: under it the seam sentences would return to design despite their own observables passing 11/11, which the resolver judged incoherent for failures the sentences demonstrably did not introduce; a reviewer who takes the stricter reading should treat this wave as selecting the redesign row for the seam cells only, with CS1–CS7 results standing either way.
+Caveats owned: n=1 per cell throughout; the S15 before-state comparison rests on HDA's archived waves, not on a fresh pre-amendment control arm run in this wave; the co-load condition (both skills present) is new and S12's clean preregistration is the only same-wave counterexample to a co-load-distraction hypothesis.
+
 ## CS1 — Trigger, negative
 
 **Prompt** (verbatim):
@@ -336,3 +387,9 @@ Expected rationale per cell, preregistered before any arm runs:
 As of this preregistration (2026-08-08), zero arms have run for any of CS1–CS7.
 Every fixture property, entanglement-neutralizing fact, and documented ground-truth disposition or bound above rests on argument alone, pending Task 2.2's generators and validators, Task 3's `SKILL.md` and template, and Phase 4's design review, canary arms, and scored arms.
 Nothing in this file is evidence; it is the contract the evidence will be measured against.
+
+**Update (2026-08-09): measurement wave 1 complete.**
+Every cell above (CS1–CS7 and the four HDA seam cells) now has one scored arm per role: run records in `tests/runs/2026-08-09-*.md`, evidence in `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`, and the verdict-table resolution in § "Global verdict table" above.
+Every figure is n=1 per cell — one arm per role, one model (Sonnet), one day — so nothing here bounds variance; treat totals as existence results, not rates.
+The canary set (`canary-*` transcripts, one per cell plus `canary-s12b`) and the superseded first-wave CS4/CS7 arms (`sc-cs4-*`, `sc-cs7-*`, which predate the 2026-08-09 amendments and prompted them) are archived unscored in `.superpowers/sdd/2026-08-08-causal-identification-review-skill/task-4.3/`, per the amendment notes in the CS4 and CS7 sections and `PROTOCOL.md`'s canary principle.
+Still owed after this wave: repeat arms to put a variance bar on the n=1 cells (CS5 especially, where the baseline already computes correct bounds and the cell differentiates on one assertion); a CS4 wave after any fixture-wording clarification of the below-cutoff outcome window (which would owe fresh arms); trigger-depth coverage of the compound-disposition finding CS2 surfaced; and, filed to `hypothesis-driven-analysis`'s own suite rather than owed here, the S1 preregistration-ordering finding (first measurement, failed) and the standing S15 failures (completeness semantics, handoffs, preregistration) this wave reproduced at their documented pre-amendment rates.

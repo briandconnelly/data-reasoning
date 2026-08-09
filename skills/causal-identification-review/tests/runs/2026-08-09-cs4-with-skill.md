@@ -1,0 +1,28 @@
+# CS4 with-skill — 2026-08-09 (amended-cell re-run)
+
+Arm transcript: `sc2-cs4-ws.jsonl` (sha256 `36df5de0…`, full digest in `artifacts/2026-08-09-measurement-wave-1-evidence.md`).
+Skill loaded from the staged copy (SKILL.md byte-identical to c5f4755, re-hashed); record archived at `sc2-cs4-ws/identification-review-merchant-verification.md` (Write at manifest ordinal 6, the final tool call).
+This arm re-measures the cell after the 2026-08-09 CS4 amendment; the first-wave `sc-cs4-*` arms are archived-unscored.
+Scored against `tests/scenarios.md` § CS4 (amended assertions).
+
+| Assertion (verbatim, first clause) | Result | Evidence |
+| --- | --- | --- |
+| Names ≥2 candidate designs including regression discontinuity, each carrying identifying assumptions and data requirements, with every disposition drawn from the closed set …; a timing-based design …, if named, must confront the discretion fact rather than treat realized timing as clean … | PASS | Three Design blocks (RD, DiD/staggered-by-batch, prospective experiment); RD and DiD both carry assumptions and data requirements; dispositions are `not-constructible`, `not-constructible`, `unresolved` (all closed-set, checker-verified tokens in the first two blocks); the DiD threat register quotes and confronts the discretion fact ("Risk analysts had discretion to fast-track 'high-touch' merchants … not logged anywhere the fraud team can retrieve"), and no design treats realized timing as clean; the prospective block is named-only per assertion 6's own exclusion and the fixture's "permits naming, but not designing" contract. |
+| Regression discontinuity's block states its identifying assumptions (no manipulation/sorting …; continuity …) and its data requirements (the running variable, the enrollment flag, the outcome, and enough merchant density near the cutoff to run a manipulation and covariate-balance check). | PASS (borderline) | Assumptions: "no manipulation of lifetime volume to land on either side of $50,000; no other change coincides with the cutoff; potential outcomes are continuous through the cutoff" — the full enumerated set. Data requirements: "a chargeback outcome measured over a comparable window for merchants on both sides of the $50,000 cutoff, plus each merchant's lifetime volume near the cutoff (to define the running variable and bandwidth)" — running variable and outcome explicit, both-sides coverage entails the enrollment flag, near-cutoff bandwidth entails density; the block does not tie density to the manipulation/balance probes because it short-circuits at the failed both-sides outcome requirement before probes. Scored PASS on the core demand (both content classes stated, with the decisive requirement identified); the enumerated-gap counter-reading is recorded in the verdict resolution. |
+| If an instrumental-variable design is named (at whatever disposition), its block states … all three, not a subset … | PASS (vacuous) | No IV block; the batch design is framed as DiD/staggered adoption, dispositioned `not-constructible` on the missing pre-period. |
+| When the instrumental-variable block's estimand is a local average treatment effect, the block also states monotonicity … | PASS (vacuous) | No IV block exists. |
+| Does not propose difference-in-differences or a matching/selection-on-observables design as admissible — proposing either fails this assertion, per the decoy contract above. | PASS | DiD is named only to disposition it `not-constructible` ("no pre-period chargeback series exists for any merchant"); no matching design appears in record or final text. |
+| If a prospective randomized experiment is mentioned, it is named only — no power calculation, minimum-detectable-effect figure, sample-ratio-mismatch check, or other prospective-design mechanics appear (D3's exclusion). | PASS | Record: "naming this design is the whole of this skill's permission here; its mechanics (randomization procedure, power, minimum detectable effect, sample-ratio checks, sequential-analysis rules) are out of scope … and are not designed below." |
+| Route recorded is `construct` per SKILL.md … | PASS | Record Question block: "Route: construct — a causal question with no design behind it (\"what would it take to find out\") plus facts about how exposure was assigned, per SKILL.md § Routing." |
+
+Total: 7/7.
+
+Machine gate: `check_review.py` exits 1 with 11 findings, all shape-class: the RD and DiD blocks omit the `- Design:` name bullet and render assumptions/probes as inline prose ("Assumption probes: not run — no outcome data exists …") instead of the template's sub-list and table, and the named-only prospective block has no probe/threat tables by design.
+No closed-set, forbidden-vocabulary, or Handoff-reuse violation; adjudicated in the verdict resolution as record-shape findings on blocks the record deliberately short-circuited.
+
+Fidelity notes (not scored):
+
+- Both this arm and the baseline independently read `facts.md`'s "Only the 90 days following each merchant's own enrollment date exist" as leaving no outcome window for below-cutoff merchants, landing RD at `not-constructible` where the catalog's fixture prose expected RD's data requirements to be "even potentially completable" — a fixture-wording ambiguity (does an ineligible merchant's "enrollment decision" date anchor a window?) recorded for design attention in the verdict resolution; no assertion row keys on RD's disposition, so nothing is scored against it.
+- The final text states the boundary cleanly: "this review doesn't estimate an effect or certify any design as valid — dispositions are evidence-bounded, not endorsements."
+
+Cost: 56,364 tokens (harness-reported, n=1; +78.9% over the 31,511-token baseline); 6 tool uses (identity).
