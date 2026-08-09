@@ -20,9 +20,10 @@ Run from the repo root:
 
     uv run skills/hypothesis-driven-analysis/tests/fixtures/generate_s5b_seam.py
 
-The ground truth it plants is documented in `s5b-seam/README.md` and
-preregistered as scenario E1 in
-`skills/exploratory-data-analysis/tests/scenarios.md`.
+The ground truth it plants is documented in `s5b-seam-ground-truth.md` --
+deliberately outside the `s5b-seam/` directory the arms are handed, which the
+validator requires to hold `events.csv` alone -- and preregistered as scenario
+E1 in `skills/exploratory-data-analysis/tests/scenarios.md`.
 """
 
 from __future__ import annotations
