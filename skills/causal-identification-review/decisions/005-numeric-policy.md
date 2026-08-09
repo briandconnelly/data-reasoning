@@ -13,9 +13,10 @@ But does that ban extend to every number the skill might produce, including the 
 An early draft of the bound route — the route absorbing the former Candidate 6, partial identification under stated assumptions — produced no computed values, only the plan for how bounds would be computed.
 This kept the numeric ban simple and total.
 
-*Numeric bound endpoints allowed when computed under a precommitted assumption ledger (adopted).*
+*A numeric-scope boundary, narrower than a blanket ban (adopted).*
 The 2026-08-08 Codex cross-model critique found the numberless bound route self-defeating: it "produces a plan for bounds, not bounds," which meant the former Candidate 6 was not actually being absorbed by the draft, only gestured at.
-The settled position narrows the ban rather than dropping it: no causal point estimates, no power numbers, but bound-route endpoints computed under a ledger of assumptions committed before the computation, and probe results (a placebo contrast, a negative-control value) reported as evidence about those assumptions, are in scope.
+The settled position narrows the ban rather than dropping it, drawing a line between numeric output produced under the discipline this skill exists to enforce and numeric output that would assert a causal claim without it.
+Which specific outputs fall on which side of that line, and what discipline a given output must clear to count as in-scope, is SKILL.md's to state.
 An identified design's actual effect estimation is explicitly not this skill's job — it routes onward to HDA's estimation route with the review record attached.
 
 ## What settled it

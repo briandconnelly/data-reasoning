@@ -18,7 +18,7 @@ The candidate analysis also left this open: "Overlap with Candidate 2 is substan
 The plan settles this the other way: prospective mechanics (power, minimum detectable effect, sample-ratio-mismatch checks, sequential analysis, precommitment of an analysis before data lands) are excluded, kept as a distinct discipline this skill only names a design from, never designs.
 
 *Settled: bounds absorbed as a route, prospective design excluded but nameable.*
-The `bound` route is in scope and produces real numeric endpoints — computed under a precommitted assumption ledger — rather than only a plan for computing them (see 005 for why numberless bounds were rejected).
+The `bound` route is in scope and produces a real artifact, not only a specification of how one would be produced (see 005 for the applicable numeric-scope decision and why a specification-only route was rejected).
 Prospective mechanics stay out entirely; the review may still name "a randomized experiment at unit U" as the identifying design without designing it, which keeps the seam open for a future skill to pick up.
 
 ## What settled it

@@ -26,7 +26,7 @@ Either reason alone would have settled this; both applying together left no vers
 ## Reopening condition
 
 The frontmatter validator's contract changes to permit an empty or placeholder description, or the repo adopts a different pattern for staged rollout that does not require a skill to be fully built before any of its surface lands on main.
-Neither is anticipated.
+Nothing on the horizon points toward either.
 
 ## Where the rule lives
 
