@@ -24,6 +24,7 @@ import csv
 import filecmp
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -86,7 +87,7 @@ def load(directory: Path) -> list[dict]:
     with (directory / "events.csv").open(encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     for row in rows:
-        row["day"] = (int(row["ts"][8:10]) - START.day) + (30 if row["ts"][5:7] == "06" else 0)
+        row["day"] = (date.fromisoformat(row["ts"][:10]) - START).days
     return rows
 
 
