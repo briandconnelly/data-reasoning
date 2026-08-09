@@ -100,7 +100,9 @@ No invented confidence numbers; when a formal multiplicity correction would matt
 ### Consolidate
 
 Dedupe candidates and rank the survivors.
-Search context has consequences, not just a record: a lead surfaced by heavy search ranks below a comparably sized lead found with little search, and a magnitude selected by search is reported as likely overstated, with the honest estimate deferred to the confirming test.
+Search context has consequences, not just a record.
+Between two leads of the same class whose magnitudes do not clearly separate, the one whose search context exposed fewer comparisons ranks higher.
+A magnitude selected by search is reported as likely overstated, with the honest estimate deferred to the confirming test.
 Each reported lead records: a statement in associational wording, its class (`pattern`, `data-quality`, or `descriptive`), an evidence pointer, its search context (how many looks, across how many families, exposing roughly how many comparisons), the plausible alternative explanations noted but not tested, the cheapest adequate confirming test, and a disposition (`reported`, `handed-off`, or `dropped`).
 An unexplained residual is reported as unattributed, never assigned a cause — naming a cause is adjudication.
 
