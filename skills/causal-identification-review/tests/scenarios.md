@@ -1,6 +1,7 @@
 # Test Scenarios for causal-identification-review
 
-**Status: preregistered only — no arm has run, and nothing below is a result.**
+**Status: preregistered 2026-08-08; measurement wave 1 ran and was scored 2026-08-09.**
+The Resolution subsection and the run records in `tests/runs/` are the results; the assertion tables above remain the preregistered contract.
 This catalog is written before `SKILL.md` exists, per `decisions/006` and the Iron Law, whose single home is `skills/hypothesis-driven-analysis/tests/PROTOCOL.md`.
 `../decisions/` records the calls settled by argument (naming, authority map with `hypothesis-driven-analysis`, scope, dispositions, numeric policy, branch discipline); this file records the calls settled by a run.
 
@@ -393,3 +394,11 @@ Every cell above (CS1–CS7 and the four HDA seam cells) now has one scored arm 
 Every figure is n=1 per cell — one arm per role, one model (Sonnet), one day — so nothing here bounds variance; treat totals as existence results, not rates.
 The canary set (`canary-*` transcripts, one per cell plus `canary-s12b`) and the superseded first-wave CS4/CS7 arms (`sc-cs4-*`, `sc-cs7-*`, which predate the 2026-08-09 amendments and prompted them) are archived unscored in `.superpowers/sdd/2026-08-08-causal-identification-review-skill/task-4.3/`, per the amendment notes in the CS4 and CS7 sections and `PROTOCOL.md`'s canary principle.
 Still owed after this wave: repeat arms to put a variance bar on the n=1 cells (CS5 especially, where the baseline already computes correct bounds and the cell differentiates on one assertion); a CS4 wave after any fixture-wording clarification of the below-cutoff outcome window (which would owe fresh arms); trigger-depth coverage of the compound-disposition finding CS2 surfaced; and, filed to `hypothesis-driven-analysis`'s own suite rather than owed here, the S1 preregistration-ordering finding (first measurement, failed) and the standing S15 failures (completeness semantics, handoffs, preregistration) this wave reproduced at their documented pre-amendment rates.
+
+**Owed wording update: `SKILL.md`'s intro cost line.**
+`SKILL.md`'s intro states that no baseline-vs-skill premium has been measured for this skill yet, and that wording is now stale: measurement wave 1 measured a premium of -3.3% to +78.9% (n=1 per cell), per `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`.
+This is an edit whose decision points no cell traverses, so it owes no arms per `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § "What owes a rerun" — but it is deliberately batched with the next wording change to this file rather than made against the frozen ship contract.
+
+**Drift watch: HDA's seam sentences restate a condition this skill owns.**
+`skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
+No hook watches that pairing; a future change to this skill's disposition semantics must re-check those two HDA lines by hand.

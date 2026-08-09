@@ -15,7 +15,7 @@ literal ``none`` when the record's route assigns none), and forbidden
 certification vocabulary (``valid``, ``certified``) absent from disposition
 slots. The
 closed-set vocabulary and its semantics are governed by
-``../SKILL.md`` § Routing (authority, not yet written) and are already fixed
+``../SKILL.md`` § Routing (authority) and are already fixed
 by decision -- see
 ``../decisions/004-dispositions-never-certify.md`` and
 ``skills/hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md``
