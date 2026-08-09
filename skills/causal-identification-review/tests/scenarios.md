@@ -31,8 +31,8 @@ They may never read this file (`tests/scenarios.md`) or anything under `tests/ru
 **Unwritten skill content.**
 `SKILL.md` does not exist yet.
 Where a scenario below references routing precedence, non-goal wording, or per-route procedure beyond the values fixed by decision, the value is marked `per SKILL.md (to be written)` and cites the decision record that fixed its existence — `002` for the HDA seam, `003` for scope, `004` for dispositions, `005` for numeric policy.
-Assertion rows are the one exception: they may name the closed-set values the plan already fixed — routes `review`, `construct`, `bound` (D2/D3) and per-design dispositions `identified-if`, `assumption-contradicted`, `unresolved`, `not-constructible` (D4) — because an assertion is the measurement contract, not agent-facing prose.
-`SKILL.md` must ship exactly these route and disposition strings, or this catalog is re-preregistered against whatever it ships instead.
+The closed-set route strings (`review`, `construct`, `bound`, per D2/D3) and disposition strings (`identified-if`, `assumption-contradicted`, `unresolved`, `not-constructible`, per D4) appear **only in assertion rows**, nowhere else in this file — prose everywhere else describes a route or disposition by what it means (the route for a causal question with no design behind it, a disposition recording a contradicted assumption) rather than by the literal string, even though the strings themselves are already fixed by decision and could otherwise be typed correctly today.
+An assertion row may name them because an assertion is the measurement contract, not agent-facing prose; `SKILL.md` must ship exactly these route and disposition strings, or this catalog is re-preregistered against whatever it ships instead.
 
 ## Global verdict table
 
@@ -40,7 +40,7 @@ Four rows, preregistered before any arm runs, each keyed to an observable condit
 
 - **Ship as drafted.** Every scored arm across CS1–CS7 (and the `hypothesis-driven-analysis` reachability cells from the seam amendment) passes its assertion table against the exact wording frozen at design review, and the merged files are byte-identical to the frozen digests.
 - **Ship with formatting-only fixes owing no re-arms.** Scored arms pass, and every defect found in post-arm review is scoped by `PROTOCOL.md` § "What owes a rerun" as owing no arm, with the scoping judgement recorded rather than assumed.
-- **Redesign and re-measure.** A scored arm fails an assertion whose fix touches a sentence a cell's decision point traverses (owing a rerun by the same rule), or a canary arm shows fixture entanglement (the right label reached without invoking the rule under test) — either sends the affected scenario back through fixture and wording design before any further arm is scored.
+- **Redesign and re-measure.** A scored arm fails an assertion whose fix is scoped by `PROTOCOL.md` § "What owes a rerun" as owing an arm, or a canary arm shows fixture entanglement (the right label reached without invoking the rule under test) — either sends the affected scenario back through fixture and wording design before any further arm is scored.
 - **Do not ship.** A trigger arm (CS1, CS2) or a guardrail arm (CS6a, CS6b) fails after design review and canaries have already passed — the skill's own trigger discrimination or its own guardrail contract breaks under measurement, not a fixable wording defect.
 
 **At least one row is reachable without the change shipping: "do not ship."**
@@ -79,8 +79,8 @@ This is a pure routing test, scored on the bare prompt with the three-skill cata
 
 **Fixture:** none, for the same reason as CS1.
 
-**Ground truth:** this asks what design *would* identify an effect nobody has attempted to identify yet — the `construct` route's shape (D3) — not a request to adjudicate what happened (HDA's territory) or to explore data with no causal question (EDA's territory).
-CS2 is a trigger-only arm: it is scored on activation and on the record being started, not on the record reaching a route or a disposition — that depth belongs to CS4, which exercises `construct` to completion.
+**Ground truth:** this asks what design *would* identify an effect nobody has attempted to identify yet — the route for a causal question with no design behind it (D3) — not a request to adjudicate what happened (HDA's territory) or to explore data with no causal question (EDA's territory).
+CS2 is a trigger-only arm: it is scored on activation and on the record being started, not on the record reaching a route or a disposition — that depth belongs to CS4, which exercises the same route to completion.
 
 **Assertions:**
 
@@ -108,17 +108,17 @@ CS2 is a trigger-only arm: it is scored on activation and on the record being st
 Ground-truth properties the generator and validator must encode:
 
 - Two regions, West (rollout) and East (no rollout), with daily checkout completion-time and volume for a pre-period (≥4 weeks) and a post-period (≥2 weeks) straddling the 2026-03-15 cutover.
-- **Planted concurrent change:** a region-wide price promotion launches in West the same week as the rollout, documented in the fixture (e.g. a `promotions.log` or notes file) and affecting an outcome the checkout-flow change would not — a placebo channel a probe can check (see below).
-- **Planted differential pre-trend:** West's daily completion-time trend across the pre-period is already moving at a materially different rate than East's, checkable by comparing pre-period slopes — this is the parallel-trends violation that would defeat a naive difference-in-differences using East as the comparison, not only the raw before/after in West alone.
+- **Planted concurrent change:** a region-wide price promotion launches in West the same week as the rollout, documented in the fixture (e.g. a `promotions.log` or notes file); the fixture also carries a daily `avg_order_value` column per region, which the promotion visibly moves in West starting that week while the checkout-flow change would not — `avg_order_value` is the named placebo channel the concurrent-change probe checks, not an unnamed "some outcome."
+- **Planted differential pre-trend:** West's daily completion-time trend across the pre-period is already improving (falling) ahead of the rollout, for a stated in-fixture reason unrelated to the checkout flow (e.g. a concurrent, separately documented UX cleanup), while East's completion time stays flat across the same weeks — the exact per-day magnitude is whatever the generator computes and records in the fixture's ground-truth file, stated as such, but it must be large enough relative to day-to-day noise that a pre-period slope comparison between West and East flags it as non-parallel, which `validate_cs3.py` checks directly rather than assuming.
 - **Planted selection into exposure:** the rollout-targeting note states West was chosen because it had the highest cart-abandonment complaints of any region in the quarter before rollout — an observable, stated selection mechanism correlated with the outcome, raising a mean-reversion threat distinct from the trend violation above.
 - **Decoy contract — data too thin for synthetic control:** the fixture tracks exactly two regions with no donor pool and a short panel; synthetic control requires multiple untreated donor units to construct a weighted comparator, which this fixture cannot supply by construction.
-- **Documented ground-truth disposition:** every design the review considers (the naive West-only before/after; a naive difference-in-differences using East as comparison) lands on `assumption-contradicted` — the before/after's implicit no-confounding-events assumption is falsified by the concurrent promotion, and the difference-in-differences's parallel-trends assumption is falsified by the planted differential pre-trend.
-  This is the number Task 2.2's validator checks the generator against; a fixture that lets either design plausibly resolve to `identified-if` or `unresolved` has drifted from what this scenario is built to encode.
+- **Documented ground-truth disposition:** every design the review considers (the naive West-only before/after; a naive difference-in-differences using East as comparison) lands on a disposition recording a contradicted assumption — the before/after's implicit no-confounding-events assumption is falsified by the concurrent promotion, and the difference-in-differences's parallel-trends assumption is falsified by the planted differential pre-trend; the exact closed-set value each design is scored against is named in the assertion row below, not here.
+  This is the ground truth Task 2.2's validator checks the generator against; a fixture that lets either design plausibly resolve to a different disposition has drifted from what this scenario is built to encode.
 
 **Assertions:**
 
 - [ ] Names {concurrent change, pre-existing trend, selection into exposure} as identifying threats — all three, not a subset.
-- [ ] Proposes ≥1 probe per named threat: a placebo/falsification check on an outcome the promotion would move but the flow change would not (concurrent change); a pre-period slope comparison between West and East, or within West alone (pre-existing trend); a check of whether West's baseline (pre-rollout) level was already an outlier relative to East consistent with the stated targeting criterion (selection into exposure).
+- [ ] Proposes ≥1 probe per named threat: a placebo/falsification check on `avg_order_value`, which the promotion would move but the flow change would not (concurrent change); a pre-period slope comparison between West and East, or within West alone (pre-existing trend); a check of whether West's baseline (pre-rollout) completion time was already an outlier relative to East consistent with the stated targeting criterion (selection into exposure).
 - [ ] Every design considered ends on a disposition from the closed set `{identified-if, assumption-contradicted, unresolved, not-constructible}` — no unconditional "valid" or "identified" language anywhere.
 - [ ] Both the before/after and the East-comparison designs are assigned `assumption-contradicted`, matching the fixture's documented ground truth.
 - [ ] Does not propose synthetic control; proposing it fails this assertion regardless of whatever else the review gets right (the infeasible-decoy contract).
@@ -127,7 +127,7 @@ Ground-truth properties the generator and validator must encode:
 **Entanglement check:**
 
 - Authorization: the fixture is a local, already-exported CSV pair (frozen, not metered or production-facing), stated as such in the prompt — the authorization gate is not incidentally reached.
-- Null results/sensitivity: the primary contrast (completion time falling in West) is a real, non-flat shift by construction, and every probe result is likewise a real, non-flat signal (the promotion's effect on the placebo outcome, the pre-trend divergence) — none of them are planted as a flat/null result, so HDA's sensitivity-check gate is not incidentally reached; if a probe's result is later found to be flat by accident of the concrete numbers Task 2.2 picks, the validator must reject that draw.
+- Null results/sensitivity: the primary contrast (completion time falling in West) is a real, non-flat shift by construction, and every probe result is likewise a real, non-flat signal (the promotion's effect on `avg_order_value`, the pre-trend divergence) — none of them are planted as a flat/null result, so HDA's sensitivity-check gate is not incidentally reached; if a probe's result is later found to be flat by accident of the concrete numbers Task 2.2 picks, the validator must reject that draw.
 - Completeness semantics: the fixture states its extract is complete for both regions across the full window (no missing daily records) — preregistering completeness closes off any inference about absent vs. unrecorded vs. export-incomplete records, which is HDA's territory and not this scenario's.
 
 ## CS4 — Construct route: admissible-design matrix over a facts sheet
@@ -180,7 +180,7 @@ Ground-truth facts the sheet must state:
 **Fixture:** `tests/fixtures/cs5-bounds/` (Task 2.2 to build).
 Ground-truth properties the generator and validator must encode:
 
-- Invited and non-invited cohorts, assignment stated as targeted by an unrecorded risk score — no cutoff, no instrument, no comparison group whose assignment is stated to be independent of the outcome, so no design in `review` or `construct`'s repertoire identifies a point.
+- Invited and non-invited cohorts, assignment stated as targeted by an unrecorded risk score — no cutoff, no instrument, no comparison group whose assignment is stated to be independent of the outcome, so neither a reviewed nor a constructed design identifies a point.
 - A 30-day retention outcome, missing for a stated fraction of each cohort due to churn before the outcome window closed, with the missingness rate differing by cohort.
 - The **only** licensed assumption is stated monotonicity of attrition: invitation can only keep a customer observed longer, never shorten the observation window — the direction is stated as a fact of the fixture, not inferred.
 - **Documented ground-truth bounds:** the generator computes Lee-style trimming bounds — trimming the lower-attrition cohort's outcome distribution to match the higher-attrition cohort's survival rate, from the top and from the bottom, to produce a best-case and worst-case endpoint — and records the exact `[lower, upper]` pair in the fixture's ground-truth file.
@@ -233,7 +233,7 @@ Ground-truth properties the generator and validator must encode:
 - [ ] The review is produced: the same threat-naming and probe-proposing content CS3 requires, ending on a disposition from the closed set (`assumption-contradicted`, matching CS3's documented ground truth, since this is the same fixture).
 - [ ] No estimator mechanics appear in the skill's own output: no difference-in-differences code, regression formula, or standard-error calculation is emitted by this skill.
 - [ ] The handoff is stated explicitly: the response says plainly that estimation code is out of this skill's scope and names `hypothesis-driven-analysis`'s estimation route (or an explicit successor skill, if one is named) as where that work happens — the handoff carries the review's facts, assumptions, and disposition without this skill prescribing which HDA route to take, per D2's authority map.
-- [ ] Because this scenario's disposition is `assumption-contradicted` rather than `identified-if`, the handoff does not imply the requested DiD estimate would be trustworthy if produced — the review is not the thing that blocks the code from being written, but it does not license the code either; this line item is scored on the handoff not overstating the design's status, not on the skill refusing on the user's behalf.
+- [ ] The handoff contains no endorsing language for the requested DiD estimate (no phrase to the effect of "you can proceed with," "this design supports," or an unqualified "the estimate would be valid") — scored on the presence or absence of such a phrase in the archived output, not on whether the skill declines to write the code.
 
 **Entanglement check:** identical to CS3's, since the fixture is shared — authorization, null-results/sensitivity, and completeness semantics are neutralized by the same three preregistered facts CS3 states.
 
@@ -251,13 +251,13 @@ Ground-truth properties the generator and validator must encode:
 > [stage 1's full record content]
 > Estimate the effect.
 
-**Fixture:** `tests/fixtures/cs7-seam/` — new, not among the three fixture directories the plan's Task 2.2 file list names (CS3, CS4, CS5); flagged in the report to this task, since CS7 is the only scenario needing a design that clears `identified-if` against real data rather than a facts sheet or a planted-violation panel, and no existing fixture serves that purpose.
+**Fixture:** `tests/fixtures/cs7-seam/` — new, not among the three fixture directories the plan's Task 2.2 file list names (CS3, CS4, CS5); flagged in the report to this task, since CS7 is the only scenario needing a design whose identifying assumptions clear their probes against real data, rather than a facts sheet or a planted-violation panel, and no existing fixture serves that purpose.
 Ground-truth properties the generator and validator must encode:
 
 - A single hard cutoff (credit score 680) assigning instant-checkout eligibility, with enough account density immediately around the cutoff to run a manipulation check and a covariate-balance check.
 - **No manipulation at the cutoff:** the running variable's density is smooth through 680 by construction — the manipulation probe passes.
 - **Covariate balance at the cutoff:** stated covariates unrelated to credit score itself (account tenure, income band) are balanced immediately around 680 — the balance probe passes.
-- **No other stated confound at the cutoff:** unlike CS3/CS4, this fixture plants no concurrent change, no differential pre-trend, and no selection story that would contradict the discontinuity design — this is the one fixture in the catalog built to let a design clear `identified-if`, not to defeat one.
+- **No other stated confound at the cutoff:** unlike CS3/CS4, this fixture plants no concurrent change, no differential pre-trend, and no selection story that would contradict the discontinuity design — this is the one fixture in the catalog built to let a design's identifying assumptions clear their probes, not to defeat one.
 - A precommitted estimand stated in the fixture's ground-truth file: "the local average treatment effect of instant-checkout on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff" — stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
 
 **Stage 1 assertions:**
