@@ -1,7 +1,7 @@
 # Subagent Briefs for Hypothesis Testing
 
 Inline analysis is the default.
-Fan out only when at least two bounded, independent test packages exist **and** at least one observable condition from SKILL.md's Analysis section holds: separate data sources sharing no preprocessing, a slow or metered collection that would otherwise run serially, raw evidence large enough to crowd the main context, or an explicit request for parallel work.
+Fan out only when at least two bounded, independent test packages exist **and** at least one of the observable conditions in SKILL.md's Analysis section holds — read the list there; this file deliberately does not restate it.
 Never gate the decision on a guess about whether delegation "saves tokens" versus an inline run you have not performed.
 Raw data stays in the worker; only the structured return enters the main context.
 Degrade gracefully: a harness without subagents runs the same tests serially in the main context.
