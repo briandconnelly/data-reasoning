@@ -1,7 +1,7 @@
 # Test Scenarios for causal-identification-review
 
 **Status: preregistered 2026-08-08; measurement wave 1 ran and was scored 2026-08-09.**
-The Resolution subsection and the run records in `tests/runs/` are the results; the assertion tables above remain the preregistered contract.
+The Resolution subsection and the run records in `tests/runs/` are the results; the assertion tables below remain the preregistered contract.
 This catalog is written before `SKILL.md` exists, per `decisions/006` and the Iron Law, whose single home is `skills/hypothesis-driven-analysis/tests/PROTOCOL.md`.
 `../decisions/` records the calls settled by argument (naming, authority map with `hypothesis-driven-analysis`, scope, dispositions, numeric policy, branch discipline); this file records the calls settled by a run.
 
