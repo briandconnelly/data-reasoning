@@ -78,7 +78,8 @@ What costly collection buys is the plan, not the hypothesis table.
 It binds any costly pull you make, on every route and on work that took no route at all — a metered dump you are only reformatting is still metered.
 Before collecting, write down: the decision or output the pull serves, the exact source and action, why this is the cheapest adequate collection, a budget in the relevant unit, the authorization covering it (or `BLOCKED`), and the condition under which you stop or re-pull.
 That record is the thing the expense is meant to buy: the fishing expedition you do not pay for twice.
-A datum you have already pulled — including one an orientation probe returned to show the data's shape — is already paid for; when the probe returned the same rows, at the same grain and snapshot, that the systematic pull would, reuse them rather than paying twice, and fold the probe into the plan's budget rather than leaving it uncounted.
+A datum you have already pulled — including one an orientation probe returned to show the data's shape — is already paid for: when the probe returned the same rows, at the same grain and snapshot, that the systematic pull would, reuse them rather than paying twice.
+Count a reused probe's spend against the plan's budget rather than leaving it uncounted, and record it in the plan's `Already paid for` field.
 When the probe only sampled, truncated, or reshaped the data, a re-pull is legitimate — take it and say why, rather than stitching an inconsistent dataset together to dodge one.
 It is worth writing whether the answer is one median or five rival explanations.
 

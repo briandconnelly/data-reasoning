@@ -117,6 +117,7 @@ Serves: <the decision or output this pull is for>.
 Source and action: <the exact system, query, or endpoint, and what is run against it>.
 Cheapest adequate: <why this pull, and not a cheaper one, is the least that answers it>.
 Budget: <maximum spend in the metered unit — queries, rows, dollars, wall-clock>.
+Already paid for: <data already pulled that this plan reuses — what, at what grain and snapshot, and its spend counted against the budget — or none>.
 Authorization: <the grant covering this action, per the authorization gate — or BLOCKED, and what is needed>.
 Stop / re-pull condition: <what would make this enough, and what would justify paying again>.
 ```
