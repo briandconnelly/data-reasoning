@@ -7,8 +7,9 @@
 
 Ground truth is preregistered in scenario CS4
 (`skills/causal-identification-review/tests/scenarios.md`): the sheet must
-admit regression discontinuity and instrumental variable, and must carry a
-stated reason each of difference-in-differences and matching/
+state the facts CS4's admissible-design matrix reasons over (the cutoff,
+the batch staging, the missing pre-period, the analyst discretion), and
+must carry a stated reason each of difference-in-differences and matching/
 selection-on-observables is a decoy.
 
 Run against the fixture directory:

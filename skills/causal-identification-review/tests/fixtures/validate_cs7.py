@@ -50,6 +50,18 @@ must exceed this -- a real, non-flat signal, not an accident of the draw."""
 
 EXPECTED_FILES = {"accounts.csv", "data_notes.md"}
 
+DATA_NOTES_REQUIRED_PHRASES = (
+    # The no-bundled-policy fact the identified-if ground truth rests on,
+    # stated arm-visibly (2026-08-09 amendment): without it a careful arm
+    # has no discriminating evidence for the no-coincident-confound
+    # assumption and correctly refuses identified-if.
+    "gates instant-checkout eligibility only",
+    "no other product, pricing, underwriting, or policy rule",
+    "at or near 680",
+)
+"""Trap 8: data_notes.md must state that nothing but instant-checkout
+eligibility keys on the 680 threshold -- the validate_cs4 trap 1 pattern."""
+
 
 def load(directory: Path) -> list[dict]:
     with (directory / "accounts.csv").open(encoding="utf-8") as handle:
@@ -178,6 +190,18 @@ def _trap_7_bytes_reproduce(directory: Path) -> list[str]:
         return out
 
 
+def _trap_8_no_bundled_policy(directory: Path) -> list[str]:
+    notes_path = directory / "data_notes.md"
+    if not notes_path.exists():
+        return ["trap 8: data_notes.md is missing"]
+    lowered = notes_path.read_text(encoding="utf-8").lower()
+    out = []
+    for phrase in DATA_NOTES_REQUIRED_PHRASES:
+        if phrase.lower() not in lowered:
+            out.append(f"trap 8: data_notes.md does not state {phrase!r}")
+    return out
+
+
 def check(directory: Path) -> list[str]:
     rows = load(directory)
     return [
@@ -188,6 +212,7 @@ def check(directory: Path) -> list[str]:
         *_trap_5_estimand(),
         *_trap_6_directory(directory),
         *_trap_7_bytes_reproduce(directory),
+        *_trap_8_no_bundled_policy(directory),
     ]
 
 

@@ -144,7 +144,9 @@ Ground-truth facts the sheet must state:
 - A hard numeric eligibility cutoff: merchants with lifetime transaction volume ≥ $50,000 are auto-enrolled in verification.
   → admits **regression discontinuity**.
 - Enrollment is staged by which processor onboarding batch a merchant was assigned to; the sheet states batch order follows the processor's onboarding capacity and logistics, stated to be independent of any merchant's chargeback history or risk profile.
-  → admits **instrumental variable** (batch as instrument for verification-step timing).
+  → batch **membership** is a clean instrument in principle, but realized verification **timing** is contaminated by the unlogged within-batch fast-tracking the discretion fact states, so a design instrumenting realized timing is defeated by that fact.
+  An intent-to-treat design on batch assignment itself survives in principle, but the missing pre-period outcome data (the difference-in-differences decoy fact below) removes its outcome contrast too.
+  Net: the facts admit **regression discontinuity** as the one named design whose data requirements are even potentially completable, and the honest matrix expects arms to defeat or heavily condition every timing-based design.
 - The sheet states pre-rollout chargeback history was not retained in the export — only the 90 days following each merchant's own enrollment date exist.
   → **difference-in-differences is a decoy**: no pre-period trend data exists to check parallel trends or to construct the contrast at all, a data-requirement failure rather than an assumption risk.
 - The sheet states risk analysts had discretion to fast-track "high-touch" merchants into verification early on unrecorded judgment calls, within batch.
@@ -153,9 +155,14 @@ Ground-truth facts the sheet must state:
 
 **Assertions:**
 
-- [ ] Names ≥2 admissible designs: regression discontinuity and instrumental variable, at minimum.
+- [ ] Names ≥2 candidate designs including regression discontinuity, each carrying identifying assumptions and data requirements, with every disposition drawn from the closed set `{identified-if, assumption-contradicted, unresolved, not-constructible}`; a timing-based design (the batch instrument or a staggered comparison), if named, must confront the discretion fact rather than treat realized timing as clean — treating realized timing as as-if-random without addressing fast-tracking fails this assertion.
+
+  **Amendment (2026-08-09).** Preregistered 2026-08-08 as "names ≥2 admissible designs: regression discontinuity and instrumental variable, at minimum", over a matrix that listed batch-as-IV as flatly admissible.
+  Three independent arms — the canary, the scored baseline, and the scored with-skill arm — correctly applied the discretion fact against realized verification timing: the instrument's channel is timing, and unlogged risk-correlated fast-tracking breaks independence of realized timing even though batch membership stays clean.
+  The matrix bullet and this assertion are amended before any re-scored CS4 arm has run.
+  The previously-run CS4 arms are archived but will not be scored against the amended assertions — fresh arms re-measure this cell, because scoring amended expectations with the arms that prompted the amendment would be selection, per `PROTOCOL.md`'s canary principle.
 - [ ] Regression discontinuity's block states its identifying assumptions (no manipulation/sorting of merchants around the $50k cutoff; continuity of potential outcomes through the cutoff) and its data requirements (the running variable, the enrollment flag, the outcome, and enough merchant density near the cutoff to run a manipulation and covariate-balance check).
-- [ ] Instrumental variable's block states its identifying assumptions — relevance (batch assignment strongly predicts enrollment timing), exclusion (batch affects chargebacks only through verification timing), and independence/exogeneity of the instrument (batch order follows the processor's capacity and logistics schedule, fixed before the verification step existed and stated to be independent of any merchant's chargeback history or risk profile) — all three, not a subset — and its data requirements (batch assignment, enrollment timing, and outcome per merchant).
+- [ ] If an instrumental-variable design is named (at whatever disposition), its block states its identifying assumptions — relevance (batch assignment strongly predicts enrollment timing), exclusion (batch affects chargebacks only through verification timing), and independence/exogeneity of the instrument (batch order follows the processor's capacity and logistics schedule, fixed before the verification step existed and stated to be independent of any merchant's chargeback history or risk profile) — all three, not a subset — and its data requirements (batch assignment, enrollment timing, and outcome per merchant).
 - [ ] When the instrumental-variable block's estimand is a local average treatment effect, the block also states monotonicity (batch order never moves any merchant's enrollment timing opposite to its batch's) — or names the alternative identifying restriction it relies on instead.
 - [ ] Does not propose difference-in-differences or a matching/selection-on-observables design as admissible — proposing either fails this assertion, per the decoy contract above.
 - [ ] If a prospective randomized experiment is mentioned, it is named only — no power calculation, minimum-detectable-effect figure, sample-ratio-mismatch check, or other prospective-design mechanics appear (D3's exclusion).
@@ -259,6 +266,7 @@ Ground-truth properties the generator and validator must encode:
 - **No manipulation at the cutoff:** the running variable's density is smooth through 680 by construction — the manipulation probe passes.
 - **Covariate balance at the cutoff:** stated covariates unrelated to credit score itself (account tenure, income band) are balanced immediately around 680 — the balance probe passes.
 - **No other stated confound at the cutoff:** unlike CS3/CS4, this fixture plants no concurrent change, no differential pre-trend, and no selection story that would contradict the discontinuity design — this is the one fixture in the catalog built to let a design's identifying assumptions clear their probes, not to defeat one.
+- **The no-bundled-policy fact is stated arm-visibly:** `data_notes.md` inside `cs7-seam/` states, as a fact of the extract, that the 680 threshold gates instant-checkout eligibility only and that no other product, pricing, underwriting, or policy rule in effect during the observation window keys on credit score at or near 680 — so the design's no-coincident-confound assumption has discriminating evidence an arm can cite, rather than living only in the builder's intent; `validate_cs7.py` traps this statement's absence.
 - A precommitted estimand stated in the fixture's ground-truth file: "the local average effect of instant-checkout eligibility on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff" — stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
   Take-up of instant-checkout is unobserved — `accounts.csv` carries `eligible` only, no treatment-receipt column — so the review's estimand is eligibility's effect (a sharp-discontinuity claim in eligibility), not use's, which would need receipt data and fuzzy-discontinuity assumptions the fixture does not supply.
 
@@ -267,6 +275,10 @@ Ground-truth properties the generator and validator must encode:
 - [ ] Produces a template-shaped record (once the template exists) naming the causal question as a counterfactual contrast, the estimand, the design (regression discontinuity), its identifying assumptions, and the probes run against them.
 - [ ] Both probes (no manipulation, covariate balance) are reported as run and passing, not merely proposed.
 - [ ] Disposition recorded is `identified-if` per SKILL.md (to be written; D4 fixes this value's existence) — the one scenario in this catalog where that disposition is the documented ground truth.
+
+  **Amendment (2026-08-09).** A scored arm correctly refused `identified-if` and landed `unresolved`, because no arm-visible file stated the no-bundled-policy fact the fixture was built to embody — the no-coincident-confound assumption had no discriminating evidence available in the data.
+  The fixture is amended: `data_notes.md` now states the fact (see the fixture-property bullet above), and `validate_cs7.py` traps its absence.
+  The previously-run CS7 with-skill arm is archived but not scored; fresh arms re-measure stage 1 and stage 2, because scoring amended expectations with the arm that prompted the amendment would be selection, per `PROTOCOL.md`'s canary principle.
 - [ ] No causal point estimate appears in stage 1's own output — effect estimation is explicitly out of this skill's scope (D5) and is left for stage 2.
 - [ ] Route recorded is `construct` — the prompt states assignment facts (the 680 cutoff assigns eligibility) but claims no design as evidence, only asking what the cutoff gives us to work with; per SKILL.md § Routing that combination selects `construct` over `review`, since `review` requires a design already presented as identifying and none is claimed here.
 
