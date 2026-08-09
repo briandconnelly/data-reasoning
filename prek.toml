@@ -60,4 +60,11 @@ hooks = [
   { id = "validate-cs4-fixture", name = "causal-identification-review: cs4-facts fixture keeps every fact it states", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs4.py skills/causal-identification-review/tests/fixtures/cs4-facts", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs4\\.py|cs4-facts/)", pass_filenames = false },
   { id = "validate-cs5-fixture", name = "causal-identification-review: cs5-bounds fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs5.py skills/causal-identification-review/tests/fixtures/cs5-bounds", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs5\\.py|cs5-bounds-ground-truth\\.md|cs5-bounds/)", pass_filenames = false },
   { id = "validate-cs7-fixture", name = "causal-identification-review: cs7-seam fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs7.py skills/causal-identification-review/tests/fixtures/cs7-seam", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs7\\.py|cs7-seam-ground-truth\\.md|cs7-seam/)", pass_filenames = false },
+  # The record checker's own unit suite (check_review.py + test_check_review.py),
+  # mirroring hda-instrument-tests. The files regex matches only .py files directly
+  # under tests/ (not tests/fixtures/), so an edit under fixtures/ does not
+  # redundantly re-trigger this hook on top of its own validate-cs*-fixture hooks
+  # above; pytest still collects the whole tests/ tree, but fixtures/generate.py
+  # and validate_*.py are not named test_*.py, so default collection skips them.
+  { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/tests/[^/]+\\.py$", pass_filenames = false },
 ]
