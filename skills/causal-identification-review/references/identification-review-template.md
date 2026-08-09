@@ -44,7 +44,7 @@ Fill in one record per causal question under review; repeat the Design block onc
 
 - Assumption ledger: <the licensed assumption(s), stated as facts of the data, written before any endpoint below>
 - Bound logic: <how the licensed assumption(s) translate into the endpoint computation>
-- Computed endpoints: <lower, upper> — per `../SKILL.md` § Non-Goals and the bound route's per-route procedure (authority) for what numeric scope is permitted; this slot records the resulting values only
+- Computed endpoints: <lower, upper> — per `../SKILL.md` § Non-Goals and this block's per-route procedure (authority) for what numeric scope is permitted; this slot records the resulting values only
 
 ## Handoff
 
