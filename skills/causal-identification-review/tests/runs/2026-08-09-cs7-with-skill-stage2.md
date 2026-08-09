@@ -21,3 +21,11 @@ Fidelity notes (not scored):
 - The arm committed its decision bar before reading the interval ("committed before reading the interval") and flagged the absent materiality threshold as an assumption, both per HDA's estimation contract.
 
 Cost: 74,399 tokens (harness-reported, n=1; no baseline exists for stage 2 by design); 11 tool uses (identity; dispatch-facts claim of 12 not reproduced).
+
+## Correction (2026-08-09, final cross-model review)
+
+The scored rows above are the original record and are unchanged; this section corrects one of them.
+The external final cross-model review re-scored the verbatim-estimand assertion FAIL under the literal wording: the assertion requires the estimand string reused verbatim, the two strings are not character-identical, and a matching-terms reuse is exactly what "restated in different terms" excludes — the original PASS-borderline conceded the mismatch and scored past it.
+Adjusted total: 3/4.
+A prospective amendment of the assertion to matching-terms (with the verbatim string confined to the ground-truth file) is recorded in `tests/scenarios.md` § CS7's reopening amendment, but a prospective amendment cannot rescue an already-run arm: this arm was scored against the wording that stood when it ran.
+Consequence: the CS7 cell is reopened; stage 2 owes a fresh arm after the contract redesign, per the amendment and the verdict-resolution addendum.

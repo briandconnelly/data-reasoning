@@ -573,9 +573,20 @@ def test_identifying_assumptions_blank_still_rejected() -> None:
 
 
 def test_assumption_probes_inline_prose_accepted() -> None:
-    record = VALID_RECORD.replace(
-        _PROBES_BLOCK,
-        "- Assumption probes: none run — this design is named only, not probed\n",
+    """A named-only design carrying `none run` probes is a formatting-tolerated
+    shape — but only under a disposition that does not claim probe support
+    (`not-constructible` here); an `identified-if` with none-run probes is a
+    contradiction the probes-run gate rejects (see the gate tests below)."""
+    record = (
+        VALID_RECORD.replace(
+            _PROBES_BLOCK,
+            "- Assumption probes: none run — this design is named only, not probed\n",
+        )
+        .replace(
+            "Disposition: identified-if — parallel trends and no-anticipation both hold",
+            "Disposition: not-constructible — named only; the data cannot feed this design",
+        )
+        .replace("- Dispositions: identified-if", "- Dispositions: not-constructible")
     )
     findings, _ = cr.check_record(record)
     assert not any("probe" in f.lower() for f in findings)
@@ -659,6 +670,145 @@ def test_compound_conditional_disposition_still_rejected() -> None:
         "disposition" in f.lower() and "not-constructible if fewer than a handful" in f
         for f in findings
     )
+
+
+# --------------------------------------------------------------------------- #
+# identified-if requires probes run (2026-08-09 post-review gate) -- SKILL.md's
+# disposition semantics say `identified-if` is earned by probes run and
+# reported, not merely proposed, yet the checker passed a Design block pairing
+# `Disposition: identified-if` with `Assumption probes: none run` (reproduced
+# by the final cross-model review). The gate: an identified-if Design block
+# must carry at least one probe entry with an actual result; probes that are
+# empty, `none`, `none run`, or `not run` reject. Other dispositions may still
+# carry none-run probes -- a named-only design legitimately ends
+# `not-constructible`.
+# --------------------------------------------------------------------------- #
+def test_identified_if_with_none_run_probes_rejected() -> None:
+    record = VALID_RECORD.replace(
+        _PROBES_BLOCK,
+        "- Assumption probes: none run — this design is named only, not probed\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("identified-if" in f and "probe" in f.lower() for f in findings)
+
+
+def test_identified_if_with_bare_none_probes_rejected() -> None:
+    record = VALID_RECORD.replace(_PROBES_BLOCK, "- Assumption probes: none\n")
+    findings, _ = cr.check_record(record)
+    assert any("identified-if" in f and "probe" in f.lower() for f in findings)
+
+
+def test_identified_if_with_backtick_none_run_probes_rejected() -> None:
+    """Backtick tolerance must not launder a none-run probes slot."""
+    record = VALID_RECORD.replace(
+        _PROBES_BLOCK,
+        "- Assumption probes: `none run` — proposed but not executed\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("identified-if" in f and "probe" in f.lower() for f in findings)
+
+
+def test_identified_if_with_not_run_probes_rejected() -> None:
+    """`not run` is the same no-result content as `none run` (the shape the
+    sc2-cs4-ws record used for a named-only block) and rejects the same way."""
+    record = VALID_RECORD.replace(
+        _PROBES_BLOCK,
+        "- Assumption probes: not run — no outcome data exists to probe against\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("identified-if" in f and "probe" in f.lower() for f in findings)
+
+
+def test_identified_if_with_probe_table_accepted() -> None:
+    """The known negative: identified-if with a real probe table (results in
+    the rows) stays accepted -- the gate keys on run results, not on layout."""
+    findings, _ = cr.check_record(VALID_RECORD)
+    assert findings == []
+
+
+def test_not_constructible_with_none_run_probes_accepted() -> None:
+    """A named-only design ending not-constructible legitimately carries
+    none-run probes; the gate binds identified-if only."""
+    record = (
+        VALID_RECORD.replace(
+            _PROBES_BLOCK,
+            "- Assumption probes: none run — this design is named only, not probed\n",
+        )
+        .replace(
+            "Disposition: identified-if — parallel trends and no-anticipation both hold",
+            "Disposition: not-constructible — the data cannot feed this design",
+        )
+        .replace("- Dispositions: identified-if", "- Dispositions: not-constructible")
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_unresolved_with_none_run_probes_accepted() -> None:
+    record = (
+        VALID_RECORD.replace(
+            _PROBES_BLOCK,
+            "- Assumption probes: none run — proposed, not yet executed\n",
+        )
+        .replace(
+            "Disposition: identified-if — parallel trends and no-anticipation both hold",
+            "Disposition: unresolved — the probes are proposed but not run",
+        )
+        .replace("- Dispositions: identified-if", "- Dispositions: unresolved")
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+# --------------------------------------------------------------------------- #
+# Handoff Dispositions set-equality (2026-08-09 post-review gate) -- the reuse
+# check rejected fabricated tokens but let assigned dispositions be silently
+# OMITTED (one-directional). The mentioned set must equal the assigned set, or
+# be `none` only when nothing was assigned.
+# --------------------------------------------------------------------------- #
+_SECOND_DESIGN_BLOCK = """\
+## Design: event-study around each cohort's switch date
+
+- Design: event-study around each cohort's switch date
+- Identifying assumptions:
+  - no anticipation: behavior does not shift ahead of the switch
+- Assumption probes:
+
+  | assumption | probe | result |
+  | --- | --- | --- |
+  | no anticipation | pre-switch window inspection | could not discriminate from noise |
+
+- Data requirements: per-customer switch date and daily retention status
+- Threat register:
+
+  | threat | probe | result |
+  | --- | --- | --- |
+  | seasonality | month-of-year comparison | inconclusive |
+
+- Disposition: unresolved — the probes run could not discriminate
+
+"""
+
+TWO_DESIGN_RECORD = VALID_RECORD.replace("## Handoff", _SECOND_DESIGN_BLOCK + "## Handoff")
+
+
+def test_handoff_omitting_an_assigned_disposition_rejected() -> None:
+    """A two-design record assigning identified-if + unresolved whose Handoff
+    hand-carries only identified-if silently drops an assigned disposition --
+    rejected: the mentioned set must equal the assigned set."""
+    findings, _ = cr.check_record(TWO_DESIGN_RECORD)
+    assert any("unresolved" in f and "not carried" in f for f in findings)
+
+
+def test_handoff_carrying_every_assigned_disposition_accepted() -> None:
+    """The known negative: the same two-design record carrying both assigned
+    values passes -- set equality, not merely non-fabrication."""
+    record = TWO_DESIGN_RECORD.replace(
+        "- Dispositions: identified-if",
+        "- Dispositions: identified-if, unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
 
 
 # --------------------------------------------------------------------------- #

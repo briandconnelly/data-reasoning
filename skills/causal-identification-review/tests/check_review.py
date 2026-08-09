@@ -10,10 +10,13 @@ fields present, the Route value drawn from its closed set, every per-Design
 Disposition value drawn from its closed set, route-aware block structure
 (``review``/``construct`` require at least one Design block and no Bound
 block; ``bound`` requires the Bound block and no Design blocks), the Handoff
-Dispositions slot reusing only disposition values assigned above (or the
-literal ``none`` when the record's route assigns none), and forbidden
-certification vocabulary (``valid``, ``certified``) absent from disposition
-slots. The
+Dispositions slot reusing exactly the disposition values assigned above --
+set equality, neither fabricating nor omitting -- (or the literal ``none``
+when the record's route assigns none), an ``identified-if`` disposition
+carrying at least one assumption probe run with its result recorded (probes
+that are empty or ``none run`` reject that disposition and no other), and
+forbidden certification vocabulary (``valid``, ``certified``) absent from
+disposition slots. The
 closed-set vocabulary and its semantics are governed by
 ``../SKILL.md`` § Routing (authority) and are already fixed
 by decision -- see
@@ -73,6 +76,19 @@ EXIT_UNVERIFIABLE = 2
 _SECTION_HEADER = re.compile(r"^## (.+)$", re.MULTILINE)
 _TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$", re.MULTILINE)
 _SUBLIST_ITEM = re.compile(r"^  - .+$")
+
+# A probes slot whose content records no run result: the literal `none`,
+# `none run`, `not run`, or `n/a`, optionally backtick-wrapped, optionally
+# followed by a dash-introduced rationale (same dash discipline as
+# _NONE_DISPOSITION below). SKILL.md's disposition semantics make
+# `identified-if` conditional on probes run and reported, so a Design block
+# pairing that disposition with one of these slots is rejected; other
+# dispositions legitimately carry them (a named-only design ends
+# `not-constructible`).
+_NO_RESULT_PROBES = re.compile(
+    r"^`?(?:none(?:\s+run)?|not\s+run|n/a)`?(?:\s+[—-]\s+.+)?$",
+    re.IGNORECASE,
+)
 
 # The literal `none` Handoff Dispositions value, optionally backtick-wrapped,
 # optionally followed by a trailing rationale introduced by an em-dash or a
@@ -259,9 +275,9 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
         findings.append(
             f"Design block ({header!r}): at least one identifying assumption is required"
         )
-    if not (
-        has_table_with_data_row(body, "Assumption probes") or find_bullet(body, "Assumption probes")
-    ):
+    probes_table = has_table_with_data_row(body, "Assumption probes")
+    probes_inline = find_bullet(body, "Assumption probes")
+    if not (probes_table or probes_inline):
         findings.append(
             f"Design block ({header!r}): assumption probes table is missing or has no data row"
         )
@@ -284,6 +300,22 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
             f"closed set {sorted(DISPOSITIONS)}"
         )
     _check_forbidden(disposition_value, f"Design block ({header!r}) disposition", findings)
+    # identified-if is earned by probes run and reported (SKILL.md's
+    # disposition semantics, the paragraph after the closed set): a block
+    # assigning it over an empty or `none run` probes slot claims probe
+    # support the record does not carry. A probes table with a data row
+    # carries run results by shape; an inline value carries them unless it
+    # is one of the no-result forms.
+    if (
+        disposition_value == "identified-if"
+        and not probes_table
+        and (probes_inline is None or _NO_RESULT_PROBES.match(probes_inline.strip()))
+    ):
+        findings.append(
+            f"Design block ({header!r}): disposition 'identified-if' requires at "
+            "least one assumption probe run with its result recorded -- the "
+            "probes slot is empty or records no run result ('none', 'none run')"
+        )
     return disposition_value if disposition_value in DISPOSITIONS else None
 
 
@@ -301,13 +333,18 @@ def _check_bound(body: str, findings: list[str]) -> str | None:
 def _check_handoff(
     body: str | None, assigned_dispositions: frozenset[str], findings: list[str]
 ) -> None:
-    """Handoff structure plus disposition reuse.
+    """Handoff structure plus disposition reuse, checked as set equality.
 
     The template requires the Dispositions slot to reuse the value(s)
     assigned above verbatim, or to carry the literal ``none`` for a record
     whose route assigns no disposition (the bound route carries no Design
-    block, so it assigns none). A closed-set token that appears nowhere
-    above is a fabricated disposition, not a reuse, and fails the gate.
+    block, so it assigns none). Reuse binds in both directions: a closed-set
+    token that appears nowhere above is a fabricated disposition, and an
+    assigned disposition the slot omits is a silently dropped one -- a
+    downstream reader of the Handoff alone would never learn a design ended
+    that way. Either direction fails the gate (the omission direction was
+    added 2026-08-09 after the final cross-model review showed the check was
+    one-directional).
     """
     if body is None:
         findings.append("Handoff block missing")
@@ -338,6 +375,12 @@ def _check_handoff(
             f"Handoff block: disposition(s) {sorted(fabricated)} appear nowhere above -- "
             "Dispositions must reuse the value(s) assigned above verbatim, or be 'none' "
             "for a record whose route assigns no disposition"
+        )
+    omitted = assigned_dispositions - mentioned
+    if omitted:
+        findings.append(
+            f"Handoff block: assigned disposition(s) {sorted(omitted)} are not carried -- "
+            "Dispositions must mention every disposition assigned above, not a subset"
         )
     if not mentioned:
         findings.append(

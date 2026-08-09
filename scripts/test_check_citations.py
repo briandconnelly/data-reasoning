@@ -168,3 +168,48 @@ def test_in_scope_rejects_a_file_outside_the_scope_root(tmp_path, monkeypatch):
     monkeypatch.setattr(cc, "DEFAULT_SCOPE", ("skills/hypothesis-driven-analysis",))
 
     assert not cc.in_scope(outside)
+
+
+class TestCausalIdentificationReviewScope:
+    """causal-identification-review joined DEFAULT_SCOPE on 2026-08-09.
+
+    The prek hook's `files` regex was extended to this skill's paths earlier,
+    but the module's own DEFAULT_SCOPE was not — so the hook handed the files
+    over and the checker skipped every one ("NOT checked, and this is not a
+    pass") while still exiting 0, green-lighting files it never read. These
+    tests use the real DEFAULT_SCOPE, not a monkeypatched one, so they pin
+    the shipped scope; the planted failure is the known positive that proves
+    the newly-scoped files are actually read.
+    """
+
+    @pytest.fixture
+    def cir_repo(self, tmp_path, monkeypatch):
+        root = tmp_path / "skills" / "causal-identification-review"
+        (root / "tests").mkdir(parents=True)
+        (root / "SKILL.md").write_text(f"# Skill\n\n{SENTENCE}\n")
+        monkeypatch.setattr(cc, "REPO_ROOT", tmp_path)
+        return tmp_path
+
+    def test_default_scope_names_the_skill(self):
+        assert "skills/causal-identification-review" in cc.DEFAULT_SCOPE
+
+    def test_cir_scenarios_file_is_in_scope(self, cir_repo):
+        path = cir_repo / "skills" / "causal-identification-review" / "tests" / "scenarios.md"
+        path.write_text("catalog\n")
+        assert cc.in_scope(path)
+
+    def test_cir_planted_bad_citation_fails(self, cir_repo):
+        """Known positive: a CIR-scoped file with a stale attributed quote FAILS."""
+        path = cir_repo / "skills" / "causal-identification-review" / "tests" / "scenarios.md"
+        stale = "An absent record proves the event did not happen, which is what we assumed."
+        path.write_text(f'SKILL.md\'s "{stale}" governs this catalog.\n')
+        assert cc.in_scope(path)
+        violations = cc.check(path)
+        assert len(violations) == 1
+        assert "does not appear there" in violations[0]
+
+    def test_cir_resolving_citation_passes(self, cir_repo):
+        path = cir_repo / "skills" / "causal-identification-review" / "tests" / "scenarios.md"
+        path.write_text(f'SKILL.md\'s "{SENTENCE}" governs this catalog.\n')
+        assert cc.in_scope(path)
+        assert cc.check(path) == []

@@ -26,3 +26,12 @@ Fidelity notes (not scored):
 - The record honestly bounds what the extract can confirm about the amended no-bundled-policy fact: "a source assertion beyond what this extract's fields can independently confirm for pricing/underwriting rules not present in the data".
 
 Cost: 68,732 tokens (harness-reported, n=1; +66.5% over the 41,272-token baseline); 17 tool uses (identity).
+
+## Correction (2026-08-09, final cross-model review)
+
+The scored rows above are the original record and are unchanged; this section corrects one of them.
+The external final cross-model review re-scored the no-point-estimate assertion FAIL under the literal preregistered wording: the record reports local-linear outcome-jump magnitudes (−0.093 to −0.069) as probe results, and under that wording those are point estimates of the discontinuity, whatever refusal accompanies them.
+The original PASS leaned on the fixture's entanglement note and the record's explicit refusal to promote the number; the literal contract does not admit that lean, and the fidelity note above had already recorded the doubt rather than resolved it.
+Adjusted total: 4/5.
+Root cause: the collision is the scenario contract's, not the skill text's — the catalog's own entanglement bullet demands the discontinuity be verified non-flat while the assertion bans point estimates, and checking non-flatness numerically produces the number.
+Consequence: the CS7 cell is reopened for contract redesign and fresh arms; see the dated amendment in `tests/scenarios.md` § CS7 and the addendum to the verdict resolution.

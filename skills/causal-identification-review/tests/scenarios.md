@@ -100,6 +100,14 @@ The "ship as drafted" row is unreachable because the S1/S15 seam-cell tables con
 The stricter reading — this section's no-change row taken literally, "a failed cell sends the sentences back through design" — is recorded as the alternative: under it the seam sentences would return to design despite their own observables passing 11/11, which the resolver judged incoherent for failures the sentences demonstrably did not introduce; a reviewer who takes the stricter reading should treat this wave as selecting the redesign row for the seam cells only, with CS1–CS7 results standing either way.
 Caveats owned: n=1 per cell throughout; the S15 before-state comparison rests on HDA's archived waves, not on a fresh pre-amendment control arm run in this wave; the co-load condition (both skills present) is new and S12's clean preregistration is the only same-wave counterexample to a co-load-distraction hypothesis.
 
+**Addendum (2026-08-09, final cross-model review).**
+The original resolution above is unchanged; this addendum corrects it.
+The external final review re-scored two CS7 assertions FAIL under the literal preregistered contract — stage 1's no-point-estimate assertion and stage 2's verbatim-estimand assertion — with dated corrections in both run records; the corrected totals are CS7 stage 1 4/5 and CS7 stage 2 3/4.
+The resolution's premise that every CS1–CS7 arm passes its assertion table is therefore corrected: two CS7 assertions did not, under the literal wording.
+CS7's cell moves to the "Redesign and re-measure" row, and CS4's cell joins it: the same review found the amended CS4 matrix's instrument-defeat reasoning methodologically wrong and its intent-to-treat claim overstated (dated correction in § CS4), so its ground truth is corrected and its existing arms cannot be re-scored against the correction without selection.
+The ship judgment for the SKILL text itself is restated on the remaining evidence: all other cells' totals are unchanged, and neither re-scored failure implicates the skill prose — the stage-1 failure traces to the scenario contract's internal collision and the stage-2 failure to an assertion wording the catalog now amends prospectively, while CS4's defect lives in the catalog's fixture ground truth.
+The reopened CS4 and CS7 cells owe fresh arms after redesign and are preconditions for calling measurement wave 1 complete.
+
 ## CS1 — Trigger, negative
 
 **Prompt** (verbatim):
@@ -225,6 +233,14 @@ Ground-truth facts the sheet must state:
 - Authorization: the facts sheet is static prose, not a costly, mutating, or production-facing pull — the gate is not incidentally reached.
 - Null results/sensitivity: not applicable — no dataset exists to compute a statistic from, let alone a flat one.
 - Completeness semantics: not applicable — there are no records whose absence needs a reading; the sheet's missing-pre-period fact is a stated data-requirement gap for one design, not an ambiguous-absence question about a dataset in hand.
+
+**Correction (2026-08-09, final cross-model review): matrix reasoning corrected; cell reopened.**
+The amended matrix bullet above stands as the contract the sc2 arms were scored against, but its reasoning is methodologically wrong as stated, and this correction supersedes it as ground truth.
+The bullet reasons that risk-correlated fast-tracking breaks independence of realized timing and thereby defeats batch-as-IV; IV requires exogeneity of the *instrument* — batch membership, which the stated facts keep clean — not exogeneity of the endogenous treatment/timing variable, whose correlation with risk is precisely why an instrument is wanted at all.
+Within-batch discretion bears on monotonicity (fast-tracking could move a merchant's timing against its batch's ordering) and on exclusion (discretionary handling could touch chargebacks through channels other than verification timing); it conditions a batch-instrument design, it does not automatically invalidate one.
+The bullet's further claim that the missing pre-period outcomes remove the intent-to-treat contrast also overstates: the binding defeat in this fixture is that outcomes exist only in each enrolled merchant's own post-enrollment window — no calendar-anchored outcome exists for any merchant, and none at all for never-enrolled merchants — which is a data-availability defeat, not an assumptions defeat.
+The assertion rows themselves remain as amended: the requirement that a timing-based design confront the discretion fact stays, now read as demanding a monotonicity/exclusion confrontation rather than an instrument-independence one.
+The cell is reopened: it owes fresh arms after this ground-truth correction, because scoring the existing arms against corrected ground truth would be selection, per `PROTOCOL.md`'s canary principle.
 
 ## CS5 — Bound route: attrition bounds under stated monotonicity
 
@@ -356,6 +372,12 @@ Ground-truth properties the generator and validator must encode:
 This stage is not incidental entanglement — HDA's estimation-route gates (authorization, uncertainty reporting) apply because stage 2 genuinely runs HDA, not because the fixture accidentally tripped them.
 The assertions above test that HDA's own machinery engages normally with a handed-in record, not that this skill's fixture avoided a gate that does not belong to it.
 
+**Amendment (2026-08-09, final cross-model review): cell reopened.**
+The external final review re-scored two of this section's assertions FAIL under their literal wording — stage 1's no-point-estimate assertion (the probe table's local-linear outcome-jump magnitudes are point estimates of the discontinuity under the preregistered wording) and stage 2's verbatim-estimand assertion (the strings are not character-identical) — with dated corrections appended to both run records.
+The stage-1 failure is this section's own contract colliding with itself: the stage-1 entanglement bullet demands the discontinuity be verified non-flat, the assertion bans point estimates, and checking non-flatness numerically produces the number.
+The probe-reporting contract must therefore be redesigned before any fresh arm runs — for example, non-flatness may be probed and reported as a pass/fail verdict or a z-statistic, with the jump magnitude itself confined to the ground-truth file — and the estimand-reuse assertion amended to matching-terms, with the verbatim string carried in the ground-truth file for the grep.
+After redesign, this cell owes fresh stage-1 and stage-2 arms; the 2026-08-09 sc2 arms stand as scored-then-corrected records, and no arm predating the redesign is scored against the redesigned contract, per `PROTOCOL.md`'s canary principle.
+
 ## HDA seam cells (owed by the three amendment sentences)
 
 The seam amendment adds exactly three sentences to `skills/hypothesis-driven-analysis/SKILL.md`, and the verdict table above scores their reachability cells alongside CS1–CS7; this subsection preregisters those cells repo-side.
@@ -395,10 +417,11 @@ Every figure is n=1 per cell — one arm per role, one model (Sonnet), one day �
 The canary set (`canary-*` transcripts, one per cell plus `canary-s12b`) and the superseded first-wave CS4/CS7 arms (`sc-cs4-*`, `sc-cs7-*`, which predate the 2026-08-09 amendments and prompted them) are archived unscored in `.superpowers/sdd/2026-08-08-causal-identification-review-skill/task-4.3/`, per the amendment notes in the CS4 and CS7 sections and `PROTOCOL.md`'s canary principle.
 Still owed after this wave: repeat arms to put a variance bar on the n=1 cells (CS5 especially, where the baseline already computes correct bounds and the cell differentiates on one assertion); a CS4 wave after any fixture-wording clarification of the below-cutoff outcome window (which would owe fresh arms); trigger-depth coverage of the compound-disposition finding CS2 surfaced; and, filed to `hypothesis-driven-analysis`'s own suite rather than owed here, the S1 preregistration-ordering finding (first measurement, failed) and the standing S15 failures (completeness semantics, handoffs, preregistration) this wave reproduced at their documented pre-amendment rates.
 
-**Owed wording update: `SKILL.md`'s intro cost line.**
-`SKILL.md`'s intro states that no baseline-vs-skill premium has been measured for this skill yet, and that wording is now stale: measurement wave 1 measured a premium of -3.3% to +78.9% (n=1 per cell), per `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`.
-This is an edit whose decision points no cell traverses, so it owes no arms per `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § "What owes a rerun" — but it is deliberately batched with the next wording change to this file rather than made against the frozen ship contract.
+**Cost line updated (2026-08-09).**
+`SKILL.md`'s intro cost line was updated in the commit carrying this note: the stale no-premium-measured claim was replaced with measurement wave 1's recorded range, −3.3% to +78.9% (n=1 per cell, per `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`), framed as a first wave's figures rather than a bound.
+The edit ships without arms despite postdating measurement, and the scoping judgement is recorded here rather than assumed: the authority is `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § "What owes a rerun" — an edit that cannot reach any cell's decision point owes nothing — and no cell's decision point traverses the intro cost line, whose only readers are a human weighing whether to load the skill and the arms' cost bookkeeping, neither of which any assertion keys on.
 
 **Drift watch: HDA's seam sentences restate a condition this skill owns.**
 `skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
 No hook watches that pairing; a future change to this skill's disposition semantics must re-check those two HDA lines by hand.
+Re-flagged by the 2026-08-09 final cross-model review; the ruling stands — the wording is measured, pointer-izing it owes arms, and the change batches with the next HDA wording wave.
