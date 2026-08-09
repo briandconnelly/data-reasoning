@@ -149,10 +149,21 @@ def _disposition_value(raw: str) -> str:
     return raw.split("—", 1)[0].strip()
 
 
-def _check_forbidden(raw: str, slot_name: str, findings: list[str]) -> None:
+def _check_forbidden(value: str, slot_name: str, findings: list[str]) -> None:
+    """Forbidden-vocabulary gate, scoped to the isolated disposition VALUE token.
+
+    Decision 004 forbids an unconditional verdict *value* (``valid``,
+    ``certified`` standing in as the disposition itself), not the ordinary
+    word "valid" wherever it appears in a disposition's rationale prose --
+    "valid instrument" and "internal/external validity" are standard
+    causal-inference vocabulary a rationale will legitimately use. So this
+    checks only the already-isolated value token (the text before the first
+    em-dash, the same isolation the closed-set check uses via
+    ``_disposition_value``), never the full raw bullet.
+    """
     for word in FORBIDDEN_WORDS:
-        if re.search(rf"\b{re.escape(word)}\b", raw, re.IGNORECASE):
-            findings.append(f"forbidden vocabulary '{word}' found in {slot_name} slot: {raw!r}")
+        if re.search(rf"\b{re.escape(word)}\b", value, re.IGNORECASE):
+            findings.append(f"forbidden vocabulary '{word}' found in {slot_name} value: {value!r}")
 
 
 def _check_question(body: str | None, findings: list[str]) -> str | None:
@@ -202,7 +213,7 @@ def _check_design(header: str, body: str, findings: list[str]) -> None:
             f"Design block ({header!r}): disposition {disposition_value!r} is not in the "
             f"closed set {sorted(DISPOSITIONS)}"
         )
-    _check_forbidden(disposition_raw, f"Design block ({header!r}) disposition", findings)
+    _check_forbidden(disposition_value, f"Design block ({header!r}) disposition", findings)
 
 
 def _check_bound(body: str, findings: list[str]) -> str | None:

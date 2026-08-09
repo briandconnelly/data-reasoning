@@ -282,24 +282,42 @@ def test_bad_disposition_rejected() -> None:
 
 
 # --------------------------------------------------------------------------- #
-# Forbidden vocabulary
+# Forbidden vocabulary — scoped to the disposition VALUE token, not the whole
+# bullet (reviewer finding on an earlier revision: "identified-if -- the
+# instrument is valid only if the exclusion restriction holds" is a
+# conforming record whose rationale legitimately uses ordinary
+# causal-inference vocabulary; decision 004 forbids `valid`/`certified` as an
+# unconditional verdict VALUE, not that word anywhere in rationale prose).
 # --------------------------------------------------------------------------- #
-def test_forbidden_word_valid_in_disposition_rejected() -> None:
+def test_forbidden_word_valid_as_disposition_value_rejected() -> None:
     record = VALID_RECORD.replace(
         "Disposition: identified-if — parallel trends and no-anticipation both hold",
-        "Disposition: identified-if — the design is valid",
+        "Disposition: valid — the design is sound",
     )
     findings, _ = cr.check_record(record)
     assert any("forbidden" in f.lower() and "valid" in f.lower() for f in findings)
 
 
-def test_forbidden_word_certified_in_disposition_rejected() -> None:
+def test_forbidden_word_certified_as_disposition_value_rejected() -> None:
     record = VALID_RECORD.replace(
         "Disposition: identified-if — parallel trends and no-anticipation both hold",
-        "Disposition: identified-if — this design is now certified",
+        "Disposition: certified — this design is sound",
     )
     findings, _ = cr.check_record(record)
     assert any("forbidden" in f.lower() and "certified" in f.lower() for f in findings)
+
+
+def test_forbidden_word_valid_in_rationale_prose_is_not_flagged() -> None:
+    """'valid' used in ordinary rationale prose after a real closed-set
+    disposition value (e.g. "valid instrument") must NOT trip the gate --
+    only the isolated value token is checked, never the rationale."""
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: identified-if — the instrument is valid only if the "
+        "exclusion restriction holds",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
 
 
 def test_forbidden_word_does_not_false_positive_elsewhere() -> None:
