@@ -1391,6 +1391,11 @@ So the description that gates every activation — including the guardrail that 
 It also sits at 1020 of 1024 characters, so any future edit must displace text.
 Batch any description change with these four reruns rather than paying the measurement twice; a further ungated edit compounds an already unvalidated surface and makes attribution of later results harder.
 
+**Paid 2026-08-08.**
+All four arms were rerun against the current (2026-07-20) description, machine-verified against `SKILL.md` line 3 rather than assumed: `tests/runs/2026-08-08-scenario2-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario3-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario17-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario18-trigger-rerun.md` (2/2).
+Evidence, including the description-verification method and the three machine scans re-run with planted-positive validation: `tests/runs/artifacts/2026-08-08-trigger-rerun-evidence.md`.
+n=1 per scenario: this pays the debt (the surface now has a valid arm behind it), it does not close out the wider n=1-per-scenario caution the individual run files repeat.
+
 **2. The retrospective promotion bar remains unverified,** and this file contradicted itself about it until 2026-08-08.
 The S5 section records the corrected run as invalid and the rule as neither confirmed nor refuted; the Findings section said it "fired for the first time and passed".
 The Findings line is now corrected in place and points at the S5 section, which is the authority.
