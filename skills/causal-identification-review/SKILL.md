@@ -17,18 +17,19 @@ A review reports evidence-bounded dispositions; it never certifies — no outcom
 
 Routes are precedence-ordered; take the first that matches.
 Safety gates take precedence over all routes.
-Route on what is being asked of the design, not on the question's phrasing: "did the new flow speed up checkout?" asks what happened, which is not this skill's work however causal it sounds, while "does this rollout comparison identify the flow's effect?" asks whether a design earns its causal claim, which is this skill's work exactly.
+Route on what is being asked of the design, not on the question's phrasing: "did the new dispatch algorithm shorten delivery times?" asks what happened, which is not this skill's work however causal it sounds, while "does this depot comparison identify the algorithm's effect?" asks whether a design earns its causal claim, which is this skill's work exactly.
 
 | Route | Observable condition | Ceremony |
 | --- | --- | --- |
 | out: direct | A bounded question the records settle, with nothing causal asked | None; answer and stop — not this skill's work |
-| out: adjudicate | What happened, what drove a change, or whether a claim about the data is true — or effect estimation under a design already reviewed as identifying | Hand to `hypothesis-driven-analysis`; its own routing table picks its route |
+| out: adjudicate | What happened, what drove a change, or whether a claim about the data is true — or effect estimation under a design already reviewed as identifying | Hand to `hypothesis-driven-analysis`; its own routing table picks its route — when it is not installed, still never adjudicate or estimate from a review: report the record's facts, assumptions, and dispositions and say what adjudication would need |
 | out: explore | No causal question at all — open-ended orientation or lead-seeking over data | Hand to `exploratory-data-analysis` |
 | review | A proposed or claimed identifying design exists to review — an A/B test, a natural experiment, a rollout comparison presented as evidence of an effect or offered for vetting | Record from the template, one Design block per candidate design |
 | construct | A causal question with no design behind it — "how could we ever tell whether X causes Y" — and facts about how the world assigned the exposure | Record from the template, enumerating the designs the facts admit |
-| bound | Nothing identifies the effect and no design is constructible from the data that exists, and the ask is what can honestly be said about the effect's size | Record from the template, Bound block under a precommitted assumption ledger |
+| bound | Nothing identifies the effect and no design is constructible from the data that exists, and the remaining ask is for a defensible range rather than a point | Record from the template, Bound block under a precommitted assumption ledger |
 
 The route set is closed: a record's Route slot takes exactly one of `review`, `construct`, or `bound`, and the out-rows leave no record behind.
+A causal question with no design and no stated assignment facts still takes `construct`: its first work is asking for or recording the assignment facts, and the template's `UNSTATED` assignment-mechanism value is a finding to carry, not a blocker.
 `review` outranks `construct`: a design already being presented selects `review` even when the presenter also asks what else might work.
 `bound` follows the other two rather than competing with them: take it when the ask or a prior record has already established that nothing identifies the effect and nothing is constructible — a `construct` record whose every candidate ends `not-constructible` is that establishment.
 An ask that bundles review with estimation — "review the design, then write the estimation code" — splits at the boundary: produce the review here, and hand the estimation out.
@@ -39,7 +40,7 @@ The gates and the data rules below bind on every route; only the record's blocks
 ### Per-route procedure
 
 Write the record to a file from [references/identification-review-template.md](references/identification-review-template.md) before the reasoning that fills it; a record that first appears alongside its conclusions was not a review, it was a write-up.
-Every Design block states its identifying assumptions as claims evidence could break: "no other West-region change that week moves completion time" is breakable, "the comparison is sound" is not.
+Every Design block states its identifying assumptions as claims evidence could break: "no other change at the pilot depots that month moves delivery time" is breakable, "the comparison is sound" is not.
 Every named assumption gets at least one probe — a check that could come back against it.
 Negative controls, placebo outcomes, pre-period trend comparisons, and manipulation or covariate-balance checks at a cutoff are probes: proposing them is this skill's work, and running one against data in hand is review work, not estimation — a probe's result is evidence about an assumption, never an effect estimate.
 Check data requirements before assumptions: a design the available data cannot feed — synthetic control with no donor pool, difference-in-differences with no pre-period — is not proposed as admissible, and when it must appear because someone claimed it or its absence needs explaining, its disposition is `not-constructible` with the failed requirement named.
