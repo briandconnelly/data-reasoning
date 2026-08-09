@@ -450,6 +450,218 @@ def test_advisory_numeric_scan_does_not_flag_bound_endpoints_slot() -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Formatting tolerance (task-5.2 scoped fix) -- measurement arms produced
+# records that are substantively conforming but that the checker rejected on
+# parses that only differ in layout, not content: backtick-wrapped closed-set
+# tokens, a `none` Handoff Dispositions value carrying a trailing rationale,
+# and Design-block presence gates (identifying assumptions, assumption
+# probes, threat register) written as inline prose rather than a sublist or
+# table. None of the closed sets, the forbidden-vocabulary gate, route-aware
+# block structure, or the fabricated-disposition rejection are loosened by
+# any of this -- see the "still rejected" tests below, which pin that.
+# --------------------------------------------------------------------------- #
+def test_backtick_wrapped_route_accepted() -> None:
+    record = VALID_RECORD.replace("Route: review", "Route: `review`")
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_backtick_wrapped_disposition_accepted() -> None:
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: `identified-if` — parallel trends and no-anticipation both hold",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_backtick_wrapped_invalid_route_still_rejected() -> None:
+    """Stripping backticks must not turn an invalid token into a valid one."""
+    record = VALID_RECORD.replace("Route: review", "Route: `recommend`")
+    findings, _ = cr.check_record(record)
+    assert any("route" in f.lower() and "recommend" in f for f in findings)
+
+
+def test_backtick_wrapped_forbidden_disposition_still_rejected() -> None:
+    """Stripping backticks must not exempt a certification-vocabulary value."""
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: `valid` — the design is sound",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("forbidden" in f.lower() and "valid" in f.lower() for f in findings)
+
+
+def test_handoff_dispositions_none_with_em_dash_rationale_accepted() -> None:
+    record = VALID_BOUND_RECORD.replace(
+        "- Dispositions: none",
+        "- Dispositions: none — no Design block is carried by this bound-route record",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_handoff_dispositions_none_with_hyphen_dash_rationale_accepted() -> None:
+    record = VALID_BOUND_RECORD.replace(
+        "- Dispositions: none",
+        "- Dispositions: none - no Design block is carried by this bound-route record",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_handoff_dispositions_backtick_none_accepted() -> None:
+    record = VALID_BOUND_RECORD.replace("- Dispositions: none", "- Dispositions: `none`")
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_handoff_dispositions_none_with_rationale_but_assigned_still_rejected() -> None:
+    """`none — <rationale>` tolerance must not excuse a record that actually
+    assigned a disposition above from reusing it."""
+    record = VALID_RECORD.replace(
+        "- Dispositions: identified-if",
+        "- Dispositions: none — nothing to report",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("'none' but the record assigns" in f for f in findings)
+
+
+_ASSUMPTIONS_BLOCK = (
+    "- Identifying assumptions:\n"
+    "  - parallel trends: absent the tier change, cohorts would trend in retention the same way\n"
+    "  - no anticipation: customers did not change behavior ahead of their cohort's switch\n"
+)
+_PROBES_BLOCK = (
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | parallel trends | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | no anticipation | retention in the two weeks before each switch date | "
+    "no discontinuity |\n"
+)
+_THREATS_BLOCK = (
+    "- Threat register:\n"
+    "\n"
+    "  | threat | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | concurrent promotion | cross-referenced promotions.log against switch dates | "
+    "no overlap |\n"
+)
+
+
+def test_identifying_assumptions_inline_prose_accepted() -> None:
+    """A single prose sentence in the label's own line satisfies the
+    >=1-assumption presence gate just as a sublist does."""
+    record = VALID_RECORD.replace(
+        _ASSUMPTIONS_BLOCK,
+        "- Identifying assumptions: n/a — not evaluated; this design is named only, not probed\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("identifying assumption" in f.lower() for f in findings)
+
+
+def test_identifying_assumptions_blank_still_rejected() -> None:
+    """A genuinely empty slot -- no inline value, no sublist, nothing before
+    the next bullet -- must still fail; the tolerance is for format, not for
+    absence. (``blank_field`` only clears the label's own line, so a real
+    empty-slot record must also drop the sublist items below it.)"""
+    record = VALID_RECORD.replace(_ASSUMPTIONS_BLOCK, "- Identifying assumptions:\n")
+    findings, _ = cr.check_record(record)
+    assert any("identifying assumption" in f.lower() for f in findings)
+
+
+def test_assumption_probes_inline_prose_accepted() -> None:
+    record = VALID_RECORD.replace(
+        _PROBES_BLOCK,
+        "- Assumption probes: none run — this design is named only, not probed\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("probe" in f.lower() for f in findings)
+
+
+def test_threat_register_inline_prose_accepted() -> None:
+    record = VALID_RECORD.replace(
+        _THREATS_BLOCK,
+        "- Threat register: none run — this design is named only, not probed\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("threat register" in f.lower() for f in findings)
+
+
+def test_handoff_facts_nested_list_accepted() -> None:
+    record = VALID_RECORD.replace(
+        "- Facts: pre-period slopes matched noise; no promotion overlapped a switch window",
+        "- Facts:\n"
+        "  - pre-period slopes matched noise\n"
+        "  - no promotion overlapped a switch window",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("Facts" in f for f in findings)
+
+
+def test_handoff_facts_prose_paragraph_accepted() -> None:
+    record = VALID_RECORD.replace(
+        "- Facts: pre-period slopes matched noise; no promotion overlapped a switch window",
+        "- Facts:\n"
+        "  pre-period slopes matched noise; no promotion overlapped a switch window,\n"
+        "  reported as a paragraph rather than a single line.",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("Facts" in f for f in findings)
+
+
+def test_handoff_facts_blank_still_rejected() -> None:
+    record = blank_field(VALID_RECORD, "Facts")
+    findings, _ = cr.check_record(record)
+    assert any("Facts" in f for f in findings)
+
+
+def test_handoff_dispositions_nested_list_reuse_accepted() -> None:
+    """A per-design breakdown written as a nested list under Dispositions,
+    each entry backtick-wrapped, still counts as reusing the values assigned
+    above -- this is the shape sc2-cs7-ws's Handoff block used."""
+    record = VALID_RECORD.replace(
+        "- Dispositions: identified-if",
+        "- Dispositions:\n"
+        "  - staggered-rollout difference-in-differences: `identified-if` (conditions above)",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_handoff_dispositions_nested_list_fabricated_still_rejected() -> None:
+    """The nested-list tolerance must not let a fabricated disposition (one
+    never assigned by any Design block above) slip past the reuse check."""
+    record = VALID_RECORD.replace(
+        "- Dispositions: identified-if",
+        "- Dispositions:\n"
+        "  - staggered-rollout difference-in-differences: `unresolved` (never assigned above)",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("appear nowhere above" in f and "unresolved" in f for f in findings)
+
+
+def test_compound_conditional_disposition_still_rejected() -> None:
+    """A disposition written as a compound conditional sentence rather than a
+    closed-set token (no em-dash separating value from rationale) is not a
+    formatting variant of a real token -- it is a different, non-conforming
+    value, and must still be rejected. Mirrors the real measurement failure
+    in phase4-arms/sc-cs2/price-increase-churn-identification-review.md."""
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: not-constructible if fewer than a handful of comparators exist; "
+        "otherwise unresolved pending further probes",
+    )
+    findings, _ = cr.check_record(record)
+    assert any(
+        "disposition" in f.lower() and "not-constructible if fewer than a handful" in f
+        for f in findings
+    )
+
+
+# --------------------------------------------------------------------------- #
 # CLI / file-handling behavior
 # --------------------------------------------------------------------------- #
 def test_main_exits_zero_on_conforming_record(tmp_path: Path) -> None:

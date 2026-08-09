@@ -31,7 +31,7 @@ hooks = [
 repo = "local"
 hooks = [
   { id = "check-skill-frontmatter", name = "Validate SKILL.md frontmatter against agentskills.io spec", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-skill-frontmatter.py", files = "(?:^|/)SKILL\\.md$", pass_filenames = true },
-  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
+  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
   # The instruments' own unit suite. Nothing ran it before, so an edit to
   # score_ledger.py landed unchecked. The whole tests tree is collected; the
   # deliberately-broken scenario-3 fixture is held out by
@@ -67,4 +67,5 @@ hooks = [
   # above; pytest still collects the whole tests/ tree, but fixtures/generate.py
   # and validate_*.py are not named test_*.py, so default collection skips them.
   { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/tests/[^/]+\\.py$", pass_filenames = false },
+  { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^(skills/causal-identification-review/(SKILL\\.md|tests/.*\\.py)|skills/hypothesis-driven-analysis/SKILL.md)$", pass_filenames = false },
 ]

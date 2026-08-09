@@ -8,6 +8,7 @@ A Claude Code and Codex plugin for reasoning from data: structured exploration t
 | --- | --- |
 | [exploratory-data-analysis](skills/exploratory-data-analysis/) | Structured exploratory data analysis — orient before interpreting, count every look, consolidate ranked leads with their search context, and hand adjudication to hypothesis-driven-analysis. |
 | [hypothesis-driven-analysis](skills/hypothesis-driven-analysis/) | Guide empirical investigations with PPDAC and the scientific method — competing hypotheses, preregistered predictions, adequate tests, and a precommitted stop rule. |
+| [causal-identification-review](skills/causal-identification-review/) | Review whether a design — proposed, claimed, or still to be found — identifies a causal effect and on what assumptions, with candidate designs, breakable identifying assumptions, probes run against them, and an evidence-bounded disposition that never certifies. |
 
 The two are a pair.
 Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work.

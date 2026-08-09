@@ -74,6 +74,13 @@ _SECTION_HEADER = re.compile(r"^## (.+)$", re.MULTILINE)
 _TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$", re.MULTILINE)
 _SUBLIST_ITEM = re.compile(r"^  - .+$")
 
+# The literal `none` Handoff Dispositions value, optionally backtick-wrapped,
+# optionally followed by a trailing rationale introduced by an em-dash or a
+# hyphen-dash surrounded by whitespace (never a bare hyphen -- a token like
+# `not-constructible` must not be mistaken for `none` plus a rationale, so
+# the dash must be padded by whitespace on both sides to count as one).
+_NONE_DISPOSITION = re.compile(r"^`?none`?(?:\s+[—-]\s+.+)?$")
+
 # Advisory-only heuristic: a digit-led number immediately followed by a unit
 # word/symbol commonly used to report an effect size. Deliberately narrow --
 # see the module docstring's "Advisory-only" section for its documented gap
@@ -89,12 +96,46 @@ def _bullet_pattern(label: str) -> re.Pattern[str]:
 
 
 def find_bullet(body: str, label: str) -> str | None:
-    """The value of a ``- <label>: <value>`` bullet, or None if missing/blank."""
+    """The value of a ``- <label>:`` bullet, or None if the slot is empty.
+
+    Tries three shapes, in that order, because these gates only need to
+    confirm the labeled slot is *present* -- not that it takes one specific
+    layout: (1) inline text on the label's own line (``- Label: value``);
+    (2) an indented sublist directly below a bare ``- Label:`` line; (3) a
+    prose paragraph directly below a bare ``- Label:`` line. Returns None
+    only when none of the three finds anything, i.e. the slot really is
+    empty (immediately followed by the next bullet, a new section, a blank
+    line, or end of text).
+    """
     match = _bullet_pattern(label).search(body)
     if match is None:
         return None
-    value = match.group(1).strip()
-    return value if value else None
+    inline = match.group(1).strip()
+    if inline:
+        return inline
+    sublist = find_sublist(body, label)
+    if sublist:
+        return "; ".join(sublist)
+    return _find_paragraph(body, label)
+
+
+def _find_paragraph(body: str, label: str) -> str | None:
+    """Prose paragraph directly below a bare ``- <label>:`` line, i.e. lines
+    that are neither blank, nor a new ``- `` bullet, nor a new ``## `` section
+    header. The caller has already ruled out an inline value and a sublist."""
+    lines = body.splitlines()
+    collecting = False
+    collected: list[str] = []
+    for line in lines:
+        if not collecting:
+            if line.strip() == f"- {label}:":
+                collecting = True
+            continue
+        stripped = line.strip()
+        if stripped == "" or stripped.startswith(("- ", "## ")):
+            break
+        collected.append(stripped)
+    return " ".join(collected) if collected else None
 
 
 def find_sublist(body: str, label: str) -> list[str]:
@@ -150,8 +191,21 @@ def split_sections(text: str) -> list[tuple[str, str]]:
 
 def _disposition_value(raw: str) -> str:
     """The closed-set token from a disposition/route bullet, stripping any
-    trailing em-dash rationale (``identified-if — because ...`` -> ``identified-if``)."""
-    return raw.split("—", 1)[0].strip()
+    trailing em-dash rationale (``identified-if — because ...`` -> ``identified-if``)
+    and any backtick-wrapping (`` `identified-if` `` -> ``identified-if``) --
+    a value's markup is not part of the value, so a backtick-wrapped token
+    compares against the closed set the same as a bare one."""
+    return raw.split("—", 1)[0].strip().strip("`")
+
+
+def _is_none_disposition(raw: str) -> bool:
+    """True if a Handoff Dispositions value is the literal ``none``, tolerant
+    of backtick-wrapping and a trailing rationale (``none — no Design block
+    is carried``, ``none - ...``). A record's route assigning no disposition
+    still substantively means "none" whether or not a rationale follows it;
+    only the *reuse* semantics (below) are decided by ``assigned_dispositions``,
+    not this shape check."""
+    return bool(_NONE_DISPOSITION.match(raw.strip()))
 
 
 def _check_forbidden(value: str, slot_name: str, findings: list[str]) -> None:
@@ -196,17 +250,26 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     from the closed set, so the Handoff reuse check knows what was assigned."""
     if find_bullet(body, "Design") is None:
         findings.append(f"Design block ({header!r}): name is missing or empty")
-    if not find_sublist(body, "Identifying assumptions"):
+    # Presence only: a sublist (the canonical shape for assumptions), a table
+    # (the canonical shape for probes/threats), or plain prose under the
+    # label all satisfy these three gates -- find_bullet tries all three.
+    # The semantic quality of what's there is out of scope either way
+    # (module docstring's "Explicitly NOT this checker's claim").
+    if find_bullet(body, "Identifying assumptions") is None:
         findings.append(
             f"Design block ({header!r}): at least one identifying assumption is required"
         )
-    if not has_table_with_data_row(body, "Assumption probes"):
+    if not (
+        has_table_with_data_row(body, "Assumption probes") or find_bullet(body, "Assumption probes")
+    ):
         findings.append(
             f"Design block ({header!r}): assumption probes table is missing or has no data row"
         )
     if find_bullet(body, "Data requirements") is None:
         findings.append(f"Design block ({header!r}): Data requirements is missing or empty")
-    if not has_table_with_data_row(body, "Threat register"):
+    if not (
+        has_table_with_data_row(body, "Threat register") or find_bullet(body, "Threat register")
+    ):
         findings.append(
             f"Design block ({header!r}): threat register table is missing or has no data row"
         )
@@ -257,7 +320,7 @@ def _check_handoff(
     if dispositions_raw is None:
         findings.append("Handoff block: Dispositions is missing or empty")
         return
-    if dispositions_raw.strip().strip("`") == "none":
+    if _is_none_disposition(dispositions_raw):
         if assigned_dispositions:
             findings.append(
                 "Handoff block: Dispositions is 'none' but the record assigns "
