@@ -1,0 +1,20 @@
+{
+  "name": "data-reasoning",
+  "interface": {
+    "displayName": "Data Reasoning"
+  },
+  "plugins": [
+    {
+      "name": "data-reasoning",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

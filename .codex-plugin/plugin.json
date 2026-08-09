@@ -1,0 +1,38 @@
+{
+  "name": "data-reasoning",
+  "version": "0.1.0",
+  "description": "Skills for reasoning from data — structured exploration that generates honest leads, and hypothesis-driven investigation that adjudicates them.",
+  "author": {
+    "name": "Brian Connelly",
+    "url": "https://github.com/briandconnelly"
+  },
+  "homepage": "https://github.com/briandconnelly/data-reasoning",
+  "repository": "https://github.com/briandconnelly/data-reasoning",
+  "license": "MIT",
+  "keywords": [
+    "data-analysis",
+    "exploratory-data-analysis",
+    "hypothesis-testing",
+    "ppdac",
+    "scientific-method",
+    "skills"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Data Reasoning",
+    "shortDescription": "Explore data and test hypotheses with disciplined workflows",
+    "longDescription": "Use paired workflows for structured exploratory data analysis and hypothesis-driven investigation with explicit evidence, predictions, and stopping rules.",
+    "developerName": "Brian Connelly",
+    "category": "Productivity",
+    "capabilities": [
+      "Analysis",
+      "Research"
+    ],
+    "websiteURL": "https://github.com/briandconnelly/data-reasoning",
+    "defaultPrompt": [
+      "Explore this dataset and identify the strongest leads.",
+      "Turn this question into a hypothesis-driven analysis plan.",
+      "Evaluate whether the evidence supports these competing hypotheses."
+    ]
+  }
+}

@@ -18,10 +18,12 @@ This skill carries a verbatim copy, and `tests/test_gate_parity.py` (a prek hook
 Costly collection: worded for exploration in this skill, because HDA's text is written for investigations; the wording is free but the semantics are not.
 The invariants both statements must preserve:
 
-1. Costly is triggered by a stated or measured cost, never a suspected one; a number you cannot classify is treated as costly.
+1. Costly is triggered by any of three conditions — a cost the user, the tool, or the configuration states; a cost you observe directly; or a pull that exceeds a budget they set — never a suspected one; a number you cannot classify is treated as costly.
+   (Added 2026-08-08: the trigger set was previously stated here as "a stated or measured cost", which the third condition does not fall under. Review against the shorter form had left EDA carrying two of HDA's three triggers — the budget-overrun trigger was absent from this skill entirely. Enumerating the set is what makes the hand check able to catch that.)
 2. Cost modifies ceremony; it never selects or changes the route.
 3. The plan precedes the pull and names: what the pull serves, the exact source and action, why it is the cheapest adequate collection, a budget in the metered unit, the authorization covering it or `BLOCKED`, and the stop/re-pull condition.
-4. Data already paid for is reused, not re-pulled, when it matches the needed grain and snapshot; a sampled, truncated, or reshaped probe legitimizes a re-pull with the reason stated.
+4. Data already paid for is reused, not re-pulled, when it matches the needed grain and snapshot; a sampled, truncated, or reshaped probe legitimizes a re-pull with the reason stated; and a reused probe's spend counts against the plan's budget rather than going uncounted.
+   (Added 2026-08-08: the budget-folding clause previously lived only in HDA's prose, with no slot in the plan template, no counterpart in EDA, and no entry here — F6 of the 2026-08-08 separation audit. Enumerating it is what makes the hand check able to catch its absence.)
 
 Rewording either skill's costly-collection statement requires re-checking this list by hand; no mechanical check compares reworded text.
 

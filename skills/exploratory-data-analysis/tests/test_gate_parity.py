@@ -8,7 +8,11 @@ copy from drifting (AGENTS.md: one home per normative rule).
 import re
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+import pytest
+
+SKILLS_DIR = Path(__file__).resolve().parents[2]
+HDA_SKILL = SKILLS_DIR / "hypothesis-driven-analysis" / "SKILL.md"
+EDA_SKILL = SKILLS_DIR / "exploratory-data-analysis" / "SKILL.md"
 HEADING = "### Authorization gate (always binds)"
 MIN_GATE_LENGTH = 1000
 
@@ -22,14 +26,18 @@ def gate_block(path: Path) -> str:
     return text[start:end].strip()
 
 
-def test_gate_block_extracts_real_content():
-    """The instrument can surface a known positive, so an empty match cannot pass."""
-    hda = gate_block(REPO / "hypothesis-driven-analysis" / "SKILL.md")
-    assert "None of the following is authorization" in hda
-    assert len(hda) > MIN_GATE_LENGTH
+@pytest.mark.parametrize("path", [HDA_SKILL, EDA_SKILL], ids=["hda", "eda"])
+def test_gate_block_extracts_real_content(path: Path):
+    """The instrument can surface a known positive, so an empty match cannot pass.
+
+    Run against both sides, not just the authority: a comparison of two blocks
+    the extractor silently truncated the same way would pass while checking
+    nothing.
+    """
+    block = gate_block(path)
+    assert "None of the following is authorization" in block
+    assert len(block) > MIN_GATE_LENGTH
 
 
 def test_authorization_gate_matches_hda_verbatim():
-    hda = gate_block(REPO / "hypothesis-driven-analysis" / "SKILL.md")
-    eda = gate_block(REPO / "exploratory-data-analysis" / "SKILL.md")
-    assert eda == hda
+    assert gate_block(EDA_SKILL) == gate_block(HDA_SKILL)

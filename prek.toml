@@ -31,7 +31,7 @@ hooks = [
 repo = "local"
 hooks = [
   { id = "check-skill-frontmatter", name = "Validate SKILL.md frontmatter against agentskills.io spec", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-skill-frontmatter.py", files = "(?:^|/)SKILL\\.md$", pass_filenames = true },
-  { id = "check-citations", name = "hypothesis-driven-analysis: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/hypothesis-driven-analysis/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
+  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
   # The instruments' own unit suite. Nothing ran it before, so an edit to
   # score_ledger.py landed unchecked. The whole tests tree is collected; the
   # deliberately-broken scenario-3 fixture is held out by
@@ -40,5 +40,11 @@ hooks = [
   { id = "hda-instrument-tests", name = "hypothesis-driven-analysis: the ledger instruments' own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/hypothesis-driven-analysis/tests", files = "^skills/hypothesis-driven-analysis/tests/.*\\.py$", pass_filenames = false },
   { id = "validate-s15-fixture", name = "hypothesis-driven-analysis: s15 fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/hypothesis-driven-analysis/tests/fixtures/validate_s15.py skills/hypothesis-driven-analysis/tests/fixtures/s15-assist-rollout", files = "^skills/hypothesis-driven-analysis/tests/fixtures/(generate\\.py|validate_s15\\.py|s15-assist-rollout/)", pass_filenames = false },
   { id = "validate-s21-fixture", name = "hypothesis-driven-analysis: s21 packets keep every property they set", language = "python", language_version = "python3", entry = "python skills/hypothesis-driven-analysis/tests/fixtures/validate_s21.py skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition", files = "^skills/hypothesis-driven-analysis/tests/fixtures/(generate\\.py|validate_s21\\.py|s21-status-disposition/)", pass_filenames = false },
+  # s5b-seam has its own generator and validator rather than joining generate.py:
+  # that file drives every legacy fixture from one module-level RNG in a fixed
+  # call order, so a fixture drawing from it inherits a dependency on every
+  # builder ahead of it. This validator also regenerates and byte-compares
+  # (trap 8), which the older fixture hooks do not do.
+  { id = "validate-s5b-seam-fixture", name = "hypothesis-driven-analysis: s5b-seam fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/hypothesis-driven-analysis/tests/fixtures/validate_s5b_seam.py skills/hypothesis-driven-analysis/tests/fixtures/s5b-seam", files = "^skills/hypothesis-driven-analysis/tests/fixtures/(generate_s5b_seam\\.py|validate_s5b_seam\\.py|s5b-seam/)", pass_filenames = false },
   { id = "eda-gate-parity", name = "exploratory-data-analysis: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/exploratory-data-analysis/tests", files = "^(skills/exploratory-data-analysis/(SKILL\\.md|tests/.*\\.py)|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
 ]

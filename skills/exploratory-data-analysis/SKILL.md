@@ -54,11 +54,12 @@ Refusing work a valid grant plainly covers is its own failure. This gate exists 
 
 ### Costly collection (modifier, not a route)
 
-Collection is costly when the user, the tool, or the configuration states a cost — a price, a quota, a rate limit, a latency, a size — or when you observe the cost directly.
+Collection is costly when the user, the tool, or the configuration states a cost — a price, a quota, a rate limit, a latency, a size — when you observe the cost directly, or when the pull exceeds a budget they set.
 A suspected cost is not a trigger; a stated or measured one is, and a number you cannot classify is treated as costly.
 Cost never changes the route: a metered warehouse makes profiling more expensive, not more inferential.
 Before any costly pull, on any route, write down: what the pull serves, the exact source and action, why this is the cheapest adequate collection, a budget in the metered unit, the authorization covering it (or `BLOCKED`), and the condition under which you stop or pull again.
 Data already paid for is reused, not re-pulled, when it matches the grain and snapshot the exploration needs; a probe that sampled, truncated, or reshaped the data legitimizes a re-pull — take it and say why.
+A reused probe's spend counts against the pull's budget rather than going uncounted.
 The invariants this section must preserve in common with `hypothesis-driven-analysis`'s costly-collection rule are listed in [decisions/001-shared-gate-authority.md](decisions/001-shared-gate-authority.md); rewording either statement requires re-checking that list.
 
 ## The Lifecycle (explore route)
@@ -99,7 +100,9 @@ No invented confidence numbers; when a formal multiplicity correction would matt
 ### Consolidate
 
 Dedupe candidates and rank the survivors.
-Search context has consequences, not just a record: a lead surfaced by heavy search ranks below a comparably sized lead found with little search, and a magnitude selected by search is reported as likely overstated, with the honest estimate deferred to the confirming test.
+Search context has consequences, not just a record.
+Between two leads of the same class whose magnitudes do not clearly separate, the one whose search context exposed fewer comparisons ranks higher.
+A magnitude selected by search is reported as likely overstated, with the honest estimate deferred to the confirming test.
 Each reported lead records: a statement in associational wording, its class (`pattern`, `data-quality`, or `descriptive`), an evidence pointer, its search context (how many looks, across how many families, exposing roughly how many comparisons), the plausible alternative explanations noted but not tested, the cheapest adequate confirming test, and a disposition (`reported`, `handed-off`, or `dropped`).
 An unexplained residual is reported as unattributed, never assigned a cause — naming a cause is adjudication.
 
@@ -109,7 +112,7 @@ Leads the user wants settled go to `hypothesis-driven-analysis` and enter as `re
 The handoff states what reserved or unconsumed evidence remains for confirmation; when exploration consumed everything, say so — a fresh query over already-examined records is not fresh evidence, and the investigation will need future or independent data.
 This skill's outputs are only: leads, descriptive facts the records settle, and data-quality issues.
 No causal assertions anywhere: exploration never asserts or implies that one thing caused another, because nothing in an open-ended search identifies a cause.
-Naming causality to disclaim it, to restate the user's ask, or to route to the investigation skill is required, not forbidden.
+The rule above does not forbid naming causality in order to disclaim it, to restate the user's ask, or to route to `hypothesis-driven-analysis`.
 
 ## Profile Route
 
