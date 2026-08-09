@@ -38,7 +38,7 @@ An assertion row may name them because an assertion is the measurement contract,
 
 Four rows, preregistered before any arm runs, each keyed to an observable condition rather than to a preference.
 
-- **Ship as drafted.** Every scored arm across CS1–CS7 (and the `hypothesis-driven-analysis` reachability cells from the seam amendment) passes its assertion table against the exact wording frozen at design review, and the merged files are byte-identical to the frozen digests.
+- **Ship as drafted.** Every scored arm across CS1–CS7 (and the `hypothesis-driven-analysis` seam cells preregistered in § "HDA seam cells" below) passes its assertion table against the exact wording frozen at design review, and the merged files are byte-identical to the frozen digests.
 - **Ship with formatting-only fixes owing no re-arms.** Scored arms pass, and every defect found in post-arm review is scoped by `PROTOCOL.md` § "What owes a rerun" as owing no arm, with the scoping judgement recorded rather than assumed.
 - **Redesign and re-measure.** A scored arm fails an assertion whose fix is scoped by `PROTOCOL.md` § "What owes a rerun" as owing an arm, or a canary arm shows fixture entanglement (the right label reached without invoking the rule under test) — either sends the affected scenario back through fixture and wording design before any further arm is scored.
 - **Do not ship.** A trigger arm (CS1, CS2) or a guardrail arm (CS6a, CS6b) fails after design review and canaries have already passed — the skill's own trigger discrimination or its own guardrail contract breaks under measurement, not a fixable wording defect.
@@ -97,7 +97,7 @@ CS2 is a trigger-only arm: it is scored on activation and on the record being st
 
 **Prompt:**
 
-> We rolled out the new checkout flow to the West region on 2026-03-15, after two weeks running the old flow in both regions.
+> We rolled out the new checkout flow to the West region on 2026-03-15, after six weeks running the old flow in both regions.
 > East region stayed on the old flow throughout.
 > Median checkout completion time in West fell from the pre-rollout weeks to the two weeks after, and the team wants this written up as the flow's causal effect on completion time for the Q2 review.
 > Does this comparison identify the flow's causal effect?
@@ -155,7 +155,8 @@ Ground-truth facts the sheet must state:
 
 - [ ] Names ≥2 admissible designs: regression discontinuity and instrumental variable, at minimum.
 - [ ] Regression discontinuity's block states its identifying assumptions (no manipulation/sorting of merchants around the $50k cutoff; continuity of potential outcomes through the cutoff) and its data requirements (the running variable, the enrollment flag, the outcome, and enough merchant density near the cutoff to run a manipulation and covariate-balance check).
-- [ ] Instrumental variable's block states its identifying assumptions (relevance — batch assignment strongly predicts enrollment timing; exclusion — batch affects chargebacks only through verification timing, per the sheet's own statement that batch order tracks logistics, not risk) and its data requirements (batch assignment, enrollment timing, and outcome per merchant).
+- [ ] Instrumental variable's block states its identifying assumptions — relevance (batch assignment strongly predicts enrollment timing), exclusion (batch affects chargebacks only through verification timing), and independence/exogeneity of the instrument (batch order follows the processor's capacity and logistics schedule, fixed before the verification step existed and stated to be independent of any merchant's chargeback history or risk profile) — all three, not a subset — and its data requirements (batch assignment, enrollment timing, and outcome per merchant).
+- [ ] When the instrumental-variable block's estimand is a local average treatment effect, the block also states monotonicity (batch order never moves any merchant's enrollment timing opposite to its batch's) — or names the alternative identifying restriction it relies on instead.
 - [ ] Does not propose difference-in-differences or a matching/selection-on-observables design as admissible — proposing either fails this assertion, per the decoy contract above.
 - [ ] If a prospective randomized experiment is mentioned, it is named only — no power calculation, minimum-detectable-effect figure, sample-ratio-mismatch check, or other prospective-design mechanics appear (D3's exclusion).
 - [ ] Route recorded is `construct` per SKILL.md (to be written; D2/D3 fix that this route exists) — a causal question exists with no design yet proposed, which is what selects `construct` over `review`.
@@ -171,18 +172,18 @@ Ground-truth facts the sheet must state:
 **Prompt:**
 
 > A retention program invited a subset of at-risk customers to a concierge onboarding call.
-> Invitation was targeted by an internal risk score that was never exported, so nothing here supports a claim about who would have been invited under any other rule.
+> Invitations were randomized within monthly enrollment waves, and the fixture's assignment note states that plainly.
 > Some invited and some non-invited customers churned before their 30-day retention outcome could be observed, and the missing-outcome rate differs between the two groups.
-> Nothing here identifies the program's causal effect, and no design can be constructed from what exists.
+> Nothing here identifies the program's causal effect as a point — the differential outcome missingness breaks the randomized comparison — and no design can be constructed from what exists that would restore one.
 > What can we honestly say about the size of the effect?
 > Data: `tests/fixtures/cs5-bounds/`.
 
 **Fixture:** `tests/fixtures/cs5-bounds/` (Task 2.2 to build).
 Ground-truth properties the generator and validator must encode:
 
-- Invited and non-invited cohorts, assignment stated as targeted by an unrecorded risk score — no cutoff, no instrument, no comparison group whose assignment is stated to be independent of the outcome, so neither a reviewed nor a constructed design identifies a point.
+- Invited and non-invited cohorts, with assignment stated plainly in the fixture's assignment note as randomized within monthly enrollment waves — randomization settles who was invited, but the differential outcome missingness below breaks point identification, so no reviewed or constructed design over what exists identifies a point.
 - A 30-day retention outcome, missing for a stated fraction of each cohort due to churn before the outcome window closed, with the missingness rate differing by cohort.
-- The **only** licensed assumption is stated monotonicity of attrition: invitation can only keep a customer observed longer, never shorten the observation window — the direction is stated as a fact of the fixture, not inferred.
+- The **only** licensed assumption about the missing outcomes is stated monotonicity of attrition: invitation can only keep a customer observed longer, never shorten the observation window — the direction is stated as a fact of the fixture, not inferred, and it is what licenses trimming as the honest answer to the missingness.
 - **Documented ground-truth bounds:** the generator computes Lee-style trimming bounds — trimming the lower-attrition cohort's outcome distribution to match the higher-attrition cohort's survival rate, from the top and from the bottom, to produce a best-case and worst-case endpoint — and records the exact `[lower, upper]` pair in the fixture's ground-truth file.
   This pair is what `validate_cs5.py` checks a run's computed endpoints against.
 
@@ -258,7 +259,8 @@ Ground-truth properties the generator and validator must encode:
 - **No manipulation at the cutoff:** the running variable's density is smooth through 680 by construction — the manipulation probe passes.
 - **Covariate balance at the cutoff:** stated covariates unrelated to credit score itself (account tenure, income band) are balanced immediately around 680 — the balance probe passes.
 - **No other stated confound at the cutoff:** unlike CS3/CS4, this fixture plants no concurrent change, no differential pre-trend, and no selection story that would contradict the discontinuity design — this is the one fixture in the catalog built to let a design's identifying assumptions clear their probes, not to defeat one.
-- A precommitted estimand stated in the fixture's ground-truth file: "the local average treatment effect of instant-checkout on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff" — stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
+- A precommitted estimand stated in the fixture's ground-truth file: "the local average effect of instant-checkout eligibility on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff" — stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
+  Take-up of instant-checkout is unobserved — `accounts.csv` carries `eligible` only, no treatment-receipt column — so the review's estimand is eligibility's effect (a sharp-discontinuity claim in eligibility), not use's, which would need receipt data and fuzzy-discontinuity assumptions the fixture does not supply.
 
 **Stage 1 assertions:**
 
@@ -285,6 +287,33 @@ Ground-truth properties the generator and validator must encode:
 
 This stage is not incidental entanglement — HDA's estimation-route gates (authorization, uncertainty reporting) apply because stage 2 genuinely runs HDA, not because the fixture accidentally tripped them.
 The assertions above test that HDA's own machinery engages normally with a handed-in record, not that this skill's fixture avoided a gate that does not belong to it.
+
+## HDA seam cells (owed by the three amendment sentences)
+
+The seam amendment adds exactly three sentences to `skills/hypothesis-driven-analysis/SKILL.md`, and the verdict table above scores their reachability cells alongside CS1–CS7; this subsection preregisters those cells repo-side.
+The scoping rule that selects them lives in `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § "What owes a rerun" and is not restated here.
+The three sentences are: A1, the routing addition in HDA's § "A causal question routes on its design, not its wording" (a stated quasi-experimental structure does not identify by being named — its review routes through this skill); A2, the stop-with-limits continuation (when the conclusion is that nothing identifies the effect, this skill is the constructive continuation); and A3, the causal-wording-bar addition in HDA's § Conclusion (a quasi-experimental design clears the bar only through an identification review whose conditional-identification disposition has its probes run).
+
+| Cell | A1 (routing) | A2 (stop-with-limits) | A3 (wording bar) |
+| --- | --- | --- | --- |
+| S9 | owed | — | — |
+| S12 | owed | owed | owed |
+| S15 | owed | owed | owed |
+| S1 | — | — | owed |
+| all others | — | — | — |
+
+Expected rationale per cell, preregistered before any arm runs:
+
+- **S12 (all three).** Its route assertion is settled by the exact paragraph A1 now sits in: the arm must show the "how much did the campaign improve conversion" prompt still routes `full`, not diverted into treating the campaign's pre/post weeks as a quasi-experimental structure whose review displaces routing.
+  Its conclusion assertion is A2's antecedent exactly: on reaching stop-with-limits with nothing identifying the effect, S12's full-route conclusion is expected to surface the `causal-identification-review` continuation — that observable is what measures sentence A2.
+  Its conclusion-wording assertion reads the bar paragraph through A3, evaluated and rejected (no review exists in the run), on the way to the associative-language mandate.
+- **S15 (all three).** The fixture's claimed-clean before/after comparison is A1's antecedent live in the fixture, not hypothetical: the arm must classify the claimed structure as not identifying by being named.
+  Its asserted conclusion — the single cutover identifies nothing — traverses A2, and the memo the prompt requests is where the constructive continuation would surface.
+  Its causal-restraint assertions bind A3 on a real claimed design; S15 is the highest-risk cell — the one fixture where a run could misread A1/A3 as an invitation to run the identification review instead of the investigation — so its machine checks double as the regression net.
+- **S9 (A1 only).** Stated randomization must still route estimation: A1 is scoped to quasi-experimental structures, and S9 observes that the scoping holds — a run must not demote stated randomization into a review hand-off because this skill's description names "an A/B test" as a reviewable claimed design.
+- **S1 (A3 only).** With no review in the run, associative wording stays mandatory: the arm confirms A3 reads as an additional licensing condition on causal wording, not a loosening of the bar.
+
+**No-change row.** The three sentences ship only if these cells pass: a failed cell sends the sentences back through design — the verdict table's redesign row — before any further arm is scored, never into a wording patch that keeps the failed arm's result.
 
 ## Owed measurements
 

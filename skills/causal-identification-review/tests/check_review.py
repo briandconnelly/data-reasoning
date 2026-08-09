@@ -7,8 +7,13 @@
 
 This is a machine encoding of the record's *shape*, not its content: required
 fields present, the Route value drawn from its closed set, every per-Design
-Disposition value drawn from its closed set, and forbidden certification
-vocabulary (``valid``, ``certified``) absent from disposition slots. The
+Disposition value drawn from its closed set, route-aware block structure
+(``review``/``construct`` require at least one Design block and no Bound
+block; ``bound`` requires the Bound block and no Design blocks), the Handoff
+Dispositions slot reusing only disposition values assigned above (or the
+literal ``none`` when the record's route assigns none), and forbidden
+certification vocabulary (``valid``, ``certified``) absent from disposition
+slots. The
 closed-set vocabulary and its semantics are governed by
 ``../SKILL.md`` § Routing (authority, not yet written) and are already fixed
 by decision -- see
@@ -186,7 +191,9 @@ def _check_question(body: str | None, findings: list[str]) -> str | None:
     return route_value
 
 
-def _check_design(header: str, body: str, findings: list[str]) -> None:
+def _check_design(header: str, body: str, findings: list[str]) -> str | None:
+    """Check one Design block; return its disposition value when it is drawn
+    from the closed set, so the Handoff reuse check knows what was assigned."""
     if find_bullet(body, "Design") is None:
         findings.append(f"Design block ({header!r}): name is missing or empty")
     if not find_sublist(body, "Identifying assumptions"):
@@ -206,7 +213,7 @@ def _check_design(header: str, body: str, findings: list[str]) -> None:
     disposition_raw = find_bullet(body, "Disposition")
     if disposition_raw is None:
         findings.append(f"Design block ({header!r}): Disposition is missing or empty")
-        return
+        return None
     disposition_value = _disposition_value(disposition_raw)
     if disposition_value not in DISPOSITIONS:
         findings.append(
@@ -214,6 +221,7 @@ def _check_design(header: str, body: str, findings: list[str]) -> None:
             f"closed set {sorted(DISPOSITIONS)}"
         )
     _check_forbidden(disposition_value, f"Design block ({header!r}) disposition", findings)
+    return disposition_value if disposition_value in DISPOSITIONS else None
 
 
 def _check_bound(body: str, findings: list[str]) -> str | None:
@@ -227,7 +235,17 @@ def _check_bound(body: str, findings: list[str]) -> str | None:
     return endpoints
 
 
-def _check_handoff(body: str | None, findings: list[str]) -> None:
+def _check_handoff(
+    body: str | None, assigned_dispositions: frozenset[str], findings: list[str]
+) -> None:
+    """Handoff structure plus disposition reuse.
+
+    The template requires the Dispositions slot to reuse the value(s)
+    assigned above verbatim, or to carry the literal ``none`` for a record
+    whose route assigns no disposition (the bound route carries no Design
+    block, so it assigns none). A closed-set token that appears nowhere
+    above is a fabricated disposition, not a reuse, and fails the gate.
+    """
     if body is None:
         findings.append("Handoff block missing")
         return
@@ -235,8 +253,33 @@ def _check_handoff(body: str | None, findings: list[str]) -> None:
         findings.append("Handoff block: Facts is missing or empty")
     if find_bullet(body, "Assumptions") is None:
         findings.append("Handoff block: Assumptions is missing or empty")
-    if find_bullet(body, "Dispositions") is None:
+    dispositions_raw = find_bullet(body, "Dispositions")
+    if dispositions_raw is None:
         findings.append("Handoff block: Dispositions is missing or empty")
+        return
+    if dispositions_raw.strip().strip("`") == "none":
+        if assigned_dispositions:
+            findings.append(
+                "Handoff block: Dispositions is 'none' but the record assigns "
+                f"disposition(s) {sorted(assigned_dispositions)} above"
+            )
+        return
+    mentioned = {
+        value
+        for value in DISPOSITIONS
+        if re.search(rf"(?<![\w-]){re.escape(value)}(?![\w-])", dispositions_raw)
+    }
+    fabricated = mentioned - assigned_dispositions
+    if fabricated:
+        findings.append(
+            f"Handoff block: disposition(s) {sorted(fabricated)} appear nowhere above -- "
+            "Dispositions must reuse the value(s) assigned above verbatim, or be 'none' "
+            "for a record whose route assigns no disposition"
+        )
+    if not mentioned:
+        findings.append(
+            "Handoff block: Dispositions names no closed-set disposition value and is not 'none'"
+        )
 
 
 def _scan_numeric_estimates(text: str, endpoints_value: str | None) -> list[str]:
@@ -266,19 +309,35 @@ def check_record(text: str) -> tuple[list[str], list[str]]:
     bound_body = next((body for header, body in sections if header == "Bound"), None)
     handoff_body = next((body for header, body in sections if header == "Handoff"), None)
 
-    _check_question(question_body, findings)
+    route_value = _check_question(question_body, findings)
 
+    assigned: set[str] = set()
     for header, body in design_sections:
-        _check_design(header, body, findings)
+        disposition = _check_design(header, body, findings)
+        if disposition is not None:
+            assigned.add(disposition)
 
     endpoints_value: str | None = None
     if bound_body is not None:
         endpoints_value = _check_bound(bound_body, findings)
 
-    if not design_sections and bound_body is None:
+    # Route-aware structure: review/construct records carry Design blocks and
+    # no Bound block; a bound record carries the Bound block and no Design
+    # blocks.
+    if route_value in ("review", "construct"):
+        if not design_sections:
+            findings.append(f"route {route_value!r} requires at least one Design block")
+        if bound_body is not None:
+            findings.append(f"route {route_value!r} must not carry a Bound block")
+    elif route_value == "bound":
+        if bound_body is None:
+            findings.append("route 'bound' requires the Bound block")
+        if design_sections:
+            findings.append("route 'bound' must not carry Design blocks")
+    elif not design_sections and bound_body is None:
         findings.append("record has neither a Design block nor a Bound block")
 
-    _check_handoff(handoff_body, findings)
+    _check_handoff(handoff_body, frozenset(assigned), findings)
 
     warnings = _scan_numeric_estimates(text, endpoints_value)
     return findings, warnings

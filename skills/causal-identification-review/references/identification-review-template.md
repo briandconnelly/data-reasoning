@@ -50,7 +50,7 @@ Fill in one record per causal question under review; repeat the Design block onc
 
 - Facts: <what was established — probes run, their results, data-requirement and coverage findings, quoted rather than paraphrased where the source wording matters>
 - Assumptions: <the identifying assumption(s) carried forward from the Design or Bound block(s) above, stated as conditions any downstream estimate would be conditional on>
-- Dispositions: <the disposition value(s) assigned above, reused verbatim>
+- Dispositions: <the disposition value(s) assigned above, reused verbatim — or `none` for a record whose route assigns no disposition>
 
 This block states facts, assumptions, and dispositions only.
 It does not recommend or prescribe which route a receiving investigation takes; that choice is the receiving investigation's own routing rule to make.

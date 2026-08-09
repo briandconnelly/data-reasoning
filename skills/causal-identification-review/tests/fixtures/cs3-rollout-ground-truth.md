@@ -7,6 +7,12 @@ Not part of the fixture directory handed to arms -- generated here so `validate_
 - West pre-period completion-time slope: -0.534174 s/day (falling).
 - East pre-period completion-time slope: -0.021315 s/day (flat).
 
+## Planted baseline level (computed from the generated data)
+
+- West pre-period completion-time mean: 196.668095 s.
+- East pre-period completion-time mean: 180.063095 s.
+- West-minus-East pre-period level margin: 16.605000 s (West slower, consistent with the stated targeting criterion).
+
 ## Documented ground-truth disposition
 
 Both designs the review can construct from this fixture end on `assumption-contradicted`:

@@ -165,8 +165,9 @@ def _trap_4_assignment_note(directory: Path) -> list[str]:
         return ["trap 4: assignment_note.md is missing"]
     text = note_path.read_text(encoding="utf-8").lower()
     required_phrases = (
-        "risk score",
-        "never exported",
+        "randomized",
+        "enrollment wave",
+        "differentially missing",
         "monotonicity",
         "keep a customer observed longer",
         "never shorten",

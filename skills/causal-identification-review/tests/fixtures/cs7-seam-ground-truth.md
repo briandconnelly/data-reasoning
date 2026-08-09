@@ -4,7 +4,7 @@ Not part of the fixture directory handed to arms -- kept here so stage 1's recor
 
 ## Precommitted estimand
 
-> the local average treatment effect of instant-checkout on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff
+> the local average effect of instant-checkout eligibility on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff
 
 Stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
 

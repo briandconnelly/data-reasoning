@@ -43,7 +43,7 @@ Randomization stated, or assignment stated to be plausibly independent of the ou
 "Is B better than A, and by how much" over an assignment you have been told was random is an estimation task, however causal it sounds — the design already did the discriminating that the loop would otherwise have to do.
 Assigned by anything else — someone launched it, it shipped to whoever got it, it happened in a week when other things also happened: nothing identifies the effect, every co-occurring change is a live rival, and that is **full**.
 A stated quasi-experimental structure — a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: route its review through `causal-identification-review` when installed, and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
-"How much did launching the campaign improve conversion" is the second case wearing the first one's clothes: a causal question carrying a number, with no design behind it.
+"How much did launching the campaign improve conversion" is the unidentified-assignment case wearing the identified one's clothes: a causal question carrying a number, with no design behind it.
 The loop's job there is not to produce the number — it is to establish that the number is not available from this data, and to report what is.
 
 **Unstated assignment is the common case, and it is not an invitation to assume.**

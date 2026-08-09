@@ -59,6 +59,13 @@ COMPLETION_DIFF_FLOOR = 15.0
 """Trap 3: West's naive before/after completion-time drop must be at least
 this large -- a real, non-flat primary contrast, not a fluke of noise."""
 
+WEST_LEVEL_MARGIN_FLOOR = 10.0
+"""Trap 8: West's pre-period completion-time mean must exceed East's by at
+least this many seconds -- the stated targeting criterion (West chosen for
+the worst cart-abandonment complaints) must be consistent with West actually
+being the slower region in level throughout the pre-period, so the
+selection-into-exposure probe has a real baseline outlier to find."""
+
 PRE_PERIOD_FLOOR_DAYS = 28
 """Trap 7: scenarios.md CS3 states a pre-period of >= 4 weeks. Checked here
 independently of `generate.py`'s current constants (42 pre-days, 28
@@ -163,6 +170,55 @@ def _parse_ground_truth_slopes() -> tuple[float, float] | None:
         if "West pre-period completion-time slope" in line:
             west = float(line.split(":")[1].strip().split(" ")[0])
         if "East pre-period completion-time slope" in line:
+            east = float(line.split(":")[1].strip().split(" ")[0])
+    if west is None or east is None:
+        return None
+    return west, east
+
+
+def _trap_8_baseline_level(rows: list[dict]) -> list[str]:
+    """West's pre-period completion-time mean must sit above East's by the
+    recorded margin -- checked against both the floor and the ground-truth
+    file's recorded means, independently recomputed here."""
+    out = []
+    west_mean = _mean(_pre_series(rows, "West"))
+    east_mean = _mean(_pre_series(rows, "East"))
+    margin = west_mean - east_mean
+
+    if margin < WEST_LEVEL_MARGIN_FLOOR:
+        out.append(
+            f"trap 8: West's pre-period mean {west_mean:.2f}s exceeds East's "
+            f"{east_mean:.2f}s by only {margin:.2f}s, below the "
+            f"{WEST_LEVEL_MARGIN_FLOOR}s baseline-level floor"
+        )
+
+    recorded = _parse_ground_truth_means()
+    if recorded is None:
+        out.append("trap 8: cs3-rollout-ground-truth.md carries no parseable pre-period means")
+    else:
+        recorded_west, recorded_east = recorded
+        if abs(recorded_west - west_mean) > SLOPE_TOLERANCE:
+            out.append(
+                f"trap 8: recorded West pre-period mean {recorded_west:.6f} does not match "
+                f"recomputed mean {west_mean:.6f}"
+            )
+        if abs(recorded_east - east_mean) > SLOPE_TOLERANCE:
+            out.append(
+                f"trap 8: recorded East pre-period mean {recorded_east:.6f} does not match "
+                f"recomputed mean {east_mean:.6f}"
+            )
+    return out
+
+
+def _parse_ground_truth_means() -> tuple[float, float] | None:
+    if not CS3_GROUND_TRUTH.exists():
+        return None
+    text = CS3_GROUND_TRUTH.read_text(encoding="utf-8")
+    west = east = None
+    for line in text.splitlines():
+        if "West pre-period completion-time mean" in line:
+            west = float(line.split(":")[1].strip().split(" ")[0])
+        if "East pre-period completion-time mean" in line:
             east = float(line.split(":")[1].strip().split(" ")[0])
     if west is None or east is None:
         return None
@@ -324,6 +380,7 @@ def check(directory: Path) -> list[str]:
         *_trap_5_selection_note(directory),
         *_trap_6_bytes_reproduce(directory),
         *_trap_7_period_lengths(rows),
+        *_trap_8_baseline_level(rows),
     ]
 
 

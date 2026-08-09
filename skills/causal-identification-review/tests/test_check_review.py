@@ -4,8 +4,11 @@
 
 check_review.py enforces the identification-review record's schema-scope
 contract only: required fields present, route and disposition values drawn
-from their closed sets, and forbidden certification vocabulary (`valid`,
-`certified`) absent from disposition slots.
+from their closed sets, route-aware block structure (review/construct need
+Design blocks and no Bound block; bound needs the Bound block and no Design
+blocks), Handoff Dispositions reusing only values assigned above (or the
+literal `none` when the route assigns none), and forbidden certification
+vocabulary (`valid`, `certified`) absent from disposition slots.
 It deliberately does not judge whether the record preceded reasoning (scored
 from transcripts, per the catalog) or the semantic quality of any assumption
 or probe -- both out of scope per the task-3.2 brief.
@@ -94,7 +97,7 @@ VALID_BOUND_RECORD = """\
 
 - Facts: observed completion rate rose from 0.41 to 0.52 across the waitlist-removal boundary
 - Assumptions: monotonicity of completion under waitlist removal
-- Dispositions: unresolved
+- Dispositions: none
 """
 
 
@@ -330,6 +333,82 @@ def test_forbidden_word_does_not_false_positive_elsewhere() -> None:
     )
     findings, _ = cr.check_record(record)
     assert findings == []
+
+
+# --------------------------------------------------------------------------- #
+# Route-aware structure — review/construct need >=1 Design block and no Bound
+# block; bound needs the Bound block and no Design blocks (a design-review
+# finding: `Route: bound` + a Design block passed before this check existed).
+# --------------------------------------------------------------------------- #
+def test_route_bound_with_design_block_rejected() -> None:
+    record = VALID_RECORD.replace("Route: review", "Route: bound")
+    findings, _ = cr.check_record(record)
+    assert any("route 'bound' must not carry Design blocks" in f for f in findings)
+    assert any("route 'bound' requires the Bound block" in f for f in findings)
+
+
+def test_route_bound_without_bound_block_rejected() -> None:
+    lines = VALID_BOUND_RECORD.splitlines()
+    out, skipping = [], False
+    for line in lines:
+        if line.strip() == "## Bound":
+            skipping = True
+            continue
+        if skipping and line.startswith("## "):
+            skipping = False
+        if not skipping:
+            out.append(line)
+    record = "\n".join(out) + "\n"
+    findings, _ = cr.check_record(record)
+    assert any("route 'bound' requires the Bound block" in f for f in findings)
+
+
+def test_route_review_with_bound_block_and_no_design_rejected() -> None:
+    record = VALID_BOUND_RECORD.replace("Route: bound", "Route: review")
+    findings, _ = cr.check_record(record)
+    assert any("route 'review' requires at least one Design block" in f for f in findings)
+    assert any("route 'review' must not carry a Bound block" in f for f in findings)
+
+
+def test_route_construct_with_bound_block_and_no_design_rejected() -> None:
+    record = VALID_BOUND_RECORD.replace("Route: bound", "Route: construct")
+    findings, _ = cr.check_record(record)
+    assert any("route 'construct' requires at least one Design block" in f for f in findings)
+    assert any("route 'construct' must not carry a Bound block" in f for f in findings)
+
+
+# --------------------------------------------------------------------------- #
+# Handoff Dispositions — reuse-only, with `none` for a route assigning none
+# --------------------------------------------------------------------------- #
+def test_bound_record_handoff_dispositions_none_accepted() -> None:
+    """A bound record assigns no disposition above, so its Handoff carries the
+    literal `none` -- accepted, not treated as a missing or invalid value."""
+    findings, _ = cr.check_record(VALID_BOUND_RECORD)
+    assert findings == []
+
+
+def test_bound_record_fabricated_disposition_rejected() -> None:
+    """A closed-set disposition planted in a bound record's Handoff that
+    appears nowhere above is a fabrication, not a reuse -- rejected."""
+    record = VALID_BOUND_RECORD.replace("- Dispositions: none", "- Dispositions: unresolved")
+    findings, _ = cr.check_record(record)
+    assert any("appear nowhere above" in f and "unresolved" in f for f in findings)
+
+
+def test_design_record_fabricated_disposition_rejected() -> None:
+    """A Design record whose Handoff names a closed-set value never assigned
+    above (assigned: identified-if; handoff: unresolved) is rejected."""
+    record = VALID_RECORD.replace("- Dispositions: identified-if", "- Dispositions: unresolved")
+    findings, _ = cr.check_record(record)
+    assert any("appear nowhere above" in f and "unresolved" in f for f in findings)
+
+
+def test_design_record_handoff_none_rejected() -> None:
+    """`none` is only for a record whose route assigns no disposition; a
+    record that assigned one above must reuse it."""
+    record = VALID_RECORD.replace("- Dispositions: identified-if", "- Dispositions: none")
+    findings, _ = cr.check_record(record)
+    assert any("'none' but the record assigns" in f for f in findings)
 
 
 # --------------------------------------------------------------------------- #

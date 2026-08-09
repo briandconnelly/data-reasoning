@@ -73,7 +73,7 @@ Compute the endpoints the ledger licenses and record them in the Bound block's C
 Report only the interval, framed as a range under the stated assumptions — no midpoint offered as a best guess, no naive difference presented as the effect.
 
 **Handoff, last on every route.**
-Fill the Handoff block after everything above it, from what the record established: the facts, the assumptions any downstream estimate would be conditional on, and the disposition values reused verbatim.
+Fill the Handoff block after everything above it, from what the record established: the facts, the assumptions any downstream estimate would be conditional on, and the disposition values reused verbatim, or `none` when the route assigns none.
 The block never prescribes the receiving investigation's route: `hypothesis-driven-analysis` keeps its own routing authority and its causal-wording bar (its § "A causal question routes on its design" and § Conclusion), and this skill points there rather than restating either ([decisions/002-authority-map-with-hda.md](decisions/002-authority-map-with-hda.md)).
 
 ## Gates

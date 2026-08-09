@@ -17,11 +17,11 @@ This kept the numeric ban simple and total.
 The 2026-08-08 Codex cross-model critique found the numberless bound route self-defeating: it "produces a plan for bounds, not bounds," which meant the former Candidate 6 was not actually being absorbed by the draft, only gestured at.
 The settled position narrows the ban rather than dropping it, drawing a line between numeric output produced under the discipline this skill exists to enforce and numeric output that would assert a causal claim without it.
 Which specific outputs fall on which side of that line, and what discipline a given output must clear to count as in-scope, is SKILL.md's to state.
-An identified design's actual effect estimation is explicitly not this skill's job — it routes onward to HDA's estimation route with the review record attached.
+The settled position also kept an identified design's actual effect estimation on the out-of-scope side of the line; where that work goes instead is SKILL.md § Non-Goals's to state, with `002-authority-map-with-hda.md` holding the seam.
 
 ## What settled it
 
-The Codex critique's direct argument that a route which never outputs a number cannot be said to deliver bounds at all, which the plan resolved by permitting endpoint computation gated on a precommitted assumption ledger rather than by dropping the numeric ban generally.
+The Codex critique's direct argument that a route which never outputs a number cannot be said to deliver bounds at all, which the plan resolved by permitting endpoint computation under a stated discipline rather than by dropping the numeric ban generally; what that discipline requires, and in what order, is the bound route's per-route procedure in SKILL.md's to state.
 
 ## Reopening condition
 

@@ -55,13 +55,15 @@ floor. Post-period: 2026-03-15..2026-04-11 (28 days, 4 weeks) >= the catalog's
 2-week floor."""
 
 CS3_EAST_BASE = 180.0
-CS3_WEST_PRE_START = 188.0
-CS3_WEST_PRE_END = 166.0
-"""West's pre-period completion time falls linearly from 188s to 166s across
+CS3_WEST_PRE_START = 208.0
+CS3_WEST_PRE_END = 186.0
+"""West's pre-period completion time falls linearly from 208s to 186s across
 the 42 pre-period days -- the planted differential pre-trend, attributed in
 `ux_cleanup_note.md` to a concurrent UX cleanup unrelated to the checkout
-flow. West starts above East (188 vs 180), consistent with the stated
-targeting criterion (West had the worst checkout experience)."""
+flow. West stays distinctly above East throughout the pre-period (208..186
+vs a flat 180), consistent with the stated targeting criterion (West had the
+worst checkout experience); `validate_cs3.py`'s baseline-level trap checks
+the pre-period mean margin directly."""
 
 CS3_WEST_POST_LEVEL = 145.0
 """West's post-cutover completion time -- the real (if confounded) drop the
@@ -143,6 +145,21 @@ def _ols_slope(xs: list[float], ys: list[float]) -> float:
     return cov / var
 
 
+def cs3_pre_means(rows: list[dict]) -> tuple[float, float]:
+    """West and East pre-period completion-time means (seconds)."""
+    west_pre = [
+        r["completion_time_seconds"]
+        for r in rows
+        if r["region"] == "West" and r["date"] < CS3_CUTOVER.isoformat()
+    ]
+    east_pre = [
+        r["completion_time_seconds"]
+        for r in rows
+        if r["region"] == "East" and r["date"] < CS3_CUTOVER.isoformat()
+    ]
+    return sum(west_pre) / len(west_pre), sum(east_pre) / len(east_pre)
+
+
 def cs3_pre_slopes(rows: list[dict]) -> tuple[float, float]:
     """West and East pre-period completion-time slopes (seconds/day)."""
     west_pre = [r for r in rows if r["region"] == "West" and r["date"] < CS3_CUTOVER.isoformat()]
@@ -215,6 +232,7 @@ def build_cs3(outdir: Path, ground_truth_path: Path) -> None:
     )
 
     west_slope, east_slope = cs3_pre_slopes(rows)
+    west_pre_mean, east_pre_mean = cs3_pre_means(rows)
     ground_truth_path.write_text(
         "# cs3-rollout ground truth\n"
         "\n"
@@ -229,6 +247,14 @@ def build_cs3(outdir: Path, ground_truth_path: Path) -> None:
         "(falling).\n"
         f"- East pre-period completion-time slope: {east_slope:.6f} s/day "
         "(flat).\n"
+        "\n"
+        "## Planted baseline level (computed from the generated data)\n"
+        "\n"
+        f"- West pre-period completion-time mean: {west_pre_mean:.6f} s.\n"
+        f"- East pre-period completion-time mean: {east_pre_mean:.6f} s.\n"
+        f"- West-minus-East pre-period level margin: "
+        f"{west_pre_mean - east_pre_mean:.6f} s (West slower, consistent "
+        "with the stated targeting criterion).\n"
         "\n"
         "## Documented ground-truth disposition\n"
         "\n"
@@ -351,11 +377,14 @@ CS5_ASSIGNMENT_NOTE = (
     "\n"
     "## Assignment\n"
     "\n"
-    "Invitation to the concierge onboarding call was targeted by an internal risk score.\n"
-    "That risk score was never exported and does not appear anywhere in this fixture.\n"
-    "Nothing here supports a claim about who would have been invited under any other "
-    "targeting rule, so no comparison group's assignment can be treated as independent "
-    "of the outcome.\n"
+    "Invitations to the concierge onboarding call were randomized: within each monthly "
+    "enrollment wave, invited customers were drawn by lottery from that wave's at-risk "
+    "cohort.\n"
+    "The randomization was implemented and logged by the platform team; nothing about a "
+    "customer's history entered the draw.\n"
+    "Randomization settles who was invited, but it does not identify the program's "
+    "effect as a point here, because the 30-day outcome is differentially missing "
+    "across the two cohorts (see below).\n"
     "\n"
     "## Monotonicity assumption\n"
     "\n"
@@ -370,7 +399,8 @@ CS5_ASSIGNMENT_NOTE = (
     "outcome could be observed.\n"
     "A blank `retained_30d` value means the customer churned before the 30-day window "
     "closed, not that the event was unrecorded or the export is incomplete.\n"
-    "The missing-outcome rate differs between the two cohorts.\n"
+    "The missing-outcome rate differs between the two cohorts, so the observed "
+    "difference in retention rates cannot be read as the program's effect.\n"
 )
 
 
@@ -493,10 +523,13 @@ cutoff: eligible accounts default 6pp less often than the smooth baseline
 their score alone would predict."""
 
 CS7_ESTIMAND = (
-    "the local average treatment effect of instant-checkout on 90-day "
+    "the local average effect of instant-checkout eligibility on 90-day "
     "default rate at the credit-score-680 discontinuity, for accounts "
     "within the fixture's bandwidth of the cutoff"
 )
+"""`accounts.csv` carries `eligible` only -- no treatment-receipt column --
+so the estimand is eligibility's effect (a sharp-RD claim), not use's, which
+would need receipt data and fuzzy-RD assumptions."""
 
 
 def _cs7_default_probability(score: int, eligible: bool) -> float:
