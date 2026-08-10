@@ -36,7 +36,7 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
 
 ## Evidence and update
 
-- Prior odds: <odds or range> — provenance: <class>
+- Prior odds: <odds or range> — provenance: <class> — or `none needed` under a dominated verdict
 - Evidence:
 
   | item | LR | provenance | source, reference class, conditioning |
@@ -44,13 +44,13 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
   | <evidence item> | <ratio or range> | <class> | <where the ratio comes from> |
 
 - Independence: <why the items above are conditionally independent given each state, or `single item`>
-- Posterior odds: <odds or range, recomputable from the lines above>
+- Posterior odds: <odds or range, recomputable from the lines above> — or `none needed` under a dominated verdict
 
 ## Robustness
 
-- Prior class swept: <the range of prior odds considered> — provenance: <class>
+- Prior class swept: <the range of prior odds considered> — provenance: <class> — or `none needed` under a dominated verdict
 - Loss range swept: <the range of loss ratios considered> — provenance: <class>
-- Crossover: <the prior or loss ratio at which the preferred action flips, or `none within swept class`>
+- Crossover: <the prior or loss ratio at which the preferred action flips, or `none within swept class`> — or `none needed` under a dominated verdict
 
 ## Verdict
 

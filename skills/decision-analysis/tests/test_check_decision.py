@@ -363,6 +363,65 @@ def test_prior_sensitive_with_correct_crossover_passes():
     assert not any("crossover" in msg.lower() for msg in check(good))
 
 
+def _dominated_decide() -> str:
+    """VALID_DECIDE with a dominated verdict and its belief slots sentineled."""
+    text = replace_once(VALID_DECIDE, "- Verdict: robust", "- Verdict: dominated")
+    text = replace_once(
+        text,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Prior odds: none needed",
+    )
+    text = replace_once(text, "- Posterior odds: 0.75–5.0", "- Posterior odds: none needed")
+    text = replace_once(
+        text,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: none needed",
+    )
+    text = replace_once(text, "- Crossover: none within swept class", "- Crossover: none needed")
+    return text
+
+
+def test_dominated_verdict_with_none_needed_slots_passes():
+    assert check(_dominated_decide()) == []
+
+
+def test_dominated_verdict_tolerates_real_crossover_number():
+    # Crossover is exempt from the dominated sentinel: the arithmetic gates
+    # are skipped for the whole record, so a real number here still passes.
+    good = replace_once(
+        _dominated_decide(), "- Crossover: none needed", "- Crossover: flips at prior odds 0.5"
+    )
+    assert check(good) == []
+
+
+def test_prior_odds_without_provenance_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Prior odds: 0.25–1.0",
+    )
+    assert any("Prior odds" in msg for msg in check(bad))
+
+
+def test_prior_class_swept_without_provenance_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.25–1.0",
+    )
+    assert any("Prior class swept" in msg for msg in check(bad))
+
+
+def test_voi_signal_model_without_provenance_fails():
+    bad = replace_once(
+        VALID_VOI,
+        "- Signal model: a clean rerun halves the odds; a dirty rerun triples them "
+        "— provenance: estimated-from-data-in-hand",
+        "- Signal model: a clean rerun halves the odds; a dirty rerun triples them",
+    )
+    assert any("Signal model" in msg for msg in check(bad))
+
+
 def test_no_threshold_falls_back_to_structural_crossover_check():
     good = replace_once(
         VALID_DECIDE,

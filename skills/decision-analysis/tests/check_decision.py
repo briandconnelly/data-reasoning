@@ -116,6 +116,9 @@ def parse_sections(text: str) -> tuple[dict[str, str], list[str]]:
         end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
         name = m.group(1)
         if name in sections:
+            # Last body wins in the dict; the duplicate is still recorded and
+            # `check()` rejects the record for it, so the overwrite here never
+            # lets a duplicated section slip through unnoticed.
             duplicates.append(name)
         sections[name] = text[m.end() : end]
     return sections, duplicates
@@ -216,6 +219,19 @@ def check(text: str) -> list[str]:
     return failures
 
 
+def _check_slot_provenance(slots: tuple[tuple[str, str], ...], sentinel: str) -> list[str]:
+    """Require a provenance mention on each ``(label, value)`` slot.
+
+    ``sentinel`` (e.g. ``"none stated"``, ``"none needed"``) is a bare value
+    that is exempt from carrying a provenance class.
+    """
+    failures: list[str] = []
+    for label, value in slots:
+        if _bare(value) != sentinel and not _PROVENANCE_MENTION.search(value):
+            failures.append(f"slot '- {label}' carries a number without a provenance class")
+    return failures
+
+
 def _check_decide(sections: dict[str, str]) -> list[str]:
     failures: list[str] = []
     frame = sections["Decision frame"]
@@ -233,10 +249,27 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
             f"Consequences table must have exactly two state columns; found {len(rows[0]) - 1}"
         )
 
-    for label in ("Loss ratio:", "Decision threshold (posterior odds):"):
-        value = field(frame, label) or ""
-        if _bare(value) != "none stated" and not _PROVENANCE_MENTION.search(value):
-            failures.append(f"slot '- {label}' carries a number without a provenance class")
+    failures.extend(
+        _check_slot_provenance(
+            tuple(
+                (label, field(frame, label) or "")
+                for label in ("Loss ratio:", "Decision threshold (posterior odds):")
+            ),
+            "none stated",
+        )
+    )
+    failures.extend(
+        _check_slot_provenance(
+            (
+                ("Prior odds:", field(sections["Evidence and update"], "Prior odds:") or ""),
+                (
+                    "Prior class swept:",
+                    field(sections["Robustness"], "Prior class swept:") or "",
+                ),
+            ),
+            "none needed",
+        )
+    )
 
     model = sections["Decision-state model"]
     claim = _bare(field(model, "Claim class:") or "")
@@ -280,6 +313,13 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     sections: dict[str, str], verdict: str
 ) -> list[str]:
     failures: list[str] = []
+    if verdict == "dominated":
+        # Statewise domination needs no probabilities (SKILL.md § The Decide
+        # Route): Prior odds, Posterior odds, Prior class swept, and
+        # Crossover carry no belief-grade numbers to recompute or sweep, so
+        # none of the numeric parsing, recomputation, or crossover gates
+        # below apply to this record.
+        return failures
     evidence = sections["Evidence and update"]
     robustness = sections["Robustness"]
     frame = sections["Decision frame"]
@@ -389,6 +429,8 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
             f"Verdict value {verdict!r} is not in the closed set {sorted(VOI_VERDICTS)}"
         )
     signal = field(voi, "Signal model:") or ""
+    if not _PROVENANCE_MENTION.search(signal):
+        failures.append("slot '- Signal model:' carries a number without a provenance class")
     if "sensitivity-only" in signal and verdict != "break-even-only":
         failures.append("a sensitivity-only signal model licenses only the break-even-only verdict")
     return failures

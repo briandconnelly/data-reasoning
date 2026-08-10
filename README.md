@@ -1,6 +1,6 @@
 # data-reasoning
 
-A Claude Code and Codex plugin for reasoning from data: structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, and causal identification review that turns a dead end into a reviewed, assumption-bounded design.
+A Claude Code and Codex plugin for reasoning from data: structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, causal identification review that turns a dead end into a reviewed, assumption-bounded design, and decision analysis that turns unresolved evidence into a defensible act-wait-or-collect verdict.
 
 ## Skills
 

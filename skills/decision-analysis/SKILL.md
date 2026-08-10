@@ -107,7 +107,7 @@ Losses and thresholds carry provenance per § Numeric Policy.
 **Decision-state model.**
 The binary proposition the decision turns on, stated with an explicit residual reading — "H1 as stated" versus "not-H1, including explanations nobody named".
 A `hypothesis-driven-analysis` ledger is evidence input, never the state space: record which `UNRESOLVED` rows fold into which state and what the residual absorbs, and never derive a likelihood ratio from a status token alone — `UNRESOLVED` carries no likelihood information.
-Claim-class discipline carries over by pointer: a causal proposition gets no posterior unless `hypothesis-driven-analysis`'s causal-wording bar (its § Conclusion) is met or a `causal-identification-review` `identified-if` disposition covers it, with that review's assumptions restated in this block as explicit conditions.
+Claim-class discipline carries over by pointer: the claim class value set is `hypothesis-driven-analysis`'s ledger claim classes (its § Plan), and a causal proposition gets no posterior unless `hypothesis-driven-analysis`'s causal-wording bar (its § Conclusion) is met or a `causal-identification-review` `identified-if` disposition covers it, with that review's assumptions restated in this block as explicit conditions.
 A posterior over a causal claim is causal wording, and an `identified-if` disposition is evidence about identification, never about the effect's direction or magnitude.
 
 **Evidence and update.**
@@ -123,7 +123,7 @@ The verdict set is closed, and every value is evidence-bounded:
 - `robust` — one action is preferred across the entire stated prior class and loss range; the conditions are part of the verdict, not a footnote.
 - `prior-sensitive` — the preferred action flips within the prior class; the crossover is reported and the judgment returns to the decision owner.
 - `loss-sensitive` — the preferred action flips within the loss range, or the losses are `sensitivity-only`; the crossover is reported and the judgment returns to the decision owner.
-- `dominated` — one action wins under every state; no probabilities are needed, and the record says so.
+- `dominated` — one action wins under every state; no probabilities are needed, and the record's belief slots say `none needed`.
 
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).
 
