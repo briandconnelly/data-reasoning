@@ -17,7 +17,7 @@ actually contains.
 
 from pathlib import Path
 
-from check_decision import EXIT_UNVERIFIABLE, PROVENANCE, check, main, parse_sections
+from check_decision import EXIT_UNVERIFIABLE, PROVENANCE, check, main, parse_range, parse_sections
 
 FIXTURES = Path(__file__).parent
 
@@ -277,3 +277,100 @@ def test_provenance_vocabulary_is_the_settled_set():
         )
         == PROVENANCE
     )
+
+
+def test_parse_range_single_dashes_and_order():
+    assert parse_range("3") == (3.0, 3.0)
+    assert parse_range("0.25–1.0") == (0.25, 1.0)
+    assert parse_range("0.25-1.0") == (0.25, 1.0)
+    assert parse_range("1.0–0.25") is None
+    assert parse_range("unknown") is None
+
+
+def test_unparseable_prior_odds_fails_closed():
+    bad = replace_once(VALID_DECIDE, "- Prior odds: 0.25–1.0", "- Prior odds: unknown")
+    assert any("Prior odds" in msg for msg in check(bad))
+
+
+def test_zero_likelihood_ratio_fails_domain():
+    bad = replace_once(
+        VALID_DECIDE,
+        "| repro on staging | 3–5 |",
+        "| repro on staging | 0 |",
+    )
+    assert any("LR" in msg for msg in check(bad))
+
+
+def test_missing_evidence_data_row_fails_closed():
+    bad = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |\n",
+        "",
+    )
+    assert any("Evidence" in msg for msg in check(bad))
+
+
+def test_posterior_odds_recomputation_catches_bad_arithmetic():
+    bad = replace_once(VALID_DECIDE, "- Posterior odds: 0.75–5.0", "- Posterior odds: 2.0–9.0")
+    assert any("Posterior odds" in msg for msg in check(bad))
+
+
+def test_posterior_odds_tolerates_one_percent_rounding():
+    rounded = replace_once(
+        VALID_DECIDE, "- Posterior odds: 0.75–5.0", "- Posterior odds: 0.75–5.04"
+    )
+    assert not any("Posterior odds" in msg for msg in check(rounded))
+
+
+def test_robust_crossover_inside_swept_class_fails():
+    # threshold 0.1, LR 3-5 -> crossover prior odds [0.02, 0.0333];
+    # widening the swept class to include it makes 'robust' inconsistent.
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+    )
+    assert any("crossover" in msg.lower() for msg in check(bad))
+
+
+def test_prior_sensitive_requires_crossover_number_in_computed_interval():
+    bad = replace_once(VALID_DECIDE, "- Verdict: robust", "- Verdict: prior-sensitive")
+    bad = replace_once(
+        bad,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+    )
+    bad = replace_once(
+        bad,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.5",
+    )
+    assert any("crossover" in msg.lower() for msg in check(bad))
+
+
+def test_prior_sensitive_with_correct_crossover_passes():
+    good = replace_once(VALID_DECIDE, "- Verdict: robust", "- Verdict: prior-sensitive")
+    good = replace_once(
+        good,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+    )
+    good = replace_once(
+        good,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.02–0.033",
+    )
+    assert not any("crossover" in msg.lower() for msg in check(good))
+
+
+def test_no_threshold_falls_back_to_structural_crossover_check():
+    good = replace_once(
+        VALID_DECIDE,
+        "- Decision threshold (posterior odds): 0.1 — provenance: user-elicited",
+        "- Decision threshold (posterior odds): none stated",
+    )
+    assert check(good) == []
+    bad = replace_once(
+        good, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.5"
+    )
+    assert any("crossover" in msg.lower() for msg in check(bad))

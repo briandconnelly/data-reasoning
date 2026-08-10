@@ -98,6 +98,7 @@ EXIT_UNVERIFIABLE = 2
 _SCOPE_ACTIONS = 2
 _SCOPE_ACTION_ROWS = 2
 _SCOPE_TABLE_COLUMNS = 3
+_EVIDENCE_ROW_CELLS = 4
 
 _SECTION = re.compile(r"^## (.+?)\s*$", re.MULTILINE)
 _PROVENANCE_MENTION = re.compile(r"provenance:\s*([a-z-]+)")
@@ -275,12 +276,108 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     return failures
 
 
-def _check_decide_arithmetic(
-    sections: dict[str, str],  # noqa: ARG001 -- Task 4 fills this in
-    verdict: str,  # noqa: ARG001 -- Task 4 fills this in
+def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over five slots
+    sections: dict[str, str], verdict: str
 ) -> list[str]:
-    # Task 4 fills this in; the structural pass ships it as a no-op.
-    return []
+    failures: list[str] = []
+    evidence = sections["Evidence and update"]
+    robustness = sections["Robustness"]
+    frame = sections["Decision frame"]
+
+    prior = parse_range(_bare(field(evidence, "Prior odds:") or ""))
+    if prior is None or prior[0] <= 0:
+        failures.append("Prior odds must parse as a positive number or ordered range")
+
+    lr_product: tuple[float, float] | None = (1.0, 1.0)
+    data = _data_rows(_table_rows(evidence))
+    if not data:
+        failures.append("Evidence table must have at least one data row")
+        lr_product = None
+    for row in data:
+        if len(row) < _EVIDENCE_ROW_CELLS:
+            failures.append(f"Evidence row has {len(row)} cells; the template requires 4")
+            lr_product = None
+            continue
+        lr = parse_range(row[1])
+        if lr is None or lr[0] <= 0:
+            failures.append(f"Evidence LR {row[1]!r} must parse as a positive ratio or range")
+            lr_product = None
+        elif lr_product is not None:
+            lr_product = (lr_product[0] * lr[0], lr_product[1] * lr[1])
+        if row[2] not in PROVENANCE:
+            failures.append(f"Evidence provenance cell {row[2]!r} is not a provenance class")
+
+    posterior_value = _bare(field(evidence, "Posterior odds:") or "")
+    posterior = parse_range(posterior_value)
+    if posterior is None:
+        failures.append("Posterior odds must parse as a number or ordered range")
+
+    if prior and posterior and lr_product:
+        low = prior[0] * lr_product[0]
+        high = prior[1] * lr_product[1]
+        if not (_close(low, posterior[0]) and _close(high, posterior[1])):
+            failures.append(
+                f"Posterior odds {posterior_value!r} do not recompute from the recorded "
+                f"prior and LR lines (expected {low:g}-{high:g})"
+            )
+
+    swept = parse_range(_bare(field(robustness, "Prior class swept:") or ""))
+    if swept is None:
+        failures.append("Prior class swept must parse as a number or ordered range")
+
+    crossover_text = (field(robustness, "Crossover:") or "").strip()
+    threshold_value = _bare(field(frame, "Decision threshold (posterior odds):") or "")
+    threshold = None if threshold_value == "none stated" else parse_range(threshold_value)
+    if threshold_value != "none stated" and threshold is None:
+        failures.append("Decision threshold must be 'none stated' or parse as a number")
+
+    if threshold and lr_product and swept and verdict in {"robust", "prior-sensitive"}:
+        t = threshold[0]
+        cross_low, cross_high = t / lr_product[1], t / lr_product[0]
+        intersects = cross_low <= swept[1] * (1 + _REL_TOLERANCE) and cross_high >= swept[0] * (
+            1 - _REL_TOLERANCE
+        )
+        if verdict == "robust":
+            if intersects:
+                failures.append(
+                    f"robust verdict, but the computed prior-odds crossover "
+                    f"[{cross_low:g}, {cross_high:g}] lies inside the swept prior class"
+                )
+            if crossover_text != "none within swept class":
+                failures.append(
+                    "a robust verdict requires Crossover 'none within swept class'; "
+                    f"found {crossover_text!r}"
+                )
+        else:
+            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
+            if not intersects:
+                failures.append(
+                    "prior-sensitive verdict, but the computed crossover "
+                    f"[{cross_low:g}, {cross_high:g}] does not intersect the swept prior class"
+                )
+            elif not numbers or not (
+                cross_low * (1 - _REL_TOLERANCE)
+                <= float(numbers[0])
+                <= cross_high * (1 + _REL_TOLERANCE)
+            ):
+                failures.append(
+                    f"prior-sensitive crossover {crossover_text!r} does not fall in the "
+                    f"computed interval [{cross_low:g}, {cross_high:g}]"
+                )
+    else:
+        if verdict == "robust" and crossover_text != "none within swept class":
+            failures.append(
+                "a robust verdict requires Crossover 'none within swept class'; "
+                f"found {crossover_text!r}"
+            )
+        if verdict in {"prior-sensitive", "loss-sensitive"} and not re.search(
+            r"\d", crossover_text
+        ):
+            failures.append(
+                f"a {verdict} verdict requires a Crossover naming the flip point; "
+                f"found {crossover_text!r}"
+            )
+    return failures
 
 
 def _check_voi(sections: dict[str, str]) -> list[str]:
