@@ -1,0 +1,51 @@
+{
+  "skill_name": "exploratory-data-analysis",
+  "description": "Use when handed a dataset, log, or event stream to explore, or a named entity \u2014 an account, customer, or segment \u2014 whose story is wanted, no effect to explain and no claim to check \u2014 \"what''s in this data\", \"profile this\", \"anything interesting or anomalous\", \"tell me about this account\" \u2014 open-ended orientation, profiling, and pattern-finding. Runs a phased exploration: orient on schema, quality, and coverage before interpreting; a looks register for every output; leads that carry the search context that produced them, to confirm, never to conclude from. Do not use when a named effect needs explaining or a claim needs checking (\"why did X change\", \"is it true that\", \"why did this account''s spend drop\"), even when phrased as exploration (\"explore why churn rose\", \"generate hypotheses for why signups dropped\") \u2014 that belongs to hypothesis-driven-analysis. Not for bounded descriptive queries the records settle (answer directly) or prose summarizing; \"summarize this dataset\" is profile work and belongs here.",
+  "results": [
+    {
+      "query": "Give me the full picture on the Riverside Branch's makerspace program.",
+      "should_trigger": true,
+      "trigger_rate": 0.6666666666666666,
+      "triggers": 2,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "What's the overall story with our large-print book collection?",
+      "should_trigger": true,
+      "trigger_rate": 1.0,
+      "triggers": 3,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "Paint a complete picture of patron 88213 as a library user.",
+      "should_trigger": true,
+      "trigger_rate": 1.0,
+      "triggers": 3,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "I want a holistic view of the summer reading program at the Eastside Branch.",
+      "should_trigger": true,
+      "trigger_rate": 1.0,
+      "triggers": 3,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "Give me a full rundown on the graphic novel collection across the system.",
+      "should_trigger": true,
+      "trigger_rate": 1.0,
+      "triggers": 3,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0
+  }
+}
