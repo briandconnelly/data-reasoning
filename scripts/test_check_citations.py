@@ -213,3 +213,48 @@ class TestCausalIdentificationReviewScope:
         path.write_text(f'SKILL.md\'s "{SENTENCE}" governs this catalog.\n')
         assert cc.in_scope(path)
         assert cc.check(path) == []
+
+
+class TestDecisionAnalysisScope:
+    """decision-analysis joined DEFAULT_SCOPE on 2026-08-09, alongside its prek wiring.
+
+    Same failure class as causal-identification-review: widening only the prek
+    `files` regex without widening this module's own DEFAULT_SCOPE would have
+    the hook hand DA files over while this module skips every one as out of
+    scope, exiting 0 and green-lighting files it never read. These tests use
+    the real DEFAULT_SCOPE, not a monkeypatched one, so they pin the shipped
+    scope; the planted failure is the known positive that proves the newly-scoped
+    files are actually read.
+    """
+
+    @pytest.fixture
+    def da_repo(self, tmp_path, monkeypatch):
+        root = tmp_path / "skills" / "decision-analysis"
+        (root / "tests").mkdir(parents=True)
+        (root / "SKILL.md").write_text(f"# Skill\n\n{SENTENCE}\n")
+        monkeypatch.setattr(cc, "REPO_ROOT", tmp_path)
+        return tmp_path
+
+    def test_default_scope_names_the_skill(self):
+        assert "skills/decision-analysis" in cc.DEFAULT_SCOPE
+
+    def test_da_scenarios_file_is_in_scope(self, da_repo):
+        path = da_repo / "skills" / "decision-analysis" / "tests" / "scenarios.md"
+        path.write_text("catalog\n")
+        assert cc.in_scope(path)
+
+    def test_da_planted_bad_citation_fails(self, da_repo):
+        """Known positive: a DA-scoped file with a stale attributed quote FAILS."""
+        path = da_repo / "skills" / "decision-analysis" / "tests" / "scenarios.md"
+        stale = "An absent record proves the event did not happen, which is what we assumed."
+        path.write_text(f'SKILL.md\'s "{stale}" governs this catalog.\n')
+        assert cc.in_scope(path)
+        violations = cc.check(path)
+        assert len(violations) == 1
+        assert "does not appear there" in violations[0]
+
+    def test_da_resolving_citation_passes(self, da_repo):
+        path = da_repo / "skills" / "decision-analysis" / "tests" / "scenarios.md"
+        path.write_text(f'SKILL.md\'s "{SENTENCE}" governs this catalog.\n')
+        assert cc.in_scope(path)
+        assert cc.check(path) == []

@@ -1412,5 +1412,11 @@ Roughly thirty dense lines on faulted-worker-return disposition, a state about t
 The audit's proposed relief — pointing live agents at `tests/score_ledger.py` — was examined and rejected on the scorer's own stated scope; see `decisions/006`.
 Compressing the worker-return rules remains possible, but only inside SKILL.md and only against the specific S16/S20/S21 cells each changed sentence reaches.
 
+**5. The 2026-08-09 decision-analysis seam sentences rest on zero arms.**
+Two sentences were added to § Conclusion on 2026-08-09: the stop-with-limits continuation naming `decision-analysis`, and the numeric-policy non-conflict sentence after "Do not invent numeric confidence values."
+Neither touches the description (which stays at its 2026-07-20 wording, re-validated 2026-08-08), so the trigger surface is unaffected; what is unmeasured is conclusion-time behavior with both skills installed.
+Paying this debt means at least one with-skill full-route arm that reaches stop-with-limits on an `UNRESOLVED` set with `decision-analysis` installed (does the report name it, and does the handoff carry the ledger rather than a manufactured confidence?), plus `decision-analysis`'s DA-S1 arm (`skills/decision-analysis/tests/scenarios.md`) exercising the receiving side.
+Until then, treat the seam as designed, not shown.
+
 **What was fixed in the same pass, none of it agent-facing, none owing arms:** nothing ran the instruments' own unit suite (now a prek hook, with `tests/conftest.py` holding out the deliberately-broken S3 fixture); the Problem section's precommitted stop condition and effort budget were outside every instrument and could be silently rewritten between plan and final; the necessary-prediction column could be deleted from both ledgers and pass; `status_of` read "NOT REFUTED" as `REFUTED`; C3a missed the bare-comparative form of the very claim it polices; a descriptive row could omit its estimand unless it ended up `REFUTED`; and `scripts/check-citations.py` silently dropped explicitly-passed out-of-scope files while `decisions/` — where 005 quotes SKILL.md verbatim — sat outside its scope entirely.
 Each was reproduced by execution before being fixed, each fix is pinned by a test that fails without it, and `tests/compare_prereg.py` has a test file for the first time.
