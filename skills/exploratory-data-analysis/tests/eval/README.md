@@ -19,6 +19,6 @@ Summarize any results file by arm with `python analyze.py --fixture entity-profi
 The procedure, the isolation requirements, and the preregistered gates are in `decisions/003-entity-profiling-in-scope.md`.
 Isolation as run: no sibling `data-reasoning` skill was installed during any run, and the operator's ordinary skill roster was present identically in both arms.
 
-`frozen-description.txt` froze the skill's description text as it stood when the fixture landed at `d374381`, three commits before the description edit at `1fadd29`.
-That ordering is what makes it evidence that the baseline text was fixed before the eval ran, so it must not be refreshed after a later description edit — a refreshed copy proves nothing.
+`frozen-description.txt` froze the edited-arm (treatment) description text, committed at `d374381`, three commits before that text shipped as the skill's description at `1fadd29` and before the baseline run at `a772557`.
+That ordering is what makes it evidence that the treatment text was fixed before it shipped and before any arm ran, so it must not be refreshed after a later description edit — a refreshed copy proves nothing.
 It holds the rendered form of the description, while the harness read the YAML-escaped form of the same string.
