@@ -1,0 +1,32 @@
+# 005 — Numeric policy
+
+Status: accepted, 2026-08-08.
+
+## Question
+
+This skill must never produce a causal point estimate or run estimator mechanics — that non-goal is not in dispute.
+But does that ban extend to every number the skill might produce, including the bound route's own output, or is there a form of numeric output the ban does not cover?
+
+## Positions
+
+*No numeric output anywhere, including the bound route (as drafted before the critique).*
+An early draft of the bound route — the route absorbing the former Candidate 6, partial identification under stated assumptions — produced no computed values, only the plan for how bounds would be computed.
+This kept the numeric ban simple and total.
+
+*A numeric-scope boundary, narrower than a blanket ban (adopted).*
+The 2026-08-08 Codex cross-model critique found the numberless bound route self-defeating: it "produces a plan for bounds, not bounds," which meant the former Candidate 6 was not actually being absorbed by the draft, only gestured at.
+The settled position narrows the ban rather than dropping it, drawing a line between numeric output produced under the discipline this skill exists to enforce and numeric output that would assert a causal claim without it.
+Which specific outputs fall on which side of that line, and what discipline a given output must clear to count as in-scope, is SKILL.md's to state.
+The settled position also kept an identified design's actual effect estimation on the out-of-scope side of the line; where that work goes instead is SKILL.md § Non-Goals's to state, with `002-authority-map-with-hda.md` holding the seam.
+
+## What settled it
+
+The Codex critique's direct argument that a route which never outputs a number cannot be said to deliver bounds at all, which the plan resolved by permitting endpoint computation under a stated discipline rather than by dropping the numeric ban generally; what that discipline requires, and in what order, is the bound route's per-route procedure in SKILL.md's to state.
+
+## Reopening condition
+
+If measured runs (the bound-route scenario in the skill's own catalog) show computed endpoints drifting from the fixture's documented ground-truth bounds, or show the endpoint-computation allowance being used to smuggle an unjustified causal point estimate past the ban, the numeric policy is worth revisiting.
+
+## Where the rule lives
+
+`skills/causal-identification-review/SKILL.md` § Non-Goals and the bound route's per-route procedure, and the checker that enforces it (to be written; this record predates them).

@@ -1,6 +1,6 @@
 {
   "name": "data-reasoning",
-  "description": "Skills for reasoning from data — structured exploration that generates honest leads, and hypothesis-driven investigation that adjudicates them.",
+  "description": "Skills for reasoning from data — structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, and causal identification review that turns a dead end into a reviewed, assumption-bounded design.",
   "version": "0.1.0",
   "author": {
     "name": "Brian Connelly"

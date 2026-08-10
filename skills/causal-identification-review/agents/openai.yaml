@@ -1,0 +1,4 @@
+interface:
+  display_name: "Causal Identification Review"
+  short_description: "Review what design could identify a causal effect"
+  default_prompt: "Use $causal-identification-review to review what design could identify this effect and the assumptions it rests on."

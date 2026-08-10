@@ -61,9 +61,16 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # decision record whose quote no longer matches the body misreports the state of
 # the rule it settles. That is exactly the drift channel decisions/004 polices,
 # and it was outside every instrument until 2026-08-08.
+# causal-identification-review joined the scope on 2026-08-09, after the final
+# cross-model review caught a scope/hook mismatch: the prek hook's `files`
+# regex already matched that skill's paths, so the hook handed the files over,
+# this module skipped every one as out of scope, and the hook exited 0 --
+# green-lighting files it explicitly reported as "NOT checked". Same file
+# classes as the other two skills.
 DEFAULT_SCOPE = (
     "skills/hypothesis-driven-analysis",
     "skills/exploratory-data-analysis",
+    "skills/causal-identification-review",
 )
 SCOPE_PATTERNS = ("SKILL.md", "references/*.md", "tests/scenarios.md", "decisions/*.md")
 

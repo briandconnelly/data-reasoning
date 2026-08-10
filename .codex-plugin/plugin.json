@@ -1,7 +1,7 @@
 {
   "name": "data-reasoning",
   "version": "0.1.0",
-  "description": "Skills for reasoning from data — structured exploration that generates honest leads, and hypothesis-driven investigation that adjudicates them.",
+  "description": "Skills for reasoning from data — structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, and causal identification review that turns a dead end into a reviewed, assumption-bounded design.",
   "author": {
     "name": "Brian Connelly",
     "url": "https://github.com/briandconnelly"
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Data Reasoning",
     "shortDescription": "Explore data and test hypotheses with disciplined workflows",
-    "longDescription": "Use paired workflows for structured exploratory data analysis and hypothesis-driven investigation with explicit evidence, predictions, and stopping rules.",
+    "longDescription": "Use structured workflows for exploratory data analysis, hypothesis-driven investigation, and causal identification review, with explicit evidence, predictions, stopping rules, and assumption-bounded designs when nothing else identifies the effect.",
     "developerName": "Brian Connelly",
     "category": "Productivity",
     "capabilities": [
@@ -32,7 +32,8 @@
     "defaultPrompt": [
       "Explore this dataset and identify the strongest leads.",
       "Turn this question into a hypothesis-driven analysis plan.",
-      "Evaluate whether the evidence supports these competing hypotheses."
+      "Evaluate whether the evidence supports these competing hypotheses.",
+      "Review whether this design identifies the effect, and on what assumptions."
     ]
   }
 }
