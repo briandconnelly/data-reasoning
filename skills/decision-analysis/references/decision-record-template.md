@@ -30,7 +30,7 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
 
 - Proposition: <the binary proposition the decision turns on>
 - Residual reading: <what "false" includes — explicitly covering explanations nobody named>
-- Claim class: <causal | descriptive | data-artifact>
+- Claim class: <value> — value set per `../SKILL.md` § The Decide Route (authority)
 - Identification basis: <pointer to the design or review licensing a causal posterior, or `NONE`>
 - Ledger mapping: <which UNRESOLVED rows fold into which state and what the residual absorbs, or `none`>
 
