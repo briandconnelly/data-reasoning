@@ -1,6 +1,6 @@
 ---
 name: exploratory-data-analysis
-description: 'Use when handed a dataset, log, or event stream to explore with no particular effect to explain and no claim to check — "what''s in this data", "profile this", "anything interesting or anomalous" — open-ended orientation, profiling, and pattern-finding. Runs a phased exploration: orient on schema, quality, and coverage before interpreting; a looks register recording every output examined; prioritized leads that carry the search context that produced them. Leads are hypotheses to confirm, never conclusions. Do not use when a named effect needs explaining or a stated claim needs checking ("why did X change", "is it true that"), even phrased as exploration or hypothesis generation ("explore why churn rose", "generate hypotheses for why signups dropped") — that work belongs to hypothesis-driven-analysis. Do not use for bounded descriptive queries the records settle (answer directly) or for summarizing prose documents; "summarize this dataset" is profile work and does belong here.'
+description: 'Use when handed a dataset, log, or event stream to explore, or a named entity — an account, customer, or segment — whose story is wanted, no effect to explain and no claim to check — "what''s in this data", "profile this", "anything interesting or anomalous", "tell me about this account" — open-ended orientation, profiling, and pattern-finding. Runs a phased exploration: orient on schema, quality, and coverage before interpreting; a looks register for every output; leads that carry the search context that produced them, to confirm, never to conclude from. Do not use when a named effect needs explaining or a claim needs checking ("why did X change", "is it true that", "why did this account''s spend drop"), even when phrased as exploration ("explore why churn rose", "generate hypotheses for why signups dropped") — that belongs to hypothesis-driven-analysis. Not for bounded descriptive queries the records settle (answer directly) or prose summarizing; "summarize this dataset" is profile work and belongs here.'
 ---
 
 # Exploratory Data Analysis
@@ -20,7 +20,7 @@ Route on the shape of the ask, not its phrasing — "explore why churn rose" is 
 | --- | --- | --- |
 | out: direct | A bounded question the records settle, nothing asserted | None; answer and stop — not this skill's work |
 | out: adjudicate | A stated claim to check, a named effect to explain (however phrased), or a comparison that generalizes past the records | Hand to `hypothesis-driven-analysis`; when it is not installed, still never adjudicate from exploration — report leads with their status and say what confirmation would need |
-| profile | An open-ended orientation ask — "what's in this data", "profile this", "any quality problems", "summarize this dataset" | Frame-lite + Orient (see Profile Route); the deliverable is the orientation record |
+| profile | An open-ended orientation ask over a dataset or a named entity — "what's in this data", "profile this", "any quality problems", "summarize this dataset", "tell me about this account" | Frame-lite + Orient (see Profile Route); the deliverable is the orientation record, and for an entity the entity record (see Profile Route) |
 | explore | Open-ended lead-seeking with no named effect — "what's interesting", "any anomalies", "what does this data suggest" | The full lifecycle below |
 
 When exploration surfaces a claim the user wants settled, hand off rather than settling it here; the lead enters the investigation as `retrospective`, promotable only on evidence that did not inform it.
@@ -118,8 +118,14 @@ The rule above does not forbid naming causality in order to disclaim it, to rest
 
 Frame-lite is the scope pin and the budget only — profiling seeks orientation, not leads, so it takes no lead-shaped goal and no reservation.
 Profile fills the log's Frame-lite and Orientation sections in the same log file, written before Orient begins, and its budget doubles as its stop rule.
-Then run Orient exactly as above; the orientation record is the deliverable.
+Then run Orient exactly as above; the orientation record is the deliverable on a dataset profile, and on an entity profile it is that record plus the entity record below.
 Anything interesting spotted on the way is noted as an observation, never chased; a profile that starts chasing has silently changed route, and changing route is a decision to record, not a drift to follow.
+An entity profile is the same route over a different population: the ask names an account, a customer, a branch, or a segment, and what is wanted is that entity's story rather than a table's shape.
+Frame-lite then pins the entity and the identifier that resolves it, the sources that carry it, and the timeframe — the entity is the population, and a profile that silently widens to the whole table has changed scope, which is a decision to record.
+Orient runs as above against those sources, and its absence-semantics rule does the load-bearing work here: for an entity, "no records in this window" and "no activity in this window" are different claims, and only evidence outside the entity's own rows can tell them apart.
+The entity record is the descriptive facts the sources settle about the entity across the framed window, in associational wording.
+A change over time is reported as a change, never as a cause: § Handoff's no-causal-assertions rule binds here exactly as it binds on the explore route, and "spend fell after they moved to the annual plan" is an adjudication this route does not make.
+When the ask names an effect to explain rather than an entity to describe — "why did this account's spend drop" — the `out: adjudicate` row governs and this route does not run.
 
 ## Data Rules
 
