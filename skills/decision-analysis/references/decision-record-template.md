@@ -56,6 +56,7 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
 ## Verdict
 
 - Verdict: <value> — value set and semantics per `../SKILL.md` § The Decide Route (authority)
+- Recommended action: <one of the two actions, exactly as written in Actions — or `returned to owner` under a sensitive verdict, per `../SKILL.md` § The Decide Route (authority)>
 - Conditions: <the prior class, loss provenance, and assumptions the verdict is conditional on>
 
 ## Handoff

@@ -70,6 +70,7 @@ VALID_DECIDE = """# Decision Record: hold the release or ship
 ## Verdict
 
 - Verdict: robust
+- Recommended action: hold one week
 - Conditions: prior odds within 0.25–1.0; loss ratio within 5–20
 
 ## Handoff
@@ -87,7 +88,7 @@ VALID_VOI = """# VoI Record: rerun the load test before deciding
 - Pending decision: ship now vs hold one week, leaning hold
 - Signal model: a clean rerun halves the odds; a dirty rerun triples them — provenance: estimated-from-data-in-hand
 - Value calculation: net expected improvement 0.4 incident-equivalents after subtracting one day's delay, positive across the swept class
-- Cost: one day
+- Cost: 1 day
 - Verdict: worth-it
 """
 
@@ -298,7 +299,7 @@ def test_voi_sensitivity_only_signal_model_requires_break_even_only():
 
 
 def test_voi_missing_slot_fails():
-    bad = replace_once(VALID_VOI, "- Cost: one day\n", "")
+    bad = replace_once(VALID_VOI, "- Cost: 1 day\n", "")
     assert any("Cost" in msg for msg in check(bad))
 
 
@@ -402,7 +403,10 @@ def test_prior_sensitive_with_correct_crossover_passes():
         "- Crossover: none within swept class",
         "- Crossover: flips at prior odds 0.02–0.033",
     )
-    assert not any("crossover" in msg.lower() for msg in check(good))
+    good = replace_once(
+        good, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    assert check(good) == []
 
 
 def _dominated_decide() -> str:
@@ -486,12 +490,12 @@ def test_evidence_row_sourced_with_empty_source_cell_fails():
 
 
 def test_voi_no_cost_with_worth_it_fails():
-    bad = replace_once(VALID_VOI, "- Cost: one day", "- Cost: none stated")
+    bad = replace_once(VALID_VOI, "- Cost: 1 day", "- Cost: none stated")
     assert any("break-even-only" in msg for msg in check(bad))
 
 
 def test_voi_no_cost_with_break_even_only_passes():
-    good = replace_once(VALID_VOI, "- Cost: one day", "- Cost: none stated")
+    good = replace_once(VALID_VOI, "- Cost: 1 day", "- Cost: none stated")
     good = replace_once(good, "- Verdict: worth-it", "- Verdict: break-even-only")
     assert check(good) == []
 
@@ -517,3 +521,100 @@ def test_no_threshold_falls_back_to_structural_crossover_check():
         good, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.5"
     )
     assert any("crossover" in msg.lower() for msg in check(bad))
+
+
+def test_duplicate_slot_label_in_section_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Verdict: robust\n",
+        "- Verdict: robust\n- Verdict: optimal\n",
+    )
+    assert any("exactly once" in msg for msg in check(bad))
+
+
+def test_zero_decision_threshold_fails_domain():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Decision threshold (posterior odds): 0.1 — provenance: user-elicited",
+        "- Decision threshold (posterior odds): 0 — provenance: user-elicited",
+    )
+    assert any("strictly positive" in msg for msg in check(bad))
+
+
+def test_structural_crossover_rejects_none_prose_with_incidental_digits():
+    # No numeric threshold -> the structural branch runs; a Crossover that
+    # starts with 'none' must not pass on a digit that is not a flip point.
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Decision threshold (posterior odds): 0.1 — provenance: user-elicited",
+        "- Decision threshold (posterior odds): none stated",
+    )
+    bad = replace_once(bad, "- Verdict: robust", "- Verdict: prior-sensitive")
+    bad = replace_once(
+        bad, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    bad = replace_once(
+        bad, "- Crossover: none within swept class", "- Crossover: none known in 2026"
+    )
+    assert any("positive flip" in msg for msg in check(bad))
+
+
+def test_consequence_row_with_wrong_cell_count_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "  | ship now | incident | on-time release |",
+        "  | ship now | incident |",
+    )
+    assert any("state columns" in msg for msg in check(bad))
+
+
+def test_evidence_row_with_extra_cells_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build | extra |",
+    )
+    assert any("exactly 4" in msg for msg in check(bad))
+
+
+def test_voi_unclassifiable_cost_fails_closed():
+    for value in ("unknown", "TBD", "none"):
+        bad = replace_once(VALID_VOI, "- Cost: 1 day", f"- Cost: {value}")
+        assert any("Cost" in msg for msg in check(bad)), value
+
+
+def test_annotated_sentinel_on_threshold_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Decision threshold (posterior odds): 0.1 — provenance: user-elicited",
+        "- Decision threshold (posterior odds): none stated — provenance: user-elicited",
+    )
+    assert any("bare" in msg for msg in check(bad))
+
+
+def test_annotated_sentinel_on_dominated_slot_fails():
+    bad = replace_once(
+        _dominated_decide(),
+        "- Prior odds: none needed",
+        "- Prior odds: none needed — provenance: user-elicited",
+    )
+    assert any("Prior odds" in msg for msg in check(bad))
+
+
+def test_robust_recommended_action_must_name_a_framed_action():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Recommended action: hold one week",
+        "- Recommended action: proceed",
+    )
+    assert any("Recommended action" in msg for msg in check(bad))
+
+
+def test_sensitive_recommended_action_must_return_to_owner():
+    bad = replace_once(VALID_DECIDE, "- Verdict: robust", "- Verdict: loss-sensitive")
+    bad = replace_once(
+        bad,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at loss ratio 12",
+    )
+    assert any("returned to owner" in msg for msg in check(bad))

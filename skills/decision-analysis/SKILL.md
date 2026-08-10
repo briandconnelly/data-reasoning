@@ -80,7 +80,7 @@ Record provenance for every source, including the source of every number the rec
 This section is how the skill coexists with `hypothesis-driven-analysis`'s rule "Do not invent numeric confidence values": every number here is either sourced or explicitly hypothetical, and the two are never mixed.
 
 Every prior, likelihood ratio, loss, threshold, and signal-model number carries exactly one provenance class: `user-elicited`, `externally-sourced`, `estimated-from-data-in-hand`, or `sensitivity-only`.
-A `sensitivity-only` number is not a belief: it may appear only in the Robustness block (and the voi route's break-even mode), where it licenses crossover statements — never in Evidence and update as an update, and never reported as a probability the analysis holds.
+A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), and the voi route's break-even mode — never in Evidence and update as an update, and never reported as a probability the analysis holds.
 An `externally-sourced` or `estimated-from-data-in-hand` likelihood ratio names its source, reference class, and conditioning set; a number that cannot name them is `sensitivity-only`, whatever it looks like.
 
 Priors are robustness-first: the analysis may posit reference or skeptical priors as `sensitivity-only`, and a `robust` verdict requires the same action to be preferred across the entire stated prior class; otherwise the verdict is `prior-sensitive` with the crossover reported and the judgment handed back to the decision owner.
@@ -111,7 +111,8 @@ Claim-class discipline carries over by pointer: the claim class value set is `hy
 A posterior over a causal claim is causal wording, and an `identified-if` disposition is evidence about identification, never about the effect's direction or magnitude.
 
 **Evidence and update.**
-Odds-form arithmetic, fully shown: prior odds, then one likelihood-ratio line per evidence item, then posterior odds — each number with its provenance class, ranges rather than points wherever the source does not pin a point, per § Numeric Policy.
+Odds-form arithmetic, fully shown: prior odds, then one likelihood-ratio line per evidence item, then posterior odds — each prior and likelihood ratio with its provenance class, ranges rather than points wherever the source does not pin a point, per § Numeric Policy.
+Posterior odds carry no provenance class of their own: they are derived, and their warrant is recomputability from the lines above.
 
 **Robustness.**
 The prior class and loss range actually swept, and the crossover statements: at what prior, or what loss ratio, the preferred action flips.
@@ -125,6 +126,7 @@ The verdict set is closed, and every value is evidence-bounded:
 - `loss-sensitive` — the preferred action flips within the loss range, or the losses are `sensitivity-only`; the crossover is reported and the judgment returns to the decision owner.
 - `dominated` — one action wins under every state; no probabilities are needed, and the record's belief slots say `none needed`.
 
+The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive` and `loss-sensitive` it reads `returned to owner`, because the crossover, not the record, locates the choice.
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).
 
 **Handoff.**

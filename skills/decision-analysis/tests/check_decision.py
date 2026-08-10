@@ -6,26 +6,32 @@
 """Check a decision record's schema-scope contract, failing closed.
 
 SCOPE: this is a machine encoding of the record's *shape and arithmetic*, not
-its content. It verifies: no duplicate sections; every route-required section
+its content. It verifies: no duplicate sections and no duplicated
+route-required slot label within a section; every route-required section
 and slot present and non-empty; Route/Verdict/provenance/Claim-class values
 drawn from their closed sets; sensitivity-only provenance absent from the
 Evidence and update block; a causal Claim class carrying a non-NONE
 Identification basis and, when so, non-`none` Identification conditions; the
 binary/two-action v1 scope (two ' vs '-separated actions, exactly two
-consequence action rows and two state columns -- records outside it are
-rejected, not approximated); exactly one provenance mention on each governed
-slot (Loss ratio, Decision threshold, Prior odds, Prior class swept, Loss
-range swept, voi Signal model); a sourced evidence row (externally-sourced or
-estimated-from-data-in-hand) carrying a non-empty source cell; loss numbers
-parsing as positive numbers or ranges and carrying belief-grade provenance
-under a robust verdict, each field checked independently; a `dominated`
-verdict's four belief slots reading exactly `none needed`; the voi
-signal-model/verdict coupling and the no-stated-cost/break-even-only
-coupling; and (arithmetic gates) recomputation of the posterior-odds interval
-and, when a numeric decision threshold is recorded, of the prior-odds
-crossover interval (both endpoints) against the swept prior class. Required
-numeric fields that do not parse, or violate their domain (ordered ranges,
-odds and LRs strictly positive), are gate failures -- never skipped checks.
+consequence action rows and two state columns on every row -- records
+outside it are rejected, not approximated); exactly one provenance mention
+on each governed slot (Loss ratio, Decision threshold, Prior odds, Prior
+class swept, Loss range swept, voi Signal model), with a licensed sentinel
+accepted only bare -- never annotated; a sourced evidence row
+(externally-sourced or estimated-from-data-in-hand) carrying a non-empty
+source cell in an exactly-four-cell row; loss numbers parsing as positive
+numbers or ranges and carrying belief-grade provenance under a robust
+verdict, each field checked independently; a Recommended action naming one
+of the two framed actions under `robust`/`dominated` and reading exactly
+`returned to owner` under a sensitive verdict; a `dominated` verdict's four
+belief slots reading exactly `none needed`, with no trailing annotation; the
+voi signal-model/verdict coupling and the Cost grammar (a value containing a
+number, or exactly `none stated`, which couples to `break-even-only`); and
+(arithmetic gates) recomputation of the posterior-odds interval and, when a
+numeric decision threshold is recorded, of the prior-odds crossover interval
+(both endpoints) against the swept prior class. Required numeric fields that
+do not parse, or violate their domain (ordered ranges, odds, LRs, and
+thresholds strictly positive), are gate failures -- never skipped checks.
 
 Explicitly NOT this checker's claim: whether the record preceded reasoning
 (a transcript-level fact this file never sees), whether a likelihood ratio is
@@ -87,7 +93,7 @@ DECIDE_LABELS: dict[str, tuple[str, ...]] = {
     ),
     "Evidence and update": ("Prior odds:", "Evidence:", "Independence:", "Posterior odds:"),
     "Robustness": ("Prior class swept:", "Loss range swept:", "Crossover:"),
-    "Verdict": ("Verdict:", "Conditions:"),
+    "Verdict": ("Verdict:", "Recommended action:", "Conditions:"),
     "Handoff": ("Open factual disputes:", "Identification gaps:", "VoI question:"),
 }
 VOI_LABELS: dict[str, tuple[str, ...]] = {
@@ -190,6 +196,12 @@ def _require_slots(
             failures.append(f"record is missing required section '## {section_name}'")
             continue
         for label in section_labels:
+            count = sum(1 for line in body.splitlines() if line.strip().startswith(f"- {label}"))
+            if count > 1:
+                failures.append(
+                    f"slot '- {label}' appears {count} times in '{section_name}'; "
+                    "each label must appear exactly once"
+                )
             value = field(body, label)
             if value is None:
                 failures.append(f"section '{section_name}' is missing required slot '- {label}'")
@@ -242,6 +254,11 @@ def _check_slot_provenance(
     failures: list[str] = []
     for label, value in slots:
         if sentinel is not None and _bare(value) == sentinel:
+            if value.strip() != sentinel:
+                failures.append(
+                    f"slot '- {label}' sentinel {sentinel!r} must appear bare, "
+                    "with no trailing annotation"
+                )
             continue
         provs = _PROVENANCE_MENTION.findall(value)
         if len(provs) != 1:
@@ -254,17 +271,7 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     frame = sections["Decision frame"]
 
     actions = _bare(field(frame, "Actions:") or "")
-    if len(re.split(r"\s+vs\s+", actions)) != _SCOPE_ACTIONS:
-        failures.append("Actions must name exactly two actions separated by ' vs ' (v1 scope)")
-
-    rows = _table_rows(frame)
-    data = _data_rows(rows)
-    if len(data) != _SCOPE_ACTION_ROWS:
-        failures.append(f"Consequences table must have exactly two action rows; found {len(data)}")
-    if rows and len(rows[0]) != _SCOPE_TABLE_COLUMNS:
-        failures.append(
-            f"Consequences table must have exactly two state columns; found {len(rows[0]) - 1}"
-        )
+    failures.extend(_check_frame_scope(frame, actions))
 
     failures.extend(
         _check_slot_provenance(
@@ -326,7 +333,9 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
         failures.append(
             f"Verdict value {verdict!r} is not in the closed set {sorted(DECIDE_VERDICTS)}"
         )
-    elif verdict == "robust":
+    else:
+        failures.extend(_check_recommended_action(sections, verdict, actions))
+    if verdict == "robust":
         for section_name, label in (
             ("Decision frame", "Loss ratio:"),
             ("Robustness", "Loss range swept:"),
@@ -340,6 +349,43 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
                 )
 
     failures.extend(_check_decide_arithmetic(sections, verdict))
+    return failures
+
+
+def _check_frame_scope(frame: str, actions: str) -> list[str]:
+    """Enforce the v1 binary scope on the Actions slot and Consequences table."""
+    failures: list[str] = []
+    if len(re.split(r"\s+vs\s+", actions)) != _SCOPE_ACTIONS:
+        failures.append("Actions must name exactly two actions separated by ' vs ' (v1 scope)")
+    rows = _table_rows(frame)
+    data = _data_rows(rows)
+    if len(data) != _SCOPE_ACTION_ROWS:
+        failures.append(f"Consequences table must have exactly two action rows; found {len(data)}")
+    for row in rows:
+        if len(row) != _SCOPE_TABLE_COLUMNS:
+            failures.append(
+                f"Consequences table rows must have exactly two state columns; "
+                f"found a row with {len(row) - 1}"
+            )
+    return failures
+
+
+def _check_recommended_action(sections: dict[str, str], verdict: str, actions: str) -> list[str]:
+    """Require the Recommended action to point at a framed action or the owner."""
+    failures: list[str] = []
+    recommended = (field(sections["Verdict"], "Recommended action:") or "").strip()
+    action_names = [a.strip() for a in re.split(r"\s+vs\s+", actions)]
+    if verdict in ("robust", "dominated"):
+        if recommended not in action_names:
+            failures.append(
+                f"a {verdict} verdict requires '- Recommended action:' to name one of "
+                f"the framed actions {action_names!r}; found {recommended!r}"
+            )
+    elif recommended != "returned to owner":
+        failures.append(
+            f"a {verdict} verdict requires '- Recommended action:' to read exactly "
+            f"'returned to owner'; found {recommended!r}"
+        )
     return failures
 
 
@@ -362,11 +408,11 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             (robustness, "Prior class swept:"),
             (robustness, "Crossover:"),
         ):
-            value = _bare(field(section, label) or "")
+            value = (field(section, label) or "").strip()
             if value != "none needed":
                 failures.append(
-                    f"a dominated verdict requires '- {label}' to read 'none needed'; "
-                    f"found {value!r}"
+                    f"a dominated verdict requires '- {label}' to read exactly "
+                    f"'none needed', with no annotation; found {value!r}"
                 )
         return failures
     evidence = sections["Evidence and update"]
@@ -383,8 +429,8 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         failures.append("Evidence table must have at least one data row")
         lr_product = None
     for row in data:
-        if len(row) < _EVIDENCE_ROW_CELLS:
-            failures.append(f"Evidence row has {len(row)} cells; the template requires 4")
+        if len(row) != _EVIDENCE_ROW_CELLS:
+            failures.append(f"Evidence row has {len(row)} cells; the template requires exactly 4")
             lr_product = None
             continue
         lr = parse_range(row[1])
@@ -419,12 +465,12 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     if swept is None:
         failures.append("Prior class swept must parse as a number or ordered range")
 
-    for section_name, label in (
-        ("Decision frame", "Loss ratio:"),
-        ("Robustness", "Loss range swept:"),
+    for section_name, label, sentinel in (
+        ("Decision frame", "Loss ratio:", "none stated"),
+        ("Robustness", "Loss range swept:", None),
     ):
         value = _bare(field(sections[section_name], label) or "")
-        if value in ("none stated", "none needed"):
+        if sentinel is not None and value == sentinel:
             continue
         loss_range = parse_range(value)
         if loss_range is None or loss_range[0] <= 0:
@@ -435,8 +481,12 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     crossover_text = (field(robustness, "Crossover:") or "").strip()
     threshold_value = _bare(field(frame, "Decision threshold (posterior odds):") or "")
     threshold = None if threshold_value == "none stated" else parse_range(threshold_value)
-    if threshold_value != "none stated" and threshold is None:
-        failures.append("Decision threshold must be 'none stated' or parse as a number")
+    if threshold_value != "none stated":
+        if threshold is None:
+            failures.append("Decision threshold must be 'none stated' or parse as a number")
+        elif threshold[0] <= 0:
+            failures.append("Decision threshold odds must be strictly positive")
+            threshold = None
 
     if threshold and lr_product and swept and verdict in {"robust", "prior-sensitive"}:
         cross_low = threshold[0] / lr_product[1]
@@ -477,13 +527,13 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                 "a robust verdict requires Crossover 'none within swept class'; "
                 f"found {crossover_text!r}"
             )
-        if verdict in {"prior-sensitive", "loss-sensitive"} and not re.search(
-            r"\d", crossover_text
-        ):
-            failures.append(
-                f"a {verdict} verdict requires a Crossover naming the flip point; "
-                f"found {crossover_text!r}"
-            )
+        if verdict in {"prior-sensitive", "loss-sensitive"}:
+            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
+            if crossover_text.lower().startswith("none") or not numbers or float(numbers[0]) <= 0:
+                failures.append(
+                    f"a {verdict} verdict requires a Crossover naming a positive flip "
+                    f"point; found {crossover_text!r}"
+                )
     return failures
 
 
@@ -499,11 +549,17 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
     failures.extend(_check_slot_provenance((("Signal model:", signal),)))
     if "sensitivity-only" in signal and verdict != "break-even-only":
         failures.append("a sensitivity-only signal model licenses only the break-even-only verdict")
-    cost = _bare(field(voi, "Cost:") or "")
-    if cost == "none stated" and verdict != "break-even-only":
+    cost = (field(voi, "Cost:") or "").strip()
+    if cost == "none stated":
+        if verdict != "break-even-only":
+            failures.append(
+                "an unstated cost makes the break-even price the deliverable; "
+                "the verdict must be break-even-only"
+            )
+    elif not re.search(r"\d", cost):
         failures.append(
-            "an unstated cost makes the break-even price the deliverable; "
-            "the verdict must be break-even-only"
+            "Cost must state a measured cost containing a number, "
+            f"or read exactly 'none stated'; found {cost!r}"
         )
     return failures
 

@@ -9,7 +9,7 @@ Does a `robust` or `worth-it` verdict license executing the chosen action or pul
 ## Decision
 
 No; the rule's home is `../SKILL.md` § Numeric Policy.
-What this record preserves is the reason it is categorical: the shared authorization gate holds that evidence can never issue a grant, and a verdict is evidence — a decision record that licensed its own execution would put an authorization pathway inside the analysis, which is the exact channel the gate exists to close.
+What this record preserves is the reason it is categorical: a verdict is evidence, and under the shared authorization gate's evidence rule (home: `../SKILL.md` § Authorization gate) a decision record that licensed its own execution would put an authorization pathway inside the analysis — the exact channel that gate exists to close.
 
 ## Reopening condition
 
