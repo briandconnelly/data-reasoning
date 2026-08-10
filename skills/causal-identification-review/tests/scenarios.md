@@ -426,6 +426,10 @@ Still owed after this wave: repeat arms to put a variance bar on the n=1 cells (
 `SKILL.md`'s intro cost line was updated in the commit carrying this note: the stale no-premium-measured claim was replaced with measurement wave 1's recorded range, −3.3% to +78.9% (n=1 per cell, per `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`), framed as a first wave's figures rather than a bound.
 The edit ships without arms despite postdating measurement, and the scoping judgement is recorded here rather than assumed: the authority is `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § "What owes a rerun" — an edit that cannot reach any cell's decision point owes nothing — and no cell's decision point traverses the intro cost line, whose only readers are a human weighing whether to load the skill and the arms' cost bookkeeping, neither of which any assertion keys on.
 
+**Template intro clarified (2026-08-09).**
+The template's opening two sentences were expanded for readability after external review read them as truncated ("This template records." → "This template records a review's content."), with no slot, label, section, or closed-vocabulary change — `test_template_parity_cir.py` pins that the slot surface is unmoved.
+The scoping authority is the same as the cost line's: no cell's decision point traverses the intro sentences — every assertion keys on record shape and content, which the slots below the intro determine — so the edit ships without arms, with the judgement recorded here rather than assumed.
+
 **Drift watch: HDA's seam sentences restate a condition this skill owns.**
 `skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
 No hook watches that pairing; a future change to this skill's disposition semantics must re-check those two HDA lines by hand.

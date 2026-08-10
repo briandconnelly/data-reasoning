@@ -24,3 +24,9 @@ Fidelity notes (not scored):
 - The final text closes with "no design here supports a causal point estimate" and the record carries the Non-Goals disclaimer verbatim.
 
 Cost: 50,162 tokens (harness-reported, n=1; +43.6% over the 34,924-token baseline); 13 tool uses (identity).
+
+## Instrument note (2026-08-09, post-review)
+
+The machine-gate paragraph above describes the checker as it stood when this arm was scored; it is kept as written because this file records what the gate said at scoring time.
+The checker was subsequently given the formatting tolerance the verdict resolution's defect scoping licensed, and on re-run against this record (recovered from the archived transcript) the shipped checker passes it clean.
+See the instrument-revision note in `artifacts/2026-08-09-measurement-wave-1-evidence.md` for the full re-run results.

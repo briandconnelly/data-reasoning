@@ -75,7 +75,12 @@ EXIT_UNVERIFIABLE = 2
 
 _SECTION_HEADER = re.compile(r"^## (.+)$", re.MULTILINE)
 _TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$", re.MULTILINE)
-_SUBLIST_ITEM = re.compile(r"^  - .+$")
+# Any leading whitespace marks a sublist item: records indent nested lists
+# with 2 spaces, 4 spaces, or tabs interchangeably, and an item the sublist
+# collector misses is not picked up by the paragraph fallback either (its
+# stripped form starts with "- ", which ends paragraph collection), so a
+# narrower pattern here reads a populated slot as empty.
+_SUBLIST_ITEM = re.compile(r"^[ \t]+- .+$")
 
 # A probes slot whose content records no run result: the literal `none`,
 # `none run`, `not run`, or `n/a`, optionally backtick-wrapped, optionally
@@ -155,7 +160,8 @@ def _find_paragraph(body: str, label: str) -> str | None:
 
 
 def find_sublist(body: str, label: str) -> list[str]:
-    """Indented ``  - item`` lines directly under a ``- <label>:`` bullet."""
+    """Indented ``- item`` lines (any leading whitespace) directly under a
+    ``- <label>:`` bullet."""
     lines = body.splitlines()
     items: list[str] = []
     collecting = False

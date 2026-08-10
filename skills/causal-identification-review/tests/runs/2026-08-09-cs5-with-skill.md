@@ -22,3 +22,9 @@ Fidelity notes (not scored):
 - The estimand is correctly scoped to the always-observed stratum, matching the fixture's construction.
 
 Cost: 53,580 tokens (harness-reported, n=1; +38.8% over the 38,609-token baseline); 10 tool uses (identity).
+
+## Instrument note (2026-08-09, post-review)
+
+The machine-gate paragraph above describes the checker as it stood when this arm was scored; it is kept as written because this file records what the gate said at scoring time.
+The checker was subsequently given the formatting tolerance the verdict resolution's defect scoping licensed (sub-list slot values, `none` with a rationale), and on re-run against this record (recovered from the archived transcript) the shipped checker passes it with only the pre-disclaimed advisory.
+See the instrument-revision note in `artifacts/2026-08-09-measurement-wave-1-evidence.md` for the full re-run results.

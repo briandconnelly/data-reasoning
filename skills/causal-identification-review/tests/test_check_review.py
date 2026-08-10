@@ -629,6 +629,33 @@ def test_handoff_facts_blank_still_rejected() -> None:
     assert any("Facts" in f for f in findings)
 
 
+def test_four_space_indented_sublist_accepted() -> None:
+    """Sublist tolerance is not two-space-only (external review finding): a
+    4-space-indented item is a valid markdown sublist, and before this fix it
+    fell through both the sublist collector and the paragraph fallback (whose
+    collection ends at any stripped line starting '- '), reading a populated
+    slot as empty."""
+    record = VALID_RECORD.replace(
+        "- Facts: pre-period slopes matched noise; no promotion overlapped a switch window",
+        "- Facts:\n"
+        "    - pre-period slopes matched noise\n"
+        "    - no promotion overlapped a switch window",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_tab_indented_sublist_accepted() -> None:
+    record = VALID_RECORD.replace(
+        _ASSUMPTIONS_BLOCK,
+        "- Identifying assumptions:\n"
+        "\t- parallel trends: absent the tier change, cohorts would trend the same way\n"
+        "\t- no anticipation: customers did not change behavior ahead of the switch\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
 def test_handoff_dispositions_nested_list_reuse_accepted() -> None:
     """A per-design breakdown written as a nested list under Dispositions,
     each entry backtick-wrapped, still counts as reusing the values assigned

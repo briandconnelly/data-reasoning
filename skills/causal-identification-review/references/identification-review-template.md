@@ -1,7 +1,7 @@
 # Identification Review Record Template
 
-This template records.
-`../SKILL.md` governs.
+This template records a review's content.
+`../SKILL.md` governs what that content means.
 Every closed-vocabulary slot below — route, disposition — names only the slot: which value applies, what values exist, and what each value means are `../SKILL.md`'s to state, not this template's.
 Fill in one record per causal question under review; repeat the Design block once per candidate design the record considers.
 

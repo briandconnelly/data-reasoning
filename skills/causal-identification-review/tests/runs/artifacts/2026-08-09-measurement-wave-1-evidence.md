@@ -63,6 +63,12 @@ Command form: `uv run python skills/causal-identification-review/tests/check_rev
 Pattern finding: 5 of 7 gate failures are checker-format/record-format mismatches (backticked tokens, nested-list slot values, `none` with a rationale, named-only design blocks) against semantically compliant content; the two content-bearing findings are CS2's compound disposition (a real record-discipline deviation, outside CS2's scored scope) and the CS5 advisory (pre-disclaimed).
 Disposition of the pattern: recorded for the verdict resolution; the checker and template are unmodified by this task.
 
+**Instrument-revision note (2026-08-09, post-review).**
+The exits and findings in the table above are the wave-time checker's output, recorded before the formatting-tolerance fixes the verdict resolution's defect scoping licensed as checker-side (backtick-wrapped tokens, sub-list and paragraph slot values, `none` with a rationale, named-only design blocks, dash-rationale and sublist-indentation tolerance — each pinned in `test_check_review.py`).
+The table is deliberately not rewritten: it is the record of what the gate said when the wave was scored, and a reader running the shipped checker today should expect different output.
+Re-run 2026-08-09 against records recovered from the archived transcripts' Write calls, the shipped checker passes sc-cs3-ws, sc2-cs7-ws, and sc-s15 clean and passes sc-cs5-ws with only the pre-disclaimed advisory; sc2-cs4-ws retains six genuine slot omissions (absent `- Design:` bullets and identifying assumptions on its short-circuited blocks), and sc-cs2 still fails on its compound disposition and the Handoff-reuse consequence.
+The parse-artifact findings dissolved under the tolerant checker; the content-bearing findings stand unchanged.
+
 ## Verbatim skill-selection sentences (trigger arms)
 
 - sc-cs1 (text block 1, before any tool result; ordinal 1 is `Skill {"skill": "hypothesis-driven-analysis"}`): "Using hypothesis-driven-analysis: this is a diagnostic \"why did metric X change\" question with a named effect and plausible competing explanations, which is exactly what that skill's PPDAC process covers — not causal-identification-review (which reviews measurement designs, not adjudicates causes) or exploratory-data-analysis (no open-ended profiling ask here)."

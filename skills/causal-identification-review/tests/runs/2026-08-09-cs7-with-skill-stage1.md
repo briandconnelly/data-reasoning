@@ -35,3 +35,9 @@ The original PASS leaned on the fixture's entanglement note and the record's exp
 Adjusted total: 4/5.
 Root cause: the collision is the scenario contract's, not the skill text's — the catalog's own entanglement bullet demands the discontinuity be verified non-flat while the assertion bans point estimates, and checking non-flatness numerically produces the number.
 Consequence: the CS7 cell is reopened for contract redesign and fresh arms; see the dated amendment in `tests/scenarios.md` § CS7 and the addendum to the verdict resolution.
+
+## Instrument note (2026-08-09, post-review)
+
+The machine-gate paragraph above describes the checker as it stood when this arm was scored; it is kept as written because this file records what the gate said at scoring time.
+The checker was subsequently given the formatting tolerance the verdict resolution's defect scoping licensed (backtick-wrapped tokens, sub-list slot values, named-only design blocks), and on re-run against this record (recovered from the archived transcript) the shipped checker passes it clean.
+See the instrument-revision note in `artifacts/2026-08-09-measurement-wave-1-evidence.md` for the full re-run results.
