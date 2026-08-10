@@ -7,4 +7,4 @@ Not part of the fixture directory handed to arms -- generated here so `validate_
 - lower: -0.019370
 - upper: 0.273608
 
-Computed by trimming the invited cohort's observed `retained_30d` distribution (the lower-attrition cohort) down to the non-invited cohort's survival rate, from the bottom (lower endpoint) and from the top (upper endpoint), then subtracting the non-invited cohort's observed mean.
+Computed by trimming the invited cohort's observed `retained_30d` distribution (the lower-attrition cohort) down to the non-invited cohort's survival rate -- from the bottom, which keeps the highest outcomes and gives the upper endpoint, and from the top, which keeps the lowest outcomes and gives the lower endpoint -- then subtracting the non-invited cohort's observed mean.

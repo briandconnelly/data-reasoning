@@ -61,11 +61,20 @@ hooks = [
   { id = "validate-cs5-fixture", name = "causal-identification-review: cs5-bounds fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs5.py skills/causal-identification-review/tests/fixtures/cs5-bounds", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs5\\.py|cs5-bounds-ground-truth\\.md|cs5-bounds/)", pass_filenames = false },
   { id = "validate-cs7-fixture", name = "causal-identification-review: cs7-seam fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs7.py skills/causal-identification-review/tests/fixtures/cs7-seam", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs7\\.py|cs7-seam-ground-truth\\.md|cs7-seam/)", pass_filenames = false },
   # The record checker's own unit suite (check_review.py + test_check_review.py),
-  # mirroring hda-instrument-tests. The files regex matches only .py files directly
-  # under tests/ (not tests/fixtures/), so an edit under fixtures/ does not
-  # redundantly re-trigger this hook on top of its own validate-cs*-fixture hooks
-  # above; pytest still collects the whole tests/ tree, but fixtures/generate.py
-  # and validate_*.py are not named test_*.py, so default collection skips them.
-  { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/tests/[^/]+\\.py$", pass_filenames = false },
-  { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^(skills/causal-identification-review/(SKILL\\.md|tests/.*\\.py)|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
+  # mirroring hda-instrument-tests. The suite includes test_template_parity_cir.py,
+  # which keeps the record template's slot labels byte-identical to the checker's,
+  # so the files regex also watches the template: renaming a slot there must fail
+  # here, not silently orphan the checker's labels. The regex otherwise matches
+  # only .py files directly under tests/ (not tests/fixtures/), so an edit under
+  # fixtures/ does not redundantly re-trigger this hook on top of its own
+  # validate-cs*-fixture hooks above; pytest still collects the whole tests/
+  # tree, but fixtures/generate.py and validate_*.py are not named test_*.py, so
+  # default collection skips them.
+  { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/(tests/[^/]+\\.py|references/identification-review-template\\.md)$", pass_filenames = false },
+  # Scoped to the gate-parity test file alone: the instrument-tests hook above
+  # already runs the whole suite (gate parity included) whenever a tests/*.py
+  # file changes, so an entry running the full suite here too would run it twice
+  # per commit. This hook exists for the two SKILL.md files, which the suite
+  # hook's files regex deliberately does not watch.
+  { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests/test_gate_parity_cir.py", files = "^(skills/causal-identification-review/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
 ]

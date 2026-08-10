@@ -207,11 +207,16 @@ def split_sections(text: str) -> list[tuple[str, str]]:
 
 def _disposition_value(raw: str) -> str:
     """The closed-set token from a disposition/route bullet, stripping any
-    trailing em-dash rationale (``identified-if — because ...`` -> ``identified-if``)
-    and any backtick-wrapping (`` `identified-if` `` -> ``identified-if``) --
-    a value's markup is not part of the value, so a backtick-wrapped token
-    compares against the closed set the same as a bare one."""
-    return raw.split("—", 1)[0].strip().strip("`")
+    trailing dash-introduced rationale (``identified-if — because ...`` or
+    ``identified-if - because ...`` -> ``identified-if``) and any
+    backtick-wrapping (`` `identified-if` `` -> ``identified-if``) -- a
+    value's markup is not part of the value, so a backtick-wrapped token
+    compares against the closed set the same as a bare one. An em-dash
+    splits wherever it appears; a hyphen-dash splits only when padded by
+    whitespace on both sides, so a token like ``not-constructible`` is
+    never mistaken for a value plus a rationale -- the same dash
+    discipline as ``_NONE_DISPOSITION`` and ``_NO_RESULT_PROBES``."""
+    return re.split(r"—|\s+-\s+", raw, maxsplit=1)[0].strip().strip("`")
 
 
 def _is_none_disposition(raw: str) -> bool:
@@ -233,8 +238,8 @@ def _check_forbidden(value: str, slot_name: str, findings: list[str]) -> None:
     "valid instrument" and "internal/external validity" are standard
     causal-inference vocabulary a rationale will legitimately use. So this
     checks only the already-isolated value token (the text before the first
-    em-dash, the same isolation the closed-set check uses via
-    ``_disposition_value``), never the full raw bullet.
+    dash-introduced rationale, the same isolation the closed-set check uses
+    via ``_disposition_value``), never the full raw bullet.
     """
     for word in FORBIDDEN_WORDS:
         if re.search(rf"\b{re.escape(word)}\b", value, re.IGNORECASE):
@@ -319,15 +324,13 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     return disposition_value if disposition_value in DISPOSITIONS else None
 
 
-def _check_bound(body: str, findings: list[str]) -> str | None:
+def _check_bound(body: str, findings: list[str]) -> None:
     if find_bullet(body, "Assumption ledger") is None:
         findings.append("Bound block: Assumption ledger is missing or empty")
     if find_bullet(body, "Bound logic") is None:
         findings.append("Bound block: Bound logic is missing or empty")
-    endpoints = find_bullet(body, "Computed endpoints")
-    if endpoints is None:
+    if find_bullet(body, "Computed endpoints") is None:
         findings.append("Bound block: Computed endpoints is missing or empty")
-    return endpoints
 
 
 def _check_handoff(
@@ -388,16 +391,44 @@ def _check_handoff(
         )
 
 
-def _scan_numeric_estimates(text: str, endpoints_value: str | None) -> list[str]:
+def _mask_endpoints_slot(text: str) -> str:
+    """The record text with the Bound block's Computed endpoints slot removed:
+    the ``- Computed endpoints:`` label line plus the slot's own content
+    (an inline value, an indented sublist, or a prose paragraph directly
+    below it), whichever shape it takes. Masking the slot's region rather
+    than string-replacing its parsed value keeps the mask working when the
+    parsed form (a sublist joined with ``; `` for reporting) never appears
+    verbatim in the text -- otherwise the scan would flag the one place
+    numeric output is licensed."""
+    pattern = _bullet_pattern("Computed endpoints")
+    out: list[str] = []
+    masking = False
+    for line in text.splitlines():
+        if not masking:
+            if pattern.match(line):
+                masking = True
+            else:
+                out.append(line)
+            continue
+        stripped = line.strip()
+        if stripped == "":
+            out.append(line)
+        elif stripped.startswith("## ") or (line.startswith("- ") and not line.startswith("  ")):
+            masking = False
+            out.append(line)
+        # anything else (a sublist item, continuation prose) is slot content: masked
+    return "\n".join(out)
+
+
+def _scan_numeric_estimates(text: str) -> list[str]:
     """Advisory-only point-estimate heuristic, masking the licensed endpoints slot.
 
     See the module docstring's "Advisory-only" section for scope and the
     documented digit-only limitation.
     """
-    masked = text.replace(endpoints_value, "") if endpoints_value else text
     return [
         f"possible point estimate {m.group(0)!r} outside the Bound endpoints slot"
-        for m in _NUMERIC_ESTIMATE.finditer(masked)
+        for m in _NUMERIC_ESTIMATE.finditer(_mask_endpoints_slot(text))
     ]
 
 
@@ -423,9 +454,8 @@ def check_record(text: str) -> tuple[list[str], list[str]]:
         if disposition is not None:
             assigned.add(disposition)
 
-    endpoints_value: str | None = None
     if bound_body is not None:
-        endpoints_value = _check_bound(bound_body, findings)
+        _check_bound(bound_body, findings)
 
     # Route-aware structure: review/construct records carry Design blocks and
     # no Bound block; a bound record carries the Bound block and no Design
@@ -445,7 +475,7 @@ def check_record(text: str) -> tuple[list[str], list[str]]:
 
     _check_handoff(handoff_body, frozenset(assigned), findings)
 
-    warnings = _scan_numeric_estimates(text, endpoints_value)
+    warnings = _scan_numeric_estimates(text)
     return findings, warnings
 
 

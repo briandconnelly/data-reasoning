@@ -812,6 +812,99 @@ def test_handoff_carrying_every_assigned_disposition_accepted() -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Hyphen-dash rationale tolerance (2026-08-09 post-review fix) -- the checker
+# accepted `none - <rationale>` in the Handoff Dispositions slot but split
+# Route/Disposition rationales on the em-dash only, so `identified-if - <why>`
+# false-failed the closed-set gate AND ran the forbidden-vocabulary scan over
+# rationale prose, contradicting _check_forbidden's own value-token-only
+# promise. The dash discipline is now uniform: an em-dash splits anywhere, a
+# hyphen-dash splits only when whitespace-padded on both sides, so a token's
+# own hyphens (not-constructible) never read as value-plus-rationale.
+# --------------------------------------------------------------------------- #
+def test_route_with_hyphen_dash_rationale_accepted() -> None:
+    record = VALID_RECORD.replace(
+        "Route: review", "Route: review - a design is already being presented"
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_disposition_with_hyphen_dash_rationale_accepted() -> None:
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: identified-if - parallel trends and no-anticipation both hold",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_forbidden_word_in_hyphen_dash_rationale_is_not_flagged() -> None:
+    """The value-token isolation must hold for hyphen-dash rationales the same
+    as for em-dash ones: 'valid' in the rationale is ordinary vocabulary."""
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: identified-if - the instrument is valid only if the "
+        "exclusion restriction holds",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_hyphenated_token_own_hyphens_do_not_split() -> None:
+    """not-constructible's bare hyphens are part of the token, not a rationale
+    separator -- only a whitespace-padded hyphen-dash splits."""
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: not-constructible",
+    ).replace("- Dispositions: identified-if", "- Dispositions: not-constructible")
+    findings, _ = cr.check_record(record)
+    assert findings == []
+
+
+def test_hyphen_dash_rationale_invalid_value_still_rejected() -> None:
+    """Stripping a hyphen-dash rationale must not turn an invalid token valid."""
+    record = VALID_RECORD.replace(
+        "Disposition: identified-if — parallel trends and no-anticipation both hold",
+        "Disposition: probably-fine - looks okay",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("disposition" in f.lower() and "probably-fine" in f for f in findings)
+
+
+# --------------------------------------------------------------------------- #
+# Advisory masking is slot-regional (2026-08-09 post-review fix) -- the mask
+# previously string-replaced the parsed endpoints value, which silently no-ops
+# when the slot is a sublist (the parsed form, joined with `; `, never appears
+# in the text), flagging the licensed endpoints themselves. The mask now
+# removes the Computed endpoints slot's region whatever shape its value takes.
+# --------------------------------------------------------------------------- #
+_SUBLIST_ENDPOINTS_RECORD = VALID_BOUND_RECORD.replace(
+    "- Computed endpoints: 0.04, 0.31",
+    "- Computed endpoints:\n  - lower: 4 percentage points\n  - upper: 31 percentage points",
+)
+
+
+def test_advisory_scan_masks_sublist_endpoints_slot() -> None:
+    findings, warnings = cr.check_record(_SUBLIST_ENDPOINTS_RECORD)
+    assert findings == []
+    assert warnings == []
+
+
+def test_advisory_scan_still_fires_outside_masked_slot() -> None:
+    """Known positive for the mask's scope: the same sublist-endpoints record
+    with a point estimate planted in Handoff Facts still warns -- the mask
+    covers the slot's region, not the rest of the record."""
+    record = _SUBLIST_ENDPOINTS_RECORD.replace(
+        "- Facts: observed completion rate rose from 0.41 to 0.52 across the "
+        "waitlist-removal boundary",
+        "- Facts: the program looks like a 9.58 percentage points lift",
+    )
+    findings, warnings = cr.check_record(record)
+    assert findings == []
+    assert any("9.58" in w for w in warnings)
+
+
+# --------------------------------------------------------------------------- #
 # CLI / file-handling behavior
 # --------------------------------------------------------------------------- #
 def test_main_exits_zero_on_conforming_record(tmp_path: Path) -> None:

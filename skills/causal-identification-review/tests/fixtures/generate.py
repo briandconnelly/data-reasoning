@@ -446,9 +446,11 @@ def build_cs5(outdir: Path, ground_truth_path: Path) -> None:
         "\n"
         "Computed by trimming the invited cohort's observed "
         "`retained_30d` distribution (the lower-attrition cohort) down to "
-        "the non-invited cohort's survival rate, from the bottom "
-        "(lower endpoint) and from the top (upper endpoint), then "
-        "subtracting the non-invited cohort's observed mean.\n",
+        "the non-invited cohort's survival rate -- from the bottom, which "
+        "keeps the highest outcomes and gives the upper endpoint, and from "
+        "the top, which keeps the lowest outcomes and gives the lower "
+        "endpoint -- then subtracting the non-invited cohort's observed "
+        "mean.\n",
         encoding="utf-8",
     )
 
@@ -524,12 +526,15 @@ their score alone would predict."""
 
 CS7_ESTIMAND = (
     "the local average effect of instant-checkout eligibility on 90-day "
-    "default rate at the credit-score-680 discontinuity, for accounts "
-    "within the fixture's bandwidth of the cutoff"
+    "default rate at the credit-score-680 discontinuity"
 )
 """`accounts.csv` carries `eligible` only -- no treatment-receipt column --
 so the estimand is eligibility's effect (a sharp-RD claim), not use's, which
-would need receipt data and fuzzy-RD assumptions."""
+would need receipt data and fuzzy-RD assumptions. An earlier wording added
+"for accounts within the fixture's bandwidth of the cutoff", but no
+arm-visible file defines a bandwidth (the validator's bandwidths are not
+arm-readable under the contamination rule), so the clause was dropped
+(2026-08-09) -- locality is already carried by "at the discontinuity"."""
 
 
 def _cs7_default_probability(score: int, eligible: bool) -> float:

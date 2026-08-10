@@ -5,6 +5,11 @@ Transcripts live in `.superpowers/sdd/2026-08-08-causal-identification-review-sk
 Extraction instrument: `skills/hypothesis-driven-analysis/tests/extract_evidence.py` with `--normalize-root <worktree>` (subcommands `identity`, `manifest`, `events`, `text`); with-skill record files were read directly from the per-arm staging dirs.
 Every quote in the run records and this artifact was grepped against the archived transcript extraction or the archived record file it is attributed to, per `PROTOCOL.md` step 6.
 
+**Durability note (2026-08-09, post-wave review).**
+`.superpowers/` is gitignored, so the transcripts and per-arm record files this artifact's greps ran against do not ship with the repository.
+The sha256 digests below are the durable integrity anchors: a checkout without the archived workspace cannot re-run the quote verification, only confirm that a later-produced copy of a transcript matches its recorded digest.
+The per-arm identification-review records exist inside the transcripts' Write tool calls and are recoverable from them where the archive is present.
+
 ## Transcript digests and identity totals
 
 sha256 recomputed with `shasum -a 256` equivalent (`hashlib.sha256` over raw bytes); the `identity` subcommand independently reports the same digest for every file (verified per arm — a mismatch would have been a snapshot-integrity failure).

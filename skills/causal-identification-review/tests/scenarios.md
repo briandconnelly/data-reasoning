@@ -35,6 +35,10 @@ Where a scenario below references routing precedence, non-goal wording, or per-r
 The closed-set route strings (`review`, `construct`, `bound`, per D2/D3) and disposition strings (`identified-if`, `assumption-contradicted`, `unresolved`, `not-constructible`, per D4) appear **only in assertion rows**, nowhere else in this file — prose everywhere else describes a route or disposition by what it means (the route for a causal question with no design behind it, a disposition recording a contradicted assumption) rather than by the literal string, even though the strings themselves are already fixed by decision and could otherwise be typed correctly today.
 An assertion row may name them because an assertion is the measurement contract, not agent-facing prose; `SKILL.md` must ship exactly these route and disposition strings, or this catalog is re-preregistered against whatever it ships instead.
 
+**Scope note (2026-08-09).**
+The strings-only-in-assertion-rows rule above governed this file's preregistration-time prose, written while the strings' one shipping home (`SKILL.md`) did not yet exist.
+The Resolution, Amendment, and Correction subsections added after measurement quote closed-set tokens as recorded results — the disposition a scored arm actually assigned, the route a canary actually selected — and reporting a measured value verbatim is not the describe-by-meaning prose the rule polices.
+
 ## Global verdict table
 
 Four rows, preregistered before any arm runs, each keyed to an observable condition rather than to a preference.
@@ -335,7 +339,7 @@ Ground-truth properties the generator and validator must encode:
 - **Covariate balance at the cutoff:** stated covariates unrelated to credit score itself (account tenure, income band) are balanced immediately around 680 — the balance probe passes.
 - **No other stated confound at the cutoff:** unlike CS3/CS4, this fixture plants no concurrent change, no differential pre-trend, and no selection story that would contradict the discontinuity design — this is the one fixture in the catalog built to let a design's identifying assumptions clear their probes, not to defeat one.
 - **The no-bundled-policy fact is stated arm-visibly:** `data_notes.md` inside `cs7-seam/` states, as a fact of the extract, that the 680 threshold gates instant-checkout eligibility only and that no other product, pricing, underwriting, or policy rule in effect during the observation window keys on credit score at or near 680 — so the design's no-coincident-confound assumption has discriminating evidence an arm can cite, rather than living only in the builder's intent; `validate_cs7.py` traps this statement's absence.
-- A precommitted estimand stated in the fixture's ground-truth file: "the local average effect of instant-checkout eligibility on 90-day default rate at the credit-score-680 discontinuity, for accounts within the fixture's bandwidth of the cutoff" — stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
+- A precommitted estimand stated in the fixture's ground-truth file: "the local average effect of instant-checkout eligibility on 90-day default rate at the credit-score-680 discontinuity" — stage 1's record must state this estimand in matching terms for stage 2 to reuse verbatim.
   Take-up of instant-checkout is unobserved — `accounts.csv` carries `eligible` only, no treatment-receipt column — so the review's estimand is eligibility's effect (a sharp-discontinuity claim in eligibility), not use's, which would need receipt data and fuzzy-discontinuity assumptions the fixture does not supply.
 
 **Stage 1 assertions:**
@@ -376,6 +380,7 @@ The assertions above test that HDA's own machinery engages normally with a hande
 The external final review re-scored two of this section's assertions FAIL under their literal wording — stage 1's no-point-estimate assertion (the probe table's local-linear outcome-jump magnitudes are point estimates of the discontinuity under the preregistered wording) and stage 2's verbatim-estimand assertion (the strings are not character-identical) — with dated corrections appended to both run records.
 The stage-1 failure is this section's own contract colliding with itself: the stage-1 entanglement bullet demands the discontinuity be verified non-flat, the assertion bans point estimates, and checking non-flatness numerically produces the number.
 The probe-reporting contract must therefore be redesigned before any fresh arm runs — for example, non-flatness may be probed and reported as a pass/fail verdict or a z-statistic, with the jump magnitude itself confined to the ground-truth file — and the estimand-reuse assertion amended to matching-terms, with the verbatim string carried in the ground-truth file for the grep.
+The precommitted estimand is also amended in the same reopening (2026-08-09): its trailing clause "for accounts within the fixture's bandwidth of the cutoff" named a bandwidth defined nowhere arm-visible — the only bandwidths live in `validate_cs7.py`, which the contamination rule bars arms from reading — so the clause is dropped from the generator and the ground-truth file regenerated without it, before any fresh arm runs against the redesigned contract.
 After redesign, this cell owes fresh stage-1 and stage-2 arms; the 2026-08-09 sc2 arms stand as scored-then-corrected records, and no arm predating the redesign is scored against the redesigned contract, per `PROTOCOL.md`'s canary principle.
 
 ## HDA seam cells (owed by the three amendment sentences)
