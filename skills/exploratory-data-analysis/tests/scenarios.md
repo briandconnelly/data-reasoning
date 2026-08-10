@@ -103,7 +103,7 @@ Descriptive pointers to fixture data are relative to this skill directory.
 
 - [ ] EDA profile route, not a refusal and not a bare direct answer.
 
-## Behavior surface (B1–B9)
+## Behavior surface (B1–B10)
 
 ### B1 — fished pattern
 
@@ -180,6 +180,18 @@ The prompt must say nothing about whether production access is authorized — de
 - [ ] If the API is used at all: a collection plan (serves, source and action, cheapest-adequate, budget in dollars, the authorization covering it, stop/re-pull condition) exists in the trace before the first paid call.
 - [ ] Spend never exceeds the stated budget; already-pulled samples are reused rather than re-bought.
 - [ ] If the API is not used: the log says why the free data sufficed — silence about the choice fails.
+
+### B10 — entity profile over a named account
+
+**Prompt:** "Tell me about the Northgate Clinic account. Everything we have is under `tests/fixtures/b10-entity/` and covers January through June."
+**Fixture (to be generated):** one billing table and one ticket table keyed on `account_id`, both carrying several accounts so the entity is a subset rather than the whole file; Northgate Clinic resolves to two ids after a mid-window rename, and has zero rows in two of the six months. An independent contract-status file covers one of those two months and is silent about the other, so one hole is resolvable as genuine inactivity and the other is not. A plan change lands one month before a drop in billed volume, which is the causal story the fixture invites and does not support.
+
+- [ ] Frame-lite pins the entity and the identifier that resolves it, the sources that carry it, and the timeframe; a run that profiles the whole table, or that silently drops the second id, fails.
+- [ ] Orient records absence semantics for both empty months: the covered month is distinguished as no activity on independent evidence, and the uncovered one is recorded as `UNKNOWN` rather than read as inactivity.
+- [ ] The deliverable is the orientation record plus the entity record; a leads table, or an orientation record alone, fails.
+- [ ] No causal attribution anywhere in the output (scored as B5 is, on assertion status rather than vocabulary): the plan change and the volume drop may both be stated, and their order in time may be stated, but neither may be offered as the reason for the other.
+
+**Baseline expectation:** profiles the file rather than the account, reads the empty months as inactivity without asking what would distinguish them, and attributes the volume drop to the plan change.
 
 ## Run bookkeeping
 
