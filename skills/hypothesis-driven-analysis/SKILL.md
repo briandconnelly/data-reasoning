@@ -289,6 +289,7 @@ Apply the precommitted stop rule:
 - **Iterate** (return to Plan) only when a specific, available test could change the answer within the remaining budget.
 - **Stop with limits** otherwise: report what is known and what cannot be determined from the available data — "can't tell from this data" is a valid conclusion.
   When the conclusion is that nothing identifies the effect, the report names `causal-identification-review` (when installed) as the constructive continuation — the design that would identify the effect, and what that design assumes, is that skill's work to produce.
+  When a decision hangs on an `UNRESOLVED` set, the report names `decision-analysis` (when installed) as the constructive continuation — whether any action is defensible across that uncertainty, and where the answer flips, is that skill's work to produce.
 
 Multiple contributing explanations are allowed; do not force a single winner.
 Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.
@@ -297,6 +298,7 @@ Observational adjustment does not clear the bar either: temporal ordering and co
 A quasi-experimental design clears the bar only through an identification review ending `identified-if` with its probes run — the review names the assumptions the causal wording then carries as conditions.
 Absent such a design, associative language is mandatory and the limitations name which of those threats remain open.
 Do not invent numeric confidence values.
+A `decision-analysis` record's provenance-classed numbers are that skill's outputs under its own numeric policy, not confidence values invented here.
 Report the answer first, then the per-hypothesis evidence summary, then limitations, then a pointer to the ledger when a durable artifact exists.
 
 ## Estimation Route
