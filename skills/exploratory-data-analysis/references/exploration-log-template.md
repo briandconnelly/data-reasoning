@@ -14,7 +14,7 @@ Which sections the profile route fills, and what it delivers on a dataset profil
 ## Frame
 
 - Goal: <what a useful lead would look like; the decision or audience served, if any>
-- Scope: <dataset(s), timeframe, units; on an entity profile, the entity, the identifier that resolves it, and the sources that carry it>
+- Scope: <dataset(s), timeframe, units; on an entity profile, what § Profile Route requires Frame-lite to pin>
 - Effort budget: <tool calls | queries | wall-clock — pick one and a number>
 - Stop rule: <precommitted condition for stopping>
 - Confirmation reservation: <the holdout — later window, unexamined slice, independent source — Explore will not touch; or "none feasible: <why>">
@@ -33,9 +33,9 @@ Which sections the profile route fills, and what it delivers on a dataset profil
 
 ## Entity record (entity profile only)
 
-- Entity and identifier: <the entity, and every id that resolves it across the sources>
-- Descriptive facts: <what the sources settle about the entity across the framed window, in associational wording>
-- Change over time: <changes stated as changes; a cause named here is adjudication this route does not do>
+- Entity and identifier: <as § Profile Route requires>
+- Descriptive facts: <as § Profile Route requires>
+- Change over time: <as § Profile Route requires>
 
 ## Looks register
 

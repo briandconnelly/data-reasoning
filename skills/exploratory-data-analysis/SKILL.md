@@ -20,7 +20,7 @@ Route on the shape of the ask, not its phrasing — "explore why churn rose" is 
 | --- | --- | --- |
 | out: direct | A bounded question the records settle, nothing asserted | None; answer and stop — not this skill's work |
 | out: adjudicate | A stated claim to check, a named effect to explain (however phrased), or a comparison that generalizes past the records | Hand to `hypothesis-driven-analysis`; when it is not installed, still never adjudicate from exploration — report leads with their status and say what confirmation would need |
-| profile | An open-ended orientation ask over a dataset or a named entity — "what's in this data", "profile this", "any quality problems", "summarize this dataset", "tell me about this account" | Frame-lite + Orient (see Profile Route); the deliverable is the orientation record, and for an entity that record plus the entity record (see Profile Route) |
+| profile | An open-ended orientation ask over a dataset or a named entity — "what's in this data", "profile this", "any quality problems", "summarize this dataset", "tell me about this account" | Frame-lite + Orient; § Profile Route states what each profile delivers |
 | explore | Open-ended lead-seeking with no named effect — "what's interesting", "any anomalies", "what does this data suggest" | The full lifecycle below |
 
 When exploration surfaces a claim the user wants settled, hand off rather than settling it here; the lead enters the investigation as `retrospective`, promotable only on evidence that did not inform it.

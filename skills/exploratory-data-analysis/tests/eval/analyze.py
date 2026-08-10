@@ -15,6 +15,19 @@ def summarize(fixture_path: Path, results_path: Path) -> dict:
     results = json.loads(results_path.read_text())
     rows = results["results"] if isinstance(results, dict) else results
 
+    # A missing result row would otherwise vanish silently: the run-count check
+    # compares runs against the queries actually found, so both sides shrink
+    # together and an incomplete run yields a plausible arm mean.
+    seen = collections.Counter(row["query"] for row in rows)
+    missing = sorted(set(arms) - set(seen))
+    extra = sorted(set(seen) - set(arms))
+    duplicated = sorted(q for q, n in seen.items() if n > 1)
+    if missing or extra or duplicated:
+        raise SystemExit(
+            "result set does not match the fixture — "
+            f"missing={missing} extra={extra} duplicated={duplicated}"
+        )
+
     by_arm = collections.defaultdict(list)
     runs_by_arm = collections.Counter()
     for row in rows:
