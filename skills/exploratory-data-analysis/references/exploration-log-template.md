@@ -4,7 +4,7 @@ Create the log at Frame time, before the first look.
 Create means write: the log exists as a file before any exploration output, so the precommitment leaves a record the transcript can verify — a log first materialized in the final report is a reconstruction.
 The looks register and amendments are append-only; a lead row's `disposition` is the only sanctioned in-place update.
 Keep it in scratch space by default, named recognizably (e.g. `exploration-log.md`); put it in the project directory when the user wants a durable artifact.
-The profile route fills only Frame-lite (scope and budget) and the Orientation record.
+Which sections the profile route fills, and what it delivers on a dataset profile and on an entity profile, are governed by SKILL.md's Profile Route section, the single authority; read them there rather than from any summary here.
 
 ## Template
 
@@ -14,7 +14,7 @@ The profile route fills only Frame-lite (scope and budget) and the Orientation r
 ## Frame
 
 - Goal: <what a useful lead would look like; the decision or audience served, if any>
-- Scope: <dataset(s), timeframe, units>
+- Scope: <dataset(s), timeframe, units; on an entity profile, the entity, the identifier that resolves it, and the sources that carry it>
 - Effort budget: <tool calls | queries | wall-clock — pick one and a number>
 - Stop rule: <precommitted condition for stopping>
 - Confirmation reservation: <the holdout — later window, unexamined slice, independent source — Explore will not touch; or "none feasible: <why>">
@@ -30,6 +30,12 @@ The profile route fills only Frame-lite (scope and budget) and the Orientation r
 - Coverage: <at the exploration grain, against an expected schedule or independent denominator — or "unverifiable: <why>">
 - Absence semantics: <per source whose absent records could bear on a lead: event absent | event unrecorded | export incomplete | UNKNOWN — why no evidence discriminates>
 - Instrument caveats: <exporters, sampling, dashboards>
+
+## Entity record (entity profile only)
+
+- Entity and identifier: <the entity, and every id that resolves it across the sources>
+- Descriptive facts: <what the sources settle about the entity across the framed window, in associational wording>
+- Change over time: <changes stated as changes; a cause named here is adjudication this route does not do>
 
 ## Looks register
 

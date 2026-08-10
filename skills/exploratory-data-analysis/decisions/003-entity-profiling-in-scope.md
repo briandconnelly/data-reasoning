@@ -58,6 +58,23 @@ The edit stands; nothing was reverted.
 
 A blind holdout of five entity-profile queries, written after the edit and never seen while it was drafted, scored H = 0.933 unscored against any gate.
 
+### What the P1 movement is, and is not
+
+The obvious confound is lexical memorization.
+The edit introduced the phrase "tell me about this account", and 8 of the 20 P1 queries carry a "tell me … about" phrasing.
+If ΔP1 were that artifact, those 8 should dominate the movement.
+They do not: the 8 overlapping queries moved 0.042 → 0.375 (Δ +0.333), while the 12 non-overlapping ones moved 0.250 → 0.611 (Δ +0.361).
+The gain is if anything larger away from the introduced phrasing than on it, which is evidence against a lexical artifact rather than a limitation to disclose.
+
+One N1 entry is less independent than the arm mean suggests.
+The description's new counter-example is the phrase "why did this account's spend drop", and N1 carries "Why did this account's spend drop last month?".
+That query scored 0.000 at baseline, before the phrase existed, so nothing is circular — but its post-edit 0.000 is not independent evidence that the exclusion clause works.
+
+One P1 query regressed: "Describe the makerspace's usage patterns." moved 0.667 → 0.000.
+It is the only P1 member that lost ground; every other query held or improved.
+At three runs per query a single query's swing is within noise, and the same entity appears in the holdout at a high rate.
+It is recorded because a record that reports only improvements is not trustworthy.
+
 ### When to reopen this
 
 Reopen if `hypothesis-driven-analysis`'s description changes so that it claims entity asks more strongly than it does today.
@@ -85,11 +102,18 @@ These are the terms on which the numbers above may be read.
    The P1 queries pair an entity with a specific behavioral facet ("hold queue behaviour", "question volume and mix"), some of which skirt the description's own bounded-query exclusion.
    The holdout's five are canonical "full picture / overall story" asks that echo the description's vocabulary directly, which is the easier half of the shape.
    At n = 5, a single 2/3 run moves the mean by 0.067.
+   The holdout also reuses P1's own entities — query 1 the Riverside branch and the makerspace, query 2 the large-print collection, query 4 the summer reading program and the Eastside branch — so blind to the edit is not the same as independent of the fixture.
 
 ## Consequences
 
-- The profile route now has two deliverables, and the difference between them is stated only in § Profile Route. A future edit to that section is the only place the entity variant can change.
-- The absence-semantics rule carries more weight than it did. On a dataset profile a missing window is a coverage note; on an entity profile, "no records" and "no activity" are different claims about the entity, and only evidence outside the entity's own rows separates them. `tests/scenarios.md` B10 preregisters that behavior.
-- No behavioral arm has run. Every number above is a trigger rate — which skill activates — and says nothing about what the route produces once it does. B10 is authored, not run.
+- The profile route now has two deliverables, and the difference between them is stated only in § Profile Route.
+  A future edit to that section is the only place the entity variant can change.
+- The absence-semantics rule carries more weight than it did: § Profile Route states how it applies to an entity, and `tests/scenarios.md` B10 preregisters that behavior.
+- No behavioral arm has run.
+  Every number above is a trigger rate — which skill activates — and says nothing about what the route produces once it does.
+  B10 is authored, not run.
 - `check-citations` covers this file and `tests/scenarios.md`, so the quote above is held against the commit it pins. It does not validate the new Profile Route text's intra-file pointers: a planted `§ Nonexistent Section` reference passes the hook. Section pointers inside `SKILL.md` are held by review only.
-- The post-deployment spot check — corpus-shaped queries with all four skills installed, the only test where inter-skill competition is real — is owed and not done. It cannot run against `run_eval.py`, which measures one description in isolation.
+- The post-deployment spot check — corpus-shaped queries with all four skills installed, the only test where inter-skill competition is real — is owed and not done.
+  `run_eval.py` cannot carry it, because it scores one description in isolation.
+  `tests/scenarios.md`'s trigger scenarios can, because they load a catalog carrying both this skill's description and `hypothesis-driven-analysis`'s, and T13 and T14 preregister the entity minimal pair there.
+  Those two are authored and unrun, they carry two descriptions rather than four, and their queries are synthetic, so they narrow the debt rather than discharge it.

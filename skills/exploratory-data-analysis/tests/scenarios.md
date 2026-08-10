@@ -5,7 +5,7 @@ Behavioral test scenarios for this skill, following the repo's baseline/with-ski
 The E1 fixture exists and is validated (`skills/hypothesis-driven-analysis/tests/fixtures/s5b-seam/`); every other fixture named here is still to be generated.
 Every "Expected" and "Fixture" line is a preregistration; generating fixtures deterministically and running arms is the recorded follow-up, and a fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.
-That rule does not reach the trigger scenarios (T1–T12): they test which skill activates, so the expected outcome is stated per scenario and a passing baseline is not a defect.
+That rule does not reach the trigger scenarios (T1–T14): they test which skill activates, so the expected outcome is stated per scenario and a passing baseline is not a defect.
 Trigger runs load a catalog containing BOTH this skill's description and `hypothesis-driven-analysis`'s, because the failure under test is collision — an EDA-only catalog cannot show it; record which skill activated and, if this one, which route it took.
 Give each agent only the scenario prompt and any skill access required; do not reveal assertions, expected routes, or prior outputs.
 With-skill subagents may read the skill files and the one fixture directory named in their prompt, but not this file and not `tests/runs/`.
@@ -14,7 +14,7 @@ Anything asserting an action did NOT happen (B7's no-chase, B8's no-touch, B9's 
 Paths meant to be run are repo-root-relative; dispatched prompts resolve to absolute paths.
 Descriptive pointers to fixture data are relative to this skill directory.
 
-## Trigger surface (T1–T12)
+## Trigger surface (T1–T14)
 
 ### T1 — open-ended explore
 
@@ -103,6 +103,21 @@ Descriptive pointers to fixture data are relative to this skill directory.
 
 - [ ] EDA profile route, not a refusal and not a bare direct answer.
 
+### T13 — entity profile (pairs with T14)
+
+**Prompt:** "Tell me about the Northgate Clinic account."
+**Expected:** EDA activates; profile route, entity variant.
+
+- [ ] EDA activates; hypothesis-driven-analysis does not.
+- [ ] Profile route, not the explore lifecycle; no leads chased.
+
+### T14 — named effect on the same entity (T13's minimal pair)
+
+**Prompt:** "Why did the Northgate Clinic account's spend drop last quarter?"
+**Expected:** hypothesis-driven-analysis activates; EDA does not.
+
+- [ ] EDA does not activate; no exploration log is created.
+
 ## Behavior surface (B1–B10)
 
 ### B1 — fished pattern
@@ -186,7 +201,7 @@ The prompt must say nothing about whether production access is authorized — de
 **Prompt:** "Tell me about the Northgate Clinic account. Everything we have is under `tests/fixtures/b10-entity/` and covers January through June."
 **Fixture (to be generated):** one billing table and one ticket table keyed on `account_id`, both carrying several accounts so the entity is a subset rather than the whole file; Northgate Clinic resolves to two ids after a mid-window rename, and has zero rows in two of the six months. An independent contract-status file covers one of those two months and is silent about the other, so one hole is resolvable as genuine inactivity and the other is not. A plan change lands one month before a drop in billed volume, which is the causal story the fixture invites and does not support.
 
-- [ ] Frame-lite pins the entity and the identifier that resolves it, the sources that carry it, and the timeframe; a run that profiles the whole table, or that silently drops the second id, fails.
+- [ ] Frame-lite pins the entity and the identifier that resolves it, the sources that carry it, and the timeframe; a run that widens to the whole table without recording the scope change, or that silently drops the second id, fails.
 - [ ] Orient records absence semantics for both empty months: the covered month is distinguished as no activity on independent evidence, and the uncovered one is recorded as `UNKNOWN` rather than read as inactivity.
 - [ ] The deliverable is the orientation record plus the entity record; a leads table, or an orientation record alone, fails.
 - [ ] No causal attribution anywhere in the output (scored as B5 is, on assertion status rather than vocabulary): the plan change and the volume drop may both be stated, and their order in time may be stated, but neither may be offered as the reason for the other.

@@ -15,4 +15,10 @@ Arms:
 - `F` — frontier. Shapes whose correct route is unsettled. Recorded, never scored.
 
 Run it with `skill-creator`'s `scripts/run_eval.py`.
-The procedure, the isolation requirements, and the preregistered gates are in the design record and in `decisions/003-entity-profiling-in-scope.md`.
+Summarize any results file by arm with `python analyze.py --fixture entity-profiling-eval.json --results results-edited.json --expected-runs-per-query 3`, which is how the arm means in the decision record were computed from the committed JSON.
+The procedure, the isolation requirements, and the preregistered gates are in `decisions/003-entity-profiling-in-scope.md`.
+Isolation as run: no sibling `data-reasoning` skill was installed during any run, and the operator's ordinary skill roster was present identically in both arms.
+
+`frozen-description.txt` froze the skill's description text as it stood when the fixture landed at `d374381`, three commits before the description edit at `1fadd29`.
+That ordering is what makes it evidence that the baseline text was fixed before the eval ran, so it must not be refreshed after a later description edit — a refreshed copy proves nothing.
+It holds the rendered form of the description, while the harness read the YAML-escaped form of the same string.
