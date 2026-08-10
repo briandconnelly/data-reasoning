@@ -1,7 +1,7 @@
 {
   "name": "data-reasoning",
   "version": "0.1.0",
-  "description": "Skills for reasoning from data — structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, and causal identification review that turns a dead end into a reviewed, assumption-bounded design.",
+  "description": "Skills for reasoning from data — structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, causal identification review that turns a dead end into a reviewed, assumption-bounded design, and decision analysis that turns unresolved evidence into a defensible act-wait-or-collect verdict.",
   "author": {
     "name": "Brian Connelly",
     "url": "https://github.com/briandconnelly"
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Data Reasoning",
     "shortDescription": "Explore data and test hypotheses with disciplined workflows",
-    "longDescription": "Use structured workflows for exploratory data analysis, hypothesis-driven investigation, and causal identification review, with explicit evidence, predictions, stopping rules, and assumption-bounded designs when nothing else identifies the effect.",
+    "longDescription": "Use structured workflows for exploratory data analysis, hypothesis-driven investigation, and causal identification review, with explicit evidence, predictions, stopping rules, and assumption-bounded designs when nothing else identifies the effect, and decision analysis for choosing under uncertainty with robustness-checked verdicts.",
     "developerName": "Brian Connelly",
     "category": "Productivity",
     "capabilities": [
@@ -33,7 +33,8 @@
       "Explore this dataset and identify the strongest leads.",
       "Turn this question into a hypothesis-driven analysis plan.",
       "Evaluate whether the evidence supports these competing hypotheses.",
-      "Review whether this design identifies the effect, and on what assumptions."
+      "Review whether this design identifies the effect, and on what assumptions.",
+      "Decide whether to act, wait, or collect more data given this evidence."
     ]
   }
 }
