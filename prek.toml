@@ -31,7 +31,7 @@ hooks = [
 repo = "local"
 hooks = [
   { id = "check-skill-frontmatter", name = "Validate SKILL.md frontmatter against agentskills.io spec", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-skill-frontmatter.py", files = "(?:^|/)SKILL\\.md$", pass_filenames = true },
-  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
+  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
   # The instruments' own unit suite. Nothing ran it before, so an edit to
   # score_ledger.py landed unchecked. The whole tests tree is collected; the
   # deliberately-broken scenario-3 fixture is held out by
@@ -77,4 +77,6 @@ hooks = [
   # per commit. This hook exists for the two SKILL.md files, which the suite
   # hook's files regex deliberately does not watch.
   { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests/test_gate_parity_cir.py", files = "^(skills/causal-identification-review/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
+  { id = "da-instrument-tests", name = "decision-analysis: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests", files = "^skills/decision-analysis/(tests/[^/]+\\.py|references/decision-record-template\\.md)$", pass_filenames = false },
+  { id = "da-gate-parity", name = "decision-analysis: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests/test_gate_parity_da.py", files = "^(skills/decision-analysis/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
 ]

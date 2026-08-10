@@ -71,6 +71,7 @@ DEFAULT_SCOPE = (
     "skills/hypothesis-driven-analysis",
     "skills/exploratory-data-analysis",
     "skills/causal-identification-review",
+    "skills/decision-analysis",
 )
 SCOPE_PATTERNS = ("SKILL.md", "references/*.md", "tests/scenarios.md", "decisions/*.md")
 
