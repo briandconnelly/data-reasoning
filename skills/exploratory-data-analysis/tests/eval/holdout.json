@@ -1,0 +1,27 @@
+[
+  {
+    "arm": "H",
+    "should_trigger": true,
+    "query": "Give me the full picture on the Riverside Branch's makerspace program."
+  },
+  {
+    "arm": "H",
+    "should_trigger": true,
+    "query": "What's the overall story with our large-print book collection?"
+  },
+  {
+    "arm": "H",
+    "should_trigger": true,
+    "query": "Paint a complete picture of patron 88213 as a library user."
+  },
+  {
+    "arm": "H",
+    "should_trigger": true,
+    "query": "I want a holistic view of the summer reading program at the Eastside Branch."
+  },
+  {
+    "arm": "H",
+    "should_trigger": true,
+    "query": "Give me a full rundown on the graphic novel collection across the system."
+  }
+]
