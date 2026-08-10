@@ -24,9 +24,12 @@ Treat the routing between them, and the handoff itself, as unverified.
 
 ### Claude Code
 
+This repository is its own plugin marketplace (`.claude-plugin/marketplace.json`).
+Add it, then install the plugin from it:
+
 ```
-/plugin marketplace add briandconnelly/briandconnelly-plugins
-/plugin install data-reasoning
+/plugin marketplace add briandconnelly/data-reasoning
+/plugin install data-reasoning@data-reasoning
 ```
 
 ### Codex
