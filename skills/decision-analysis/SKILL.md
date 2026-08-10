@@ -153,7 +153,7 @@ Break-even mode inverts the question — the largest price at which the pull cou
 The stated or measured cost of the pull, which the net value calculation above consumes; when none is stated, the deliverable is the break-even price by construction.
 
 **Verdict.**
-Closed set: `worth-it` (net value positive across the robustness class), `not-worth-it` (net value negative across it), `sensitive` (the net value crosses zero within the class; crossover reported), `break-even-only` (no defensible signal model; the price bound is the deliverable).
+Closed set: `worth-it` (net value positive across the robustness class), `not-worth-it` (net value negative across it), `sensitive` (the net value crosses zero within the class; crossover reported), `break-even-only` (no defensible signal model, or no stated cost; the price bound is the deliverable).
 A `worth-it` verdict does not authorize the pull (§ Numeric Policy).
 The seam with the costly-collection gate: the plan's "cheapest adequate collection" line answers *which* pull; this route answers *whether any* pull at this price is worth making, and a voi record attaches to the plan rather than replacing it.
 

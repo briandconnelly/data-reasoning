@@ -7,16 +7,23 @@
 
 SCOPE: this is a machine encoding of the record's *shape and arithmetic*, not
 its content. It verifies: no duplicate sections; every route-required section
-and slot present and non-empty; Route/Verdict/provenance values drawn from
-their closed sets; sensitivity-only provenance absent from the Evidence and
-update block; a causal Claim class carrying a non-NONE Identification basis;
-the binary/two-action v1 scope (two ' vs '-separated actions, exactly two
+and slot present and non-empty; Route/Verdict/provenance/Claim-class values
+drawn from their closed sets; sensitivity-only provenance absent from the
+Evidence and update block; a causal Claim class carrying a non-NONE
+Identification basis and, when so, non-`none` Identification conditions; the
+binary/two-action v1 scope (two ' vs '-separated actions, exactly two
 consequence action rows and two state columns -- records outside it are
-rejected, not approximated); loss numbers carrying belief-grade provenance
-under a robust verdict, each field checked independently; the voi
-signal-model/verdict coupling; and (arithmetic gates) recomputation of the
-posterior-odds interval and, when a numeric decision threshold is recorded,
-of the prior-odds crossover interval against the swept prior class. Required
+rejected, not approximated); exactly one provenance mention on each governed
+slot (Loss ratio, Decision threshold, Prior odds, Prior class swept, Loss
+range swept, voi Signal model); a sourced evidence row (externally-sourced or
+estimated-from-data-in-hand) carrying a non-empty source cell; loss numbers
+parsing as positive numbers or ranges and carrying belief-grade provenance
+under a robust verdict, each field checked independently; a `dominated`
+verdict's four belief slots reading exactly `none needed`; the voi
+signal-model/verdict coupling and the no-stated-cost/break-even-only
+coupling; and (arithmetic gates) recomputation of the posterior-odds interval
+and, when a numeric decision threshold is recorded, of the prior-odds
+crossover interval (both endpoints) against the swept prior class. Required
 numeric fields that do not parse, or violate their domain (ordered ranges,
 odds and LRs strictly positive), are gate failures -- never skipped checks.
 
@@ -53,6 +60,9 @@ PROVENANCE = frozenset(
     {"user-elicited", "externally-sourced", "estimated-from-data-in-hand", "sensitivity-only"}
 )
 BELIEF_LOSS_PROVENANCE = frozenset({"user-elicited", "externally-sourced"})
+# Authority: hypothesis-driven-analysis's ledger claim classes (its § Plan);
+# SKILL.md § The Decide Route points at that authority by reference.
+CLAIM_CLASSES = frozenset({"causal", "descriptive", "data-artifact"})
 
 # Every top-level template bullet, by section; Task 5's parity test asserts
 # set equality between these labels and the template's bullets.
@@ -72,6 +82,7 @@ DECIDE_LABELS: dict[str, tuple[str, ...]] = {
         "Residual reading:",
         "Claim class:",
         "Identification basis:",
+        "Identification conditions:",
         "Ledger mapping:",
     ),
     "Evidence and update": ("Prior odds:", "Evidence:", "Independence:", "Posterior odds:"),
@@ -219,16 +230,22 @@ def check(text: str) -> list[str]:
     return failures
 
 
-def _check_slot_provenance(slots: tuple[tuple[str, str], ...], sentinel: str) -> list[str]:
-    """Require a provenance mention on each ``(label, value)`` slot.
+def _check_slot_provenance(
+    slots: tuple[tuple[str, str], ...], sentinel: str | None = None
+) -> list[str]:
+    """Require exactly one provenance mention on each ``(label, value)`` slot.
 
     ``sentinel`` (e.g. ``"none stated"``, ``"none needed"``) is a bare value
-    that is exempt from carrying a provenance class.
+    that is exempt from carrying a provenance class. ``None`` means every
+    slot in ``slots`` always requires exactly one provenance class.
     """
     failures: list[str] = []
     for label, value in slots:
-        if _bare(value) != sentinel and not _PROVENANCE_MENTION.search(value):
-            failures.append(f"slot '- {label}' carries a number without a provenance class")
+        if sentinel is not None and _bare(value) == sentinel:
+            continue
+        provs = _PROVENANCE_MENTION.findall(value)
+        if len(provs) != 1:
+            failures.append(f"slot '- {label}' must carry exactly one provenance class")
     return failures
 
 
@@ -270,15 +287,32 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
             "none needed",
         )
     )
+    failures.extend(
+        _check_slot_provenance(
+            (("Loss range swept:", field(sections["Robustness"], "Loss range swept:") or ""),)
+        )
+    )
 
     model = sections["Decision-state model"]
     claim = _bare(field(model, "Claim class:") or "")
     basis = _bare(field(model, "Identification basis:") or "")
+    if claim not in CLAIM_CLASSES:
+        failures.append(
+            f"Claim class value {claim!r} is not in the closed set {sorted(CLAIM_CLASSES)}"
+        )
     if claim == "causal" and (not basis or basis.upper() == "NONE"):
         failures.append(
             "Claim class 'causal' requires a non-NONE Identification basis "
             "(HDA's causal-wording bar or a CIR identified-if, by pointer)"
         )
+    if claim == "causal" and basis and basis.upper() != "NONE":
+        conditions = _bare(field(model, "Identification conditions:") or "")
+        if conditions.lower() == "none":
+            failures.append(
+                "Claim class 'causal' with a non-NONE Identification basis requires "
+                "'- Identification conditions:' to restate the identifying assumptions, "
+                "not 'none'"
+            )
 
     evidence = sections["Evidence and update"]
     if "sensitivity-only" in evidence:
@@ -318,7 +352,22 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         # Route): Prior odds, Posterior odds, Prior class swept, and
         # Crossover carry no belief-grade numbers to recompute or sweep, so
         # none of the numeric parsing, recomputation, or crossover gates
-        # below apply to this record.
+        # below apply to this record -- but the sentinel itself is required,
+        # not optional, on each of those four slots.
+        evidence = sections["Evidence and update"]
+        robustness = sections["Robustness"]
+        for section, label in (
+            (evidence, "Prior odds:"),
+            (evidence, "Posterior odds:"),
+            (robustness, "Prior class swept:"),
+            (robustness, "Crossover:"),
+        ):
+            value = _bare(field(section, label) or "")
+            if value != "none needed":
+                failures.append(
+                    f"a dominated verdict requires '- {label}' to read 'none needed'; "
+                    f"found {value!r}"
+                )
         return failures
     evidence = sections["Evidence and update"]
     robustness = sections["Robustness"]
@@ -346,6 +395,11 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             lr_product = (lr_product[0] * lr[0], lr_product[1] * lr[1])
         if row[2] not in PROVENANCE:
             failures.append(f"Evidence provenance cell {row[2]!r} is not a provenance class")
+        if row[2] in ("externally-sourced", "estimated-from-data-in-hand") and not row[3]:
+            failures.append(
+                f"Evidence row {row[0]!r} has provenance {row[2]!r} but an empty source, "
+                "reference class, conditioning cell"
+            )
 
     posterior_value = _bare(field(evidence, "Posterior odds:") or "")
     posterior = parse_range(posterior_value)
@@ -365,6 +419,19 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     if swept is None:
         failures.append("Prior class swept must parse as a number or ordered range")
 
+    for section_name, label in (
+        ("Decision frame", "Loss ratio:"),
+        ("Robustness", "Loss range swept:"),
+    ):
+        value = _bare(field(sections[section_name], label) or "")
+        if value in ("none stated", "none needed"):
+            continue
+        loss_range = parse_range(value)
+        if loss_range is None or loss_range[0] <= 0:
+            failures.append(
+                f"'- {label}' must parse as a positive number or ordered range; found {value!r}"
+            )
+
     crossover_text = (field(robustness, "Crossover:") or "").strip()
     threshold_value = _bare(field(frame, "Decision threshold (posterior odds):") or "")
     threshold = None if threshold_value == "none stated" else parse_range(threshold_value)
@@ -372,8 +439,8 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         failures.append("Decision threshold must be 'none stated' or parse as a number")
 
     if threshold and lr_product and swept and verdict in {"robust", "prior-sensitive"}:
-        t = threshold[0]
-        cross_low, cross_high = t / lr_product[1], t / lr_product[0]
+        cross_low = threshold[0] / lr_product[1]
+        cross_high = threshold[1] / lr_product[0]
         intersects = cross_low <= swept[1] * (1 + _REL_TOLERANCE) and cross_high >= swept[0] * (
             1 - _REL_TOLERANCE
         )
@@ -429,10 +496,15 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
             f"Verdict value {verdict!r} is not in the closed set {sorted(VOI_VERDICTS)}"
         )
     signal = field(voi, "Signal model:") or ""
-    if not _PROVENANCE_MENTION.search(signal):
-        failures.append("slot '- Signal model:' carries a number without a provenance class")
+    failures.extend(_check_slot_provenance((("Signal model:", signal),)))
     if "sensitivity-only" in signal and verdict != "break-even-only":
         failures.append("a sensitivity-only signal model licenses only the break-even-only verdict")
+    cost = _bare(field(voi, "Cost:") or "")
+    if cost == "none stated" and verdict != "break-even-only":
+        failures.append(
+            "an unstated cost makes the break-even price the deliverable; "
+            "the verdict must be break-even-only"
+        )
     return failures
 
 

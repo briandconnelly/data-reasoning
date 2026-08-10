@@ -32,6 +32,7 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
 - Residual reading: <what "false" includes — explicitly covering explanations nobody named>
 - Claim class: <value> — value set per `../SKILL.md` § The Decide Route (authority)
 - Identification basis: <pointer to the design or review licensing a causal posterior, or `NONE`>
+- Identification conditions: <the identifying assumptions restated as explicit conditions, when the basis is an identified-if review — or `none`>
 - Ledger mapping: <which UNRESOLVED rows fold into which state and what the residual absorbs, or `none`>
 
 ## Evidence and update

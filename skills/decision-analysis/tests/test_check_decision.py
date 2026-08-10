@@ -46,6 +46,7 @@ VALID_DECIDE = """# Decision Record: hold the release or ship
 - Residual reading: false includes measurement noise and any cause nobody named
 - Claim class: descriptive
 - Identification basis: NONE
+- Identification conditions: none
 - Ledger mapping: none
 
 ## Evidence and update
@@ -186,7 +187,30 @@ def test_causal_claim_with_identification_basis_passes():
         "- Identification basis: NONE",
         "- Identification basis: CIR record cir-2026-08-01, identified-if, assumptions restated above",
     )
+    good = replace_once(
+        good,
+        "- Identification conditions: none",
+        "- Identification conditions: staging traffic is representative of production traffic",
+    )
     assert not any("Identification basis" in msg for msg in check(good))
+    assert not any("Identification conditions" in msg for msg in check(good))
+
+
+def test_causal_claim_with_basis_but_conditions_none_fails():
+    bad = replace_once(VALID_DECIDE, "- Claim class: descriptive", "- Claim class: causal")
+    bad = replace_once(
+        bad,
+        "- Identification basis: NONE",
+        "- Identification basis: CIR record cir-2026-08-01, identified-if, assumptions restated above",
+    )
+    assert any("Identification conditions" in msg for msg in check(bad))
+
+
+def test_unknown_claim_class_fails():
+    bad = replace_once(VALID_DECIDE, "- Claim class: descriptive", "- Claim class: Causal")
+    assert any("Claim class" in msg for msg in check(bad))
+    bad2 = replace_once(VALID_DECIDE, "- Claim class: descriptive", "- Claim class: statistical")
+    assert any("Claim class" in msg for msg in check(bad2))
 
 
 def test_three_actions_fails_binary_scope():
@@ -230,6 +254,24 @@ def test_loss_range_without_provenance_fails_robust():
         VALID_DECIDE,
         "- Loss range swept: 5–20 — provenance: user-elicited",
         "- Loss range swept: 5–20",
+    )
+    assert any("Loss range swept" in msg for msg in check(bad))
+
+
+def test_loss_ratio_nonnumeric_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Loss ratio: 10 — provenance: user-elicited",
+        "- Loss ratio: bananas — provenance: user-elicited",
+    )
+    assert any("Loss ratio" in msg for msg in check(bad))
+
+
+def test_loss_range_swept_reversed_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Loss range swept: 5–20 — provenance: user-elicited",
+        "- Loss range swept: 20–5 — provenance: user-elicited",
     )
     assert any("Loss range swept" in msg for msg in check(bad))
 
@@ -385,13 +427,26 @@ def test_dominated_verdict_with_none_needed_slots_passes():
     assert check(_dominated_decide()) == []
 
 
-def test_dominated_verdict_tolerates_real_crossover_number():
-    # Crossover is exempt from the dominated sentinel: the arithmetic gates
-    # are skipped for the whole record, so a real number here still passes.
-    good = replace_once(
+def test_dominated_verdict_with_real_numbers_fails():
+    # A dominated verdict's belief slots must read exactly 'none needed';
+    # a real number in any of them is a gate failure, not a tolerated extra.
+    bad = replace_once(
         _dominated_decide(), "- Crossover: none needed", "- Crossover: flips at prior odds 0.5"
     )
-    assert check(good) == []
+    assert any("Crossover" in msg for msg in check(bad))
+    bad2 = replace_once(_dominated_decide(), "- Prior odds: none needed", "- Prior odds: bananas")
+    assert any("Prior odds" in msg for msg in check(bad2))
+
+
+def test_threshold_range_uses_both_endpoints_to_fail_robust():
+    # threshold 0.1-2, LR 3-5 -> crossover [0.1/5, 2/3] = [0.02, 0.667],
+    # which intersects the swept class 0.25-1.0: 'robust' is inconsistent.
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Decision threshold (posterior odds): 0.1 — provenance: user-elicited",
+        "- Decision threshold (posterior odds): 0.1–2 — provenance: user-elicited",
+    )
+    assert any("crossover" in msg.lower() for msg in check(bad))
 
 
 def test_prior_odds_without_provenance_fails():
@@ -410,6 +465,35 @@ def test_prior_class_swept_without_provenance_fails():
         "- Prior class swept: 0.25–1.0",
     )
     assert any("Prior class swept" in msg for msg in check(bad))
+
+
+def test_prior_odds_with_two_provenance_mentions_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced, provenance: user-elicited",
+    )
+    assert any("Prior odds" in msg for msg in check(bad))
+
+
+def test_evidence_row_sourced_with_empty_source_cell_fails():
+    bad = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | |",
+    )
+    assert any("repro on staging" in msg for msg in check(bad))
+
+
+def test_voi_no_cost_with_worth_it_fails():
+    bad = replace_once(VALID_VOI, "- Cost: one day", "- Cost: none stated")
+    assert any("break-even-only" in msg for msg in check(bad))
+
+
+def test_voi_no_cost_with_break_even_only_passes():
+    good = replace_once(VALID_VOI, "- Cost: one day", "- Cost: none stated")
+    good = replace_once(good, "- Verdict: worth-it", "- Verdict: break-even-only")
+    assert check(good) == []
 
 
 def test_voi_signal_model_without_provenance_fails():
