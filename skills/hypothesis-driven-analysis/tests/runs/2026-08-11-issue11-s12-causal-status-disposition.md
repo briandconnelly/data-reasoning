@@ -18,7 +18,7 @@ Re-derived fresh from the archived ledgers, not from the issue or the wave notes
 
 Both `REFUTED` rows cite T1 and nothing else, and in both ledgers T1 is the pre/post exposure–outcome contrast — confirming the issue's premise.
 Reconciliation against a total the archive states: the replication wave file reports exactly these four arms with exactly these statuses (rep1/rep3 miss, rep2 and the 2026-08-10 arm comply), and these are all the Sonnet-as-main-agent S12 arms under `runs/`.
-Earlier Sonnet S12 arms exist (2026-07-16, dispatched as subagents against superseded skill wording at `e55ba78`) and are outside this population: a measured result belongs to the wording it ran against.
+Earlier S12 arms predate the main-agent design (2026-07-16/17 subagent runs against superseded skill wording; the causal-routing run states Sonnet at `e55ba78`, the 07-17 rerun ran on Opus) and are outside this population: a measured result belongs to the wording it ran against.
 Instrument check: the rep1 basis phrase greps to 0 matches in the rep2 ledger, so a hit is discriminating.
 
 ## The rule the misses lose to
@@ -28,8 +28,8 @@ Instrument check: the rep1 basis phrase greps to 0 matches in the rep2 ledger, s
 > An exposure–outcome contrast from a design that does not identify the causal contrast cannot by itself mark that causal hypothesis `REFUTED`: that test leaves it `UNRESOLVED`, because a co-exposure pushing the other way could mask a real effect.
 
 Line 258 carves out refutation by independent evidence that does not rely on the unidentified contrast.
-Rep3's basis text mirrors that carve-out — "this refutation does not rely on the unidentified campaign/no-campaign contrast, only on whether the claimed outcome (a rise) occurred at all" — while resting the refutation on T1, which is that contrast: the pre/post split around the launch date is the exposure split.
-Rep1's basis engages only the necessary-prediction machinery and shows no sign of reaching line 257 at all.
+Rep3's basis text mirrors that carve-out — "this refutation does not rely on the unidentified campaign/no-campaign contrast, only on whether the claimed outcome (a rise) occurred at all in the raw aggregate" — while resting the refutation on T1, which is that contrast: the pre/post split around the launch date is the exposure split.
+Rep1's H1 basis engages only the necessary-prediction machinery, but its ledger reaches the rule's substance elsewhere: line 65 applies the carve-out's logic to T2 ("That refutation does not depend on the unidentified before/after contrast itself"), and line 75 calls the negative result associative — while the H1 row at line 70 still rests on T1.
 
 ## Decision: capability finding, not a wording defect
 
@@ -38,15 +38,14 @@ This disposition takes the first path, on three grounds:
 
 1. The wording exists, is single-homed at the exact decision point, and states the masking rationale in the same sentence — there is no missing sentence to add that line 257 does not already say.
 2. Discoverability is demonstrated in the same conditions: rep2 — same model, same wording, same fixture, same prompt — found the rule, restated its substance, and applied it, as did the 2026-08-10 arm.
-3. The clearest miss is not a discovery failure: rep3's basis argues around line 258's carve-out, which means the arm plausibly reached the wording and lost to it in application.
+3. Neither miss is a discovery failure: rep3's basis argues around line 258's carve-out, and rep1's ledger applies the carve-out's logic to T2 (line 65) and calls its own negative result associative (line 75) while resting H1's `REFUTED` on T1 anyway — both arms reached the rule's substance and lost to it in application.
 
-Residual: rep1 shows no evidence of reaching line 257, so a discoverability contribution cannot be excluded for that arm alone.
-It does not change the disposition, because the candidate fix on that path — an added example or restatement — would be a second home for the rule (decision 004) and would owe arms to justify prose with no identified defect.
+The candidate fix on the wording path — an added example or restatement — would in any case be a second home for the rule (decision 004) and would owe arms to justify prose with no identified defect.
 
 ## Extended deployment advice
 
-The 2026-08-10 wave's advice ("which model may run as main agent") gains a caveat, it does not flip:
-Sonnet as main agent applies the causal-status rule at `SKILL.md@faf98cd` line 257 inconsistently — observed 2 misses in the 4 archived Sonnet-as-main-agent S12 arms, where the one scored arm passed.
+The 2026-08-10 wave's advice ("which model may run as main agent") gains a caveat — it does not flip:
+Sonnet as main agent applies the causal-status rule at `SKILL.md@faf98cd` line 257 inconsistently — observed 2 misses in the 4 archived Sonnet-as-main-agent S12 arms, where the one arm scored on assertion 5 passed.
 Investigations where the deliverable is a causal status under an unidentified design should treat a Sonnet-produced `REFUTED` on a causal row as needing review against line 257 before it is acted on.
 
 Caveat carried from the issue: the 2 misses come from arms that were not being scored on assertion 5, so 2/4 is an observed count, not a measured failure rate.
