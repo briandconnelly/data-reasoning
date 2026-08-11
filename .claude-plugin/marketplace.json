@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "data-reasoning",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Marketplace serving the data-reasoning plugin from its own repository.",
   "owner": {
     "name": "Brian Connelly",
