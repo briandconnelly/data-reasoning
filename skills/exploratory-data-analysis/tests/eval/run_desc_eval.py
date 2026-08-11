@@ -36,6 +36,35 @@ unparseable stream *before* a decisive verdict. A nonzero exit caused by this
 harness's own termination is therefore never void. Each row records which
 valid ending occurred in ``ending``.
 
+Usage limits (``invalid_reason="usage_limit"``): when the account has no quota
+left, ``claude -p`` exits 0 and emits a well-formed stream that carries no tool
+call at all, so every other validity check passes and the invocation would be
+scored as a legitimate non-trigger. It is a non-execution, not a negative. The
+stream is therefore also scanned for usage-limit signals, in this order of
+preference (all three were observed together in every affected transcript of the
+300-invocation run that exposed this):
+
+- a ``rate_limit_event`` event whose ``rate_limit_info.status`` (or
+  ``overageStatus``) is ``rejected``;
+- an ``assistant`` event with ``error == "rate_limit"``;
+- a ``result`` event with ``api_error_status == 429``;
+- as a text fallback, assistant text or the ``result`` string matching
+  ``USAGE_LIMIT_TEXT`` (e.g. "You've hit your session limit - resets 4pm").
+
+Only a stream that has not yet reached a decisive verdict can be classified this
+way: a usage limit that arrives after a tool call has already decided the
+invocation does not undo that decision. The consequences are:
+
+- the attempt is ``status="void"``, ``invalid_reason="usage_limit"``,
+  ``triggered=null`` — never ``triggered=false``;
+- it is *not* retried. A usage limit does not clear in seconds, so a retry
+  would only burn the cell's budget on the same non-execution;
+- it does not consume one of the cell's ``MAX_ATTEMPTS`` executions, because no
+  execution happened;
+- the whole run aborts immediately with a nonzero exit and an operator message
+  naming the ordinal it stopped at. Everything already written is preserved and
+  ``--resume`` continues the run once the quota resets.
+
 Differences from the original (the point of this script):
 
 - stderr is captured to a file per attempt, never discarded.
@@ -76,19 +105,25 @@ Resuming (``--resume``), for a run interrupted partway through:
   the default; ``--resume`` is the only way to reopen one, and it opens the
   file for append, never for truncation.
 - A *cell* is ``(query_index, run, arm_label)``. A cell is complete when it
-  has a ``valid`` row, or when its rows are all ``void`` and the highest
-  attempt reached ``MAX_ATTEMPTS`` (its retries are spent; re-running it
-  would break the preregistered at-most-2-retries rule). Complete cells are
-  skipped. A cell with only ``void`` rows below ``MAX_ATTEMPTS`` was
-  interrupted mid-retry: it resumes at ``highest attempt + 1``, so its new
-  rows and transcripts never collide with the stranded ones.
+  has a ``valid`` row, or when it has spent ``MAX_ATTEMPTS`` executions on
+  ``void`` rows (its retries are spent; re-running it would break the
+  preregistered at-most-2-retries rule). Complete cells are skipped. A cell
+  below that budget was interrupted mid-retry: it resumes at ``highest
+  attempt + 1``, so its new rows and transcripts never collide with the
+  stranded ones.
+- A ``usage_limit`` void row is a non-execution, so it spends nothing: it
+  never makes a cell complete, and a cell whose only row is one re-runs from
+  a full budget of ``MAX_ATTEMPTS`` executions. Its attempt *number* is still
+  spent, so the resumed attempt cannot overwrite the stranded transcript,
+  which means a cell's attempt numbers may exceed ``MAX_ATTEMPTS`` while its
+  executions never do.
 - An attempt the interruption killed before its row was written is not an
   attempt: it has no verdict and no ``status``, so it consumes no retry and
   its partial transcript is rewritten when that attempt number runs again.
   Only rows in ``results.jsonl`` count, and every transcript a row names is
   left untouched. A final line left truncated by a crash is likewise dropped.
 - The at-most-2-retries rule is enforced across sessions, not per session:
-  total attempts for a cell never exceed ``MAX_ATTEMPTS`` however many
+  total executions for a cell never exceed ``MAX_ATTEMPTS`` however many
   resumes it took to get there.
 - The plan is regenerated from the same seed, fixture, and arms, and must
   cover every cell already present in ``results.jsonl``; otherwise the run
@@ -135,6 +170,22 @@ TERMINATE_GRACE_S = 5.0
 MANIFEST_PATTERN = re.compile(r"manifest-(\d{8}T\d{6}Z)(?:-(\d+))?\.json\Z")
 UNCOVERED_CELLS_SHOWN = 10
 GENERIC_SKILL_NAME = "skill"
+USAGE_LIMIT_REASON = "usage_limit"
+REJECTED_STATUS = "rejected"
+RATE_LIMIT_ERROR = "rate_limit"
+HTTP_TOO_MANY_REQUESTS = 429
+EXIT_STARTUP_ERROR = 1
+EXIT_USAGE_LIMIT = 2
+# Text fallback for the usage-limit refusal, for the day the structured fields
+# change. Kept narrow on purpose: a pattern that also matches an ordinary answer
+# would turn real non-triggers into voids and destroy the measurement.
+USAGE_LIMIT_TEXT = re.compile(
+    r"hit your (?:\w+ ){0,2}limit"
+    r"|(?:usage|session|rate|quota) limit (?:reached|exceeded)"
+    r"|(?:reached|exceeded) your (?:\w+ ){0,2}limit"
+    r"|\blimits?\b.{0,40}\bresets?\b[^\w\n]{0,4}\d",
+    re.IGNORECASE,
+)
 
 # A cell is one planned unit of work: (query_index, run, arm_label).
 CellKey = tuple[int, int, str]
@@ -171,11 +222,16 @@ class ProcessResult:
     session_id: str | None
     parsed_any: bool
     decided_on_result: bool
+    usage_limit_signal: str | None
 
 
 @dataclass(frozen=True)
 class AttemptOutcome:
-    """Classification of one claude process attempt."""
+    """Classification of one claude process attempt.
+
+    ``usage_limit_signal`` names the event field that proved the usage limit; it
+    is operator diagnostics only, and is None for every other outcome.
+    """
 
     status: str
     invalid_reason: str | None
@@ -184,6 +240,7 @@ class AttemptOutcome:
     started_utc: str
     duration_s: float
     ending: str | None
+    usage_limit_signal: str | None = None
 
 
 @dataclass(frozen=True)
@@ -204,17 +261,36 @@ class Config:
 
 
 @dataclass(frozen=True)
+class CellProgress:
+    """Where one interrupted cell picks up.
+
+    ``next_attempt`` is the next unused attempt *number* (so a resumed attempt
+    can never overwrite a stranded transcript). ``attempts_spent`` counts only
+    real executions, so a ``usage_limit`` void — a non-execution — leaves the
+    cell's retry budget untouched while still consuming its attempt number.
+    """
+
+    next_attempt: int
+    attempts_spent: int
+
+
+FIRST_CELL_PROGRESS = CellProgress(next_attempt=1, attempts_spent=0)
+
+
+@dataclass(frozen=True)
 class ResumeState:
     """What an existing results.jsonl says about each cell's progress.
 
-    ``complete`` holds cells that must be skipped. ``start_attempt`` holds the
-    next attempt number for cells that were interrupted mid-retry; a cell
-    absent from it starts at attempt 1.
+    ``complete`` holds cells that must be skipped. ``progress`` holds where
+    cells interrupted mid-retry pick up; a cell absent from it starts fresh.
     """
 
     complete: frozenset[CellKey]
-    start_attempt: dict[CellKey, int]
+    progress: dict[CellKey, CellProgress]
     rows_read: int
+
+    def progress_for(self, key: CellKey) -> CellProgress:
+        return self.progress.get(key, FIRST_CELL_PROGRESS)
 
 
 def find_project_root() -> Path:
@@ -348,6 +424,69 @@ def assistant_decision(event: dict, clean_name: str) -> bool | None:
     return None
 
 
+def assistant_text(event: dict) -> str:
+    """Concatenate the text blocks of an assistant event's message."""
+    content = event.get("message", {}).get("content", [])
+    if not isinstance(content, list):
+        return ""
+    return "\n".join(
+        item.get("text", "")
+        for item in content
+        if isinstance(item, dict) and item.get("type") == "text"
+    )
+
+
+def rate_limit_event_signal(event: dict) -> str | None:
+    """Only ``status`` counts.
+
+    A healthy session also emits ``rate_limit_event``, and its sibling
+    ``overageStatus`` reads ``rejected`` there too — that field reports whether
+    overage billing is available (``overageDisabledReason: org_level_disabled``),
+    not whether the request was served. Treating it as a usage limit voided a
+    normal answered invocation in testing.
+    """
+    info = event.get("rate_limit_info")
+    info = info if isinstance(info, dict) else {}
+    if info.get("status") == REJECTED_STATUS:
+        return f"rate_limit_event.rate_limit_info.status={REJECTED_STATUS}"
+    return None
+
+
+def assistant_usage_limit_signal(event: dict) -> str | None:
+    if event.get("error") == RATE_LIMIT_ERROR:
+        return f"assistant.error={RATE_LIMIT_ERROR}"
+    if USAGE_LIMIT_TEXT.search(assistant_text(event)):
+        return "assistant text matched USAGE_LIMIT_TEXT"
+    return None
+
+
+def result_usage_limit_signal(event: dict) -> str | None:
+    if event.get("api_error_status") == HTTP_TOO_MANY_REQUESTS:
+        return f"result.api_error_status={HTTP_TOO_MANY_REQUESTS}"
+    result_text = event.get("result")
+    if isinstance(result_text, str) and USAGE_LIMIT_TEXT.search(result_text):
+        return "result text matched USAGE_LIMIT_TEXT"
+    return None
+
+
+USAGE_LIMIT_SIGNALS = {
+    "rate_limit_event": rate_limit_event_signal,
+    "assistant": assistant_usage_limit_signal,
+    "result": result_usage_limit_signal,
+}
+
+
+def usage_limit_signal(event: dict) -> str | None:
+    """Name the usage-limit signal this event carries, or None.
+
+    Structured fields are preferred and checked first; the text match is a
+    fallback for the day those fields change. See the module docstring for what
+    each signal looks like in a real transcript.
+    """
+    detect = USAGE_LIMIT_SIGNALS.get(str(event.get("type")))
+    return None if detect is None else detect(event)
+
+
 class LiveDetector:
     """Run run_eval.py's detection over a stream consumed line by line.
 
@@ -355,7 +494,12 @@ class LiveDetector:
     None while undecided. run_eval.py's ``triggered`` accumulator is only ever
     set True immediately before returning, so a ``result`` event decides False,
     exactly as here. The detector keeps no event history: only the verdict, the
-    session id, and whether any line parsed at all.
+    session id, whether any line parsed at all, and any usage-limit signal.
+
+    A usage limit is only recognised while the verdict is still undecided: once
+    a tool call has decided the invocation, a later rate-limit event cannot undo
+    it. ``decided`` is what the reader loop stops on, because either outcome
+    ends the invocation.
     """
 
     def __init__(self, clean_name: str) -> None:
@@ -365,6 +509,12 @@ class LiveDetector:
         self.session_id: str | None = None
         self.parsed_any = False
         self.decided_on_result = False
+        self.usage_limit_signal: str | None = None
+
+    @property
+    def decided(self) -> bool:
+        """True once nothing further in the stream can change the outcome."""
+        return self.verdict is not None or self.usage_limit_signal is not None
 
     def feed_line(self, line: str) -> bool | None:
         try:
@@ -375,7 +525,11 @@ class LiveDetector:
             return self.verdict
         self.parsed_any = True
         self._record_session(event)
-        if self.verdict is not None:
+        if self.decided:
+            return self.verdict
+        signal = usage_limit_signal(event)
+        if signal is not None:
+            self.usage_limit_signal = signal
             return self.verdict
         event_type = event.get("type")
         if event_type == "stream_event":
@@ -400,25 +554,26 @@ class LiveDetector:
             self.session_id = session_id
 
 
-def drain_buffer(buffer: str, out, detector: LiveDetector) -> tuple[str, bool | None]:
+def drain_buffer(buffer: str, out, detector: LiveDetector) -> tuple[str, bool]:
     """Archive every complete line in ``buffer``, feeding each to the detector.
 
-    Lines keep being archived after the verdict lands, so whatever already
-    arrived reaches the transcript; only the detector stops deciding.
+    Lines keep being archived after the outcome lands, so whatever already
+    arrived reaches the transcript; only the detector stops deciding. Returns
+    the unconsumed tail and whether the detector has decided.
     """
-    verdict = detector.verdict
     while "\n" in buffer:
         line, buffer = buffer.split("\n", 1)
         out.write(line + "\n")
         stripped = line.strip()
-        if stripped and verdict is None:
-            verdict = detector.feed_line(stripped)
+        if stripped and not detector.decided:
+            detector.feed_line(stripped)
     out.flush()
-    return buffer, verdict
+    return buffer, detector.decided
 
 
 def stream_process(process: subprocess.Popen, out, detector: LiveDetector, timeout: float) -> bool:
-    """Consume stdout live until the detector decides, EOF, or the timeout.
+    """Consume stdout live until the detector decides (a verdict or a usage
+    limit), EOF, or the timeout.
 
     Returns True if the whole invocation timed out. Every byte read is written
     to ``out`` as it arrives; nothing beyond one partial line is held.
@@ -441,15 +596,15 @@ def stream_process(process: subprocess.Popen, out, detector: LiveDetector, timeo
             break
         if chunk:
             buffer += decoder.decode(chunk)
-            buffer, verdict = drain_buffer(buffer, out, detector)
-            if verdict is not None:
+            buffer, decided = drain_buffer(buffer, out, detector)
+            if decided:
                 break
         elif process.poll() is not None:
             break
     buffer += decoder.decode(b"", final=True)
     if buffer:
         out.write(buffer)
-        if detector.verdict is None and buffer.strip():
+        if not detector.decided and buffer.strip():
             detector.feed_line(buffer.strip())
         out.flush()
     return False
@@ -477,8 +632,22 @@ def classify_attempt(
     only streams that never decided. The two valid endings are the two the
     preregistration names: a result event is a normal completion, any earlier
     decisive verdict is an early stop by this harness.
+
+    A usage limit is checked first: it is a non-execution, so it can never be
+    scored as a trigger verdict of either polarity.
     """
     session_id = process_result.session_id
+    if process_result.usage_limit_signal is not None:
+        return AttemptOutcome(
+            "void",
+            USAGE_LIMIT_REASON,
+            None,
+            session_id,
+            started_utc,
+            duration_s,
+            None,
+            process_result.usage_limit_signal,
+        )
     if process_result.verdict is not None:
         ending = "completed" if process_result.decided_on_result else "terminated_on_detection"
         return AttemptOutcome(
@@ -547,6 +716,7 @@ def run_attempt(config: Config, arm: Arm, query: str, stem: Path) -> AttemptOutc
         session_id=detector.session_id,
         parsed_any=detector.parsed_any,
         decided_on_result=detector.decided_on_result,
+        usage_limit_signal=detector.usage_limit_signal,
     )
     return classify_attempt(process_result, started_utc, duration_s)
 
@@ -642,26 +812,32 @@ def read_existing_rows(results_path: Path) -> list[dict]:
     return rows
 
 
+def is_usage_limit_row(row: dict) -> bool:
+    return row.get("status") == "void" and row.get("invalid_reason") == USAGE_LIMIT_REASON
+
+
 def build_resume_state(rows: list[dict]) -> ResumeState:
     """Classify every cell present in existing rows as complete or interrupted.
 
-    Complete: any ``valid`` row, or all-``void`` rows whose highest attempt
-    reached MAX_ATTEMPTS. Interrupted: all-``void`` rows below MAX_ATTEMPTS,
-    which resume at the next attempt number so the per-cell attempt total
-    stays capped at MAX_ATTEMPTS across sessions.
+    Complete: any ``valid`` row, or MAX_ATTEMPTS spent executions. Interrupted:
+    anything below that, which resumes at the next unused attempt number so the
+    per-cell execution total stays capped at MAX_ATTEMPTS across sessions.
+    ``usage_limit`` rows are non-executions and spend no budget, so a cell whose
+    only row is one re-runs with its full budget.
     """
     by_cell: dict[CellKey, list[dict]] = {}
     for row in rows:
         by_cell.setdefault(row_cell(row), []).append(row)
     complete: set[CellKey] = set()
-    start_attempt: dict[CellKey, int] = {}
+    progress: dict[CellKey, CellProgress] = {}
     for key, cell_rows in by_cell.items():
         highest = max(int(row["attempt"]) for row in cell_rows)
-        if any(row["status"] == "valid" for row in cell_rows) or highest >= MAX_ATTEMPTS:
+        spent = sum(1 for row in cell_rows if not is_usage_limit_row(row))
+        if any(row["status"] == "valid" for row in cell_rows) or spent >= MAX_ATTEMPTS:
             complete.add(key)
         else:
-            start_attempt[key] = highest + 1
-    return ResumeState(frozenset(complete), start_attempt, len(rows))
+            progress[key] = CellProgress(next_attempt=highest + 1, attempts_spent=spent)
+    return ResumeState(frozenset(complete), progress, len(rows))
 
 
 def verify_plan_covers(plan: list[Invocation], rows: list[dict], results_path: Path) -> None:
@@ -746,7 +922,7 @@ def print_resume_summary(
     remaining: list[Invocation],
     verified: dict[str, str],
 ) -> None:
-    interrupted = sorted(state.start_attempt)
+    interrupted = sorted(state.progress)
     print(
         f"[resume] rows read: {state.rows_read}\n"
         f"[resume] cells complete: {len(state.complete)}/{len(plan)}\n"
@@ -754,10 +930,13 @@ def print_resume_summary(
         f"[resume] cells remaining to run: {len(remaining)}",
         file=sys.stderr,
     )
-    for index, run, label in interrupted:
+    for key in interrupted:
+        index, run, label = key
+        cell = state.progress[key]
         print(
             f"[resume]   q{index} r{run} {label} continues at attempt "
-            f"{state.start_attempt[(index, run, label)]} of {MAX_ATTEMPTS}",
+            f"{cell.next_attempt} with {cell.attempts_spent} of "
+            f"{MAX_ATTEMPTS} execution(s) spent",
             file=sys.stderr,
         )
     for name, value in verified.items():
@@ -785,8 +964,11 @@ def prepare_resume(
         "cells_complete": len(state.complete),
         "cells_remaining": len(remaining),
         "cells_continuing_at_attempt": {
-            f"q{index}-r{run}-{label}": attempt
-            for (index, run, label), attempt in sorted(state.start_attempt.items())
+            f"q{index}-r{run}-{label}": {
+                "next_attempt": cell.next_attempt,
+                "attempts_spent": cell.attempts_spent,
+            }
+            for (index, run, label), cell in sorted(state.progress.items())
         },
         "verified_provenance": verified,
     }
@@ -909,6 +1091,38 @@ def drop_truncated_tail(path: Path) -> None:
         handle.truncate(keep)
 
 
+class UsageLimitAbort(RuntimeError):
+    """The account ran out of quota; the run stops and keeps what it has.
+
+    Unlike StartupError this is raised mid-run, after rows were written, so its
+    message must tell the operator exactly where the run stopped and how to
+    continue it.
+    """
+
+
+def usage_limit_message(
+    invocation: Invocation,
+    attempt: int,
+    plan_size: int,
+    outcome: AttemptOutcome,
+    results_path: Path,
+) -> str:
+    return (
+        f"usage limit reached; the run stopped at ordinal {invocation.ordinal} of "
+        f"{plan_size} (q{invocation.query_index} {invocation.arm.label} "
+        f"r{invocation.run} attempt {attempt}).\n"
+        f"  signal: {outcome.usage_limit_signal}\n"
+        f"  The model never ran, so this attempt is recorded as status=void "
+        f"invalid_reason={USAGE_LIMIT_REASON} triggered=null. It was not retried "
+        f"(a usage limit does not clear in seconds) and it does not spend the "
+        f"cell's retry budget.\n"
+        f"  Everything already measured is preserved in {results_path}.\n"
+        f"  Once the quota resets, re-run the same command with --resume: the "
+        f"stopped cell re-runs from a fresh attempt and the run continues from "
+        f"where it stopped."
+    )
+
+
 def execute_plan(
     config: Config,
     plan: list[Invocation],
@@ -920,8 +1134,12 @@ def execute_plan(
 
     ``plan`` is the remaining work; ``total`` is the size of the full plan, so
     progress lines keep the ordinals of the original run. A cell interrupted
-    mid-retry starts at its recorded next attempt, which keeps the per-cell
-    total at MAX_ATTEMPTS across sessions.
+    mid-retry starts at its recorded next attempt number with its recorded
+    executions already spent, which keeps the per-cell execution total at
+    MAX_ATTEMPTS across sessions.
+
+    Raises UsageLimitAbort on the first usage-limit void: that attempt is not
+    retried and no further invocation is launched.
     """
     transcripts_dir = config.out_dir / "transcripts"
     transcripts_dir.mkdir(parents=True, exist_ok=True)
@@ -932,8 +1150,10 @@ def execute_plan(
     with results_path.open(mode, encoding="utf-8") as results:
         for invocation in plan:
             label = sanitize_label(invocation.arm.label)
-            first_attempt = 1 if state is None else state.start_attempt.get(cell_of(invocation), 1)
-            for attempt in range(first_attempt, MAX_ATTEMPTS + 1):
+            cell = FIRST_CELL_PROGRESS if state is None else state.progress_for(cell_of(invocation))
+            attempt = cell.next_attempt
+            spent = cell.attempts_spent
+            while spent < MAX_ATTEMPTS:
                 stem = transcripts_dir / (
                     f"q{invocation.query_index:03d}-{label}-r{invocation.run}-a{attempt}"
                 )
@@ -970,8 +1190,14 @@ def execute_plan(
                     f"{outcome.duration_s}s",
                     file=sys.stderr,
                 )
+                if outcome.invalid_reason == USAGE_LIMIT_REASON:
+                    raise UsageLimitAbort(
+                        usage_limit_message(invocation, attempt, plan_size, outcome, results_path)
+                    )
                 if outcome.status == "valid":
                     break
+                spent += 1
+                attempt += 1
 
 
 def parse_args() -> argparse.Namespace:
@@ -1080,7 +1306,10 @@ def main() -> int:
         return run_eval(parse_args())
     except StartupError as error:
         print(f"Error: {error}", file=sys.stderr)
-        return 1
+        return EXIT_STARTUP_ERROR
+    except UsageLimitAbort as error:
+        print(f"Aborted: {error}", file=sys.stderr)
+        return EXIT_USAGE_LIMIT
 
 
 if __name__ == "__main__":

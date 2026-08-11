@@ -30,6 +30,14 @@ The decay is unmistakable once the run is sliced by time:
 
 No P0 invocation after ordinal ~139 triggered at all.
 
+## The archived rows are poisoned, and exactly identifiable
+
+All 179 contaminated rows are scored `(status=valid, triggered=false)`, and in this run they coincide **exactly** with the rows carrying `ending == "completed"` — the two sets are identical, with no row on either side unmatched (verified over all 300 rows against the transcripts).
+That coincidence is a property of this run, not a general rule: a genuine non-triggering session that runs to a result event also ends `completed`, and here there simply were none, because every uncontaminated invocation was terminated early on a decisive verdict.
+The reliable marker is in the transcripts, where all four of these appear together: `rate_limit_event` with `rate_limit_info.status == "rejected"`, an assistant message with `error: "rate_limit"`, a `result` event with `api_error_status: 429`, and the refusal text.
+
+Anyone reading `runs/artifacts/2026-08-11-phaseA-void/results.jsonl` must treat every `ending == "completed"` row as a non-execution, not a negative.
+
 ## The instrument defect this exposes
 
 Every validity check the harness performs — exit code 0, parseable stream, result event present, non-empty session id — **passes** for a usage-limit refusal.
