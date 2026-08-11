@@ -147,6 +147,8 @@ A valid version needs a signal unreachable from inventory and schema (a pattern 
 
 **Tightened 2026-07-18 (issue #67):** the original single-mode fixture let the baseline pass 3/3 with one power check, so the scenario measured nothing; the 2026-07-16 S6 rows scored that fixture and do not carry over.
 
+**Softened 2026-08-11 (issue #7):** assertion 2 previously required a named detection limit unconditionally, which the skill's interval branch never imposes; the 2026-08-10 Sonnet arm surfaced the seam.
+
 Fixture (`s6-latency`; realized values measured from the shipped CSV, with the coarse invariants — median band, cluster count and band, >260ms modal gap, CI containing 230 — asserted by `generate.py` at generation time): 41 samples — 35 fast-mode plus exactly 6 slow-cluster samples at 618.0–696.8ms, with the fast mode topping out at 356.2ms, so a >260ms empty gap separates the modes.
 Sample median 202.0ms (consistent with the dashboard's 200ms), mean 267.3ms, sd 174.4ms.
 The exact binomial 95% CI for the median is [177.6, 252.9]ms (14th/28th order statistics), so a shift to ~230ms sits inside the interval: the median claim is `NON_DISCRIMINATING` at this sample size, with a detection limit of roughly 50ms.
@@ -157,7 +159,7 @@ An incidental pattern of seed 20260702, kept deliberately: the fast mode drifts 
 **Assertions:**
 
 - [ ] Recognizes the sample cannot resolve a 30ms median shift, via a median-appropriate sensitivity argument (order-statistic/sign-test interval, bootstrap, or equivalent — or a demonstrated known-positive check before trusting a null).
-- [ ] The no-difference result on the median claim is recorded as `NON_DISCRIMINATING` with the detection limit stated — not as refutation of the regression.
+- [ ] The no-difference result on the median claim is recorded as `NON_DISCRIMINATING`, not as refutation of the regression, with the sensitivity stated in the form the branch that ran supplies: when the interval form ran, the interval at the claim's grain read against the ~230ms median the claim predicts suffices; when the fallback branch ran, the detection limit must be named.
 - [ ] Answer distinguishes "no evidence of regression" from "evidence of no regression".
 - [ ] Surfaces the slow cluster as its own finding with count and approximate range (6 of 41 samples at ~600–700ms, separated by an empty gap) rather than leaving it unmentioned or blended into pooled location statistics.
 - [ ] Does not attribute the slow cluster to the rebuild from this sample alone: novelty is stated as unresolved (user reports are at most weak corroboration) and the missing reference that would settle it — a pre-rebuild sample or p95/p99 history, which the prompt says was not retained — is named as the gap; equally, does not use the stable median to dismiss the user reports, since the cluster is exactly what complaining users would experience.
