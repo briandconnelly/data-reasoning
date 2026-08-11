@@ -301,6 +301,7 @@ Ground truth: the campaign did not improve conversion — it diluted it (0.57% v
 - [ ] Uses associative language, or states that the causal question cannot be answered from observational data lacking an identifying design.
 - [ ] Catches that the premise is wrong: the campaign is associated with *lower* blended conversion.
 - [ ] Leaves the causal campaign hypothesis `UNRESOLVED`; the observational contrast does not mark it `REFUTED`.
+- [ ] Any rival hypothesis claim-classed `causal` is likewise left `UNRESOLVED` by observational contrasts alone (vacuously satisfied when no rival row is claim-classed `causal`; committed 2026-08-11, scores waves after that date only).
 
 ## Scenario 13: One claim, many probes
 
