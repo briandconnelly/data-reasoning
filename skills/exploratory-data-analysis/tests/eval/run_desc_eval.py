@@ -54,11 +54,46 @@ Execution is strictly sequential (num-workers=1 semantics).
 Outputs under ``--out-dir``:
 
 - ``results.jsonl`` — one JSON object per attempt (a retry is a fresh
-  invocation and gets its own row). Refuses to run if it already exists.
+  invocation and gets its own row). Refuses to run if it already exists,
+  unless ``--resume`` is given.
 - ``manifest-<utcstamp>.json`` — argv, seed, model, claude CLI version,
   git SHA, fixture and description sha256s, and the query order per run.
+  Every invocation writes a new manifest; an existing one is never
+  overwritten (a same-second collision gets a ``-<n>`` suffix).
 - ``transcripts/<stem>.stdout.jsonl`` and ``<stem>.stderr.log`` per attempt,
   where ``<stem>`` is ``q{query_index:03d}-{arm_label}-r{run}-a{attempt}``.
+  The attempt number is part of the stem, so a resumed attempt of a cell
+  can never overwrite a stranded attempt of the same cell.
+
+Resuming (``--resume``), for a run interrupted partway through:
+
+- The refusal to touch an existing ``results.jsonl`` is the default and stays
+  the default; ``--resume`` is the only way to reopen one, and it opens the
+  file for append, never for truncation.
+- A *cell* is ``(query_index, run, arm_label)``. A cell is complete when it
+  has a ``valid`` row, or when its rows are all ``void`` and the highest
+  attempt reached ``MAX_ATTEMPTS`` (its retries are spent; re-running it
+  would break the preregistered at-most-2-retries rule). Complete cells are
+  skipped. A cell with only ``void`` rows below ``MAX_ATTEMPTS`` was
+  interrupted mid-retry: it resumes at ``highest attempt + 1``, so its new
+  rows and transcripts never collide with the stranded ones.
+- An attempt the interruption killed before its row was written is not an
+  attempt: it has no verdict and no ``status``, so it consumes no retry and
+  its partial transcript is rewritten when that attempt number runs again.
+  Only rows in ``results.jsonl`` count, and every transcript a row names is
+  left untouched. A final line left truncated by a crash is likewise dropped.
+- The at-most-2-retries rule is enforced across sessions, not per session:
+  total attempts for a cell never exceed ``MAX_ATTEMPTS`` however many
+  resumes it took to get there.
+- The plan is regenerated from the same seed, fixture, and arms, and must
+  cover every cell already present in ``results.jsonl``; otherwise the run
+  aborts rather than append rows from an incompatible plan.
+- Both description sha256s and the fixture sha256 are recompared against the
+  most recent manifest in the out-dir. Any difference aborts the run, naming
+  the digest that changed: resuming across an edited description or fixture
+  would mix wordings within one result set.
+- The resumed invocation writes its own manifest, recording ``resumed``, the
+  complete/remaining cell counts, and the digests it verified.
 
 Descriptions are read from the frozen files as rendered text: exactly one
 trailing newline is stripped, the sha256 of the resulting string is recorded,
@@ -91,6 +126,11 @@ EXCERPT_CHARS = 300
 READ_CHUNK_BYTES = 8192
 SELECT_POLL_S = 1.0
 TERMINATE_GRACE_S = 5.0
+MANIFEST_PATTERN = re.compile(r"manifest-(\d{8}T\d{6}Z)(?:-(\d+))?\.json\Z")
+UNCOVERED_CELLS_SHOWN = 10
+
+# A cell is one planned unit of work: (query_index, run, arm_label).
+CellKey = tuple[int, int, str]
 
 
 @dataclass(frozen=True)
@@ -152,6 +192,21 @@ class Config:
     skill_name: str
     project_root: Path
     dry_run: bool
+    resume: bool
+
+
+@dataclass(frozen=True)
+class ResumeState:
+    """What an existing results.jsonl says about each cell's progress.
+
+    ``complete`` holds cells that must be skipped. ``start_attempt`` holds the
+    next attempt number for cells that were interrupted mid-retry; a cell
+    absent from it starts at attempt 1.
+    """
+
+    complete: frozenset[CellKey]
+    start_attempt: dict[CellKey, int]
+    rows_read: int
 
 
 def find_project_root() -> Path:
@@ -497,6 +552,169 @@ def query_orders(config: Config, queries: list[tuple[int, str]]) -> dict[str, li
     return orders
 
 
+class ResumeError(RuntimeError):
+    """A resume precondition failed; no row may be appended."""
+
+
+def cell_of(invocation: Invocation) -> CellKey:
+    return (invocation.query_index, invocation.run, invocation.arm.label)
+
+
+def row_cell(row: dict) -> CellKey:
+    return (int(row["query_index"]), int(row["run"]), str(row["arm_label"]))
+
+
+def read_existing_rows(results_path: Path) -> list[dict]:
+    """Parse an existing results.jsonl into rows.
+
+    Only a final line left truncated by a crash is tolerated (rows are
+    flushed one per line, so nothing else can be partial). Any other malformed
+    or incomplete row aborts: guessing at it would misjudge which cells ran.
+    """
+    text = results_path.read_text(encoding="utf-8")
+    lines = text.split("\n")
+    ends_with_newline = text.endswith("\n")
+    if ends_with_newline:
+        lines.pop()
+    rows: list[dict] = []
+    for number, line in enumerate(lines, start=1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as error:
+            if number == len(lines) and not ends_with_newline:
+                print(
+                    f"Warning: final line {number} of {results_path} is truncated "
+                    f"(crash mid-write); it is ignored and dropped before appending",
+                    file=sys.stderr,
+                )
+                continue
+            raise ResumeError(f"{results_path} line {number} is not valid JSON: {error}") from error
+        if not isinstance(row, dict):
+            raise ResumeError(f"{results_path} line {number} is not a JSON object")
+        missing = [
+            field
+            for field in ("query_index", "run", "arm_label", "attempt", "status")
+            if field not in row
+        ]
+        if missing:
+            raise ResumeError(f"{results_path} line {number} lacks field(s): {', '.join(missing)}")
+        rows.append(row)
+    return rows
+
+
+def build_resume_state(rows: list[dict]) -> ResumeState:
+    """Classify every cell present in existing rows as complete or interrupted.
+
+    Complete: any ``valid`` row, or all-``void`` rows whose highest attempt
+    reached MAX_ATTEMPTS. Interrupted: all-``void`` rows below MAX_ATTEMPTS,
+    which resume at the next attempt number so the per-cell attempt total
+    stays capped at MAX_ATTEMPTS across sessions.
+    """
+    by_cell: dict[CellKey, list[dict]] = {}
+    for row in rows:
+        by_cell.setdefault(row_cell(row), []).append(row)
+    complete: set[CellKey] = set()
+    start_attempt: dict[CellKey, int] = {}
+    for key, cell_rows in by_cell.items():
+        highest = max(int(row["attempt"]) for row in cell_rows)
+        if any(row["status"] == "valid" for row in cell_rows) or highest >= MAX_ATTEMPTS:
+            complete.add(key)
+        else:
+            start_attempt[key] = highest + 1
+    return ResumeState(frozenset(complete), start_attempt, len(rows))
+
+
+def verify_plan_covers(plan: list[Invocation], rows: list[dict], results_path: Path) -> None:
+    """Abort unless the regenerated plan covers every cell already recorded."""
+    planned = {cell_of(invocation) for invocation in plan}
+    missing = sorted({row_cell(row) for row in rows} - planned)
+    if not missing:
+        return
+    head = missing[:UNCOVERED_CELLS_SHOWN]
+    shown = ", ".join(f"q{index} r{run} {label}" for index, run, label in head)
+    hidden = len(missing) - len(head)
+    more = f" (and {hidden} more)" if hidden else ""
+    raise ResumeError(
+        f"the regenerated plan does not cover {len(missing)} cell(s) already in "
+        f"{results_path}: {shown}{more}. The plan arguments (seed, fixture, "
+        f"--queries, --runs, labels) must match the interrupted run."
+    )
+
+
+def latest_manifest(out_dir: Path) -> Path:
+    """Return the newest manifest by its embedded UTC stamp, then suffix."""
+    candidates = []
+    for path in sorted(out_dir.iterdir()):
+        match = MANIFEST_PATTERN.fullmatch(path.name)
+        if match:
+            candidates.append(((match.group(1), int(match.group(2) or 0)), path))
+    if not candidates:
+        raise ResumeError(
+            f"no manifest-<utcstamp>.json found in {out_dir}; "
+            f"cannot verify description and fixture digests for --resume"
+        )
+    return max(candidates)[1]
+
+
+def verify_digests(config: Config, arms: dict[str, Arm], manifest_path: Path) -> dict[str, str]:
+    """Abort if any description or fixture digest drifted since that manifest.
+
+    Resuming across an edited description or fixture would mix wordings inside
+    one result set, so every difference is named and the run stops.
+    """
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    fixture_sha256 = sha256_text(config.fixture.read_text(encoding="utf-8"))
+    drift = []
+    recorded_fixture = manifest.get("fixture_sha256")
+    if recorded_fixture != fixture_sha256:
+        drift.append(
+            f"fixture {config.fixture}: manifest {recorded_fixture} != current {fixture_sha256}"
+        )
+    recorded_descriptions = manifest.get("descriptions") or {}
+    for key, arm in arms.items():
+        recorded = (recorded_descriptions.get(key) or {}).get("sha256")
+        if recorded != arm.sha256:
+            drift.append(
+                f"description {key} (label {arm.label}): "
+                f"manifest {recorded} != current {arm.sha256}"
+            )
+    if drift:
+        raise ResumeError(
+            f"provenance drift against {manifest_path}; refusing to resume:\n  "
+            + "\n  ".join(drift)
+        )
+    verified = {"manifest": str(manifest_path), "fixture_sha256": fixture_sha256}
+    for key, arm in arms.items():
+        verified[f"description_{key}_sha256"] = arm.sha256
+    return verified
+
+
+def print_resume_summary(
+    state: ResumeState,
+    plan: list[Invocation],
+    remaining: list[Invocation],
+    verified: dict[str, str],
+) -> None:
+    interrupted = sorted(state.start_attempt)
+    print(
+        f"[resume] rows read: {state.rows_read}\n"
+        f"[resume] cells complete: {len(state.complete)}/{len(plan)}\n"
+        f"[resume] cells interrupted mid-retry: {len(interrupted)}\n"
+        f"[resume] cells remaining to run: {len(remaining)}",
+        file=sys.stderr,
+    )
+    for index, run, label in interrupted:
+        print(
+            f"[resume]   q{index} r{run} {label} continues at attempt "
+            f"{state.start_attempt[(index, run, label)]} of {MAX_ATTEMPTS}",
+            file=sys.stderr,
+        )
+    for name, value in verified.items():
+        print(f"[resume] verified {name}: {value}", file=sys.stderr)
+
+
 def select_queries(fixture_items: list[dict], selector: str | None) -> list[tuple[int, str]]:
     """Select (fixture_index, query) pairs.
 
@@ -528,14 +746,29 @@ def tool_version(cmd: list[str]) -> str:
         return f"unavailable: {type(error).__name__}: {error}"
 
 
+def unique_manifest_path(out_dir: Path) -> Path:
+    """Pick a manifest name that no existing file holds.
+
+    Every invocation, resumed or not, writes its own manifest; a same-second
+    collision takes a ``-<n>`` suffix rather than overwriting the earlier one.
+    """
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    manifest_path = out_dir / f"manifest-{stamp}.json"
+    suffix = 2
+    while manifest_path.exists():
+        manifest_path = out_dir / f"manifest-{stamp}-{suffix}.json"
+        suffix += 1
+    return manifest_path
+
+
 def write_manifest(
     config: Config,
     arms: dict[str, Arm],
     desc_paths: dict[str, Path],
     queries: list[tuple[int, str]],
+    resume_info: dict | None = None,
 ) -> Path:
-    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    manifest_path = config.out_dir / f"manifest-{stamp}.json"
+    manifest_path = unique_manifest_path(config.out_dir)
     manifest = {
         "argv": sys.argv,
         "seed": config.seed,
@@ -559,7 +792,10 @@ def write_manifest(
         "selected_query_indices": [index for index, _ in queries],
         "query_order_per_run": query_orders(config, queries),
         "dry_run": config.dry_run,
+        "resumed": config.resume,
     }
+    if resume_info is not None:
+        manifest["resume"] = resume_info
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
     return manifest_path
 
@@ -578,13 +814,47 @@ def print_dry_run_preview(config: Config, plan: list[Invocation]) -> None:
         )
 
 
-def execute_plan(config: Config, plan: list[Invocation], results_path: Path) -> None:
+def drop_truncated_tail(path: Path) -> None:
+    """Discard a final line that a crash left unterminated, before appending.
+
+    ``read_existing_rows`` already ignores such a line, and it carries no
+    classifiable attempt. Removing it (rather than just terminating it) keeps
+    the file parseable end to end, so a second resume does not trip over a
+    malformed line that is no longer last.
+    """
+    data = path.read_bytes()
+    if not data or data.endswith(b"\n"):
+        return
+    keep = data.rfind(b"\n") + 1
+    with path.open("rb+") as handle:
+        handle.truncate(keep)
+
+
+def execute_plan(
+    config: Config,
+    plan: list[Invocation],
+    results_path: Path,
+    state: ResumeState | None = None,
+    total: int | None = None,
+) -> None:
+    """Run every invocation in ``plan``, appending one row per attempt.
+
+    ``plan`` is the remaining work; ``total`` is the size of the full plan, so
+    progress lines keep the ordinals of the original run. A cell interrupted
+    mid-retry starts at its recorded next attempt, which keeps the per-cell
+    total at MAX_ATTEMPTS across sessions.
+    """
     transcripts_dir = config.out_dir / "transcripts"
     transcripts_dir.mkdir(parents=True, exist_ok=True)
-    with results_path.open("w", encoding="utf-8") as results:
+    plan_size = len(plan) if total is None else total
+    mode = "a" if config.resume else "w"
+    if mode == "a" and results_path.exists():
+        drop_truncated_tail(results_path)
+    with results_path.open(mode, encoding="utf-8") as results:
         for invocation in plan:
             label = sanitize_label(invocation.arm.label)
-            for attempt in range(1, MAX_ATTEMPTS + 1):
+            first_attempt = 1 if state is None else state.start_attempt.get(cell_of(invocation), 1)
+            for attempt in range(first_attempt, MAX_ATTEMPTS + 1):
                 stem = transcripts_dir / (
                     f"q{invocation.query_index:03d}-{label}-r{invocation.run}-a{attempt}"
                 )
@@ -613,7 +883,7 @@ def execute_plan(config: Config, plan: list[Invocation], results_path: Path) -> 
                 results.write(json.dumps(row) + "\n")
                 results.flush()
                 print(
-                    f"[{invocation.ordinal}/{len(plan)}] q{invocation.query_index} "
+                    f"[{invocation.ordinal}/{plan_size}] q{invocation.query_index} "
                     f"{invocation.arm.label} r{invocation.run} a{attempt}: "
                     f"{outcome.status} triggered={outcome.triggered} "
                     f"ending={outcome.ending} reason={outcome.invalid_reason} "
@@ -640,6 +910,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--label-b", default="B", help="Label for arm B")
     parser.add_argument("--dry-run", action="store_true", help="Plan and manifest only")
     parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Append to an existing results.jsonl, skipping cells already complete "
+        "(without it, an existing results.jsonl is refused)",
+    )
+    parser.add_argument(
         "--queries",
         default=None,
         help="0-based index filter (e.g. 3 or 1,4 or 2-5) or regex on query text",
@@ -651,6 +927,21 @@ def parse_args() -> argparse.Namespace:
         "(default: derived from the fixture path's skills/<name>/ segment)",
     )
     return parser.parse_args()
+
+
+def precondition_error(config: Config, results_path: Path) -> str | None:
+    """Return the reason this invocation must not start, or None.
+
+    The refusal to touch an existing results.jsonl is the default; only
+    --resume lifts it, and then the file must actually be there.
+    """
+    if config.resume and config.dry_run:
+        return "--resume and --dry-run are mutually exclusive"
+    if config.resume and not results_path.exists():
+        return f"--resume given but {results_path} does not exist"
+    if not config.dry_run and not config.resume and results_path.exists():
+        return f"{results_path} already exists; refusing to overwrite"
+    return None
 
 
 def main() -> int:
@@ -665,7 +956,14 @@ def main() -> int:
         skill_name=args.skill_name or default_skill_name(args.fixture),
         project_root=find_project_root(),
         dry_run=args.dry_run,
+        resume=args.resume,
     )
+    config.out_dir.mkdir(parents=True, exist_ok=True)
+    results_path = config.out_dir / "results.jsonl"
+    blocked = precondition_error(config, results_path)
+    if blocked:
+        print(f"Error: {blocked}", file=sys.stderr)
+        return 1
     fixture_items = json.loads(config.fixture.read_text(encoding="utf-8"))
     queries = select_queries(fixture_items, args.queries)
     if not queries:
@@ -676,18 +974,43 @@ def main() -> int:
     for key, label in (("A", args.label_a), ("B", args.label_b)):
         text = read_frozen_description(desc_paths[key])
         arms[key] = Arm(label=label, text=text, sha256=sha256_text(text))
-    config.out_dir.mkdir(parents=True, exist_ok=True)
-    results_path = config.out_dir / "results.jsonl"
-    if not config.dry_run and results_path.exists():
-        print(f"Error: {results_path} already exists; refusing to overwrite", file=sys.stderr)
-        return 1
-    manifest_path = write_manifest(config, arms, desc_paths, queries)
-    print(f"Manifest: {manifest_path}", file=sys.stderr)
     plan = list(plan_invocations(config, queries, arms))
+    remaining = plan
+    state: ResumeState | None = None
+    resume_info: dict | None = None
+    if config.resume:
+        try:
+            rows = read_existing_rows(results_path)
+            verify_plan_covers(plan, rows, results_path)
+            verified = verify_digests(config, arms, latest_manifest(config.out_dir))
+        except ResumeError as error:
+            print(f"Error: {error}", file=sys.stderr)
+            return 1
+        state = build_resume_state(rows)
+        remaining = [item for item in plan if cell_of(item) not in state.complete]
+        print_resume_summary(state, plan, remaining, verified)
+        resume_info = {
+            "results_file": str(results_path),
+            "rows_read": state.rows_read,
+            "cells_total": len(plan),
+            "cells_complete": len(state.complete),
+            "cells_remaining": len(remaining),
+            "cells_continuing_at_attempt": {
+                f"q{index}-r{run}-{label}": attempt
+                for (index, run, label), attempt in sorted(state.start_attempt.items())
+            },
+            "verified_digests": verified,
+        }
+    manifest_path = write_manifest(config, arms, desc_paths, queries, resume_info)
+    print(f"Manifest: {manifest_path}", file=sys.stderr)
     if config.dry_run:
         print_dry_run_preview(config, plan)
         return 0
-    execute_plan(config, plan, results_path)
+    if config.resume and not remaining:
+        print(f"All {len(plan)} cells already complete; nothing to run.", file=sys.stderr)
+        print(f"Results: {results_path}", file=sys.stderr)
+        return 0
+    execute_plan(config, remaining, results_path, state, len(plan))
     print(f"Results: {results_path}", file=sys.stderr)
     return 0
 
