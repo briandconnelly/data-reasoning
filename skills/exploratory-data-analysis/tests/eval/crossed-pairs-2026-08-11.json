@@ -1,0 +1,372 @@
+[
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "profile",
+    "query": "Profile the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null,
+    "content_phrase": "the Fairview branch"
+  },
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "overview",
+    "query": "Give me an overview of the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null
+  },
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null
+  },
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null
+  },
+  {
+    "base_id": 2,
+    "base_slug": "hold-pickup-lockers",
+    "speech_act": "profile",
+    "query": "Profile the hold pickup lockers.",
+    "scope": "whole",
+    "entity": "hold pickup lockers",
+    "facet": null,
+    "content_phrase": "the hold pickup lockers"
+  },
+  {
+    "base_id": 2,
+    "base_slug": "hold-pickup-lockers",
+    "speech_act": "overview",
+    "query": "Give me an overview of the hold pickup lockers.",
+    "scope": "whole",
+    "entity": "hold pickup lockers",
+    "facet": null
+  },
+  {
+    "base_id": 2,
+    "base_slug": "hold-pickup-lockers",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the hold pickup lockers.",
+    "scope": "whole",
+    "entity": "hold pickup lockers",
+    "facet": null
+  },
+  {
+    "base_id": 2,
+    "base_slug": "hold-pickup-lockers",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the hold pickup lockers.",
+    "scope": "whole",
+    "entity": "hold pickup lockers",
+    "facet": null
+  },
+  {
+    "base_id": 3,
+    "base_slug": "teen-coding-workshop",
+    "speech_act": "profile",
+    "query": "Profile the teen coding workshop — attendance numbers.",
+    "scope": "facet",
+    "entity": "teen coding workshop",
+    "facet": "attendance numbers",
+    "content_phrase": "the teen coding workshop — attendance numbers"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "teen-coding-workshop",
+    "speech_act": "overview",
+    "query": "Give me an overview of the teen coding workshop — attendance numbers.",
+    "scope": "facet",
+    "entity": "teen coding workshop",
+    "facet": "attendance numbers"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "teen-coding-workshop",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the teen coding workshop — attendance numbers.",
+    "scope": "facet",
+    "entity": "teen coding workshop",
+    "facet": "attendance numbers"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "teen-coding-workshop",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the teen coding workshop — attendance numbers.",
+    "scope": "facet",
+    "entity": "teen coding workshop",
+    "facet": "attendance numbers"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "profile",
+    "query": "Profile Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts",
+    "content_phrase": "Central Library's graphic novel collection — renewal counts"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "overview",
+    "query": "Give me an overview of Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "bookmobile-noshows",
+    "speech_act": "profile",
+    "query": "Profile the bookmobile route — missed-stop counts.",
+    "scope": "facet",
+    "entity": "bookmobile route",
+    "facet": "missed-stop counts",
+    "content_phrase": "the bookmobile route — missed-stop counts"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "bookmobile-noshows",
+    "speech_act": "overview",
+    "query": "Give me an overview of the bookmobile route — missed-stop counts.",
+    "scope": "facet",
+    "entity": "bookmobile route",
+    "facet": "missed-stop counts"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "bookmobile-noshows",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the bookmobile route — missed-stop counts.",
+    "scope": "facet",
+    "entity": "bookmobile route",
+    "facet": "missed-stop counts"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "bookmobile-noshows",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the bookmobile route — missed-stop counts.",
+    "scope": "facet",
+    "entity": "bookmobile route",
+    "facet": "missed-stop counts"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "circulation-desk-branch12",
+    "speech_act": "profile",
+    "query": "Profile the circulation desk at branch 12 — transaction wait times.",
+    "scope": "facet",
+    "entity": "circulation desk at branch 12",
+    "facet": "transaction wait times",
+    "content_phrase": "the circulation desk at branch 12 — transaction wait times"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "circulation-desk-branch12",
+    "speech_act": "overview",
+    "query": "Give me an overview of the circulation desk at branch 12 — transaction wait times.",
+    "scope": "facet",
+    "entity": "circulation desk at branch 12",
+    "facet": "transaction wait times"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "circulation-desk-branch12",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the circulation desk at branch 12 — transaction wait times.",
+    "scope": "facet",
+    "entity": "circulation desk at branch 12",
+    "facet": "transaction wait times"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "circulation-desk-branch12",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the circulation desk at branch 12 — transaction wait times.",
+    "scope": "facet",
+    "entity": "circulation desk at branch 12",
+    "facet": "transaction wait times"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "profile",
+    "query": "Profile branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null,
+    "content_phrase": "branch 9"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "overview",
+    "query": "Give me an overview of branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null
+  },
+  {
+    "base_id": 8,
+    "base_slug": "ill-turnaround",
+    "speech_act": "profile",
+    "query": "Profile the interlibrary loan program — request turnaround times.",
+    "scope": "facet",
+    "entity": "interlibrary loan program",
+    "facet": "request turnaround times",
+    "content_phrase": "the interlibrary loan program — request turnaround times"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "ill-turnaround",
+    "speech_act": "overview",
+    "query": "Give me an overview of the interlibrary loan program — request turnaround times.",
+    "scope": "facet",
+    "entity": "interlibrary loan program",
+    "facet": "request turnaround times"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "ill-turnaround",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the interlibrary loan program — request turnaround times.",
+    "scope": "facet",
+    "entity": "interlibrary loan program",
+    "facet": "request turnaround times"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "ill-turnaround",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the interlibrary loan program — request turnaround times.",
+    "scope": "facet",
+    "entity": "interlibrary loan program",
+    "facet": "request turnaround times"
+  },
+  {
+    "base_id": 9,
+    "base_slug": "local-history-archive",
+    "speech_act": "profile",
+    "query": "Profile the local history archive.",
+    "scope": "whole",
+    "entity": "local history archive",
+    "facet": null,
+    "content_phrase": "the local history archive"
+  },
+  {
+    "base_id": 9,
+    "base_slug": "local-history-archive",
+    "speech_act": "overview",
+    "query": "Give me an overview of the local history archive.",
+    "scope": "whole",
+    "entity": "local history archive",
+    "facet": null
+  },
+  {
+    "base_id": 9,
+    "base_slug": "local-history-archive",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the local history archive.",
+    "scope": "whole",
+    "entity": "local history archive",
+    "facet": null
+  },
+  {
+    "base_id": 9,
+    "base_slug": "local-history-archive",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the local history archive.",
+    "scope": "whole",
+    "entity": "local history archive",
+    "facet": null
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "profile",
+    "query": "Profile the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates",
+    "content_phrase": "the study room booking system — no-show rates"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "overview",
+    "query": "Give me an overview of the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates"
+  }
+]
