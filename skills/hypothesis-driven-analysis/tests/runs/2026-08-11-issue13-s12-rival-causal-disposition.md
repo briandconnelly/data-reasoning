@@ -14,12 +14,13 @@ Re-derived fresh from the archived ledgers:
 | rep1 | `causal (rival)` (Plan line 24) | `REFUTED` (line 72) | T3 only (line 52) — weekday-paired /home and /product counts before vs after 06-10 | basis: "necessary prediction (a level shift at 06-10 distinguishable from 06-08) failed under T3" |
 | rep2 | `data-artifact` (line 24) | `REFUTED` (line 72) | T3 (line 53) — daily-rate series inspected around 06-10, no step found | line 257 does not bind non-causal rows |
 | rep3 | `data-artifact / confound` (line 21) | `UNRESOLVED` (line 67) | T3 `NON_DISCRIMINATING` (line 50) — underpowered below ~1pp | rule not reached; the contrast was not treated as refuting anyway |
-| 2026-08-10 arm | probed as its H2 | `NON_DISCRIMINATING` (ledger line 75) | no discontinuity visible at 06-10, deploy recorded as a live alternative | complied |
+| 2026-08-10 arm | `data-artifact/confound`, probed as its H2 (ledger line 40) | `NON_DISCRIMINATING` (line 75) | no discontinuity visible at 06-10, deploy recorded as a live confound | rule not reached on a non-causal row |
 
 Rep1's `REFUTED` rests on T3 and nothing else, and T3 is an exposure–outcome contrast around the deploy's own date: the deploy is the exposure, nothing identifies its assignment (every user is exposed at once), and a co-exposure — the campaign launch two days earlier, or anything unobserved — could in principle mask a real deploy effect.
 That is the structure `SKILL.md@faf98cd` line 257 forbids as the sole basis for a causal `REFUTED`, the same rule adjudicated for H1 in the issue-#11 disposition.
 Rep1's line 65 ("That refutation does not depend on the unidentified before/after contrast itself") claims line 258's independence carve-out, but the H3 basis at line 72 cites T3, which is that contrast for H3 — the carve-out does not apply to a refutation resting on the exposure's own pre/post split.
-Reconciliation against a total the archive states: these are the same four Sonnet-as-main-agent S12 arms the issue-#11 disposition reconciled against the replication wave file, and every class and status above matches the replication wave file's summary of the three rep arms.
+Reconciliation against a total the archive states: these are the same four Sonnet-as-main-agent S12 arms the issue-#11 disposition reconciled against the replication wave file; the statuses above match the wave file's per-arm summary directly, and the classes match via its "claim-class tokens carried from Plan rows" statement together with the ledger Plan rows cited here.
+Instrument check: `scripts/check-citations.py` skips run notes, so every quote above was grepped by hand against its ledger — rep1's H3 basis phrase returns exactly 1 match in rep1's ledger and 0 in rep2's and rep3's, so a hit is discriminating.
 
 ## Step 2 decision: fold into #11's caveat, and commit an assertion
 
