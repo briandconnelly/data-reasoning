@@ -1,0 +1,36 @@
+[
+  {
+    "arm": "canary-0.33-tier",
+    "should_trigger": true,
+    "query": "Give me a rundown on the Eastside branch — holds, checkouts, everything.",
+    "source_index": 1
+  },
+  {
+    "arm": "canary-0.33-tier",
+    "should_trigger": true,
+    "query": "Give me context on branch 7's hold queue behaviour.",
+    "source_index": 8
+  },
+  {
+    "arm": "canary-0.33-tier",
+    "should_trigger": true,
+    "query": "Give me an overview of the digital lending service.",
+    "source_index": 15
+  },
+  {
+    "arm": "canary-0.33-tier",
+    "should_trigger": true,
+    "query": "Tell me about the periodicals collection at branch 3.",
+    "source_index": 17
+  },
+  {
+    "arm": "canary-probe-prose",
+    "should_trigger": false,
+    "query": "Summarize this staff report on branch renovations for me."
+  },
+  {
+    "arm": "canary-probe-dataset",
+    "should_trigger": true,
+    "query": "Summarize what's in the circulation export."
+  }
+]

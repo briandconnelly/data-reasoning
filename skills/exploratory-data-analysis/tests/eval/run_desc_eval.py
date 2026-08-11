@@ -12,6 +12,11 @@ Detection method (mirrored from skill-creator ``scripts/run_eval.py``):
   The file body is a YAML block scalar (``description: |``) holding the
   description indented by two spaces, followed by
   ``# {skill_name}`` and ``This skill handles: {description}``.
+- ``{skill_name}`` comes from ``--skill-name`` when given (recorded as
+  ``explicit``), else from the fixture path's ``skills/<name>/`` segment
+  (recorded as ``derived-from-path``). There is no fallback: a fixture path
+  with no such segment aborts the run. The command name is part of what the
+  model routes on, so a wrong name silently changes what is measured.
 - ``claude -p <query> --output-format stream-json --verbose
   --include-partial-messages --model <model>`` runs with cwd at the project
   root and the ``CLAUDECODE`` env var removed.
@@ -88,12 +93,13 @@ Resuming (``--resume``), for a run interrupted partway through:
 - The plan is regenerated from the same seed, fixture, and arms, and must
   cover every cell already present in ``results.jsonl``; otherwise the run
   aborts rather than append rows from an incompatible plan.
-- Both description sha256s and the fixture sha256 are recompared against the
-  most recent manifest in the out-dir. Any difference aborts the run, naming
-  the digest that changed: resuming across an edited description or fixture
-  would mix wordings within one result set.
+- Both description sha256s, the fixture sha256, and the resolved skill name are
+  recompared against the most recent manifest in the out-dir. Any difference
+  aborts the run, naming the value that changed: resuming across an edited
+  description, an edited fixture, or a different skill name would mix
+  configurations within one result set.
 - The resumed invocation writes its own manifest, recording ``resumed``, the
-  complete/remaining cell counts, and the digests it verified.
+  complete/remaining cell counts, and the provenance values it verified.
 
 Descriptions are read from the frozen files as rendered text: exactly one
 trailing newline is stripped, the sha256 of the resulting string is recorded,
@@ -128,6 +134,7 @@ SELECT_POLL_S = 1.0
 TERMINATE_GRACE_S = 5.0
 MANIFEST_PATTERN = re.compile(r"manifest-(\d{8}T\d{6}Z)(?:-(\d+))?\.json\Z")
 UNCOVERED_CELLS_SHOWN = 10
+GENERIC_SKILL_NAME = "skill"
 
 # A cell is one planned unit of work: (query_index, run, arm_label).
 CellKey = tuple[int, int, str]
@@ -190,6 +197,7 @@ class Config:
     timeout: int
     seed: int
     skill_name: str
+    skill_name_resolution: str
     project_root: Path
     dry_run: bool
     resume: bool
@@ -218,14 +226,44 @@ def find_project_root() -> Path:
     return current
 
 
-def default_skill_name(fixture: Path) -> str:
-    """Derive the skill name from a skills/<name>/... fixture path."""
+class StartupError(RuntimeError):
+    """A precondition failed; the run must not start and nothing may be written."""
+
+
+class SkillNameError(StartupError):
+    """The skill name could not be resolved; the run must not start."""
+
+
+def derive_skill_name(fixture: Path) -> str | None:
+    """Derive the skill name from a skills/<name>/... fixture path.
+
+    Returns None when the path carries no usable ``skills/<name>`` segment, and
+    also when the derived name is the generic ``skill`` — that name is exactly
+    what the old silent fallback produced, so it can never be trusted as a
+    derivation. Callers abort instead of guessing.
+    """
     parts = fixture.resolve().parts
     if "skills" in parts:
         index = parts.index("skills")
-        if index + 1 < len(parts):
+        if index + 1 < len(parts) and parts[index + 1] != GENERIC_SKILL_NAME:
             return parts[index + 1]
-    return "skill"
+    return None
+
+
+def resolve_skill_name(explicit: str | None, fixture: Path) -> tuple[str, str]:
+    """Return (skill_name, resolution) or raise; never falls back silently."""
+    if explicit:
+        return explicit, "explicit"
+    derived = derive_skill_name(fixture)
+    if derived is None:
+        raise SkillNameError(
+            f"cannot derive a skill name: the fixture path {fixture.resolve()} contains "
+            f"no 'skills/<name>' component (a component named 'skills' followed by a "
+            f"name other than '{GENERIC_SKILL_NAME}'). The synthetic command name is "
+            f"part of what the model routes on, so guessing it would silently change "
+            f"what is measured. Pass --skill-name <name> explicitly."
+        )
+    return derived, "derived-from-path"
 
 
 def sha256_text(text: str) -> str:
@@ -552,7 +590,7 @@ def query_orders(config: Config, queries: list[tuple[int, str]]) -> dict[str, li
     return orders
 
 
-class ResumeError(RuntimeError):
+class ResumeError(StartupError):
     """A resume precondition failed; no row may be appended."""
 
 
@@ -658,15 +696,22 @@ def latest_manifest(out_dir: Path) -> Path:
     return max(candidates)[1]
 
 
-def verify_digests(config: Config, arms: dict[str, Arm], manifest_path: Path) -> dict[str, str]:
-    """Abort if any description or fixture digest drifted since that manifest.
+def verify_provenance(config: Config, arms: dict[str, Arm], manifest_path: Path) -> dict[str, str]:
+    """Abort if any provenance value drifted since that manifest.
 
-    Resuming across an edited description or fixture would mix wordings inside
-    one result set, so every difference is named and the run stops.
+    Resuming across an edited description, an edited fixture, or a different
+    skill name would mix configurations inside one result set, so every
+    difference is named and the run stops.
     """
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     fixture_sha256 = sha256_text(config.fixture.read_text(encoding="utf-8"))
     drift = []
+    recorded_skill_name = manifest.get("skill_name")
+    if recorded_skill_name != config.skill_name:
+        drift.append(
+            f"skill name: manifest {recorded_skill_name!r} != current "
+            f"{config.skill_name!r} (resolved: {config.skill_name_resolution})"
+        )
     recorded_fixture = manifest.get("fixture_sha256")
     if recorded_fixture != fixture_sha256:
         drift.append(
@@ -685,7 +730,11 @@ def verify_digests(config: Config, arms: dict[str, Arm], manifest_path: Path) ->
             f"provenance drift against {manifest_path}; refusing to resume:\n  "
             + "\n  ".join(drift)
         )
-    verified = {"manifest": str(manifest_path), "fixture_sha256": fixture_sha256}
+    verified = {
+        "manifest": str(manifest_path),
+        "skill_name": config.skill_name,
+        "fixture_sha256": fixture_sha256,
+    }
     for key, arm in arms.items():
         verified[f"description_{key}_sha256"] = arm.sha256
     return verified
@@ -713,6 +762,35 @@ def print_resume_summary(
         )
     for name, value in verified.items():
         print(f"[resume] verified {name}: {value}", file=sys.stderr)
+
+
+def prepare_resume(
+    config: Config, arms: dict[str, Arm], plan: list[Invocation], results_path: Path
+) -> tuple[ResumeState, list[Invocation], dict]:
+    """Validate the resume preconditions and return what still has to run.
+
+    Raises ResumeError if the existing rows, the regenerated plan, or the
+    provenance recorded in the newest manifest disagree with this invocation.
+    """
+    rows = read_existing_rows(results_path)
+    verify_plan_covers(plan, rows, results_path)
+    verified = verify_provenance(config, arms, latest_manifest(config.out_dir))
+    state = build_resume_state(rows)
+    remaining = [item for item in plan if cell_of(item) not in state.complete]
+    print_resume_summary(state, plan, remaining, verified)
+    resume_info = {
+        "results_file": str(results_path),
+        "rows_read": state.rows_read,
+        "cells_total": len(plan),
+        "cells_complete": len(state.complete),
+        "cells_remaining": len(remaining),
+        "cells_continuing_at_attempt": {
+            f"q{index}-r{run}-{label}": attempt
+            for (index, run, label), attempt in sorted(state.start_attempt.items())
+        },
+        "verified_provenance": verified,
+    }
+    return state, remaining, resume_info
 
 
 def select_queries(fixture_items: list[dict], selector: str | None) -> list[tuple[int, str]]:
@@ -776,6 +854,7 @@ def write_manifest(
         "runs": config.runs,
         "timeout": config.timeout,
         "skill_name": config.skill_name,
+        "skill_name_resolution": config.skill_name_resolution,
         "project_root": str(config.project_root),
         "claude_cli_version": tool_version(["claude", "--version"]),
         "git_sha": tool_version(["git", "-C", str(config.project_root), "rev-parse", "HEAD"]),
@@ -860,6 +939,7 @@ def execute_plan(
                 )
                 outcome = run_attempt(config, invocation.arm, invocation.query, stem)
                 row = {
+                    "skill_name": config.skill_name,
                     "query_index": invocation.query_index,
                     "query": invocation.query,
                     "arm_label": invocation.arm.label,
@@ -923,8 +1003,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skill-name",
         default=None,
-        help="Skill name embedded in the synthetic command file "
-        "(default: derived from the fixture path's skills/<name>/ segment)",
+        help="Skill name embedded in the synthetic command file, used verbatim "
+        "(default: derived from the fixture path's skills/<name>/ segment; a "
+        "fixture path without one aborts the run instead of guessing)",
     )
     return parser.parse_args()
 
@@ -944,8 +1025,9 @@ def precondition_error(config: Config, results_path: Path) -> str | None:
     return None
 
 
-def main() -> int:
-    args = parse_args()
+def run_eval(args: argparse.Namespace) -> int:
+    """Resolve the configuration, plan, and execute; raise StartupError to abort."""
+    skill_name, skill_name_resolution = resolve_skill_name(args.skill_name, args.fixture)
     config = Config(
         fixture=args.fixture,
         out_dir=args.out_dir,
@@ -953,7 +1035,8 @@ def main() -> int:
         runs=args.runs,
         timeout=args.timeout,
         seed=args.seed,
-        skill_name=args.skill_name or default_skill_name(args.fixture),
+        skill_name=skill_name,
+        skill_name_resolution=skill_name_resolution,
         project_root=find_project_root(),
         dry_run=args.dry_run,
         resume=args.resume,
@@ -962,13 +1045,11 @@ def main() -> int:
     results_path = config.out_dir / "results.jsonl"
     blocked = precondition_error(config, results_path)
     if blocked:
-        print(f"Error: {blocked}", file=sys.stderr)
-        return 1
+        raise StartupError(blocked)
     fixture_items = json.loads(config.fixture.read_text(encoding="utf-8"))
     queries = select_queries(fixture_items, args.queries)
     if not queries:
-        print("Error: no queries selected", file=sys.stderr)
-        return 1
+        raise StartupError("no queries selected")
     desc_paths = {"A": args.desc_a, "B": args.desc_b}
     arms = {}
     for key, label in (("A", args.label_a), ("B", args.label_b)):
@@ -979,28 +1060,7 @@ def main() -> int:
     state: ResumeState | None = None
     resume_info: dict | None = None
     if config.resume:
-        try:
-            rows = read_existing_rows(results_path)
-            verify_plan_covers(plan, rows, results_path)
-            verified = verify_digests(config, arms, latest_manifest(config.out_dir))
-        except ResumeError as error:
-            print(f"Error: {error}", file=sys.stderr)
-            return 1
-        state = build_resume_state(rows)
-        remaining = [item for item in plan if cell_of(item) not in state.complete]
-        print_resume_summary(state, plan, remaining, verified)
-        resume_info = {
-            "results_file": str(results_path),
-            "rows_read": state.rows_read,
-            "cells_total": len(plan),
-            "cells_complete": len(state.complete),
-            "cells_remaining": len(remaining),
-            "cells_continuing_at_attempt": {
-                f"q{index}-r{run}-{label}": attempt
-                for (index, run, label), attempt in sorted(state.start_attempt.items())
-            },
-            "verified_digests": verified,
-        }
+        state, remaining, resume_info = prepare_resume(config, arms, plan, results_path)
     manifest_path = write_manifest(config, arms, desc_paths, queries, resume_info)
     print(f"Manifest: {manifest_path}", file=sys.stderr)
     if config.dry_run:
@@ -1013,6 +1073,14 @@ def main() -> int:
     execute_plan(config, remaining, results_path, state, len(plan))
     print(f"Results: {results_path}", file=sys.stderr)
     return 0
+
+
+def main() -> int:
+    try:
+        return run_eval(parse_args())
+    except StartupError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
