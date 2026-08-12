@@ -1,0 +1,50 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "ce40301d-0d90-4570-8e4f-2b89f37350ba",
+  "tool_uses": [
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/SKILL.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Write",
+      "path": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch/t14-rep1/investigation-ledger.md"
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": true,
+  "first_text": "ROUTE: hypothesis-driven-analysis\n\nA named effect (\"spend dropped\") needs explaining, with multiple plausible causes \u2014 that's PPDAC diagnostic work, not open-ended profiling.\n\nLet me read the skill and see what data exists.",
+  "route": "hda",
+  "wrote_files": [
+    "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch/t14-rep1/investigation-ledger.md"
+  ],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "403c6bfe5bb3a56f8076e524634da4c83bfd939e07d52ededddefb9b3c7479e2",
+  "jsonl_sha256": "786cab36e417a31b3ca01a121aa4deafd600eb210f13e062abc59b3b5149dd3e",
+  "scenario": "t14",
+  "rep": 1,
+  "suffix": "-",
+  "catalog_order": "eda-first",
+  "started_utc": "2026-08-12T00:05:12+00:00",
+  "duration_s": 71.3,
+  "exit_code": 0,
+  "prompt_sha256": "59f0b162d66ffecf4209500c2e9b7761b83483315a8b11738182e9e762836080"
+}

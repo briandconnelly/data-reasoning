@@ -1,0 +1,50 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "f8f0d973-5bec-4a62-9ec9-5e030be58fff",
+  "tool_uses": [
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/SKILL.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Write",
+      "path": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch/t14-rep4/orientation-note.md"
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": true,
+  "first_text": "I'll start by routing this request.\n\nROUTE: hypothesis-driven-analysis\n\nThis is a diagnostic \"why did this metric change\" question about a named effect (a spend drop) with multiple plausible explanations \u2014 exactly what the hypothesis-driven skill covers, and explicitly excluded from the exploratory skill even though it names an account.",
+  "route": "hda",
+  "wrote_files": [
+    "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch/t14-rep4/orientation-note.md"
+  ],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "55534943015dda915e2635343fc552fde55c4fdd1fa913cccc928d6ce4ca8278",
+  "jsonl_sha256": "e7a1b88a3f977e240a23f5c3b6e67023313396daf42a115d7d369246460b6b72",
+  "scenario": "t14",
+  "rep": 4,
+  "suffix": "-",
+  "catalog_order": "hda-first",
+  "started_utc": "2026-08-12T00:08:00+00:00",
+  "duration_s": 60.9,
+  "exit_code": 0,
+  "prompt_sha256": "4cf5dc8d29ebe242b8454b7bfcb3ef12b7f5aa9b2bdb4d8a611979d2d44dde75"
+}
