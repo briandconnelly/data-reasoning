@@ -1,0 +1,150 @@
+[
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "profile",
+    "query": "Profile the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null,
+    "content_phrase": "the Fairview branch"
+  },
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "overview",
+    "query": "Give me an overview of the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null
+  },
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null
+  },
+  {
+    "base_id": 1,
+    "base_slug": "fairview-branch",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the Fairview branch.",
+    "scope": "whole",
+    "entity": "Fairview branch",
+    "facet": null
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "profile",
+    "query": "Profile Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts",
+    "content_phrase": "Central Library's graphic novel collection — renewal counts"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "overview",
+    "query": "Give me an overview of Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "graphic-novel-central",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about Central Library's graphic novel collection — renewal counts.",
+    "scope": "facet",
+    "entity": "Central Library's graphic novel collection",
+    "facet": "renewal counts"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "profile",
+    "query": "Profile branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null,
+    "content_phrase": "branch 9"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "overview",
+    "query": "Give me an overview of branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null
+  },
+  {
+    "base_id": 7,
+    "base_slug": "branch-9-whole",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about branch 9.",
+    "scope": "whole",
+    "entity": "branch 9",
+    "facet": null
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "profile",
+    "query": "Profile the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates",
+    "content_phrase": "the study room booking system — no-show rates"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "overview",
+    "query": "Give me an overview of the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "study-room-noshow",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the study room booking system — no-show rates.",
+    "scope": "facet",
+    "entity": "study room booking system",
+    "facet": "no-show rates"
+  }
+]
