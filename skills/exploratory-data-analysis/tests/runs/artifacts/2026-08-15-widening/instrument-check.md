@@ -1,0 +1,50 @@
+# Instrument check — positive-control the analyzers before the widening wave
+
+Written before any Tasks 5-7 invocation runs.
+This records that `analyze_phasec.py` and `analyze_ab.py` reproduce published numbers from committed archives, and pins the exact invocation forms later tasks must use.
+
+## Step 1 — analyze_phasec.py against the Phase C archive
+
+Command:
+
+```
+python3 skills/exploratory-data-analysis/tests/eval/analyze_phasec.py \
+  --results skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-phaseC/results.jsonl \
+  --fixture skills/exploratory-data-analysis/tests/eval/crossed-pairs-2026-08-11.json \
+  --expected-runs 3
+```
+
+Reproduced exactly, matching decision 004 and `2026-08-11-phaseC-results.md`.
+Baseline arm: profile 0.8333, overview 0.1000, rundown 0.0333, tell-me-about 0.1333.
+Treatment arm: profile 0.8000, overview 0.0667, rundown 0.0000, tell-me-about 0.0000.
+theta_bar = -0.0333, exact interval [-0.1333, +0.0667], VERDICT: NOT_SUPPORTED — all matching the published record exactly.
+`analyze_phasec.py` is confirmed to reproduce a published number from a committed archive; the instrument is trustworthy for baseline/treatment-labeled data.
+
+## Additional control — ceiling-probe table by direct tally
+
+`analyze_phasec.py` cannot ingest the 2026-08-12 ceiling-probe archive, because that archive's `arm_label` values are `shipped`/`ceiling`, not the `baseline`/`treatment` pair the script hardcodes.
+The published ceiling-probe table is nonetheless reproducible directly from the archive by an ad hoc tally of `results.jsonl`, joined to `probe-fixture.json` on `query_index` for `speech_act`, restricted to `status == "valid"` rows.
+That recount (command and output in the task-4 report) reproduces shipped 0.500/0.125/0.125/0.125 and ceiling 0.875/1.000/1.000/0.750 for profile/overview/rundown/tell-me-about exactly, so the archive itself is sound even though `analyze_phasec.py` cannot read its labels.
+
+## Step 2 — analyze_ab.py invocation form for cost-arm analysis
+
+Working command, validated against the archived Phase A results:
+
+```
+python3 skills/exploratory-data-analysis/tests/eval/analyze_ab.py \
+  --results skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-phaseA/results.jsonl \
+  --fixture skills/exploratory-data-analysis/tests/eval/entity-profiling-eval.json \
+  --expected-runs 3 --json
+```
+
+This exits 0 and its JSON carries per-arm means (including N1 and N2) and the P1 permutation interval.
+The 16-query subset fixture (`cost-arms-2026-08-15.json`) fails against the same results file with `CHECK FAILED` (query-index and query-text mismatches), because `analyze_ab.py` matches results to the fixture positionally by `query_index` and the subset reorders and shortens the query list relative to any results file built against the full fixture's indices.
+**Tasks 6-7 must pass `--fixture skills/exploratory-data-analysis/tests/eval/entity-profiling-eval.json` (the full fixture) for cost-arm analysis, never `cost-arms-2026-08-15.json`.**
+The results file for a cost-arm run only contains cost-arm queries, so arm means for arms other than N1/N2 are simply absent from the output, not incorrect.
+
+## Binding notes for Tasks 5-7
+
+`analyze_phasec.py` hardcodes `DESC_ARMS = ("baseline", "treatment")` and will reject any `results.jsonl` whose `arm_label` values are anything else.
+Every future wave run that needs `analyze_phasec.py`-style per-speech-act analysis must invoke `run_desc_eval.py` with `--label-a baseline --label-b treatment`, where `baseline` is always the reference arm (desc-a) and `treatment` is always the candidate arm (desc-b).
+The run manifest records which frozen description file each label maps to for that run, so the generic `baseline`/`treatment` labels stay unambiguous.
+Any gate note, report, or disclosure table that cites `baseline` or `treatment` from an `analyze_phasec.py` run must translate those labels back to the actual description files via that run's manifest before drawing conclusions about a specific candidate.
