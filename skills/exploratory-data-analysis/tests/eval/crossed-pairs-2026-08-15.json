@@ -121,43 +121,43 @@
   },
   {
     "base_id": 4,
-    "base_slug": "harbor-ferry-otp",
+    "base_slug": "harbor-ferry-punctuality",
     "speech_act": "profile",
-    "query": "Profile on-time performance for the Harbor Point ferry.",
+    "query": "Profile punctuality for the Harbor Point ferry.",
     "scope": "facet",
     "entity": "Harbor Point ferry",
-    "facet": "on-time performance",
-    "content_phrase": "on-time performance for the Harbor Point ferry"
+    "facet": "punctuality",
+    "content_phrase": "punctuality for the Harbor Point ferry"
   },
   {
     "base_id": 4,
-    "base_slug": "harbor-ferry-otp",
+    "base_slug": "harbor-ferry-punctuality",
     "speech_act": "overview",
-    "query": "Give me an overview of on-time performance for the Harbor Point ferry.",
+    "query": "Give me an overview of punctuality for the Harbor Point ferry.",
     "scope": "facet",
     "entity": "Harbor Point ferry",
-    "facet": "on-time performance",
-    "content_phrase": "on-time performance for the Harbor Point ferry"
+    "facet": "punctuality",
+    "content_phrase": "punctuality for the Harbor Point ferry"
   },
   {
     "base_id": 4,
-    "base_slug": "harbor-ferry-otp",
+    "base_slug": "harbor-ferry-punctuality",
     "speech_act": "rundown",
-    "query": "Give me a rundown on on-time performance for the Harbor Point ferry.",
+    "query": "Give me a rundown on punctuality for the Harbor Point ferry.",
     "scope": "facet",
     "entity": "Harbor Point ferry",
-    "facet": "on-time performance",
-    "content_phrase": "on-time performance for the Harbor Point ferry"
+    "facet": "punctuality",
+    "content_phrase": "punctuality for the Harbor Point ferry"
   },
   {
     "base_id": 4,
-    "base_slug": "harbor-ferry-otp",
+    "base_slug": "harbor-ferry-punctuality",
     "speech_act": "tell-me-about",
-    "query": "Tell me about on-time performance for the Harbor Point ferry.",
+    "query": "Tell me about punctuality for the Harbor Point ferry.",
     "scope": "facet",
     "entity": "Harbor Point ferry",
-    "facet": "on-time performance",
-    "content_phrase": "on-time performance for the Harbor Point ferry"
+    "facet": "punctuality",
+    "content_phrase": "punctuality for the Harbor Point ferry"
   },
   {
     "base_id": 5,

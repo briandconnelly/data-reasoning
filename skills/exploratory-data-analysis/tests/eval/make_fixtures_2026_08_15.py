@@ -29,8 +29,8 @@ BASES = [
      "the Eastgate park-and-ride garage"),
     (3, "route-7-farebox", "facet", "Route 7 express", "farebox revenue",
      "farebox revenue for the Route 7 express"),
-    (4, "harbor-ferry-otp", "facet", "Harbor Point ferry", "on-time performance",
-     "on-time performance for the Harbor Point ferry"),
+    (4, "harbor-ferry-punctuality", "facet", "Harbor Point ferry", "punctuality",
+     "punctuality for the Harbor Point ferry"),
     (5, "route-22-ridership", "facet", "Route 22 loop", "ridership by stop",
      "ridership by stop for the Route 22 loop"),
     (6, "fleetwood-backlog", "facet", "Fleetwood bus depot", "maintenance backlog",
@@ -80,6 +80,16 @@ def verify_crossed(rows: list[dict]) -> list[str]:
     if len(rows) != 40:
         errors.append(f"expected 40 rows, got {len(rows)}")
     for r in rows:
+        # Check for required fields
+        if "base_id" not in r:
+            errors.append(f"row missing field: base_id")
+            continue
+        if "speech_act" not in r:
+            errors.append(f"base {r['base_id']}: missing field speech_act")
+            continue
+        if "content_phrase" not in r:
+            errors.append(f"base {r['base_id']}/{r['speech_act']}: missing field content_phrase")
+            continue
         want = FRAMES[r["speech_act"]].format(c=r["content_phrase"])
         if r["query"] != want:
             errors.append(f"base {r['base_id']}/{r['speech_act']}: not frame-parallel")
