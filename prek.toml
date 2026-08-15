@@ -1,11 +1,16 @@
 minimum_prek_version = "0.3.0"
 
+# Run archives and manifest-pinned fixtures are byte-frozen evidence: the run
+# manifests record their SHA-256, so a formatting hook that rewrites them
+# breaks the recorded provenance chain. The three byte-mutating hooks below
+# carry the same exclude regex for that reason.
+
 [[repos]]
 repo = "builtin"
 hooks = [
-  { id = "trailing-whitespace" },
-  { id = "end-of-file-fixer" },
-  { id = "mixed-line-ending" },
+  { id = "trailing-whitespace", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
+  { id = "end-of-file-fixer", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
+  { id = "mixed-line-ending", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
   { id = "check-merge-conflict" },
   { id = "check-added-large-files" },
   { id = "check-yaml" },
