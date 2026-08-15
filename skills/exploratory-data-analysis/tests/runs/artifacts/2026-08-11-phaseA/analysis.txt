@@ -79,4 +79,3 @@ VERDICT: SHIP
   temporality:
     longitudinal   baseline=0.4444 treatment=0.4444 delta=0.0000 queries=3
     snapshot       baseline=0.3922 treatment=0.4314 delta=0.0392 queries=17
-

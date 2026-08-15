@@ -78,4 +78,3 @@ REOPEN CONDITION (theta_bar < 0 AND interval excludes 0): False
   by_which_first:
     baseline     baseline=0.2333 (n=60)  treatment=0.1333 (n=60)
     treatment    baseline=0.3167 (n=60)  treatment=0.3000 (n=60)
-
