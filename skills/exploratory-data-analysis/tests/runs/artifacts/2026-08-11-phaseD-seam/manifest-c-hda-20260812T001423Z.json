@@ -1,0 +1,44 @@
+{
+  "created_utc": "2026-08-12T00:14:23+00:00",
+  "harness_args": {
+    "scenario": "c-hda",
+    "reps": 1,
+    "out_dir": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/archive",
+    "scratch_root": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch",
+    "model": "claude-opus-5",
+    "timeout": 600,
+    "start_rep": 1,
+    "order": "alternate",
+    "rerun_suffix": "r2",
+    "dry_run": false
+  },
+  "rep_plan": [
+    {
+      "rep": 1,
+      "catalog_order": "eda-first",
+      "name": "c-hda-rep1-r2"
+    }
+  ],
+  "claude_version": "2.1.228 (Claude Code)",
+  "repo_git_sha": "467baafdf5ac66aef93e71b9baaff30453439a4b",
+  "eda_skill_md_sha256": "c1b4ed92a8d0bbfd3e58af6085e8341ab62b1ad1c968fd9e5f198ead7319d0f3",
+  "hda_skill_md_sha256": "c88a49c9bedfd0f61f52587828185b4cff0e586530d4a87ca5e8efc8051cceb7",
+  "eda_description_sha256": "a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38",
+  "hda_description_sha256": "169a84dfe217055b8841cfaaaa38385ac77d992eb0a0b4fceb4b9c5b4996ff68",
+  "eda_description_len": 1019,
+  "hda_description_len": 1020,
+  "filled_prompt_sha256_per_scenario_order": {
+    "t13/eda-first": "0c1f1e42062adc9f67d49e0c2d374055a12e5c468cb549d115a003d084f16797",
+    "t13/hda-first": "a6cb26e29cd3f651171edbe02d895e68726b2f002323249f4e9193d6cb8ff0e0",
+    "t14/eda-first": "5dd9528a7b64202c12efcbaf48405a106fb04676df489f69cc7b6e89ca01b5f5",
+    "t14/hda-first": "d19e04e2c86525610c0051d86e6fd5ebf196c3e57649e5b0f91e18e99d18c44b",
+    "c-eda/eda-first": "55ec630cfa30483f249e070a7ab121d763d18124ffaa9e4d3741cdb42d059b76",
+    "c-eda/hda-first": "874ac5a45e417fa31257bce2ac0f57654e39d348797a0334861b5b6f497b6b4b",
+    "c-hda/eda-first": "f1349ad59852ab23664f3747dfb3277e00a38f0adf73d0f8cfec740f584aae51",
+    "c-hda/hda-first": "3ddd9c4425db51b94dab1231b1b872809771e0e625779acc6b910924deaeb235",
+    "c-none/eda-first": "f08aef747ff61da49c3fe15ae179577ee887c6a427b42c69318f690d265b10f1",
+    "c-none/hda-first": "2cc5c5aca2af2393aec976cf4f97075bce12de87055a9c5f9676ab173011a5f0"
+  },
+  "filled_prompt_note": "SCRATCH_DIR left as the literal placeholder {SCRATCH_DIR}; per-rep prompt_sha256 in summary.tsv covers the fully filled prompt",
+  "prompt_template": "You are the main agent on a data-analysis task for a user.\n\nTwo skills are installed. Their catalog entries:\n\n{CATALOG_ENTRIES}\n\nEach skill's full instructions live at:\n{CATALOG_PATHS}\n\nIf a skill applies to the user's request, read its SKILL.md and follow it as your working method. If none applies, proceed without one.\n\nBefore your first tool call \u2014 or, if you make no tool calls, at the start of your reply \u2014 output a single line in exactly this form: `ROUTE: exploratory-data-analysis` or `ROUTE: hypothesis-driven-analysis` or `ROUTE: none`. Then give one or two sentences explaining why.\n\nThe user's request:\n\n\"{SCENARIO_PROMPT}\"\n\nWrite any working files you produce (notes, logs, intermediate results) to {SCRATCH_DIR} \u2014 do not write anywhere inside /Users/bdc/projects/data-reasoning.\n\nDo not read anything under /Users/bdc/projects/data-reasoning/skills/exploratory-data-analysis/tests/ or /Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/tests/.\n\nYour final message is your report to the user."
+}

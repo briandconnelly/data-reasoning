@@ -1,0 +1,652 @@
+{
+  "base_count": 10,
+  "digests": {
+    "baseline": "7fc858af152f80129bfa2840e534ec2e657c4fec61767bd7e244c34420fb9e6a",
+    "treatment": "a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38"
+  },
+  "estimand": {
+    "n_bases": 10,
+    "permutation": {
+      "ci_high": 0.06666666666666667,
+      "ci_low": -0.13333333333333333,
+      "excludes_zero": false,
+      "mean": -0.03333333333333333,
+      "mean_exact": "-1/30",
+      "method": "exact sign-flip DP convolution over 10 per-base theta values (exactly equivalent to full 2^10 = 1024 enumeration; deterministic, two-sided 95%)",
+      "n": 10,
+      "null_critical_high": 0.1,
+      "null_critical_low": -0.1,
+      "p_two_sided": 1.0
+    },
+    "signs": {
+      "narrowed": 1,
+      "unchanged": 7,
+      "widened": 2
+    },
+    "theta_bar": -0.03333333333333333,
+    "theta_bar_exact": "-1/30"
+  },
+  "excludes_zero": false,
+  "expected_runs": 3,
+  "fixture_file": "skills/exploratory-data-analysis/tests/eval/crossed-pairs-2026-08-11.json",
+  "order": {
+    "by_run": {
+      "1": {
+        "baseline": {
+          "n": 40,
+          "rate": 0.3
+        },
+        "treatment": {
+          "n": 40,
+          "rate": 0.225
+        }
+      },
+      "2": {
+        "baseline": {
+          "n": 40,
+          "rate": 0.225
+        },
+        "treatment": {
+          "n": 40,
+          "rate": 0.2
+        }
+      },
+      "3": {
+        "baseline": {
+          "n": 40,
+          "rate": 0.3
+        },
+        "treatment": {
+          "n": 40,
+          "rate": 0.225
+        }
+      }
+    },
+    "by_which_first": {
+      "baseline": {
+        "baseline": {
+          "n": 60,
+          "rate": 0.23333333333333334
+        },
+        "treatment": {
+          "n": 60,
+          "rate": 0.13333333333333333
+        }
+      },
+      "treatment": {
+        "baseline": {
+          "n": 60,
+          "rate": 0.31666666666666665
+        },
+        "treatment": {
+          "n": 60,
+          "rate": 0.3
+        }
+      }
+    }
+  },
+  "per_base": [
+    {
+      "base_id": 1,
+      "base_slug": "fairview-branch",
+      "gap": {
+        "baseline": 0.3333333333333333,
+        "treatment": 0.3333333333333333
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 0.3333333333333333,
+        "treatment": 0.3333333333333333
+      },
+      "query_indices": {
+        "overview": 1,
+        "profile": 0,
+        "rundown": 2,
+        "tell-me-about": 3
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 0.3333333333333333,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 0.3333333333333333,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "whole",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 2,
+      "base_slug": "hold-pickup-lockers",
+      "gap": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 5,
+        "profile": 4,
+        "rundown": 6,
+        "tell-me-about": 7
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "whole",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 3,
+      "base_slug": "teen-coding-workshop",
+      "gap": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 9,
+        "profile": 8,
+        "rundown": 10,
+        "tell-me-about": 11
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "facet",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 4,
+      "base_slug": "graphic-novel-central",
+      "gap": {
+        "baseline": 0.6666666666666666,
+        "treatment": 1.0
+      },
+      "generic_mean": {
+        "baseline": 0.3333333333333333,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 13,
+        "profile": 12,
+        "rundown": 14,
+        "tell-me-about": 15
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.3333333333333333,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.6666666666666666
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "facet",
+      "theta": -0.3333333333333333,
+      "theta_exact": "-1/3"
+    },
+    {
+      "base_id": 5,
+      "base_slug": "bookmobile-noshows",
+      "gap": {
+        "baseline": 0.8888888888888888,
+        "treatment": 0.8888888888888888
+      },
+      "generic_mean": {
+        "baseline": 0.1111111111111111,
+        "treatment": 0.1111111111111111
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 17,
+        "profile": 16,
+        "rundown": 18,
+        "tell-me-about": 19
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.3333333333333333
+        },
+        "treatment": {
+          "overview": 0.3333333333333333,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "facet",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 6,
+      "base_slug": "circulation-desk-branch12",
+      "gap": {
+        "baseline": 1.0,
+        "treatment": 0.6666666666666666
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 0.6666666666666666
+      },
+      "query_indices": {
+        "overview": 21,
+        "profile": 20,
+        "rundown": 22,
+        "tell-me-about": 23
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 0.6666666666666666,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "facet",
+      "theta": 0.3333333333333333,
+      "theta_exact": "1/3"
+    },
+    {
+      "base_id": 7,
+      "base_slug": "branch-9-whole",
+      "gap": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "query_indices": {
+        "overview": 25,
+        "profile": 24,
+        "rundown": 26,
+        "tell-me-about": 27
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 0.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 0.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "whole",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 8,
+      "base_slug": "ill-turnaround",
+      "gap": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 29,
+        "profile": 28,
+        "rundown": 30,
+        "tell-me-about": 31
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "facet",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 9,
+      "base_slug": "local-history-archive",
+      "gap": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "generic_mean": {
+        "baseline": 0.0,
+        "treatment": 0.0
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 33,
+        "profile": 32,
+        "rundown": 34,
+        "tell-me-about": 35
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        },
+        "treatment": {
+          "overview": 0.0,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "whole",
+      "theta": 0.0,
+      "theta_exact": "0"
+    },
+    {
+      "base_id": 10,
+      "base_slug": "study-room-noshow",
+      "gap": {
+        "baseline": 0.5555555555555556,
+        "treatment": 0.8888888888888888
+      },
+      "generic_mean": {
+        "baseline": 0.4444444444444444,
+        "treatment": 0.1111111111111111
+      },
+      "profile": {
+        "baseline": 1.0,
+        "treatment": 1.0
+      },
+      "query_indices": {
+        "overview": 37,
+        "profile": 36,
+        "rundown": 38,
+        "tell-me-about": 39
+      },
+      "rates": {
+        "baseline": {
+          "overview": 0.6666666666666666,
+          "profile": 1.0,
+          "rundown": 0.3333333333333333,
+          "tell-me-about": 0.3333333333333333
+        },
+        "treatment": {
+          "overview": 0.3333333333333333,
+          "profile": 1.0,
+          "rundown": 0.0,
+          "tell-me-about": 0.0
+        }
+      },
+      "scope": "facet",
+      "theta": -0.3333333333333333,
+      "theta_exact": "-1/3"
+    }
+  ],
+  "reopen_condition": false,
+  "reopen_note": "measurable half of the prereg's reopen rule; it reopens the ship decision only if Phase A shipped, which analyze_ab.py decides, not this script",
+  "results_file": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseC/scored/results.jsonl",
+  "scope": {
+    "facet": {
+      "base_ids": [
+        3,
+        4,
+        5,
+        6,
+        8,
+        10
+      ],
+      "bases": 6,
+      "mean_gap": {
+        "baseline": 0.8518518518518519,
+        "treatment": 0.9074074074074074
+      },
+      "signs": {
+        "narrowed": 1,
+        "unchanged": 3,
+        "widened": 2
+      },
+      "theta_bar": -0.05555555555555555
+    },
+    "whole": {
+      "base_ids": [
+        1,
+        2,
+        7,
+        9
+      ],
+      "bases": 4,
+      "mean_gap": {
+        "baseline": 0.5833333333333334,
+        "treatment": 0.5833333333333334
+      },
+      "signs": {
+        "narrowed": 0,
+        "unchanged": 4,
+        "widened": 0
+      },
+      "theta_bar": 0.0
+    }
+  },
+  "scope_sizes": {
+    "facet": 6,
+    "whole": 4
+  },
+  "speech_acts": {
+    "overview": {
+      "baseline": {
+        "invocations": 30,
+        "rate": 0.1,
+        "triggers": 3
+      },
+      "delta": -0.03333333333333333,
+      "queries": 10,
+      "query_indices": [
+        1,
+        5,
+        9,
+        13,
+        17,
+        21,
+        25,
+        29,
+        33,
+        37
+      ],
+      "treatment": {
+        "invocations": 30,
+        "rate": 0.06666666666666667,
+        "triggers": 2
+      }
+    },
+    "profile": {
+      "baseline": {
+        "invocations": 30,
+        "rate": 0.8333333333333334,
+        "triggers": 25
+      },
+      "delta": -0.03333333333333333,
+      "queries": 10,
+      "query_indices": [
+        0,
+        4,
+        8,
+        12,
+        16,
+        20,
+        24,
+        28,
+        32,
+        36
+      ],
+      "treatment": {
+        "invocations": 30,
+        "rate": 0.8,
+        "triggers": 24
+      }
+    },
+    "rundown": {
+      "baseline": {
+        "invocations": 30,
+        "rate": 0.03333333333333333,
+        "triggers": 1
+      },
+      "delta": -0.03333333333333333,
+      "queries": 10,
+      "query_indices": [
+        2,
+        6,
+        10,
+        14,
+        18,
+        22,
+        26,
+        30,
+        34,
+        38
+      ],
+      "treatment": {
+        "invocations": 30,
+        "rate": 0.0,
+        "triggers": 0
+      }
+    },
+    "tell-me-about": {
+      "baseline": {
+        "invocations": 30,
+        "rate": 0.13333333333333333,
+        "triggers": 4
+      },
+      "delta": -0.13333333333333333,
+      "queries": 10,
+      "query_indices": [
+        3,
+        7,
+        11,
+        15,
+        19,
+        23,
+        27,
+        31,
+        35,
+        39
+      ],
+      "treatment": {
+        "invocations": 30,
+        "rate": 0.0,
+        "triggers": 0
+      }
+    }
+  },
+  "validity": {
+    "expected_runs": 3,
+    "rows": 241,
+    "valid": 240,
+    "void": 1
+  },
+  "verdict": "NOT_SUPPORTED",
+  "voids": [
+    {
+      "arm_label": "baseline",
+      "attempt": 1,
+      "invalid_reason": "usage_limit",
+      "query_index": 39,
+      "run": 2,
+      "transcript_file": "transcripts/q039-baseline-r2-a1.stdout.jsonl"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "46e5419d-d85f-430e-8ae3-4de2a0c475f0",
+  "tool_uses": [],
+  "read_eda_skill": false,
+  "read_hda_skill": false,
+  "first_text": "I'll start by looking at what data is available.\n\nROUTE: hypothesis-driven-analysis",
+  "route": "hda",
+  "wrote_files": [],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "9f555df3f5d5337e5da1b855ce092a3ddb61a59fa69d8a729dd8bb4b2e457ffc",
+  "jsonl_sha256": "695377a808110c8719832b15d78787c93b0e8f9a1f5c306f543bcb7be2cd1e1f",
+  "scenario": "t14",
+  "rep": 2,
+  "suffix": "r2",
+  "catalog_order": "hda-first",
+  "started_utc": "2026-08-12T00:11:07+00:00",
+  "duration_s": 6.0,
+  "exit_code": 0,
+  "prompt_sha256": "f4a193d86399c3aaf23754af09b0d723cbc27f7ce7254425e413775a7885b190"
+}

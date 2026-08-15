@@ -1,0 +1,52 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "128cb09b-fef7-4e6b-9cc8-5509f1290cbf",
+  "tool_uses": [
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/SKILL.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/references/ledger-template.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": true,
+  "first_text": "ROUTE: hypothesis-driven-analysis\n\nA named effect (\"spend dropped\") needs explaining for a specific account, with multiple plausible causes \u2014 that's a diagnostic why, not open-ended profiling.\n\nLet me read the skill and see what data exists.",
+  "route": "hda",
+  "wrote_files": [],
+  "json_parse_failures": 0,
+  "valid": false,
+  "invalid_reason": "exit code 1",
+  "final_text_sha256": "343442d58e1bc24a549ec024171c3a8bd00c3fd027f9cf3d06233b2f6e5eb9cf",
+  "jsonl_sha256": "7a20b4841e4c2e0fb60d8b0606ce1771136e138d06457ae6ed186a02eb57e86b",
+  "scenario": "t14",
+  "rep": 2,
+  "suffix": "-",
+  "catalog_order": "hda-first",
+  "started_utc": "2026-08-12T00:06:23+00:00",
+  "duration_s": 90.8,
+  "exit_code": 1,
+  "prompt_sha256": "c47eec32e6e5a4cfb6198abaa0ca4d65e8b89c39dad22ec38e1b237055e05c36"
+}

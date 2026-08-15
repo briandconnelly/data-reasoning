@@ -1,0 +1,46 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "079a3a79-821d-49ec-8422-7ef9a61d0293",
+  "tool_uses": [
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/SKILL.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Write",
+      "path": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/t13t14-wave/scratch/t14-rep1-canary/ledger-northgate-spend.md"
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": true,
+  "first_text": "ROUTE: hypothesis-driven-analysis\n\nThe ask names a specific effect (\"spend drop\") on a named account and wants the cause \u2014 multiple explanations are plausible (churned line items, price change, seasonality, billing-period artifact), so this is diagnostic, not open-ended profiling.\n\nLet me read the skill and then find the data.",
+  "route": "hda",
+  "wrote_files": [
+    "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/t13t14-wave/scratch/t14-rep1-canary/ledger-northgate-spend.md"
+  ],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "e33b74eba6dc800b120d31eb8fe6a8b753837b8545f4b26611daa6caa38b0220",
+  "jsonl_sha256": "3831ff8f6c548f5e2ec4aa036eddc65cd33f3e0ed5f50fe4dd13ab83035a503e",
+  "scenario": "t14",
+  "rep": 1,
+  "suffix": "canary",
+  "catalog_order": "eda-first",
+  "started_utc": "2026-08-11T18:27:37+00:00",
+  "duration_s": 70.8,
+  "exit_code": 0,
+  "prompt_sha256": "b37b8bbcdda3584cd3a3215cb30e15bf549a659486476a3b7e6b6fa00a1bf523"
+}

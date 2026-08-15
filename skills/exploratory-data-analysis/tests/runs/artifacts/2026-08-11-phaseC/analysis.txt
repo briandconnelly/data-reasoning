@@ -1,0 +1,80 @@
+== Validity and completeness ==
+  rows=241  valid=240  void=1  expected_runs=3
+  base and scope membership: read from the fixture's own fields
+    bases=10  whole=4  facet=6
+  digest[baseline] = 7fc858af152f80129bfa2840e534ec2e657c4fec61767bd7e244c34420fb9e6a
+  digest[treatment] = a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38
+  voids (retried, not scored):
+    q39 baseline run=2 attempt=1 reason=usage_limit
+
+== Preregistered estimand (Phase C) ==
+  gap_i(D) = rate(profile) - mean(rate over overview, rundown, tell-me-about)
+  theta_i  = gap_i(baseline) - gap_i(treatment)   [positive = treatment narrowed]
+  bases: 10
+  theta_bar = -0.0333   (exact -1/30)
+  signs: narrowed=1 unchanged=7 widened=2
+  method: exact sign-flip DP convolution over 10 per-base theta values (exactly equivalent to full 2^10 = 1024 enumeration; deterministic, two-sided 95%)
+  two-sided 95% interval: [-0.1333, +0.0667]   p=1.0000   excludes 0: False
+
+== Support level (preregistered) ==
+  CONFIRMED     theta_bar > 0 and the interval excludes 0
+  DIRECTIONAL   theta_bar > 0 otherwise
+  NOT_SUPPORTED theta_bar <= 0
+
+VERDICT: NOT_SUPPORTED
+REOPEN CONDITION (theta_bar < 0 AND interval excludes 0): False
+  measurable half of the prereg's reopen rule; it reopens the ship decision only if Phase A shipped, which analyze_ab.py decides, not this script
+  theta_bar=-0.0333  excludes_zero=False
+
+== Per-base rates, gaps, and theta (disclosure, not gating) ==
+  base slug                       scope  desc        profile   overvw  rundown     tell      gap
+  1    fairview-branch            whole  baseline      0.333    0.000    0.000    0.000    0.333
+  1    fairview-branch            whole  treatment     0.333    0.000    0.000    0.000    0.333
+                                         theta_i                                          0.0000
+  2    hold-pickup-lockers        whole  baseline      1.000    0.000    0.000    0.000    1.000
+  2    hold-pickup-lockers        whole  treatment     1.000    0.000    0.000    0.000    1.000
+                                         theta_i                                          0.0000
+  3    teen-coding-workshop       facet  baseline      1.000    0.000    0.000    0.000    1.000
+  3    teen-coding-workshop       facet  treatment     1.000    0.000    0.000    0.000    1.000
+                                         theta_i                                          0.0000
+  4    graphic-novel-central      facet  baseline      1.000    0.333    0.000    0.667    0.667
+  4    graphic-novel-central      facet  treatment     1.000    0.000    0.000    0.000    1.000
+                                         theta_i                                         -0.3333
+  5    bookmobile-noshows         facet  baseline      1.000    0.000    0.000    0.333    0.889
+  5    bookmobile-noshows         facet  treatment     1.000    0.333    0.000    0.000    0.889
+                                         theta_i                                          0.0000
+  6    circulation-desk-branch12  facet  baseline      1.000    0.000    0.000    0.000    1.000
+  6    circulation-desk-branch12  facet  treatment     0.667    0.000    0.000    0.000    0.667
+                                         theta_i                                          0.3333
+  7    branch-9-whole             whole  baseline      0.000    0.000    0.000    0.000    0.000
+  7    branch-9-whole             whole  treatment     0.000    0.000    0.000    0.000    0.000
+                                         theta_i                                          0.0000
+  8    ill-turnaround             facet  baseline      1.000    0.000    0.000    0.000    1.000
+  8    ill-turnaround             facet  treatment     1.000    0.000    0.000    0.000    1.000
+                                         theta_i                                          0.0000
+  9    local-history-archive      whole  baseline      1.000    0.000    0.000    0.000    1.000
+  9    local-history-archive      whole  treatment     1.000    0.000    0.000    0.000    1.000
+                                         theta_i                                          0.0000
+  10   study-room-noshow          facet  baseline      1.000    0.667    0.333    0.333    0.556
+  10   study-room-noshow          facet  treatment     1.000    0.333    0.000    0.000    0.889
+                                         theta_i                                         -0.3333
+
+== Speech-act marginal rates (disclosure, not gating) ==
+  speech act         baseline  treatment      delta  n(invocations)
+  profile              0.8333     0.8000    -0.0333              60
+  overview             0.1000     0.0667    -0.0333              60
+  rundown              0.0333     0.0000    -0.0333              60
+  tell-me-about        0.1333     0.0000    -0.1333              60
+
+== Scope breakdown (disclosure, not gating) ==
+  whole  bases=4  mean gap baseline=0.5833 treatment=0.5833  theta_bar=0.0000  (narrowed=0 unchanged=4 widened=0)
+  facet  bases=6  mean gap baseline=0.8519 treatment=0.9074  theta_bar=-0.0556  (narrowed=1 unchanged=3 widened=2)
+
+== Order diagnostics (recorded, not gating) ==
+  by_run:
+    1            baseline=0.3000 (n=40)  treatment=0.2250 (n=40)
+    2            baseline=0.2250 (n=40)  treatment=0.2000 (n=40)
+    3            baseline=0.3000 (n=40)  treatment=0.2250 (n=40)
+  by_which_first:
+    baseline     baseline=0.2333 (n=60)  treatment=0.1333 (n=60)
+    treatment    baseline=0.3167 (n=60)  treatment=0.3000 (n=60)

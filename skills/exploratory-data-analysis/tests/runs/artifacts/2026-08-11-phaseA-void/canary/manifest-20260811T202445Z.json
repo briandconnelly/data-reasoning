@@ -1,0 +1,67 @@
+{
+  "argv": [
+    "skills/exploratory-data-analysis/tests/eval/run_desc_eval.py",
+    "--fixture",
+    "skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11.json",
+    "--desc-a",
+    "skills/exploratory-data-analysis/tests/eval/frozen-2026-08-11-baseline.txt",
+    "--desc-b",
+    "skills/exploratory-data-analysis/tests/eval/frozen-2026-08-11-treatment.txt",
+    "--out-dir",
+    "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseA/canary2",
+    "--model",
+    "claude-opus-5",
+    "--runs",
+    "1",
+    "--timeout",
+    "390",
+    "--seed",
+    "20260811",
+    "--label-a",
+    "baseline",
+    "--label-b",
+    "treatment"
+  ],
+  "seed": 20260811,
+  "model": "claude-opus-5",
+  "runs": 1,
+  "timeout": 390,
+  "skill_name": "exploratory-data-analysis",
+  "project_root": "/Users/bdc/projects/data-reasoning",
+  "claude_cli_version": "2.1.228 (Claude Code)",
+  "git_sha": "69c68627ffd46ef422a0abb59cad57e12f05a52c",
+  "fixture": "skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11.json",
+  "fixture_sha256": "b0dc540634ba8ebe3d7c3ab042fec7f4001d0af01895ae645bab2ea9a23b3db5",
+  "descriptions": {
+    "A": {
+      "label": "baseline",
+      "path": "skills/exploratory-data-analysis/tests/eval/frozen-2026-08-11-baseline.txt",
+      "sha256": "7fc858af152f80129bfa2840e534ec2e657c4fec61767bd7e244c34420fb9e6a"
+    },
+    "B": {
+      "label": "treatment",
+      "path": "skills/exploratory-data-analysis/tests/eval/frozen-2026-08-11-treatment.txt",
+      "sha256": "a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38"
+    }
+  },
+  "selected_query_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "query_order_per_run": {
+    "1": [
+      3,
+      2,
+      5,
+      1,
+      4,
+      0
+    ]
+  },
+  "dry_run": false,
+  "resumed": false
+}

@@ -1,0 +1,50 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "a8566f87-800d-4ec1-bb50-b66e6b077d9c",
+  "tool_uses": [
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/SKILL.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/references/ledger-template.md"
+    },
+    {
+      "name": "Write",
+      "path": "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch/t14-rep5/ledger.md"
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": true,
+  "first_text": "ROUTE: hypothesis-driven-analysis\n\nA named effect (\"spend dropped\") on a named account needs explaining, with several plausible causes competing \u2014 that is a diagnostic *why*, not open-ended profiling.\n\nLet me read the skill and see what data exists.",
+  "route": "hda",
+  "wrote_files": [
+    "/private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseD/scratch/t14-rep5/ledger.md"
+  ],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "7adeba750a5a798dcdcb87c7d80d13a0f04df1aab2e5b6b7d6ec312e0abea129",
+  "jsonl_sha256": "0c276d31ce28bfd20127add729a1b3a9116c84cfb44ea885f503ea665c08a9bd",
+  "scenario": "t14",
+  "rep": 5,
+  "suffix": "-",
+  "catalog_order": "eda-first",
+  "started_utc": "2026-08-12T00:09:01+00:00",
+  "duration_s": 84.3,
+  "exit_code": 0,
+  "prompt_sha256": "b655b2db7e69ca4f85431c411c8a8abaddce8437556e94aa47b26812407fe87f"
+}

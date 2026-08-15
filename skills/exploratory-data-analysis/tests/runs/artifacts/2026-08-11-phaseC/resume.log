@@ -1,0 +1,113 @@
+[resume] rows read: 140
+[resume] cells complete: 139/240
+[resume] cells interrupted mid-retry: 1
+[resume] cells remaining to run: 101
+[resume]   q39 r2 baseline continues at attempt 2 with 0 of 3 execution(s) spent
+[resume] verified manifest: /private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseC/scored/manifest-20260812T001708Z.json
+[resume] verified skill_name: exploratory-data-analysis
+[resume] verified fixture_sha256: 6e96cd7828db0ebe67be56033aa1a4ea1f3a803cf7bfca770be509bcd6ca48ed
+[resume] verified description_A_sha256: 7fc858af152f80129bfa2840e534ec2e657c4fec61767bd7e244c34420fb9e6a
+[resume] verified description_B_sha256: a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38
+Manifest: /private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseC/scored/manifest-20260812T153042Z.json
+[140/240] q39 baseline r2 a2: valid triggered=False ending=terminated_on_detection reason=None 8.19s
+[141/240] q22 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 8.842s
+[142/240] q22 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 10.084s
+[143/240] q37 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 8.977s
+[144/240] q37 baseline r2 a1: valid triggered=True ending=terminated_on_detection reason=None 9.325s
+[145/240] q3 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 6.731s
+[146/240] q3 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 6.678s
+[147/240] q12 baseline r2 a1: valid triggered=True ending=terminated_on_detection reason=None 7.321s
+[148/240] q12 treatment r2 a1: valid triggered=True ending=terminated_on_detection reason=None 6.977s
+[149/240] q21 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 7.16s
+[150/240] q21 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 13.279s
+[151/240] q31 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 9.702s
+[152/240] q31 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 7.096s
+[153/240] q26 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 9.107s
+[154/240] q26 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 6.063s
+[155/240] q23 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 10.089s
+[156/240] q23 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 6.805s
+[157/240] q34 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 9.777s
+[158/240] q34 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 7.979s
+[159/240] q35 treatment r2 a1: valid triggered=False ending=terminated_on_detection reason=None 7.198s
+[160/240] q35 baseline r2 a1: valid triggered=False ending=terminated_on_detection reason=None 6.561s
+[161/240] q1 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.508s
+[162/240] q1 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.806s
+[163/240] q32 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 9.043s
+[164/240] q32 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 10.445s
+[165/240] q20 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 8.57s
+[166/240] q20 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 11.675s
+[167/240] q35 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.903s
+[168/240] q35 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.169s
+[169/240] q18 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.535s
+[170/240] q18 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.841s
+[171/240] q4 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 10.127s
+[172/240] q4 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 7.428s
+[173/240] q30 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.112s
+[174/240] q30 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.813s
+[175/240] q17 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.191s
+[176/240] q17 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 11.168s
+[177/240] q24 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.331s
+[178/240] q24 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 10.823s
+[179/240] q15 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 13.411s
+[180/240] q15 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.897s
+[181/240] q23 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.304s
+[182/240] q23 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.221s
+[183/240] q6 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.257s
+[184/240] q6 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.518s
+[185/240] q26 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.519s
+[186/240] q26 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 5.831s
+[187/240] q13 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 6.972s
+[188/240] q13 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.9s
+[189/240] q10 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 11.944s
+[190/240] q10 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.52s
+[191/240] q28 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 8.77s
+[192/240] q28 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 9.798s
+[193/240] q38 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.867s
+[194/240] q38 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 10.274s
+[195/240] q2 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.925s
+[196/240] q2 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.874s
+[197/240] q25 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.094s
+[198/240] q25 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.024s
+[199/240] q14 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.666s
+[200/240] q14 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.556s
+[201/240] q29 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.998s
+[202/240] q29 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.2s
+[203/240] q31 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.732s
+[204/240] q31 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.012s
+[205/240] q19 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.037s
+[206/240] q19 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 10.588s
+[207/240] q34 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.325s
+[208/240] q34 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.808s
+[209/240] q27 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.831s
+[210/240] q27 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.62s
+[211/240] q8 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 9.036s
+[212/240] q8 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 8.183s
+[213/240] q37 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 9.121s
+[214/240] q37 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.758s
+[215/240] q21 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.469s
+[216/240] q21 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 10.43s
+[217/240] q9 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.477s
+[218/240] q9 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.487s
+[219/240] q0 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 11.641s
+[220/240] q0 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.527s
+[221/240] q3 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.702s
+[222/240] q3 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 6.636s
+[223/240] q36 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 12.682s
+[224/240] q36 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 6.619s
+[225/240] q12 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 5.974s
+[226/240] q12 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 6.124s
+[227/240] q16 treatment r3 a1: valid triggered=True ending=terminated_on_detection reason=None 10.36s
+[228/240] q16 baseline r3 a1: valid triggered=True ending=terminated_on_detection reason=None 7.528s
+[229/240] q11 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.601s
+[230/240] q11 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.881s
+[231/240] q22 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.776s
+[232/240] q22 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.945s
+[233/240] q39 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.387s
+[234/240] q39 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.182s
+[235/240] q7 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 8.983s
+[236/240] q7 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.497s
+[237/240] q33 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.765s
+[238/240] q33 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 9.463s
+[239/240] q5 baseline r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.52s
+[240/240] q5 treatment r3 a1: valid triggered=False ending=terminated_on_detection reason=None 7.668s
+Results: /private/tmp/claude-501/-Users-bdc-projects-data-reasoning/76335987-e357-4d54-ab07-84cc5c1360d1/scratchpad/phaseC/scored/results.jsonl

@@ -1,0 +1,102 @@
+{
+  "0": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "1": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "2": {
+    "scope": "whole",
+    "temporality": "longitudinal",
+    "boundary": "clean"
+  },
+  "3": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "4": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "5": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "6": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "7": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "8": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "9": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "10": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "11": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "12": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "13": {
+    "scope": "facet",
+    "temporality": "longitudinal",
+    "boundary": "named-effect"
+  },
+  "14": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "15": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "16": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "17": {
+    "scope": "whole",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "18": {
+    "scope": "facet",
+    "temporality": "snapshot",
+    "boundary": "clean"
+  },
+  "19": {
+    "scope": "whole",
+    "temporality": "longitudinal",
+    "boundary": "clean"
+  }
+}
