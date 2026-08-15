@@ -1,0 +1,402 @@
+[
+  {
+    "base_id": 1,
+    "base_slug": "route-12-crosstown",
+    "speech_act": "profile",
+    "query": "Profile the Route 12 crosstown bus.",
+    "scope": "whole",
+    "entity": "Route 12 crosstown bus",
+    "facet": null,
+    "content_phrase": "the Route 12 crosstown bus"
+  },
+  {
+    "base_id": 1,
+    "base_slug": "route-12-crosstown",
+    "speech_act": "overview",
+    "query": "Give me an overview of the Route 12 crosstown bus.",
+    "scope": "whole",
+    "entity": "Route 12 crosstown bus",
+    "facet": null,
+    "content_phrase": "the Route 12 crosstown bus"
+  },
+  {
+    "base_id": 1,
+    "base_slug": "route-12-crosstown",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the Route 12 crosstown bus.",
+    "scope": "whole",
+    "entity": "Route 12 crosstown bus",
+    "facet": null,
+    "content_phrase": "the Route 12 crosstown bus"
+  },
+  {
+    "base_id": 1,
+    "base_slug": "route-12-crosstown",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the Route 12 crosstown bus.",
+    "scope": "whole",
+    "entity": "Route 12 crosstown bus",
+    "facet": null,
+    "content_phrase": "the Route 12 crosstown bus"
+  },
+  {
+    "base_id": 2,
+    "base_slug": "eastgate-garage",
+    "speech_act": "profile",
+    "query": "Profile the Eastgate park-and-ride garage.",
+    "scope": "whole",
+    "entity": "Eastgate park-and-ride garage",
+    "facet": null,
+    "content_phrase": "the Eastgate park-and-ride garage"
+  },
+  {
+    "base_id": 2,
+    "base_slug": "eastgate-garage",
+    "speech_act": "overview",
+    "query": "Give me an overview of the Eastgate park-and-ride garage.",
+    "scope": "whole",
+    "entity": "Eastgate park-and-ride garage",
+    "facet": null,
+    "content_phrase": "the Eastgate park-and-ride garage"
+  },
+  {
+    "base_id": 2,
+    "base_slug": "eastgate-garage",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the Eastgate park-and-ride garage.",
+    "scope": "whole",
+    "entity": "Eastgate park-and-ride garage",
+    "facet": null,
+    "content_phrase": "the Eastgate park-and-ride garage"
+  },
+  {
+    "base_id": 2,
+    "base_slug": "eastgate-garage",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the Eastgate park-and-ride garage.",
+    "scope": "whole",
+    "entity": "Eastgate park-and-ride garage",
+    "facet": null,
+    "content_phrase": "the Eastgate park-and-ride garage"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "route-7-farebox",
+    "speech_act": "profile",
+    "query": "Profile farebox revenue for the Route 7 express.",
+    "scope": "facet",
+    "entity": "Route 7 express",
+    "facet": "farebox revenue",
+    "content_phrase": "farebox revenue for the Route 7 express"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "route-7-farebox",
+    "speech_act": "overview",
+    "query": "Give me an overview of farebox revenue for the Route 7 express.",
+    "scope": "facet",
+    "entity": "Route 7 express",
+    "facet": "farebox revenue",
+    "content_phrase": "farebox revenue for the Route 7 express"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "route-7-farebox",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on farebox revenue for the Route 7 express.",
+    "scope": "facet",
+    "entity": "Route 7 express",
+    "facet": "farebox revenue",
+    "content_phrase": "farebox revenue for the Route 7 express"
+  },
+  {
+    "base_id": 3,
+    "base_slug": "route-7-farebox",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about farebox revenue for the Route 7 express.",
+    "scope": "facet",
+    "entity": "Route 7 express",
+    "facet": "farebox revenue",
+    "content_phrase": "farebox revenue for the Route 7 express"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "harbor-ferry-otp",
+    "speech_act": "profile",
+    "query": "Profile on-time performance for the Harbor Point ferry.",
+    "scope": "facet",
+    "entity": "Harbor Point ferry",
+    "facet": "on-time performance",
+    "content_phrase": "on-time performance for the Harbor Point ferry"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "harbor-ferry-otp",
+    "speech_act": "overview",
+    "query": "Give me an overview of on-time performance for the Harbor Point ferry.",
+    "scope": "facet",
+    "entity": "Harbor Point ferry",
+    "facet": "on-time performance",
+    "content_phrase": "on-time performance for the Harbor Point ferry"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "harbor-ferry-otp",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on on-time performance for the Harbor Point ferry.",
+    "scope": "facet",
+    "entity": "Harbor Point ferry",
+    "facet": "on-time performance",
+    "content_phrase": "on-time performance for the Harbor Point ferry"
+  },
+  {
+    "base_id": 4,
+    "base_slug": "harbor-ferry-otp",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about on-time performance for the Harbor Point ferry.",
+    "scope": "facet",
+    "entity": "Harbor Point ferry",
+    "facet": "on-time performance",
+    "content_phrase": "on-time performance for the Harbor Point ferry"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "route-22-ridership",
+    "speech_act": "profile",
+    "query": "Profile ridership by stop for the Route 22 loop.",
+    "scope": "facet",
+    "entity": "Route 22 loop",
+    "facet": "ridership by stop",
+    "content_phrase": "ridership by stop for the Route 22 loop"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "route-22-ridership",
+    "speech_act": "overview",
+    "query": "Give me an overview of ridership by stop for the Route 22 loop.",
+    "scope": "facet",
+    "entity": "Route 22 loop",
+    "facet": "ridership by stop",
+    "content_phrase": "ridership by stop for the Route 22 loop"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "route-22-ridership",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on ridership by stop for the Route 22 loop.",
+    "scope": "facet",
+    "entity": "Route 22 loop",
+    "facet": "ridership by stop",
+    "content_phrase": "ridership by stop for the Route 22 loop"
+  },
+  {
+    "base_id": 5,
+    "base_slug": "route-22-ridership",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about ridership by stop for the Route 22 loop.",
+    "scope": "facet",
+    "entity": "Route 22 loop",
+    "facet": "ridership by stop",
+    "content_phrase": "ridership by stop for the Route 22 loop"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "fleetwood-backlog",
+    "speech_act": "profile",
+    "query": "Profile the maintenance backlog at the Fleetwood bus depot.",
+    "scope": "facet",
+    "entity": "Fleetwood bus depot",
+    "facet": "maintenance backlog",
+    "content_phrase": "the maintenance backlog at the Fleetwood bus depot"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "fleetwood-backlog",
+    "speech_act": "overview",
+    "query": "Give me an overview of the maintenance backlog at the Fleetwood bus depot.",
+    "scope": "facet",
+    "entity": "Fleetwood bus depot",
+    "facet": "maintenance backlog",
+    "content_phrase": "the maintenance backlog at the Fleetwood bus depot"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "fleetwood-backlog",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the maintenance backlog at the Fleetwood bus depot.",
+    "scope": "facet",
+    "entity": "Fleetwood bus depot",
+    "facet": "maintenance backlog",
+    "content_phrase": "the maintenance backlog at the Fleetwood bus depot"
+  },
+  {
+    "base_id": 6,
+    "base_slug": "fleetwood-backlog",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the maintenance backlog at the Fleetwood bus depot.",
+    "scope": "facet",
+    "entity": "Fleetwood bus depot",
+    "facet": "maintenance backlog",
+    "content_phrase": "the maintenance backlog at the Fleetwood bus depot"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "student-fare-program",
+    "speech_act": "profile",
+    "query": "Profile the student fare program.",
+    "scope": "whole",
+    "entity": "student fare program",
+    "facet": null,
+    "content_phrase": "the student fare program"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "student-fare-program",
+    "speech_act": "overview",
+    "query": "Give me an overview of the student fare program.",
+    "scope": "whole",
+    "entity": "student fare program",
+    "facet": null,
+    "content_phrase": "the student fare program"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "student-fare-program",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the student fare program.",
+    "scope": "whole",
+    "entity": "student fare program",
+    "facet": null,
+    "content_phrase": "the student fare program"
+  },
+  {
+    "base_id": 7,
+    "base_slug": "student-fare-program",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the student fare program.",
+    "scope": "whole",
+    "entity": "student fare program",
+    "facet": null,
+    "content_phrase": "the student fare program"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "paratransit-complaints",
+    "speech_act": "profile",
+    "query": "Profile complaint volume for the paratransit service.",
+    "scope": "facet",
+    "entity": "paratransit service",
+    "facet": "complaint volume",
+    "content_phrase": "complaint volume for the paratransit service"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "paratransit-complaints",
+    "speech_act": "overview",
+    "query": "Give me an overview of complaint volume for the paratransit service.",
+    "scope": "facet",
+    "entity": "paratransit service",
+    "facet": "complaint volume",
+    "content_phrase": "complaint volume for the paratransit service"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "paratransit-complaints",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on complaint volume for the paratransit service.",
+    "scope": "facet",
+    "entity": "paratransit service",
+    "facet": "complaint volume",
+    "content_phrase": "complaint volume for the paratransit service"
+  },
+  {
+    "base_id": 8,
+    "base_slug": "paratransit-complaints",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about complaint volume for the paratransit service.",
+    "scope": "facet",
+    "entity": "paratransit service",
+    "facet": "complaint volume",
+    "content_phrase": "complaint volume for the paratransit service"
+  },
+  {
+    "base_id": 9,
+    "base_slug": "downtown-transit-mall",
+    "speech_act": "profile",
+    "query": "Profile the downtown transit mall.",
+    "scope": "whole",
+    "entity": "downtown transit mall",
+    "facet": null,
+    "content_phrase": "the downtown transit mall"
+  },
+  {
+    "base_id": 9,
+    "base_slug": "downtown-transit-mall",
+    "speech_act": "overview",
+    "query": "Give me an overview of the downtown transit mall.",
+    "scope": "whole",
+    "entity": "downtown transit mall",
+    "facet": null,
+    "content_phrase": "the downtown transit mall"
+  },
+  {
+    "base_id": 9,
+    "base_slug": "downtown-transit-mall",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on the downtown transit mall.",
+    "scope": "whole",
+    "entity": "downtown transit mall",
+    "facet": null,
+    "content_phrase": "the downtown transit mall"
+  },
+  {
+    "base_id": 9,
+    "base_slug": "downtown-transit-mall",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about the downtown transit mall.",
+    "scope": "whole",
+    "entity": "downtown transit mall",
+    "facet": null,
+    "content_phrase": "the downtown transit mall"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "central-transfers",
+    "speech_act": "profile",
+    "query": "Profile transfer volumes at Central Station.",
+    "scope": "facet",
+    "entity": "Central Station",
+    "facet": "transfer volumes",
+    "content_phrase": "transfer volumes at Central Station"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "central-transfers",
+    "speech_act": "overview",
+    "query": "Give me an overview of transfer volumes at Central Station.",
+    "scope": "facet",
+    "entity": "Central Station",
+    "facet": "transfer volumes",
+    "content_phrase": "transfer volumes at Central Station"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "central-transfers",
+    "speech_act": "rundown",
+    "query": "Give me a rundown on transfer volumes at Central Station.",
+    "scope": "facet",
+    "entity": "Central Station",
+    "facet": "transfer volumes",
+    "content_phrase": "transfer volumes at Central Station"
+  },
+  {
+    "base_id": 10,
+    "base_slug": "central-transfers",
+    "speech_act": "tell-me-about",
+    "query": "Tell me about transfer volumes at Central Station.",
+    "scope": "facet",
+    "entity": "Central Station",
+    "facet": "transfer volumes",
+    "content_phrase": "transfer volumes at Central Station"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Why did branch 14's circulation drop last quarter?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "What's driving the increase in holds at the Eastside branch?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Why has patron retention at Riverside fallen since the renovation?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Something changed in the bookmobile route's usage — figure out what."
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Staff say the audiobook collection is cannibalising print circulation. Is that true?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Why are hold wait times longer at branch 7 than at branch 3?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "What caused the drop in teen section visits at Central Library?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Why did this account's spend drop last month?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "What's driving the spend increase on the Kestrel vendor account?"
+  },
+  {
+    "arm": "N1",
+    "should_trigger": false,
+    "query": "Our procurement lead says account 4471's spend doubled after the contract change. Is that right?"
+  },
+  {
+    "arm": "N2",
+    "should_trigger": false,
+    "query": "How many holds were placed in March?"
+  },
+  {
+    "arm": "N2",
+    "should_trigger": false,
+    "query": "Which branch has copy 4471?"
+  },
+  {
+    "arm": "N2",
+    "should_trigger": false,
+    "query": "What's the total circulation for last week?"
+  },
+  {
+    "arm": "N2",
+    "should_trigger": false,
+    "query": "When did patron 88213 last check out an item?"
+  },
+  {
+    "arm": "N2",
+    "should_trigger": false,
+    "query": "How many branches are in the system?"
+  },
+  {
+    "arm": "N2",
+    "should_trigger": false,
+    "query": "What's the median loan duration?"
+  }
+]
