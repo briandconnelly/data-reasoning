@@ -24,7 +24,55 @@ theta_bar = -0.0333, exact interval [-0.1333, +0.0667], VERDICT: NOT_SUPPORTED â
 
 `analyze_phasec.py` cannot ingest the 2026-08-12 ceiling-probe archive, because that archive's `arm_label` values are `shipped`/`ceiling`, not the `baseline`/`treatment` pair the script hardcodes.
 The published ceiling-probe table is nonetheless reproducible directly from the archive by an ad hoc tally of `results.jsonl`, joined to `probe-fixture.json` on `query_index` for `speech_act`, restricted to `status == "valid"` rows.
-That recount (command and output in the task-4 report) reproduces shipped 0.500/0.125/0.125/0.125 and ceiling 0.875/1.000/1.000/0.750 for profile/overview/rundown/tell-me-about exactly, so the archive itself is sound even though `analyze_phasec.py` cannot read its labels.
+Run with `python3 <script>` from the worktree root, the script below reproduces the table exactly, so the archive itself is sound even though `analyze_phasec.py` cannot read its labels.
+
+```python
+import json
+from collections import defaultdict
+
+fixture = json.load(open("skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-12-ceiling-probe/probe-fixture.json"))
+speech_act_by_index = {i: item["speech_act"] for i, item in enumerate(fixture)}
+
+rows = []
+with open("skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-12-ceiling-probe/results.jsonl") as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            rows.append(json.loads(line))
+
+counts = defaultdict(lambda: [0, 0])  # (arm, act) -> [triggers, n]
+for row in rows:
+    if row.get("status") != "valid":
+        continue
+    act = speech_act_by_index[row["query_index"]]
+    arm = row["arm_label"]
+    counts[(arm, act)][1] += 1
+    if row["triggered"]:
+        counts[(arm, act)][0] += 1
+
+order = ["profile", "overview", "rundown", "tell-me-about"]
+for arm in ("shipped", "ceiling"):
+    parts = []
+    for act in order:
+        trig, n = counts[(arm, act)]
+        rate = trig / n if n else None
+        parts.append(f"{act}={rate:.3f} (n={n})")
+    print(arm, " ".join(parts))
+
+total_valid = sum(1 for r in rows if r.get("status") == "valid")
+total_void = sum(1 for r in rows if r.get("status") == "void")
+print(f"rows={len(rows)} valid={total_valid} void={total_void}")
+```
+
+Output:
+
+```
+shipped profile=0.500 (n=8) overview=0.125 (n=8) rundown=0.125 (n=8) tell-me-about=0.125 (n=8)
+ceiling profile=0.875 (n=8) overview=1.000 (n=8) rundown=1.000 (n=8) tell-me-about=0.750 (n=8)
+rows=64 valid=64 void=0
+```
+
+That matches the published table exactly: shipped 0.500/0.125/0.125/0.125 and ceiling 0.875/1.000/1.000/0.750 for profile/overview/rundown/tell-me-about, with all 64 rows valid and 0 void.
 
 ## Step 2 â€” analyze_ab.py invocation form for cost-arm analysis
 
