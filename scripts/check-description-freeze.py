@@ -67,7 +67,8 @@ def run(repo: Path, update: frozenset[str]) -> int:
             print(
                 f"FROZEN: {skill}'s description differs from its golden.\n"
                 f"  Descriptions are frozen against unmeasured change; {DECISION}\n"
-                f"  states the unfreezing conditions, after which --update {skill} refreshes the pin.",
+                f"  states the unfreezing conditions, after which --update {skill}\n"
+                f"  refreshes the pin.",
                 file=sys.stderr,
             )
     return 1 if failures else 0

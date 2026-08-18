@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 SCRIPTS = Path(__file__).resolve().parent
+MIN_DESC_LENGTH = 200
 spec = importlib.util.spec_from_file_location(
     "check_description_freeze", SCRIPTS / "check-description-freeze.py"
 )
@@ -29,13 +30,13 @@ def make_fake_repo(tmp_path: Path) -> Path:
 def test_every_description_extracts_real_content():
     for skill in cdf.SKILLS:
         desc = cdf.read_description(REPO / "skills" / skill / "SKILL.md")
-        assert len(desc) > 200, skill
+        assert len(desc) > MIN_DESC_LENGTH, skill
 
 
 def test_broken_frontmatter_is_an_error_not_a_pass(tmp_path):
     bad = tmp_path / "SKILL.md"
     bad.write_text("---\ndescription: [unclosed\n---\nbody\n", encoding="utf-8")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="frontmatter"):
         cdf.read_description(bad)
 
 
