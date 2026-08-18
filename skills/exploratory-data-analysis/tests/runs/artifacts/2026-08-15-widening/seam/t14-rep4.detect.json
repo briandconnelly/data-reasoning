@@ -1,0 +1,68 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "6e5b1ceb-4bd5-4439-b81b-f2d5d78bcb3e",
+  "tool_uses": [
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": false,
+  "first_text": "I'll start by routing, then look at what data is actually available.\n\nROUTE: hypothesis-driven-analysis\n\nA named effect (\"spend dropped\") needs explaining, with multiple plausible causes \u2014 that's diagnostic why-work, not open-ended profiling.",
+  "route": "hda",
+  "wrote_files": [],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "5c6c247ea374a621c94faecb84cf83e575a8a2a8ecc84439ca41619d51920c96",
+  "jsonl_sha256": "3d23b90c138a306154e633416f7a645075145d7dc247e04440a48741db5b5122",
+  "scenario": "t14",
+  "rep": 4,
+  "suffix": "-",
+  "catalog_order": "hda-first",
+  "started_utc": "2026-08-18T02:46:39+00:00",
+  "duration_s": 142.3,
+  "exit_code": 0,
+  "prompt_sha256": "712b5a9e26df39461de41ad3bd8a522af72b90c40fb717c4e3df50e502ae071a"
+}
