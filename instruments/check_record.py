@@ -10,8 +10,7 @@ suspends completeness findings while a record still carries template
 placeholders (the skills mandate writing the template before filling it).
 
 Exit codes: 0 clean, 1 findings (one per stdout line), 2 not a recognized
-record or unreadable. Callers must treat this tool's absence or failure as
-"not validated", never as clean.
+record or unreadable.
 """
 
 from __future__ import annotations
@@ -61,6 +60,30 @@ PLACEHOLDER = re.compile(r"<[^<>\n]+>")
 DELIMITERS = (" —", " -", ";", ":", " (", ",")
 MIN_TABLE_ROWS = 2  # header + at least one data row
 
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+CELL_SPLIT = re.compile(r"(?<!\\)\|")
+
+
+def _strip_fences(text: str) -> str:
+    """Blank out fenced code blocks (backtick or tilde, up to 3-space indent)
+    so quoted records and code samples are never scanned as record content.
+    Line count is preserved."""
+    out = []
+    fence: str | None = None
+    for line in text.split("\n"):
+        m = FENCE.match(line)
+        if fence is None:
+            if m:
+                fence = m.group(1)[0]
+                out.append("")
+                continue
+            out.append(line)
+        else:
+            if m and m.group(1)[0] == fence:
+                fence = None
+            out.append("")
+    return "\n".join(out)
+
 
 def detect(text: str) -> str | None:
     first = text.lstrip().split("\n", 1)[0]
@@ -102,12 +125,25 @@ def _section(text: str, heading: str) -> str:
 
 
 def _table_rows(section: str) -> list[list[str]]:
-    """All markdown table rows in a section as cell lists, header included."""
+    """All markdown table rows in a section as cell lists, header included.
+
+    Cells are split on unescaped pipes only: a `\\|` inside a cell (e.g. a
+    shell pipeline quoted in a Method cell) does not shift the columns.
+    Known residual leniency: a pipe inside an inline code span still splits;
+    that can only shift a cell downstream to a column the checks below don't
+    key on by name, which is at worst a false negative, never a false
+    positive on a checked column.
+    """
     rows = []
     for raw_line in section.splitlines():
         line = raw_line.strip()
         if line.startswith("|") and not set(line) <= {"|", "-", " ", ":"}:
-            rows.append([c.strip() for c in line.strip("|").split("|")])
+            cells = [c.strip() for c in CELL_SPLIT.split(line)]
+            if cells and cells[0] == "":
+                cells = cells[1:]
+            if cells and cells[-1] == "":
+                cells = cells[:-1]
+            rows.append(cells)
     return rows
 
 
@@ -122,6 +158,38 @@ def _column(rows: list[list[str]], name: str) -> list[str]:
     return [r[idx] for r in rows[1:] if idx < len(r)]
 
 
+def _require_column(rows: list[list[str]], name: str, where: str, findings: list[str]) -> bool:
+    """True if `rows`' header has a column matching `name`; else records a
+    finding and returns False. An empty table is left to the dedicated
+    empty-table finding, not duplicated here."""
+    if not rows:
+        return False
+    if not any(name.lower() in h.lower() for h in rows[0]):
+        findings.append(f"{where}: table lacks a {name!r} column")
+        return False
+    return True
+
+
+def _slot_values(body: str):
+    """Values sitting in slot positions: '- Label: value' lines, table data
+    cells, and the title line's remainder."""
+    lines = body.split("\n")
+    if lines:
+        first = lines[0]
+        if ": " in first:
+            yield first.split(": ", 1)[1]
+    for line in lines[1:]:
+        stripped = line.strip()
+        if stripped.startswith("- ") and ":" in stripped:
+            yield stripped.split(":", 1)[1]
+        elif stripped.startswith("|") and not set(stripped) <= {"|", "-", " ", ":"}:
+            yield from (c.strip() for c in CELL_SPLIT.split(stripped.strip("|")))
+
+
+def _in_progress(body: str) -> bool:
+    return any(v.strip() == "..." or PLACEHOLDER.search(v) for v in _slot_values(body))
+
+
 def _check_claim(value: str, where: str, findings: list[str]) -> None:
     if _is_placeholder(value):
         return
@@ -134,55 +202,65 @@ def _check_claim(value: str, where: str, findings: list[str]) -> None:
     )
 
 
-def check(text: str) -> list[str]:  # noqa: PLR0912
+def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pass per record kind
     kind = detect(text)
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    in_progress = bool(PLACEHOLDER.search(text)) or bool(re.search(r"\|\s*\.\.\.\s*\|", text))
+    body = _strip_fences(text)
+    in_progress = _in_progress(body)
 
     if not in_progress:
         for heading in REQUIRED_SECTIONS[kind]:
-            if ("\n" + heading + "\n") not in text:
+            if ("\n" + heading + "\n") not in body:
                 findings.append(f"required section missing: {heading}")
 
     if kind == "ledger":
-        hyp = _table_rows(_section(text, "## Hypotheses"))
-        for v in _column(hyp, "claim"):
-            _check_claim(v, "Hypotheses", findings)
+        # No id-grammar check on `id` cells (e.g. H1 vs H4 (retrospective)):
+        # the template's own retrospective-hypothesis form breaks a strict
+        # grammar, and leniency wins when a fix would force a false positive.
+        hyp = _table_rows(_section(body, "## Hypotheses"))
+        hyp_ok = in_progress or _require_column(hyp, "claim", "Hypotheses", findings)
+        if hyp_ok:
+            for v in _column(hyp, "claim"):
+                _check_claim(v, "Hypotheses", findings)
         if not in_progress:
             if len(hyp) < MIN_TABLE_ROWS:
                 findings.append("Hypotheses: table has no data rows")
-            for i, v in enumerate(_column(hyp, "necessary prediction"), 1):
-                if not v.strip():
-                    findings.append(f"Hypotheses row {i}: necessary prediction is empty")
-        tests = _table_rows(_section(text, "## Tests"))
-        for v in _column(tests, "outcome"):
-            if _is_placeholder(v):
-                continue
-            if _leading_token(v, OUTCOMES) is None:
-                findings.append(
-                    f"Tests: outcome {v!r} does not begin with a value from the "
-                    f"closed set {sorted(OUTCOMES)}"
-                )
+            if _require_column(hyp, "necessary prediction", "Hypotheses", findings):
+                for i, v in enumerate(_column(hyp, "necessary prediction"), 1):
+                    if not v.strip():
+                        findings.append(f"Hypotheses row {i}: necessary prediction is empty")
+        tests = _table_rows(_section(body, "## Tests"))
+        if in_progress or _require_column(tests, "outcome", "Tests", findings):
+            for v in _column(tests, "outcome"):
+                if _is_placeholder(v):
+                    continue
+                if _leading_token(v, OUTCOMES) is None:
+                    findings.append(
+                        f"Tests: outcome {v!r} does not begin with a value from the "
+                        f"closed set {sorted(OUTCOMES)}"
+                    )
         if not in_progress and len(tests) < MIN_TABLE_ROWS:
             findings.append("Tests: table has no data rows")
-        concl = _table_rows(_section(text, "## Conclusion"))
-        for v in _column(concl, "status"):
-            if _is_placeholder(v):
-                continue
-            if _normalize(v) not in STATUSES:
-                findings.append(
-                    f"Conclusion: status {_normalize(v)!r} is not REFUTED or UNRESOLVED "
-                    f"(the status set is closed)"
-                )
-        for v in _column(concl, "claim"):
-            _check_claim(v, "Conclusion", findings)
+        concl = _table_rows(_section(body, "## Conclusion"))
+        if in_progress or _require_column(concl, "status", "Conclusion", findings):
+            for v in _column(concl, "status"):
+                if _is_placeholder(v):
+                    continue
+                if _normalize(v) not in STATUSES:
+                    findings.append(
+                        f"Conclusion: status {_normalize(v)!r} is not REFUTED or UNRESOLVED "
+                        f"(the status set is closed)"
+                    )
+        if in_progress or _require_column(concl, "claim", "Conclusion", findings):
+            for v in _column(concl, "claim"):
+                _check_claim(v, "Conclusion", findings)
         if not in_progress and len(concl) < MIN_TABLE_ROWS:
             findings.append("Conclusion: per-hypothesis table has no data rows")
 
     elif kind == "review":
-        for line in text.splitlines():
+        for line in body.splitlines():
             stripped = line.strip()
             if stripped.startswith(("- Disposition:", "- Dispositions:")):
                 value = stripped.split(":", 1)[1]
@@ -194,10 +272,16 @@ def check(text: str) -> list[str]:  # noqa: PLR0912
                         f"from the closed set {sorted(DISPOSITIONS)} — 'valid' and "
                         f"'certified' are not dispositions"
                     )
+        if not in_progress:
+            handoff = _section(body, "## Handoff")
+            if not any(line.strip().startswith("- Dispositions:") for line in handoff.splitlines()):
+                findings.append("Handoff: required '- Dispositions:' slot is missing")
 
     elif kind in ("decision", "voi"):
         allowed = DECIDE_VERDICTS if kind == "decision" else VOI_VERDICTS
-        for line in text.splitlines():
+        heading = "## Verdict" if kind == "decision" else "## VoI"
+        section = _section(body, heading)
+        for line in section.splitlines():
             stripped = line.strip()
             if stripped.startswith("- Verdict:"):
                 value = stripped.split(":", 1)[1]
@@ -208,6 +292,10 @@ def check(text: str) -> list[str]:  # noqa: PLR0912
                         f"verdict {_normalize(value)!r} does not begin with a value "
                         f"from the closed set {sorted(allowed)}"
                     )
+        if not in_progress and not any(
+            line.strip().startswith("- Verdict:") for line in section.splitlines()
+        ):
+            findings.append("Verdict: required '- Verdict:' slot is missing")
 
     return findings
 

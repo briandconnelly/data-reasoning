@@ -1,5 +1,5 @@
-"""The hook must stay silent on non-records, feed findings back on records,
-and surface validator unavailability on records instead of passing silently."""
+"""Hook behavior tests. Failure semantics are owned by
+skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md."""
 
 # ruff: noqa: PLR2004 -- 2 is the hook's documented exit code for "not validated"
 

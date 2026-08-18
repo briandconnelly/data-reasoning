@@ -4,17 +4,18 @@
 
 Runs instruments/check_record.py on the written file and feeds findings back
 via exit 2 + stderr (PostToolUse cannot block — the file is already written;
-after-the-fact feedback is the design). Scope and limits of the validator are
-owned by skills/hypothesis-driven-analysis/decisions/
-006-instruments-are-not-a-live-self-check.md.
+after-the-fact feedback is the design).
 
 This is harness-level enforcement, not agent-read prose: no SKILL.md sentence
 points at the instrument, so no measured arms are owed for it.
 
-Failure discipline: the hook sniffs record signatures itself, so a record
-written while the validator is missing, broken, or timing out gets an
-explicit "not validated" via exit 2 — never a silent pass. Non-records are
-always silent.
+Exit codes: 0 non-record file or clean record; 2 record with findings
+(printed to stderr), validator missing/broken/timed-out, or file
+unreadable/unclassifiable.
+
+Failure semantics are owned by
+skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md;
+this file enacts them.
 """
 
 from __future__ import annotations

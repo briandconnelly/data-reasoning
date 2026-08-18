@@ -246,6 +246,77 @@ def test_non_record_detects_none():
     assert cr.detect("# Some Notes\n\nhello\n") is None
 
 
+def test_escaped_pipe_in_method_cell_is_not_an_outcome():
+    """Codex finding: an escaped pipe in a Tests Method cell shifted the
+    columns, so a correct ledger was flagged on outcome 'wc -l'."""
+    good = GOOD_LEDGER.replace(
+        "| T1 | H1 | step at 09:10 | window compare | CONSISTENT | S1 rows 1-9 |",
+        "| T1 | H1 | step at 09:10 | grep -c err log \\| wc -l | CONSISTENT | S1 rows 1-9 |",
+    )
+    assert cr.check(good) == []
+
+
+def test_fenced_quoted_record_does_not_reject_a_valid_verdict():
+    """Codex finding: a fenced excerpt quoting '- Verdict: optimal' inside
+    Evidence rejected a decision record whose actual verdict is valid."""
+    good = GOOD_DECISION.replace(
+        "- Prior odds: 1:1 — provenance: sensitivity-only",
+        "- Prior odds: 1:1 — provenance: sensitivity-only\n\n```\n- Verdict: optimal\n```",
+    )
+    assert cr.check(good) == []
+
+
+def test_tilde_fenced_quote_is_ignored_too():
+    good = GOOD_DECISION.replace(
+        "- Prior odds: 1:1 — provenance: sensitivity-only",
+        "- Prior odds: 1:1 — provenance: sensitivity-only\n\n~~~\n- Verdict: optimal\n~~~",
+    )
+    assert cr.check(good) == []
+
+
+def test_html_tag_in_prose_does_not_suspend_completeness():
+    """Codex finding: any <...> span anywhere marked the record in-progress
+    and suppressed every completeness finding."""
+    skel = "# Investigation: q?\n\nSee <details> below.\n"
+    assert any("required section missing" in f for f in cr.check(skel))
+
+
+def test_decision_record_without_a_verdict_line_is_caught():
+    """Codex finding: a decision record with all six headings empty and no
+    Verdict line validated clean."""
+    empty = (
+        "# Decision Record: d?\n\n## Decision frame\n\n## Decision-state model\n\n"
+        "## Evidence and update\n\n## Robustness\n\n## Verdict\n\n## Handoff\n"
+    )
+    assert any("Verdict" in f for f in cr.check(empty))
+
+
+def test_ledger_table_missing_its_claim_column_is_caught():
+    """Codex finding: tables whose headers omit the checked columns passed
+    silently because _column returned [] without complaint."""
+    bad = (
+        GOOD_LEDGER.replace(
+            "| id | claim | Candidate explanation | Prediction if true | Prediction if false | Necessary prediction (failure refutes) | Cheapest adequate test | Data needed |",
+            "| id | note |",
+        )
+        .replace("| --- | --- | --- | --- | --- | --- | --- | --- |", "| --- | --- |", 1)
+        .replace(
+            "| H1 | causal | deploy caused step | latency steps at 09:10 | no step at 09:10 | step aligns with deploy window | T1 | logs |",
+            "| H1 | banana |",
+        )
+        .replace(
+            "| H2 | data-artifact | exporter gap | gap in coverage | no gap | coverage hole spans the step | T2 | export manifest |",
+            "| H2 | banana |",
+        )
+    )
+    assert any("claim" in f and "column" in f for f in cr.check(bad))
+
+
+def test_review_handoff_without_dispositions_line_is_caught():
+    bad = GOOD_REVIEW.replace("- Dispositions: identified-if", "- Notes: none")
+    assert any("Dispositions" in f for f in cr.check(bad))
+
+
 def test_required_headings_exist_in_shipped_templates():
     """Parity: every heading this validator requires appears in the template
     that owns that record type, so a template rename must fail here."""
