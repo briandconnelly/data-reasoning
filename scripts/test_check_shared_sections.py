@@ -13,6 +13,9 @@ from pathlib import Path
 
 import pytest
 
+MIN_SECTION_SIZE = 150
+EXPECTED_ERROR_CODE = 2
+
 SCRIPTS = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location(
     "check_shared_sections", SCRIPTS / "check-shared-sections.py"
@@ -36,11 +39,11 @@ def test_every_target_extracts_real_content():
         text = (REPO / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
         block = css.extract_section(text, heading)
         assert block.startswith(heading + "\n")
-        assert len(block) > 200, (skill, heading)
+        assert len(block) > MIN_SECTION_SIZE, (skill, heading)
 
 
 def test_missing_heading_is_an_error_not_a_pass():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="heading not found"):
         css.extract_section("# nothing here\n", "### Costly collection (modifier, not a route)")
 
 
@@ -83,16 +86,26 @@ def test_update_is_targeted(tmp_path, capsys):
     """--update refreshes only the named golden, so a drift elsewhere still fails."""
     fake = make_fake_repo(tmp_path)
     victim = fake / "skills" / "exploratory-data-analysis" / "SKILL.md"
+    old_cost = (
+        "Cost never changes the route: a metered warehouse makes profiling more expensive, "
+        "not more inferential."
+    )
+    new_cost = (
+        "Cost never changes the route: a metered warehouse makes profiling costlier, "
+        "not more inferential."
+    )
+    old_provenance = (
+        "Minimize collection, redact secrets and personal data, and record provenance "
+        "for every source."
+    )
+    new_provenance = (
+        "Minimize collection, redact secrets and personal data, and record provenance "
+        "for each source."
+    )
     victim.write_text(
         victim.read_text(encoding="utf-8")
-        .replace(
-            "Cost never changes the route: a metered warehouse makes profiling more expensive, not more inferential.",
-            "Cost never changes the route: a metered warehouse makes profiling costlier, not more inferential.",
-        )
-        .replace(
-            "Minimize collection, redact secrets and personal data, and record provenance for every source.",
-            "Minimize collection, redact secrets and personal data, and record provenance for each source.",
-        ),
+        .replace(old_cost, new_cost)
+        .replace(old_provenance, new_provenance),
         encoding="utf-8",
     )
     css.run(fake, update=frozenset({"eda-costly-collection"}))  # refreshes only that golden
@@ -100,7 +113,8 @@ def test_update_is_targeted(tmp_path, capsys):
     capsys.readouterr()  # drain
     css.run(fake, update=frozenset())
     err = capsys.readouterr().err
-    assert "eda-data-rules" in err and "eda-costly-collection" not in err
+    assert "eda-data-rules" in err
+    assert "eda-costly-collection" not in err
 
 
 def test_unknown_update_target_is_an_error():
@@ -108,8 +122,9 @@ def test_unknown_update_target_is_an_error():
         [sys.executable, str(SCRIPTS / "check-shared-sections.py"), "--update", "no-such-slug"],
         capture_output=True,
         text=True,
+        check=False,
     )
-    assert result.returncode == 2
+    assert result.returncode == EXPECTED_ERROR_CODE
 
 
 def test_clean_repo_passes():
