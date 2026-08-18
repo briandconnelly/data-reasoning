@@ -4,13 +4,15 @@ minimum_prek_version = "0.3.0"
 # manifests record their SHA-256, so a formatting hook that rewrites them
 # breaks the recorded provenance chain. The three byte-mutating hooks below
 # carry the same exclude regex for that reason.
+# Shared-section goldens are also byte-frozen (exact extracts from SKILL.md
+# sections), so they are excluded from the same three hooks.
 
 [[repos]]
 repo = "builtin"
 hooks = [
-  { id = "trailing-whitespace", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
-  { id = "end-of-file-fixer", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
-  { id = "mixed-line-ending", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
+  { id = "trailing-whitespace", exclude = '^(skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)|scripts/shared-sections/.*)$' },
+  { id = "end-of-file-fixer", exclude = '^(skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)|scripts/shared-sections/.*)$' },
+  { id = "mixed-line-ending", exclude = '^(skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)|scripts/shared-sections/.*)$' },
   { id = "check-merge-conflict" },
   { id = "check-added-large-files" },
   { id = "check-yaml" },
@@ -37,6 +39,18 @@ repo = "local"
 hooks = [
   { id = "check-skill-frontmatter", name = "Validate SKILL.md frontmatter against agentskills.io spec", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-skill-frontmatter.py", files = "(?:^|/)SKILL\\.md$", pass_filenames = true },
   { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
+  # decisions/001-shared-gate-authority.md (EDA) enumerates the invariants the
+  # costly-collection and data-rules copies must preserve; rewording was
+  # guarded only by a hand check nothing ran. This hook freezes each copy
+  # against a golden so drift fails loudly; refreshing a golden (--update) is
+  # a diff-visible act the decision record governs.
+  { id = "check-shared-sections", name = "skills: costly-collection and data-rules copies match their goldens", language = "python", language_version = "python3", entry = "python scripts/check-shared-sections.py", files = "^(skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/SKILL\\.md|scripts/(check-shared-sections\\.py|shared-sections/.*))$", pass_filenames = false },
+  { id = "shared-sections-tests", name = "skills: the shared-section checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q scripts/test_check_shared_sections.py", files = "^scripts/(check-shared-sections\\.py|test_check_shared_sections\\.py)$", pass_filenames = false },
+  # skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md:
+  # the routing descriptions are pinned against unmeasured change. Goldens in
+  # scripts/frontmatter-descriptions/; the decision record governs any refresh.
+  { id = "check-description-freeze", name = "skills: frontmatter descriptions are frozen against unmeasured change", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-description-freeze.py", files = "^(skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/SKILL\\.md|scripts/(check-description-freeze\\.py|frontmatter-descriptions/.*))$", pass_filenames = false },
+  { id = "description-freeze-tests", name = "skills: the description-freeze checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8", "pyyaml>=6"], entry = "python -m pytest -q scripts/test_check_description_freeze.py", files = "^scripts/(check-description-freeze\\.py|test_check_description_freeze\\.py)$", pass_filenames = false },
   # The instruments' own unit suite. Nothing ran it before, so an edit to
   # score_ledger.py landed unchecked. The whole tests tree is collected; the
   # deliberately-broken scenario-3 fixture is held out by
@@ -84,4 +98,10 @@ hooks = [
   { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests/test_gate_parity_cir.py", files = "^(skills/causal-identification-review/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
   { id = "da-instrument-tests", name = "decision-analysis: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests", files = "^skills/decision-analysis/(tests/[^/]+\\.py|references/decision-record-template\\.md)$", pass_filenames = false },
   { id = "da-gate-parity", name = "decision-analysis: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests/test_gate_parity_da.py", files = "^(skills/decision-analysis/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
+  # instruments/ is the public, fixture-neutral structural validator adopted in
+  # principle by HDA decisions/006 (which owns its scope). Its parity test
+  # reads all four record templates and its template-clean test feeds their
+  # fenced blocks through check(), so the files regex watches the templates
+  # too: a template change must fail here, not silently orphan the validator.
+  { id = "instruments-tests", name = "instruments: the structural record validator's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q instruments", files = "^(instruments/.*\\.py|hooks/(hooks\\.json|check_record_hook\\.py)|\\.claude-plugin/plugin\\.json|skills/[^/]+/references/(ledger-template|exploration-log-template|identification-review-template|decision-record-template)\\.md)$", pass_filenames = false },
 ]

@@ -8,3 +8,4 @@ Each record states the context, the decision, and the consequences accepted with
 - [003-entity-profiling-in-scope.md](003-entity-profiling-in-scope.md) — an ask that names an entity and wants its story is profile work, and what the route produces for it.
 - [004-speech-act-governs-entity-profiling-triggering.md](004-speech-act-governs-entity-profiling-triggering.md) — speech act, not the exclusion clause, governs entity-profiling triggering, by one to two orders of magnitude.
 - [005-generic-speech-acts-claimed.md](005-generic-speech-acts-claimed.md) — the widening 004 anticipated: measured gain (pooled generic 0.0667 -> 0.5778) and null cost, shipped as two commits.
+- [006-description-freeze-until-measured.md](006-description-freeze-until-measured.md) — the four routing descriptions are frozen at their 2026-08-18 baselines against unmeasured change.

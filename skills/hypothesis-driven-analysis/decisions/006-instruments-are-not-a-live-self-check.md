@@ -45,3 +45,8 @@ Or: someone demonstrates a structural-only mode of `score_ledger.py` that cannot
 
 Nowhere yet — this decision records why no agent-read file points at an instrument, so that the next reader does not re-propose it.
 The scorer's own applicability limits are stated in `tests/score_ledger.py`'s SCOPE header, which is the authority on what it may be pointed at.
+
+*(Extended 2026-08-18: the first reopening condition is now half met.
+`instruments/check_record.py` is the fixture-neutral structural validator this record adopted in principle — public, outside `tests/`, stdlib-only, with its own unit suite — checking within the scope this record already stated, plus an in-progress rule so a template skeleton mid-fill is never flagged (the shipped templates validating clean is a unit test).
+Live enforcement arrived as a plugin PostToolUse hook (`hooks/hooks.json`) rather than a SKILL.md sentence: the hook is harness configuration, not agent-read prose, so it owes no measured arms under decisions/001 — the SKILL.md pointer this record deferred remains deferred on the same terms.
+Per this record's constraint, the hook reports an unavailable validator on a record file as "not validated" via the same feedback channel as findings, never as a silent pass.)*
