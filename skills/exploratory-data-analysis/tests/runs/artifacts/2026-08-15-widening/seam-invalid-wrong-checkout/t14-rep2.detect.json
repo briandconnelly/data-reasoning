@@ -1,0 +1,88 @@
+{
+  "model": "claude-opus-5",
+  "session_id": "9d581c9f-f847-4b62-93cd-d327380a119e",
+  "tool_uses": [
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Read",
+      "path": "/Users/bdc/projects/data-reasoning/skills/hypothesis-driven-analysis/SKILL.md"
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    },
+    {
+      "name": "Bash",
+      "path": null
+    }
+  ],
+  "read_eda_skill": false,
+  "read_hda_skill": true,
+  "first_text": "ROUTE: hypothesis-driven-analysis\n\nThis is a named effect needing explanation (\"why did spend drop\") with multiple plausible causes \u2014 that's the diagnostic case, not open-ended profiling.",
+  "route": "hda",
+  "wrote_files": [],
+  "json_parse_failures": 0,
+  "valid": true,
+  "invalid_reason": "-",
+  "final_text_sha256": "c0ac4d2c697563fb1050b903b35b18cb14bf5eda8149d53a8e913a3bb069d531",
+  "jsonl_sha256": "f6fcee4ff1c30352b567e88457a5a8d300b8197545f65cae7f18eaf08e359491",
+  "scenario": "t14",
+  "rep": 2,
+  "suffix": "-",
+  "catalog_order": "hda-first",
+  "started_utc": "2026-08-18T02:35:13+00:00",
+  "duration_s": 453.3,
+  "exit_code": 0,
+  "prompt_sha256": "26ccc5726b045d7d8e7d6dfeccf75391ea311173a93d2ca37dae566346112cb6"
+}
