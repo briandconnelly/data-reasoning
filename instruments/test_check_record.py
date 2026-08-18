@@ -317,6 +317,26 @@ def test_review_handoff_without_dispositions_line_is_caught():
     assert any("Dispositions" in f for f in cr.check(bad))
 
 
+def test_unclosed_fence_suppresses_completeness_not_correctness():
+    """An unterminated fence blanks the tail; completeness findings on the
+    swallowed sections would fail a correct record, so they are suspended."""
+    good = GOOD_DECISION.replace(
+        "- Crossover: none within swept class",
+        "- Crossover: none within swept class\n\n```\npasted log excerpt",
+    )
+    assert cr.check(good) == []
+
+
+def test_unclosed_fence_does_not_suppress_prefence_vocab():
+    bad = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: optimal"
+    ).replace(
+        "- Open factual disputes: none",
+        "- Open factual disputes: none\n\n```\npasted log excerpt",
+    )
+    assert any("verdict" in f.lower() for f in cr.check(bad))
+
+
 def test_required_headings_exist_in_shipped_templates():
     """Parity: every heading this validator requires appears in the template
     that owns that record type, so a template rename must fail here."""

@@ -64,10 +64,12 @@ FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 CELL_SPLIT = re.compile(r"(?<!\\)\|")
 
 
-def _strip_fences(text: str) -> str:
+def _strip_fences(text: str) -> tuple[str, bool]:
     """Blank out fenced code blocks (backtick or tilde, up to 3-space indent)
     so quoted records and code samples are never scanned as record content.
-    Line count is preserved."""
+    Line count is preserved. Also reports whether a fence was still open at
+    EOF (an unterminated fence blanks everything after it, including any
+    genuinely-present later sections)."""
     out = []
     fence: str | None = None
     for line in text.split("\n"):
@@ -82,7 +84,7 @@ def _strip_fences(text: str) -> str:
             if m and m.group(1)[0] == fence:
                 fence = None
             out.append("")
-    return "\n".join(out)
+    return "\n".join(out), fence is not None
 
 
 def detect(text: str) -> str | None:
@@ -207,8 +209,13 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    body = _strip_fences(text)
-    in_progress = _in_progress(body)
+    body, unterminated_fence = _strip_fences(text)
+    # An unterminated fence blanks everything after it (including any
+    # genuinely-present later sections), so completeness findings there
+    # would fail correct work — treat the record as in-progress instead.
+    # Vocabulary checks still run on whatever body remains (the pre-fence
+    # part).
+    in_progress = unterminated_fence or _in_progress(body)
 
     if not in_progress:
         for heading in REQUIRED_SECTIONS[kind]:
