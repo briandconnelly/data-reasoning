@@ -56,7 +56,7 @@ All four gates passed, so both commits shipped per the prereg's ship rule.
 
 Recorded per the prereg, not gating.
 
-Gate 1's fresh fixture: run-order means moved by up to 0.05 across the three runs, and baseline/treatment-first splits differed by up to 0.0833 (`AvB-gate1.md`) — consistent with a null, no directional order effect evident.
+Gate 1's fresh fixture: the per-run baseline-minus-treatment contrast moved by up to 0.05 across the three runs, while the baseline arm's own mean moved by up to 0.10 across the same runs (0.3000 to 0.4000; `AvB-gate1.md`), and baseline/treatment-first splits differed by up to 0.0833 (`AvB-gate1.md`) — consistent with a null, no directional order effect evident.
 Gate 1's cost arms: by-run and by-which-first rates matched or nearly matched across splits (`AvB-gate1.md`).
 Gates 2/3's fresh fixture: treatment triggered substantially more than baseline in every run and under both orderings — baseline-first 0.2000 vs 0.6000, treatment-first 0.3167 vs 0.7667 (`BvC-gates.md`) — consistent with a genuine treatment effect rather than an order artifact.
 Gates 2/3's cost arms: the small treatment-arm bump (2/96 invocations) was order-independent (`BvC-gates.md`).
@@ -66,7 +66,8 @@ The screening pairs (C1/C2/C3) each showed baseline-first vs treatment-first spl
 
 Decision 004's per-speech-act table (`profile` 0.833, `overview` 0.100, `tell-me-about` 0.133, `rundown` 0.033) was measured under the shipped 2026-08-11 description and was the baseline that record said a widening must beat.
 That widening has now run.
-The pooled generic rate under the shipped description, remeasured in this wave's fresh fixture, was 0.0667 (Gate 2/3, `BvC-gates.md`); under C3 it is 0.5778, lift interval [+0.2889, +0.7333].
+The pooled generic rate under the compressed description (arm B), measured in this wave's fresh fixture, was 0.0667 (Gate 2/3, `BvC-gates.md`); under C3 it is 0.5778, lift interval [+0.2889, +0.7333].
+The BvC pair never ran the shipped 2026-08-11 text itself (`BvC-gates.md`), but Gate 1 measured B statistically indistinguishable from the shipped description on this same pooled generic contrast (`AvB-gate1.md`), so 0.0667 stands in for the shipped baseline this table supersedes.
 Any future widening work measures against C3's rates and this wave's crossed-pair instrument (`crossed-pairs-2026-08-15.json`), not against 004's table.
 
 ## Limits

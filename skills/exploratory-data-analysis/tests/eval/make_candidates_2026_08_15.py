@@ -33,6 +33,8 @@ EX_C3 = (
     "a rundown, or a profile of a named entity all belong here"
 )
 
+MAX_DESCRIPTION_LENGTH = 1024  # shipped-description budget the candidates must fit
+
 TAIL_MARKERS = [
     "hypothesis-driven-analysis",
     "bounded descriptive",
@@ -56,7 +58,7 @@ def main() -> None:
     expected = {"B-compressed": (b, 983), "C1": (c1, 994), "C2": (c2, 1021), "C3": (c3, 1021)}
     for name, (text, length) in expected.items():
         assert len(text) == length, f"{name}: {len(text)} != {length}"
-        assert len(text) <= 1024, name
+        assert len(text) <= MAX_DESCRIPTION_LENGTH, name
         for marker in TAIL_MARKERS:
             assert marker in text, f"{name} lost tail marker {marker!r}"
         (EVAL / f"frozen-2026-08-15-{name}.txt").write_text(text + "\n")

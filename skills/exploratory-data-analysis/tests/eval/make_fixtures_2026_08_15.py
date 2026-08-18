@@ -23,26 +23,79 @@ FRAMES = {
 
 # (base_id, slug, scope, entity, facet, content_phrase)
 BASES = [
-    (1, "route-12-crosstown", "whole", "Route 12 crosstown bus", None,
-     "the Route 12 crosstown bus"),
-    (2, "eastgate-garage", "whole", "Eastgate park-and-ride garage", None,
-     "the Eastgate park-and-ride garage"),
-    (3, "route-7-farebox", "facet", "Route 7 express", "farebox revenue",
-     "farebox revenue for the Route 7 express"),
-    (4, "harbor-ferry-punctuality", "facet", "Harbor Point ferry", "punctuality",
-     "punctuality for the Harbor Point ferry"),
-    (5, "route-22-ridership", "facet", "Route 22 loop", "ridership by stop",
-     "ridership by stop for the Route 22 loop"),
-    (6, "fleetwood-backlog", "facet", "Fleetwood bus depot", "maintenance backlog",
-     "the maintenance backlog at the Fleetwood bus depot"),
-    (7, "student-fare-program", "whole", "student fare program", None,
-     "the student fare program"),
-    (8, "paratransit-complaints", "facet", "paratransit service", "complaint volume",
-     "complaint volume for the paratransit service"),
-    (9, "downtown-transit-mall", "whole", "downtown transit mall", None,
-     "the downtown transit mall"),
-    (10, "central-transfers", "facet", "Central Station", "transfer volumes",
-     "transfer volumes at Central Station"),
+    (
+        1,
+        "route-12-crosstown",
+        "whole",
+        "Route 12 crosstown bus",
+        None,
+        "the Route 12 crosstown bus",
+    ),
+    (
+        2,
+        "eastgate-garage",
+        "whole",
+        "Eastgate park-and-ride garage",
+        None,
+        "the Eastgate park-and-ride garage",
+    ),
+    (
+        3,
+        "route-7-farebox",
+        "facet",
+        "Route 7 express",
+        "farebox revenue",
+        "farebox revenue for the Route 7 express",
+    ),
+    (
+        4,
+        "harbor-ferry-punctuality",
+        "facet",
+        "Harbor Point ferry",
+        "punctuality",
+        "punctuality for the Harbor Point ferry",
+    ),
+    (
+        5,
+        "route-22-ridership",
+        "facet",
+        "Route 22 loop",
+        "ridership by stop",
+        "ridership by stop for the Route 22 loop",
+    ),
+    (
+        6,
+        "fleetwood-backlog",
+        "facet",
+        "Fleetwood bus depot",
+        "maintenance backlog",
+        "the maintenance backlog at the Fleetwood bus depot",
+    ),
+    (7, "student-fare-program", "whole", "student fare program", None, "the student fare program"),
+    (
+        8,
+        "paratransit-complaints",
+        "facet",
+        "paratransit service",
+        "complaint volume",
+        "complaint volume for the paratransit service",
+    ),
+    (
+        9,
+        "downtown-transit-mall",
+        "whole",
+        "downtown transit mall",
+        None,
+        "the downtown transit mall",
+    ),
+    (
+        10,
+        "central-transfers",
+        "facet",
+        "Central Station",
+        "transfer volumes",
+        "transfer volumes at Central Station",
+    ),
 ]
 
 TEMPORAL = re.compile(
@@ -50,39 +103,44 @@ TEMPORAL = re.compile(
     r"|drop|rise|rose|fell|improv|declin"
 )
 
+EXPECTED_CROSSED_ROWS = 40  # 10 bases x 4 speech-act frames
+EXPECTED_COST_ARM_ROWS = 16  # N1 + N2 rows in entity-profiling-eval.json
+
 
 def build_crossed() -> list[dict]:
     rows = []
     for base_id, slug, scope, entity, facet, content in BASES:
         for act, frame in FRAMES.items():
-            rows.append({
-                "base_id": base_id,
-                "base_slug": slug,
-                "speech_act": act,
-                "query": frame.format(c=content),
-                "scope": scope,
-                "entity": entity,
-                "facet": facet,
-                "content_phrase": content,
-            })
+            rows.append(
+                {
+                    "base_id": base_id,
+                    "base_slug": slug,
+                    "speech_act": act,
+                    "query": frame.format(c=content),
+                    "scope": scope,
+                    "entity": entity,
+                    "facet": facet,
+                    "content_phrase": content,
+                }
+            )
     return rows
 
 
 def build_cost() -> list[dict]:
     src = json.loads((EVAL / "entity-profiling-eval.json").read_text())
     rows = [q for q in src if q.get("arm") in ("N1", "N2")]
-    assert len(rows) == 16, len(rows)
+    assert len(rows) == EXPECTED_COST_ARM_ROWS, len(rows)
     return rows
 
 
 def verify_crossed(rows: list[dict]) -> list[str]:
     errors = []
-    if len(rows) != 40:
-        errors.append(f"expected 40 rows, got {len(rows)}")
+    if len(rows) != EXPECTED_CROSSED_ROWS:
+        errors.append(f"expected {EXPECTED_CROSSED_ROWS} rows, got {len(rows)}")
     for r in rows:
         # Check for required fields
         if "base_id" not in r:
-            errors.append(f"row missing field: base_id")
+            errors.append("row missing field: base_id")
             continue
         if "speech_act" not in r:
             errors.append(f"base {r['base_id']}: missing field speech_act")
@@ -109,8 +167,12 @@ def verify_crossed(rows: list[dict]) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--verify-only", type=Path, default=None,
-                        help="verify an existing crossed-pairs fixture file and exit")
+    parser.add_argument(
+        "--verify-only",
+        type=Path,
+        default=None,
+        help="verify an existing crossed-pairs fixture file and exit",
+    )
     args = parser.parse_args()
 
     if args.verify_only:
@@ -120,9 +182,11 @@ def main() -> int:
         errors = verify_crossed(crossed)
         if not errors:
             (EVAL / "crossed-pairs-2026-08-15.json").write_text(
-                json.dumps(crossed, indent=2, ensure_ascii=False) + "\n")
+                json.dumps(crossed, indent=2, ensure_ascii=False) + "\n"
+            )
             (EVAL / "cost-arms-2026-08-15.json").write_text(
-                json.dumps(build_cost(), indent=2, ensure_ascii=False) + "\n")
+                json.dumps(build_cost(), indent=2, ensure_ascii=False) + "\n"
+            )
     for e in errors:
         print(f"FAIL: {e}")
     if not errors:
