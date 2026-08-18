@@ -7,3 +7,4 @@ Before any costly pull, on any route, write down: what the pull serves, the exac
 Data already paid for is reused, not re-pulled, when it matches the grain and snapshot the exploration needs; a probe that sampled, truncated, or reshaped the data legitimizes a re-pull — take it and say why.
 A reused probe's spend counts against the pull's budget rather than going uncounted.
 The invariants this section must preserve in common with `hypothesis-driven-analysis`'s costly-collection rule are listed in [decisions/001-shared-gate-authority.md](decisions/001-shared-gate-authority.md); rewording either statement requires re-checking that list.
+

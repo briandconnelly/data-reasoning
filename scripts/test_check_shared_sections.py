@@ -127,5 +127,18 @@ def test_unknown_update_target_is_an_error():
     assert result.returncode == EXPECTED_ERROR_CODE
 
 
+def test_boundary_blank_line_drift_fails_run(tmp_path):
+    """A boundary blank-line edit must fail the production comparison path."""
+    fake = make_fake_repo(tmp_path)
+    victim = fake / "skills" / "exploratory-data-analysis" / "SKILL.md"
+    victim.write_text(
+        victim.read_text(encoding="utf-8").replace(
+            "\n\n## The Lifecycle (explore route)", "\n\n\n## The Lifecycle (explore route)"
+        ),
+        encoding="utf-8",
+    )
+    assert css.run(fake, update=frozenset()) == 1
+
+
 def test_clean_repo_passes():
     assert css.run(REPO, update=frozenset()) == 0

@@ -90,14 +90,12 @@ def run(repo: Path, update: frozenset[str]) -> int:
             return 2
         golden = golden_dir / f"{slug}.md"
         if slug in update or "all" in update:
-            golden.write_text(block.rstrip("\n") + "\n", encoding="utf-8")
+            golden.write_text(block, encoding="utf-8")
             continue
         if not golden.exists():
             print(f"ERROR: missing golden {golden}; run --update {slug} once", file=sys.stderr)
             return 2
-        golden_content = golden.read_text(encoding="utf-8")
-        normalized_block = block.rstrip("\n") + "\n"
-        if golden_content != normalized_block:
+        if golden.read_text(encoding="utf-8") != block:
             failures += 1
             print(
                 f"DRIFT: {skill}/SKILL.md {heading!r} differs from {golden}.\n"

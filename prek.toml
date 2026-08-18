@@ -4,13 +4,15 @@ minimum_prek_version = "0.3.0"
 # manifests record their SHA-256, so a formatting hook that rewrites them
 # breaks the recorded provenance chain. The three byte-mutating hooks below
 # carry the same exclude regex for that reason.
+# Shared-section goldens are also byte-frozen (exact extracts from SKILL.md
+# sections), so they are excluded from the same three hooks.
 
 [[repos]]
 repo = "builtin"
 hooks = [
-  { id = "trailing-whitespace", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
-  { id = "end-of-file-fixer", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
-  { id = "mixed-line-ending", exclude = '^skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)$' },
+  { id = "trailing-whitespace", exclude = '^(skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)|scripts/shared-sections/.*)$' },
+  { id = "end-of-file-fixer", exclude = '^(skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)|scripts/shared-sections/.*)$' },
+  { id = "mixed-line-ending", exclude = '^(skills/([^/]+/tests/runs/artifacts/.*|exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json)|scripts/shared-sections/.*)$' },
   { id = "check-merge-conflict" },
   { id = "check-added-large-files" },
   { id = "check-yaml" },
