@@ -76,6 +76,11 @@ The substantive claim is unaffected — all 33 c1 arms derive `UNRESOLVED` — s
 This is the same class of miss the archive already corrected once for c3 (twelve counted where fifteen ran), reached here through a name pattern rather than a heading pattern.
 The text carrying it is `scenarios.md`, which this branch does not edit; it is left as a recorded discrepancy for a separate change.
 
+## Amendments
+
+- 2026-08-18, post-edit (commit b5143b8): corrected the Cells-per-group table's Free-check row arm count from 12 to 6 (S21 d5 + d7 at 3 arms each); no reachability, expectation, or owed-arms claim changed.
+  That commit's message named only the digest pin; this note discloses the arithmetic correction it also carried.
+
 **Second finding: no archived arm read the current file.**
 Every S21 arm and every S20 round-3 to round-5 arm read `SKILL.md` at digest `da9cefbc…`; the file this scoping was written against, before the restructure, is `c88a49c9…`, and the restructured file the owed arms will read is `9191a552…` (added after the edit, which is the only time it can be known).
 S16's arms (2026-07-17) and S19's arms (2026-07-21) predate the 2026-07-25 disposition edit entirely.

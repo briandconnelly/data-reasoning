@@ -18,13 +18,13 @@ All four skills carry the same authorization gate verbatim, and `skills/explorat
 The pairing is a design claim, not a measured one.
 `hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`); `exploratory-data-analysis` has none — its scenarios are authored and no arm has run (`skills/exploratory-data-analysis/tests/scenarios.md`).
 No run has yet exercised a handoff between the two.
-Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", the descriptions that decide which skill activates also rest on zero valid arms.
+Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 with one trigger arm per scenario; the other three descriptions, and the routing between all four, rest on zero valid arms — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds them there until that changes.
 Treat the routing between them, and the handoff itself, as unverified.
 `causal-identification-review` differs: measurement wave 1 (n=1 per cell) has been scored, with the verdict row recorded in `skills/causal-identification-review/tests/scenarios.md` § "Global verdict table".
 `decision-analysis` has authored scenarios and no run arms (`skills/decision-analysis/tests/scenarios.md`); treat its routing and its premium as unmeasured.
 
 The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.
-As of 2026-08-18 (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,263 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 2,765 plus a 690-word template; `causal-identification-review` is 2,416 plus 492; `exploratory-data-analysis` is 2,415 plus 843.
+As of 2026-08-18 (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,315 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 2,765 plus a 690-word template; `causal-identification-review` is 2,416 plus 492; `exploratory-data-analysis` is 2,415 plus 843.
 Co-loading two skills — the designed handoff case — pays the verbatim authorization gate (~350 words) and a near-duplicate costly-collection section once per skill loaded.
 Reducing that duplication means extracting the shared contract, which edits `hypothesis-driven-analysis` and is deferred on the terms in `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` § Consequences.
 
