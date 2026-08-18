@@ -4,4 +4,3 @@
 - Minimize collection.
 - Redact secrets and personal data.
 - Record provenance for every source.
-

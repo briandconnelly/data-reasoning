@@ -7,4 +7,3 @@ Before any costly pull actually executed, on any route, write down: what the pul
 Data already paid for is reused, not re-pulled, when it matches the grain and snapshot the analysis needs; a pull that sampled, truncated, or reshaped the data legitimizes a re-pull — take it and say why.
 A reused pull's spend counts against the plan's budget rather than going uncounted.
 The invariants this statement must preserve in common with the other skills' costly-collection rules are listed in `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md`; rewording this statement requires re-checking that list by hand.
-
