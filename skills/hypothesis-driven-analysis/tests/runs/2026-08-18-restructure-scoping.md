@@ -2,7 +2,7 @@
 
 Branch: `hda-analysis-restructure`.
 Change under scope: `SKILL.md` § Analysis, the passage from `Spot-verify the evidence…` through `Validate assumptions shared across workers…`, reorganized into a `#### Verifying worker returns` subsection with bold labels and bullet lists.
-Every sentence keeps its bytes and its order; the only new text is the heading and the labels.
+Every sentence keeps its bytes and its order; the only additions are the heading, the bold labels, the `- ` list markers, and blank lines — the exact allowlist the sentence-identity check enforces.
 The ordering this document obeys, the rerun obligation it applies, and the rules the passage states all live elsewhere and are not restated here — see `PROTOCOL.md` (order, and what owes a rerun) and `SKILL.md` § Analysis (the rules themselves).
 
 This document is written before the wording edit, per `PROTOCOL.md`'s order.
@@ -80,6 +80,8 @@ The text carrying it is `scenarios.md`, which this branch does not edit; it is l
 
 - 2026-08-18, post-edit (commit b5143b8): corrected the Cells-per-group table's Free-check row arm count from 12 to 6 (S21 d5 + d7 at 3 arms each); no reachability, expectation, or owed-arms claim changed.
   That commit's message named only the digest pin; this note discloses the arithmetic correction it also carried.
+- 2026-08-18, PR review: the scope sentence previously said the only new text is "the heading and the labels", omitting the `- ` list markers and blank lines the sentence-identity check's allowlist also permits; the sentence now names the full allowlist.
+  A wording correction to this document's own description of the diff — no reachability, expectation, or owed-arms claim changed.
 
 **Second finding: no archived arm read the current file.**
 Every S21 arm and every S20 round-3 to round-5 arm read `SKILL.md` at digest `da9cefbc…`; the file this scoping was written against, before the restructure, is `c88a49c9…`, and the restructured file the owed arms will read is `9191a552…` (added after the edit, which is the only time it can be known).

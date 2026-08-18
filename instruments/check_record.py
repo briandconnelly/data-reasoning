@@ -71,17 +71,20 @@ def _strip_fences(text: str) -> tuple[str, bool]:
     EOF (an unterminated fence blanks everything after it, including any
     genuinely-present later sections)."""
     out = []
-    fence: str | None = None
+    fence: tuple[str, int] | None = None  # (char, opening run length)
     for line in text.split("\n"):
         m = FENCE.match(line)
         if fence is None:
             if m:
-                fence = m.group(1)[0]
+                fence = (m.group(1)[0], len(m.group(1)))
                 out.append("")
                 continue
             out.append(line)
         else:
-            if m and m.group(1)[0] == fence:
+            # CommonMark: a closer is the same character with a run at least
+            # as long as the opener, so a ``` line inside a ```` block is
+            # content, not a closer.
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
                 fence = None
             out.append("")
     return "\n".join(out), fence is not None

@@ -274,6 +274,16 @@ def test_tilde_fenced_quote_is_ignored_too():
     assert cr.check(good) == []
 
 
+def test_longer_fence_is_not_closed_by_a_shorter_run():
+    """Copilot finding: the closer check ignored fence length, so a ````
+    block quoting a ``` fence closed early and its content was scanned."""
+    good = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1",
+        "- Verdict: prior-sensitive — crossover at 3:1\n\n````\n```\n- Verdict: optimal\n```\n````",
+    )
+    assert cr.check(good) == []
+
+
 def test_html_tag_in_prose_does_not_suspend_completeness():
     """Codex finding: any <...> span anywhere marked the record in-progress
     and suppressed every completeness finding."""
