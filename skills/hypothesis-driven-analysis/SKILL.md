@@ -219,34 +219,51 @@ The evidence must discriminate between the readings that are live for this sourc
 When that entry is `UNKNOWN`, report the affected quantity as selection-sensitive with the direction unknown; a maturity or recency argument ("the data had time to arrive") addresses timing, not export completeness, and does not license a direction.
 Declare a source whose absent records bear on a conclusion using the ledger template's `Source completeness semantics` form, and when no evidence discriminates its readings, declare it `UNKNOWN` in that form rather than asserting a reading.
 A direction asserted under established semantics still names, adjacent to the claim, the estimand-specific bound or assumption it rests on — an unqualified direction in the conclusion violates this rule even when the ledger entry carries the caveat.
+
+#### Verifying worker returns
+
 Spot-verify the evidence behind the leading explanation and the strongest rival.
-**Verifying does not mean paying twice.** Re-running a metered query to check a metered query is the expensive form, and it is rarely the one that catches anything.
-Start with the free check: read the worker's stated method and command against the prediction it claims to test, and against its own return.
-Does the command implement the method it names? Does the quoted number appear in the output it came from? Is the grain the one the prediction specified, and the window the one the brief set?
-That costs nothing and catches what actually goes wrong — a wrong join, a unit error, an off-by-one window, a figure that appears nowhere in the rows behind it.
-Re-run the collection when it is cheap, or when the free check surfaces a doubt the return cannot settle and the budget covers the second charge; a metered re-pull is a legitimate spend, not a rule violation, and it needs a ledger amendment like any other unplanned collection.
-When neither is available — metered source, budget spent, and a return you cannot fault on its face — record that the verdict rests on an unverified worker return.
-That is a limitation to state, not a verification to claim.
-When the free check *does* fault a return, classify each fault — a return can carry more than one.
-When faults of different classes co-occur, the disposition follows a fixed severity order — conflicting execution records outrank an established deviation, which outranks a derived-value error — and the highest-ranked fault present dictates it.
-Rank the return's execution record above its narrative: the quoted commands and the parameters the tool itself emitted are the account of what ran, while Method and Deviations are the worker's description of it.
 
-An error in a **derived value** — an arithmetic slip in a delta, a mislabeled percentage — is settled by recomputing it from raw figures whose own provenance is unfaulted, since the recomputation is evidence independent of the worker's claim.
-Record the outcome the corrected figure implies: that is the worker's outcome only where the correction leaves it and the conclusion unchanged, and a slip that carries the figure across the threshold the prediction named changes the outcome rather than surviving as a footnote.
+**Free check first.**
 
-A deviation is **established** when the worker reports it and the execution record does not contradict the report, or when a coherent execution record shows it — that is, when the command and the tool's own output agree on a procedure the brief did not authorize.
-An established deviation makes the reconciled outcome `NON_DISCRIMINATING` when the procedure that record evidences did not adequately test the preregistered prediction, unless evidence from outside the return verifies the deviation harmless.
-A narrative field contradicting a coherent execution record does not unsettle it; it is one more thing the return got wrong, whether it confesses a deviation the record does not show or denies one the record does.
-That downgrade records the inadequacy of the test that ran, not distrust of the worker — an honest query against the wrong window still leaves the preregistered prediction untested, which is what `NON_DISCRIMINATING` says.
-An established deviation that leaves the prediction adequately tested is a deviation to record, not a downgrade to make.
+- **Verifying does not mean paying twice.** Re-running a metered query to check a metered query is the expensive form, and it is rarely the one that catches anything.
+- Start with the free check: read the worker's stated method and command against the prediction it claims to test, and against its own return.
+- Does the command implement the method it names? Does the quoted number appear in the output it came from? Is the grain the one the prediction specified, and the window the one the brief set?
+- That costs nothing and catches what actually goes wrong — a wrong join, a unit error, an off-by-one window, a figure that appears nowhere in the rows behind it.
+- Re-run the collection when it is cheap, or when the free check surfaces a doubt the return cannot settle and the budget covers the second charge; a metered re-pull is a legitimate spend, not a rule violation, and it needs a ledger amendment like any other unplanned collection.
+- When neither is available — metered source, budget spent, and a return you cannot fault on its face — record that the verdict rests on an unverified worker return.
+- That is a limitation to state, not a verification to claim.
 
-When the execution records themselves conflict — a quoted output with no source among the commands shown, a command and the output beneath it naming different days — nothing is established, because one resolution has the briefed collection happening with the fault confined to the report of it.
-Nor is anything verified: the same worker whose quote broke also attested that its quotes were exact, so the return's remaining attestations cannot clear the fault they sit beside, and a benign explanation you can construct is a plausible story, not a verification.
-Record the fault as a limitation and treat the outcome as resting on an unverified return, however plausible the innocent reading; that limitation reaches the conclusion, where it bars treating the result as established or action-ready.
-"Unverified" is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with the limitation recorded beside it.
-Do not reach for `NON_DISCRIMINATING` here either — it says a test could not discriminate, not that you doubt a return which, if honest, discriminated fine.
+**When the free check faults a return.**
 
-Validate assumptions shared across workers — a shared bad join or unit error invalidates every verdict at once.
+- When the free check *does* fault a return, classify each fault — a return can carry more than one.
+- When faults of different classes co-occur, the disposition follows a fixed severity order — conflicting execution records outrank an established deviation, which outranks a derived-value error — and the highest-ranked fault present dictates it.
+- Rank the return's execution record above its narrative: the quoted commands and the parameters the tool itself emitted are the account of what ran, while Method and Deviations are the worker's description of it.
+
+**Derived-value error (lowest severity).**
+
+- An error in a **derived value** — an arithmetic slip in a delta, a mislabeled percentage — is settled by recomputing it from raw figures whose own provenance is unfaulted, since the recomputation is evidence independent of the worker's claim.
+- Record the outcome the corrected figure implies: that is the worker's outcome only where the correction leaves it and the conclusion unchanged, and a slip that carries the figure across the threshold the prediction named changes the outcome rather than surviving as a footnote.
+
+**Established deviation (middle severity).**
+
+- A deviation is **established** when the worker reports it and the execution record does not contradict the report, or when a coherent execution record shows it — that is, when the command and the tool's own output agree on a procedure the brief did not authorize.
+- An established deviation makes the reconciled outcome `NON_DISCRIMINATING` when the procedure that record evidences did not adequately test the preregistered prediction, unless evidence from outside the return verifies the deviation harmless.
+- A narrative field contradicting a coherent execution record does not unsettle it; it is one more thing the return got wrong, whether it confesses a deviation the record does not show or denies one the record does.
+- That downgrade records the inadequacy of the test that ran, not distrust of the worker — an honest query against the wrong window still leaves the preregistered prediction untested, which is what `NON_DISCRIMINATING` says.
+- An established deviation that leaves the prediction adequately tested is a deviation to record, not a downgrade to make.
+
+**Conflicting execution records (highest severity).**
+
+- When the execution records themselves conflict — a quoted output with no source among the commands shown, a command and the output beneath it naming different days — nothing is established, because one resolution has the briefed collection happening with the fault confined to the report of it.
+- Nor is anything verified: the same worker whose quote broke also attested that its quotes were exact, so the return's remaining attestations cannot clear the fault they sit beside, and a benign explanation you can construct is a plausible story, not a verification.
+- Record the fault as a limitation and treat the outcome as resting on an unverified return, however plausible the innocent reading; that limitation reaches the conclusion, where it bars treating the result as established or action-ready.
+- "Unverified" is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with the limitation recorded beside it.
+- Do not reach for `NON_DISCRIMINATING` here either — it says a test could not discriminate, not that you doubt a return which, if honest, discriminated fine.
+
+**Shared assumptions.**
+
+- Validate assumptions shared across workers — a shared bad join or unit error invalidates every verdict at once.
 
 ### Conclusion
 
