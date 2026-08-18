@@ -96,3 +96,15 @@ The results file for a cost-arm run only contains cost-arm queries, so arm means
 Every future wave run that needs `analyze_phasec.py`-style per-speech-act analysis must invoke `run_desc_eval.py` with `--label-a baseline --label-b treatment`, where `baseline` is always the reference arm (desc-a) and `treatment` is always the candidate arm (desc-b).
 The run manifest records which frozen description file each label maps to for that run, so the generic `baseline`/`treatment` labels stay unambiguous.
 Any gate note, report, or disclosure table that cites `baseline` or `treatment` from an `analyze_phasec.py` run must translate those labels back to the actual description files via that run's manifest before drawing conclusions about a specific candidate.
+
+## Correction, 2026-08-17 — the "always full fixture" rule for `analyze_ab.py` was measured wrong
+
+Task 6's `AvB-gate1.md` demonstrated, with archived evidence, that the "Tasks 6-7 must pass `--fixture entity-profiling-eval.json` (the full fixture) for cost-arm analysis" instruction above does not hold for a genuinely cost-arm-only results file.
+Two forms were tried and both failed:
+1. Run against the 16-query subset fixture, analyzed with the full fixture: `CHECK FAILED` on `query_index`, because the subset fixture reorders and renumbers the same 16 queries relative to the full fixture's own indices.
+2. Run against the full fixture with `--queries` restricted to the cost arms' own indices, analyzed with the full fixture: `CHECK FAILED` in `check_completeness`, because that check requires `expected_runs` valid rows for every one of the full fixture's 50 indices unconditionally, and a genuinely 16-query-scoped run only ever covers 16 of them.
+The original claim above only worked because the archive it was validated against (`2026-08-11-phaseA/results.jsonl`) happened to cover all 50 queries of the full fixture — a fully-covered special case, not the general rule.
+
+**Corrected rule:** `analyze_ab.py`'s `--fixture` argument must match the fixture the run itself was executed against, not "the full fixture" unconditionally.
+For a 16-query cost-arm run, that is `cost-arms-2026-08-15.json`, because then `check_fixture_match` and `check_completeness` are both evaluated against exactly the same 16-row shape the run covered.
+Task 7 applied this corrected rule for the B-vs-C3 cost-arm analysis; see `BvC-gates.md` and the `AvB-cost` evidence in `AvB-gate1.md` for the two failing forms and the passing form.
