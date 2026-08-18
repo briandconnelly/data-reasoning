@@ -77,7 +77,7 @@ This is the same class of miss the archive already corrected once for c3 (twelve
 The text carrying it is `scenarios.md`, which this branch does not edit; it is left as a recorded discrepancy for a separate change.
 
 **Second finding: no archived arm read the current file.**
-Every S21 arm and every S20 round-3 to round-5 arm read `SKILL.md` at digest `da9cefbc…`; the working-tree file is `c88a49c9…`.
+Every S21 arm and every S20 round-3 to round-5 arm read `SKILL.md` at digest `da9cefbc…`; the file this scoping was written against, before the restructure, is `c88a49c9…`, and the restructured file the owed arms will read is `9191a552…` (added after the edit, which is the only time it can be known).
 S16's arms (2026-07-17) and S19's arms (2026-07-21) predate the 2026-07-25 disposition edit entirely.
 The archive is therefore evidence about which cells reach which sentences, and about what those cells produced under earlier text — it is not a current-wording baseline for any cell.
 
@@ -118,7 +118,7 @@ The archive is therefore evidence about which cells reach which sentences, and a
 | Group | Cells that reach it | Archived arms in those cells |
 | --- | --- | --- |
 | lead sentence (P1) | S20 c1–c4; S16; S19 | 75 + 3 + 3 |
-| Free check first (P2–P8) | S20 c1–c4; S21 d5, d7; S16; S19 | 75 + 12 + 3 + 3 |
+| Free check first (P2–P8) | S20 c1–c4; S21 d5, d7; S16; S19 | 75 + 6 + 3 + 3 |
 | When the free check faults a return (P9–P11) | S20 c1, c3, c4 reach P11; no cell reaches P9 or P10 | 63 for P11 |
 | Derived-value error (P12–P13) | S20 c2; S16 | 12 + 3 |
 | Established deviation (P14–P18) | S20 c1; S20 c4; S21 d4; S16 | 33 + 15 + 3 + 3 |
