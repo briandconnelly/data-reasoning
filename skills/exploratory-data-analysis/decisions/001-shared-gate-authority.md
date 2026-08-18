@@ -46,3 +46,8 @@ Extended 2026-08-09: `decision-analysis` joined as a carrier with the same oblig
 - A deliberate change to HDA's authorization gate now requires touching this skill in the same change — that is the point, and the parity hook enforces it.
 - The verbatim copy is safe to ship standalone; the costly-collection invariants remain review-enforced, which is the residual risk this record accepts.
 - Full extraction of the shared contract to one repo-level source both skills consume is deferred: it edits HDA, so it batches with the owed S2/S3/S17/S18 eval reruns.
+
+*(Extended 2026-08-18: silent drift is no longer possible.
+`scripts/check-shared-sections.py` freezes every carrier's costly-collection and data-rules section against a golden copy, so any rewording fails a prek hook whose message points back at this file's invariant lists.
+The check is a change detector, not a semantic check: refreshing a golden (`--update <slug>`) is an explicit, diff-visible act, and whether the hand check against the lists above actually happened remains a review question — that is the residual this record continues to accept, now with the drift itself made loud.
+The goldens were verified against both invariant lists when first generated on 2026-08-18.)*
