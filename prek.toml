@@ -46,6 +46,11 @@ hooks = [
   # a diff-visible act the decision record governs.
   { id = "check-shared-sections", name = "skills: costly-collection and data-rules copies match their goldens", language = "python", language_version = "python3", entry = "python scripts/check-shared-sections.py", files = "^(skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/SKILL\\.md|scripts/(check-shared-sections\\.py|shared-sections/.*))$", pass_filenames = false },
   { id = "shared-sections-tests", name = "skills: the shared-section checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q scripts/test_check_shared_sections.py", files = "^scripts/(check-shared-sections\\.py|test_check_shared_sections\\.py)$", pass_filenames = false },
+  # skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md:
+  # the routing descriptions are pinned against unmeasured change. Goldens in
+  # scripts/frontmatter-descriptions/; the decision record governs any refresh.
+  { id = "check-description-freeze", name = "skills: frontmatter descriptions are frozen against unmeasured change", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-description-freeze.py", files = "^(skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/SKILL\\.md|scripts/(check-description-freeze\\.py|frontmatter-descriptions/.*))$", pass_filenames = false },
+  { id = "description-freeze-tests", name = "skills: the description-freeze checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8", "pyyaml>=6"], entry = "python -m pytest -q scripts/test_check_description_freeze.py", files = "^scripts/(check-description-freeze\\.py|test_check_description_freeze\\.py)$", pass_filenames = false },
   # The instruments' own unit suite. Nothing ran it before, so an edit to
   # score_ledger.py landed unchecked. The whole tests tree is collected; the
   # deliberately-broken scenario-3 fixture is held out by
