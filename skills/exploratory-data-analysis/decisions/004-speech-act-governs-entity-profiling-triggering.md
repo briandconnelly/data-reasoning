@@ -91,3 +91,4 @@ Nothing here says what the profile route produces once it activates.
 - If a follow-up widens the description to claim generic speech acts, this record's rates are the baseline it must beat, and the crossed-pair fixture is the instrument.
 - If `hypothesis-driven-analysis`'s description changes so that it claims entity asks more strongly (the trigger `decisions/003` already names), the seam results here become stale.
 - If any future run of `tests/eval/` reports arm means without archived transcripts, treat them as unverifiable: the instrument that produced the historical numbers cannot distinguish a non-trigger from a quota refusal, and Phase A attempt 1 showed that failure producing 179 silent false negatives in a run that looked entirely normal.
+- The widening this record anticipated ran on 2026-08-15; its rates and instrument are superseded as the widening baseline by `005-generic-speech-acts-claimed.md`.

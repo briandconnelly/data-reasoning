@@ -22,3 +22,20 @@ Isolation as run: no sibling `data-reasoning` skill was installed during any run
 `frozen-description.txt` froze the edited-arm (treatment) description text, committed at `d374381`, three commits before that text shipped as the skill's description at `1fadd29` and before the baseline run at `a772557`.
 That ordering is what makes it evidence that the treatment text was fixed before it shipped and before any arm ran, so it must not be refreshed after a later description edit — a refreshed copy proves nothing.
 It holds the rendered form of the description, while the harness read the YAML-escaped form of the same string.
+
+## 2026-08-15 widening wave (issue #17)
+
+The rules, gates, and fixtures below are governed by `2026-08-15-widening-prereg.md`; it is the single authority for thresholds and is not restated here.
+
+- `2026-08-15-widening-prereg.md` — the preregistration: screening rule, confirmatory gates, and ship discipline, fixed before any arm of the wave ran.
+- `frozen-2026-08-15-B-compressed.txt` — arm B, the compression candidate (983 chars), the shipped description minus its lead-purpose clause.
+- `frozen-2026-08-15-C1.txt` — screening candidate C1 (994 chars), B plus an activity-naming opening.
+- `frozen-2026-08-15-C2.txt` — screening candidate C2 (1021 chars), B plus two generic-verb exemplars.
+- `frozen-2026-08-15-C3.txt` — the winning widening candidate (1021 chars), shipped as arm C.
+- `crossed-pairs-2026-08-15.json` — the confirmatory fresh fixture (40 queries, one invented municipal transit domain); its companion doc is `crossed-pairs-2026-08-15.md`.
+- `cost-arms-2026-08-15.json` — the confirmatory cost fixture (N1 + N2, 16 queries copied from `entity-profiling-eval.json`); its companion doc is `crossed-pairs-2026-08-15.md`'s "Cost-arm companion" section.
+- `candidates-2026-08-15.md` — how each candidate description was derived from the shipped text, and which edits it carries against B.
+- `make_candidates_2026_08_15.py` — generator script that derives the frozen candidate description files from the frozen shipped text.
+- `make_fixtures_2026_08_15.py` — generator script that builds and verifies the confirmatory and cost-arm fixtures.
+
+The wave's decision record is `decisions/005-generic-speech-acts-claimed.md`.
