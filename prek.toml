@@ -103,5 +103,5 @@ hooks = [
   # reads all four record templates and its template-clean test feeds their
   # fenced blocks through check(), so the files regex watches the templates
   # too: a template change must fail here, not silently orphan the validator.
-  { id = "instruments-tests", name = "instruments: the structural record validator's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q instruments", files = "^(instruments/.*\\.py|skills/[^/]+/references/(ledger-template|exploration-log-template|identification-review-template|decision-record-template)\\.md)$", pass_filenames = false },
+  { id = "instruments-tests", name = "instruments: the structural record validator's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q instruments", files = "^(instruments/.*\\.py|hooks/(hooks\\.json|check_record_hook\\.py)|\\.claude-plugin/plugin\\.json|skills/[^/]+/references/(ledger-template|exploration-log-template|identification-review-template|decision-record-template)\\.md)$", pass_filenames = false },
 ]

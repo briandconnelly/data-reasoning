@@ -45,6 +45,12 @@ It sets `force-for-plugin: false`, so installing the plugin never changes the ac
 Output styles are a Claude Code feature.
 Codex has no equivalent, so a Codex install gets the four skills and no style.
 
+## Live record validation
+
+Claude Code installs also get a PostToolUse hook (`hooks/hooks.json`) that runs `instruments/check_record.py` on any record file the agent writes and feeds structural findings back to the agent.
+What the validator may and may not check is owned by `skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`.
+Codex has no hook mechanism, so a Codex install gets the validator file and no live enforcement.
+
 ## Installation
 
 ### Claude Code
