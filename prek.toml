@@ -98,4 +98,10 @@ hooks = [
   { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests/test_gate_parity_cir.py", files = "^(skills/causal-identification-review/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
   { id = "da-instrument-tests", name = "decision-analysis: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests", files = "^skills/decision-analysis/(tests/[^/]+\\.py|references/decision-record-template\\.md)$", pass_filenames = false },
   { id = "da-gate-parity", name = "decision-analysis: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests/test_gate_parity_da.py", files = "^(skills/decision-analysis/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
+  # instruments/ is the public, fixture-neutral structural validator adopted in
+  # principle by HDA decisions/006 (which owns its scope). Its parity test
+  # reads all four record templates and its template-clean test feeds their
+  # fenced blocks through check(), so the files regex watches the templates
+  # too: a template change must fail here, not silently orphan the validator.
+  { id = "instruments-tests", name = "instruments: the structural record validator's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q instruments", files = "^(instruments/.*\\.py|skills/[^/]+/references/(ledger-template|exploration-log-template|identification-review-template|decision-record-template)\\.md)$", pass_filenames = false },
 ]
