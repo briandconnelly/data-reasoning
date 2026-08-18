@@ -29,13 +29,20 @@ Three candidates were screened against the shipped description on the ceiling-pr
 - C2: shipped 0.1667, C2 0.5000, delta +0.3333.
 - C3: shipped 0.1250, C3 0.5417, delta +0.4167.
 
-Per the prereg's winner rule (highest pooled generic rate, ties broken toward fewer edits against B), C3 won outright with no tie to break, and its delta against its own pair's shipped arm (+0.4167) cleared the 0.25 proceed threshold.
+Per `2026-08-15-widening-prereg.md` § "Screening", quoted verbatim, attributed:
+> Winner: highest pooled generic rate; ties break toward the fewest edits against B (C1 or C2 over C3).
+> Proceed to the confirmatory wave only if the winner's pooled generic rate exceeds the shipped arm's pooled generic rate in its own pair by at least 0.25.
+
+C3 won outright, with no tie to break, and its delta against its own pair's shipped arm (+0.4167) cleared the rule above.
 C3 went forward as arm C into the confirmatory wave.
 
 Commit `4c72ca2` applied C3 to the shipped description, at 1021 characters.
 The confirmatory wave ran three gates against it, all on the fresh crossed-pair fixture and the cost arms, 3 runs per query per arm:
 
-- **Gate 2 — gain (B vs C3).** Pooled generic rate rose from 0.0667 (baseline/B) to 0.5778 (treatment/C3), meeting the >= 0.5 floor; the pooled generic lift interval was [+0.2889, +0.7333], excluding zero (`BvC-gates.md`).
+- **Gate 2 — gain (B vs C3).** Per `2026-08-15-widening-prereg.md` § "Confirmatory wave", quoted verbatim, attributed:
+  > Gate 2 — gain (B vs C, fresh fixture): pooled generic rate under C is at least 0.5 and the interval for the pooled generic lift excludes zero.
+
+  Pooled generic rate rose from 0.0667 (baseline/B) to 0.5778 (treatment/C3); the pooled generic lift interval was [+0.2889, +0.7333], excluding zero (`BvC-gates.md`).
   **VERDICT: PASS.**
 - **Gate 3 — cost (B vs C3).** The N1 change interval was [0, +0.1333] and the N2 change interval was [0, 0]; both included zero, as required (`BvC-gates.md`).
   **VERDICT: PASS.**
