@@ -56,7 +56,52 @@ DISPOSITIONS = {"identified-if", "assumption-contradicted", "unresolved", "not-c
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
 
-PLACEHOLDER = re.compile(r"<[^<>\n]+>")
+# A template placeholder is `<` + a letter + text without `<`, `>`, `=` + `>`.
+# Inequalities (`< 1.5`, `<5%`) start with a space or digit; HTML attributes
+# carry `=`; bare HTML tags are excluded by name below. Residual: `<q and r>`
+# with a letter-initial inequality still reads as a placeholder.
+PLACEHOLDER = re.compile(r"<([A-Za-z][^<>\n=]*)>")
+HTML_TAGS = frozenset(
+    {
+        "a",
+        "b",
+        "br",
+        "code",
+        "details",
+        "div",
+        "em",
+        "hr",
+        "i",
+        "img",
+        "kbd",
+        "li",
+        "ol",
+        "p",
+        "pre",
+        "span",
+        "strong",
+        "sub",
+        "summary",
+        "sup",
+        "table",
+        "td",
+        "th",
+        "tr",
+        "u",
+        "ul",
+    }
+)
+
+
+def _has_placeholder(value: str) -> bool:
+    for m in PLACEHOLDER.finditer(value):
+        inner = m.group(1).strip().rstrip("/").strip().lower()
+        if inner in HTML_TAGS:
+            continue
+        return True
+    return False
+
+
 DELIMITERS = (" —", " -", ";", ":", " (", ",")
 MIN_TABLE_ROWS = 2  # header + at least one data row
 
@@ -109,7 +154,7 @@ def detect(text: str) -> str | None:
 
 def _is_placeholder(value: str) -> bool:
     v = value.strip()
-    return not v or v == "..." or bool(PLACEHOLDER.search(v))
+    return not v or v == "..." or _has_placeholder(v)
 
 
 def _normalize(value: str) -> str:
@@ -201,7 +246,7 @@ def _slot_values(body: str):
 
 
 def _in_progress(body: str) -> bool:
-    return any(v.strip() == "..." or PLACEHOLDER.search(v) for v in _slot_values(body))
+    return any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body))
 
 
 def _check_claim(value: str, where: str, findings: list[str]) -> None:

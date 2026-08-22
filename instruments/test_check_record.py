@@ -381,3 +381,40 @@ def test_html_commented_structure_is_not_record_content():
 def test_comment_stripping_preserves_line_count():
     text = "a\n<!-- one\ntwo\nthree -->\nb\n"
     assert cr._strip_comments(text).count("\n") == text.count("\n")
+
+
+INEQUALITY_DECISION = (
+    "# Decision Record: d\n\n## Decision frame\n\n"
+    "- Crossover: flips where prior odds < 1.5 or loss ratio > 2\n"
+)
+
+BR_LEDGER = GOOD_LEDGER.replace(
+    "| H1 | causal | deploy caused step |", "| H1 | causal | deploy<br>caused step |"
+).replace(
+    "## Sources\n\n| id | Origin (file, query, system) | Acquired | Coverage notes |\n| --- | --- | --- | --- |\n| S1 | logs.csv | 2026-08-18 | full day |\n\n",
+    "",
+)
+
+
+def test_inequality_in_a_slot_is_not_a_placeholder():
+    findings = cr.check(INEQUALITY_DECISION)
+    assert any("required section missing: ## Verdict" in f for f in findings)
+
+
+def test_br_tag_in_a_cell_is_not_a_placeholder():
+    assert "## Sources" not in BR_LEDGER  # the fixture really removed the section
+    findings = cr.check(BR_LEDGER)
+    assert any("required section missing: ## Sources" in f for f in findings)
+
+
+def test_template_placeholders_still_count():
+    assert cr._has_placeholder("<one-line question>")
+    assert cr._has_placeholder(
+        "<CONSISTENT / CONTRADICTED / NON_DISCRIMINATING, with evidence pointer>"
+    )
+    assert cr._has_placeholder("<date>")
+    assert not cr._has_placeholder("<br>")
+    assert not cr._has_placeholder("<br/>")
+    assert not cr._has_placeholder("a < 1.5 or b > 2")
+    assert not cr._has_placeholder("<5% and >2%")
+    assert not cr._has_placeholder('<a href="x">')
