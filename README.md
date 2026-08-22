@@ -19,7 +19,7 @@ The pairing is a design claim, not a measured one.
 `hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).
 `exploratory-data-analysis` has measured description-trigger arms only (`skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md`, `2026-08-11-t14-trigger.md`, and the repaired rerun; the lift is recorded in `skills/exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md`); its behavior scenarios in `tests/scenarios.md` are authored and unrun.
 No run has yet exercised a handoff between the two.
-Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against a two-skill catalog (HDA, EDA, and `systematic-debugging`), not the four skills that now ship.
+Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against the then two-skill shipped surface plus a `systematic-debugging` stand-in, not the four skills that now ship.
 `causal-identification-review`'s description has n=1 trigger cells (CS1, CS2, CS6a) against a three-skill catalog; `decision-analysis`'s has none.
 Routing between all four skills rests on zero arms run against the full catalog — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds every description until that changes.
 Treat the routing between them, and the handoff itself, as unverified.
