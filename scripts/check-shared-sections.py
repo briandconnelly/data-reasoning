@@ -56,7 +56,15 @@ def extract_section(text: str, heading: str) -> str:
     boundary = re.compile(rf"^#{{1,{level}}} ")
     start = None
     fenced = False
+    commented = False
     for i, line in enumerate(lines):
+        if commented:
+            if "-->" in line:
+                commented = False
+            continue
+        if "<!--" in line and "-->" not in line:
+            commented = True
+            continue
         if line.startswith("```"):
             fenced = not fenced
             continue

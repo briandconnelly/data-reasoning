@@ -142,3 +142,10 @@ def test_boundary_blank_line_drift_fails_run(tmp_path):
 
 def test_clean_repo_passes():
     assert css.run(REPO, update=frozenset()) == 0
+
+
+def test_commented_out_heading_is_not_found():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n<!--\n{heading}\n\nhidden\n-->\n\n## Other\n\nvisible\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
