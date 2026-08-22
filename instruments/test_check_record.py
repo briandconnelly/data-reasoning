@@ -447,3 +447,25 @@ def test_inline_code_pipe_in_method_cell_does_not_shift_outcome():
         "| T1 | H1 | step at 09:10 | window compare |", "| T1 | H1 | step at 09:10 | run `a | b` |"
     )
     assert cr.check(ledger) == []
+
+
+REVIEW_SKELETON = (
+    "# Identification Review: q\n\n## Question\n\n- Route: {route}\n\n"
+    "## Handoff\n\n- Dispositions: {disp}\n"
+)
+
+
+def test_annotated_none_disposition_is_accepted():
+    assert (
+        cr.check(REVIEW_SKELETON.format(route="bound", disp="none — bound route assigns none"))
+        == []
+    )
+
+
+def test_route_outside_closed_set_is_caught():
+    findings = cr.check(REVIEW_SKELETON.format(route="banana", disp="none"))
+    assert any("route 'banana'" in f for f in findings)
+
+
+def test_annotated_route_is_accepted():
+    assert cr.check(REVIEW_SKELETON.format(route="construct — no design stated", disp="none")) == []

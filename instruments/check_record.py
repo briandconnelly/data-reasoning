@@ -53,6 +53,7 @@ REQUIRED_SECTIONS = {
 STATUSES = {"REFUTED", "UNRESOLVED"}
 OUTCOMES = {"NOT_TESTED", "CONSISTENT", "CONTRADICTED", "NON_DISCRIMINATING"}
 DISPOSITIONS = {"identified-if", "assumption-contradicted", "unresolved", "not-constructible"}
+ROUTES = {"review", "construct", "bound"}
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
 
@@ -354,13 +355,20 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
             stripped = _unemphasize(line.strip())
             if stripped.startswith(("- Disposition:", "- Dispositions:")):
                 value = stripped.split(":", 1)[1]
-                if _is_placeholder(value) or _normalize(value) == "none":
+                if _is_placeholder(value):
                     continue
-                if _leading_token(value, DISPOSITIONS) is None:
+                if _leading_token(value, DISPOSITIONS | {"none"}) is None:
                     findings.append(
                         f"disposition {_normalize(value)!r} does not begin with a value "
                         f"from the closed set {sorted(DISPOSITIONS)} — 'valid' and "
                         f"'certified' are not dispositions"
+                    )
+            if stripped.startswith("- Route:"):
+                value = stripped.split(":", 1)[1]
+                if not _is_placeholder(value) and _leading_token(value, ROUTES) is None:
+                    findings.append(
+                        f"route {_normalize(value)!r} does not begin with a value from the "
+                        f"closed set {sorted(ROUTES)}"
                     )
         if not in_progress:
             handoff = _section(body, "## Handoff")
