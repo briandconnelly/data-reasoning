@@ -98,12 +98,14 @@ def main() -> int:  # noqa: PLR0911
             file=sys.stderr,
         )
         return 2
-    # Validator exit 2: either the file is unreadable (it says so on stderr),
-    # which is not a clean pass, or the signature matched but no required
-    # heading did — a user's own note, not a record — which is silence.
-    if result.stderr.startswith("unreadable"):
-        return unavailable(file_path, "validator could not read the file")
-    return 0
+    if result.returncode == 2:  # noqa: PLR2004 -- 2 is the validator's documented exit code
+        # Validator exit 2: unreadable (it says so on stderr) is not a clean
+        # pass; a signature match with no required heading is a user's own
+        # note, not a record, and is silence.
+        if result.stderr.startswith("unreadable"):
+            return unavailable(file_path, "validator could not read the file")
+        return 0
+    return unavailable(file_path, f"validator exited {result.returncode}")
 
 
 if __name__ == "__main__":
