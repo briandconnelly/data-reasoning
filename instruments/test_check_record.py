@@ -426,3 +426,24 @@ def test_lone_unterminated_fence_is_a_finding_not_a_pass():
     findings = cr.check("# Decision Record: d\n\n```\n")
     assert findings, "an unterminated fence must not produce a clean pass"
     assert any("unterminated code fence" in f for f in findings)
+
+
+def test_trailing_whitespace_on_a_heading_is_still_the_heading():
+    assert cr.check("# VoI Record: x\n\n## VoI \n\n- Verdict: worth-it\n") == []
+
+
+def test_bold_verdict_label_is_still_the_slot():
+    assert cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict:** worth-it\n") == []
+    assert cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict**: worth-it\n") == []
+
+
+def test_bold_verdict_with_bad_value_is_still_caught():
+    findings = cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict:** optimal\n")
+    assert any("verdict 'optimal'" in f for f in findings)
+
+
+def test_inline_code_pipe_in_method_cell_does_not_shift_outcome():
+    ledger = GOOD_LEDGER.replace(
+        "| T1 | H1 | step at 09:10 | window compare |", "| T1 | H1 | step at 09:10 | run `a | b` |"
+    )
+    assert cr.check(ledger) == []

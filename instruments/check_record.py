@@ -118,6 +118,28 @@ def _strip_comments(text: str) -> str:
     return COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), text)
 
 
+LABEL_EMPHASIS = re.compile(r"^- (\*\*|__|\*|_)([^*_:\n]+?)(:?)\1:?\s*")
+
+
+def _unemphasize(line: str) -> str:
+    """'- **Verdict:** x', '- **Verdict**: x', '- *Verdict*: x' -> '- Verdict: x'.
+    Emphasis on a slot label is presentation, not a different slot."""
+    return LABEL_EMPHASIS.sub(lambda m: f"- {m.group(2)}: ", line, count=1)
+
+
+CODE_SPAN = re.compile(r"`[^`\n]*`")
+
+
+def _mask_code_pipes(line: str) -> str:
+    """Hide `|` inside inline code spans from the cell splitter; `_unmask`
+    restores it inside the cell."""
+    return CODE_SPAN.sub(lambda m: m.group(0).replace("|", "\x00"), line)
+
+
+def _unmask(cell: str) -> str:
+    return cell.replace("\x00", "|")
+
+
 def _strip_fences(text: str) -> tuple[str, bool]:
     """Blank out fenced code blocks (backtick or tilde, up to 3-space indent)
     so quoted records and code samples are never scanned as record content.
@@ -133,7 +155,7 @@ def _strip_fences(text: str) -> tuple[str, bool]:
                 fence = (m.group(1)[0], len(m.group(1)))
                 out.append("")
                 continue
-            out.append(line)
+            out.append(line.rstrip())
         else:
             # CommonMark: a closer is the same character with a run at least
             # as long as the opener, so a ``` line inside a ```` block is
@@ -188,16 +210,13 @@ def _table_rows(section: str) -> list[list[str]]:
 
     Cells are split on unescaped pipes only: a `\\|` inside a cell (e.g. a
     shell pipeline quoted in a Method cell) does not shift the columns.
-    Known residual leniency: a pipe inside an inline code span still splits;
-    that can only shift a cell downstream to a column the checks below don't
-    key on by name, which is at worst a false negative, never a false
-    positive on a checked column.
+    Pipes inside inline code spans are masked before the split.
     """
     rows = []
     for raw_line in section.splitlines():
         line = raw_line.strip()
         if line.startswith("|") and not set(line) <= {"|", "-", " ", ":"}:
-            cells = [c.strip() for c in CELL_SPLIT.split(line)]
+            cells = [_unmask(c.strip()) for c in CELL_SPLIT.split(_mask_code_pipes(line))]
             if cells and cells[0] == "":
                 cells = cells[1:]
             if cells and cells[-1] == "":
@@ -242,7 +261,9 @@ def _slot_values(body: str):
         if stripped.startswith("- ") and ":" in stripped:
             yield stripped.split(":", 1)[1]
         elif stripped.startswith("|") and not set(stripped) <= {"|", "-", " ", ":"}:
-            yield from (c.strip() for c in CELL_SPLIT.split(stripped.strip("|")))
+            yield from (
+                _unmask(c.strip()) for c in CELL_SPLIT.split(_mask_code_pipes(stripped.strip("|")))
+            )
 
 
 def _in_progress(body: str) -> bool:
@@ -330,7 +351,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
 
     elif kind == "review":
         for line in body.splitlines():
-            stripped = line.strip()
+            stripped = _unemphasize(line.strip())
             if stripped.startswith(("- Disposition:", "- Dispositions:")):
                 value = stripped.split(":", 1)[1]
                 if _is_placeholder(value) or _normalize(value) == "none":
@@ -343,7 +364,10 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                     )
         if not in_progress:
             handoff = _section(body, "## Handoff")
-            if not any(line.strip().startswith("- Dispositions:") for line in handoff.splitlines()):
+            if not any(
+                _unemphasize(line.strip()).startswith("- Dispositions:")
+                for line in handoff.splitlines()
+            ):
                 findings.append("Handoff: required '- Dispositions:' slot is missing")
 
     elif kind in ("decision", "voi"):
@@ -351,7 +375,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
         heading = "## Verdict" if kind == "decision" else "## VoI"
         section = _section(body, heading)
         for line in section.splitlines():
-            stripped = line.strip()
+            stripped = _unemphasize(line.strip())
             if stripped.startswith("- Verdict:"):
                 value = stripped.split(":", 1)[1]
                 if _is_placeholder(value):
@@ -362,7 +386,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                         f"from the closed set {sorted(allowed)}"
                     )
         if not in_progress and not any(
-            line.strip().startswith("- Verdict:") for line in section.splitlines()
+            _unemphasize(line.strip()).startswith("- Verdict:") for line in section.splitlines()
         ):
             findings.append("Verdict: required '- Verdict:' slot is missing")
 
