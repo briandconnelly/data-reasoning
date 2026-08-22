@@ -91,14 +91,15 @@ hooks = [
   # validate-cs*-fixture hooks above; pytest still collects the whole tests/
   # tree, but fixtures/generate.py and validate_*.py are not named test_*.py, so
   # default collection skips them.
-  { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/(tests/[^/]+\\.py|references/identification-review-template\\.md)$", pass_filenames = false },
+  { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/(SKILL\\.md|tests/[^/]+\\.py|references/identification-review-template\\.md)$", pass_filenames = false },
   # Scoped to the gate-parity test file alone: the instrument-tests hook above
   # already runs the whole suite (gate parity included) whenever a tests/*.py
   # file changes, so an entry running the full suite here too would run it twice
-  # per commit. This hook exists for the two SKILL.md files, which the suite
-  # hook's files regex deliberately does not watch.
+  # per commit. The suite hooks above now watch their own SKILL.md too; this
+  # hook remains because it is the only one that watches HDA's SKILL.md for
+  # this skill.
   { id = "cir-gate-parity", name = "causal-identification-review: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests/test_gate_parity_cir.py", files = "^(skills/causal-identification-review/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
-  { id = "da-instrument-tests", name = "decision-analysis: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests", files = "^skills/decision-analysis/(tests/[^/]+\\.py|references/decision-record-template\\.md)$", pass_filenames = false },
+  { id = "da-instrument-tests", name = "decision-analysis: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests", files = "^skills/decision-analysis/(SKILL\\.md|tests/[^/]+\\.py|references/decision-record-template\\.md)$", pass_filenames = false },
   { id = "da-gate-parity", name = "decision-analysis: authorization gate matches HDA verbatim", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests/test_gate_parity_da.py", files = "^(skills/decision-analysis/SKILL\\.md|skills/hypothesis-driven-analysis/SKILL\\.md)$", pass_filenames = false },
   # instruments/ is the public, fixture-neutral structural validator adopted in
   # principle by HDA decisions/006 (which owns its scope). Its parity test
