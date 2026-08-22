@@ -420,6 +420,15 @@ def test_template_placeholders_still_count():
     assert not cr._has_placeholder("a < 1.5 or b > 2")
     assert not cr._has_placeholder("<5% and >2%")
     assert not cr._has_placeholder('<a href="x">')
+    assert not cr._has_placeholder("<https://dash.internal/funnel>")
+    assert not cr._has_placeholder("<name@example.com>")
+    assert not cr._has_placeholder("<mailto:ops@example.com>")
+
+
+def test_autolink_in_a_slot_does_not_suspend_completeness():
+    rec = "# Exploration: e\n\n## Frame\n\n- Source: <https://dash.internal/funnel>\n"
+    findings = cr.check(rec)
+    assert any("required section missing: ## Orientation record" in f for f in findings)
 
 
 def test_lone_unterminated_fence_is_a_finding_not_a_pass():

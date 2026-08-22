@@ -59,8 +59,10 @@ VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
 
 # A template placeholder is `<` + a letter + text without `<`, `>`, `=` + `>`.
 # Inequalities (`< 1.5`, `<5%`) start with a space or digit; HTML attributes
-# carry `=`; bare HTML tags are excluded by name below. Residual: `<q and r>`
-# with a letter-initial inequality still reads as a placeholder.
+# carry `=`; bare HTML tags are excluded by name below, and a Markdown
+# autolink (`<https://...>`, `<name@example.com>`, `<mailto:...>`) is real
+# record content, not a template blank, so it is excluded too. Residual:
+# `<q and r>` with a letter-initial inequality still reads as a placeholder.
 PLACEHOLDER = re.compile(r"<([A-Za-z][^<>\n=]*)>")
 HTML_TAGS = frozenset(
     {
@@ -98,6 +100,8 @@ def _has_placeholder(value: str) -> bool:
     for m in PLACEHOLDER.finditer(value):
         inner = m.group(1).strip().rstrip("/").strip().lower()
         if inner in HTML_TAGS:
+            continue
+        if "://" in inner or "@" in inner or inner.startswith(("http", "mailto:")):
             continue
         return True
     return False
