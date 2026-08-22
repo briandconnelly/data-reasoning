@@ -80,3 +80,17 @@ def test_garbled_stdin_is_silent():
         check=False,
     )
     assert r.returncode == 0
+
+
+def test_unreadable_candidate_is_not_a_silent_pass(tmp_path):
+    r = run_hook({"tool_input": {"file_path": str(tmp_path / "missing.md")}})
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_users_own_investigation_note_is_left_alone(tmp_path):
+    f = tmp_path / "outage.md"
+    f.write_text("# Investigation: prod outage 2026-08-20\n\nTimeline...\n")
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr

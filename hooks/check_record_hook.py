@@ -10,8 +10,8 @@ This is harness-level enforcement, not agent-read prose: no SKILL.md sentence
 points at the instrument, so no measured arms are owed for it.
 
 Exit codes: 0 non-record file or clean record; 2 record with findings
-(printed to stderr), validator missing/broken/timed-out, or file
-unreadable/unclassifiable.
+(printed to stderr), validator missing/broken/timed-out, or candidate file
+unreadable. Garbled stdin exits 0: there is no file to validate.
 
 Failure semantics are owned by
 skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md;
@@ -39,12 +39,13 @@ DECISION = (
 )
 
 
-def looks_like_record(path: str) -> bool:
+def looks_like_record(path: str) -> bool | None:
+    """True: title signature matches. False: it does not. None: unreadable."""
     try:
         with Path(path).open(encoding="utf-8", errors="replace") as f:
             head = f.read(4096)
     except OSError:
-        return False
+        return None
     first = head.lstrip().split("\n", 1)[0]
     return first.startswith(SIGNATURES)
 
@@ -67,7 +68,10 @@ def main() -> int:  # noqa: PLR0911
     file_path = (payload.get("tool_input") or {}).get("file_path")
     if not file_path or not str(file_path).endswith(".md"):
         return 0
-    if not looks_like_record(str(file_path)):
+    sniff = looks_like_record(str(file_path))
+    if sniff is None:
+        return unavailable(file_path, "the file could not be read")
+    if not sniff:
         return 0
     plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
     if not plugin_root:
@@ -96,9 +100,12 @@ def main() -> int:  # noqa: PLR0911
             file=sys.stderr,
         )
         return 2
-    # exit 2 from the validator on a file the signature sniff matched:
-    # it could not be read or classified, which is still not a clean pass.
-    return unavailable(file_path, "validator could not read or classify the file")
+    # Validator exit 2: either the file is unreadable (it says so on stderr),
+    # which is not a clean pass, or the signature matched but no required
+    # heading did — a user's own note, not a record — which is silence.
+    if result.stderr.startswith("unreadable"):
+        return unavailable(file_path, "validator could not read the file")
+    return 0
 
 
 if __name__ == "__main__":

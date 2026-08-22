@@ -172,10 +172,16 @@ def _strip_fences(text: str) -> tuple[str, bool]:
 
 
 def detect(text: str) -> str | None:
+    """Kind of record, or None. A title signature alone is not enough: a
+    user's own note titled `# Investigation: …` is not a ledger. The record
+    must also carry at least one of its kind's required headings."""
     first = text.lstrip().split("\n", 1)[0]
     for prefix, kind in SIGNATURES.items():
         if first.startswith(prefix):
-            return kind
+            body = "\n" + "\n".join(line.rstrip() for line in text.split("\n")) + "\n"
+            if any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind]):
+                return kind
+            return None
     return None
 
 

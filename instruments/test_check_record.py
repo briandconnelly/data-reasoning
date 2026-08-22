@@ -287,7 +287,7 @@ def test_longer_fence_is_not_closed_by_a_shorter_run():
 def test_html_tag_in_prose_does_not_suspend_completeness():
     """Codex finding: any <...> span anywhere marked the record in-progress
     and suppressed every completeness finding."""
-    skel = "# Investigation: q?\n\nSee <details> below.\n"
+    skel = "# Investigation: q?\n\n## Problem\n\nSee <details> below.\n"
     assert any("required section missing" in f for f in cr.check(skel))
 
 
@@ -423,7 +423,7 @@ def test_template_placeholders_still_count():
 
 
 def test_lone_unterminated_fence_is_a_finding_not_a_pass():
-    findings = cr.check("# Decision Record: d\n\n```\n")
+    findings = cr.check("# Decision Record: d\n\n## Decision frame\n\n```\n")
     assert findings, "an unterminated fence must not produce a clean pass"
     assert any("unterminated code fence" in f for f in findings)
 
@@ -495,3 +495,12 @@ def test_pending_record_still_reports_bad_vocab():
     assert cr._in_progress(cr._strip_fences(plan)[0])  # the pending line marks it in progress
     findings = cr.check(plan)
     assert any("outcome 'SUPPORTED'" in f for f in findings)
+
+
+def test_signature_without_any_required_heading_is_not_a_record():
+    note = "# Investigation: prod outage 2026-08-20\n\nTimeline...\n"
+    assert cr.detect(note) is None
+
+
+def test_signature_with_one_required_heading_is_a_record():
+    assert cr.detect("# Investigation: x\n\n## Problem\n") == "ledger"
