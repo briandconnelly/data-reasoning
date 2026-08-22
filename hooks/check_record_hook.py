@@ -6,8 +6,8 @@ Runs instruments/check_record.py on the written file and feeds findings back
 via exit 2 + stderr (PostToolUse cannot block — the file is already written;
 after-the-fact feedback is the design).
 
-This is harness-level enforcement, not agent-read prose: no SKILL.md sentence
-points at the instrument, so no measured arms are owed for it.
+Whether this hook's output is agent-read prose, and what it therefore owes,
+is settled by the decision record named below; this file does not restate it.
 
 Exit codes: 0 non-record file or clean record; 2 record with findings
 (printed to stderr), validator missing/broken/timed-out, or candidate file
@@ -53,8 +53,7 @@ def looks_like_record(path: str) -> bool | None:
 def unavailable(file_path: str, why: str) -> int:
     print(
         f"data-reasoning: the record at {file_path} was not validated ({why}).\n"
-        f"Not validated is not a clean pass; validate structure against the owning "
-        f"template yourself. Validator terms: {DECISION}",
+        f"Not validated is not a clean pass. Validator terms: {DECISION}",
         file=sys.stderr,
     )
     return 2
@@ -95,8 +94,7 @@ def main() -> int:  # noqa: PLR0911
         print(
             f"data-reasoning: the record at {file_path} has structural findings:\n"
             f"{result.stdout}"
-            f"Fix the record; closed vocabularies live in the owning SKILL.md, "
-            f"and the check's scope is {DECISION}",
+            f"Closed vocabularies live in the owning SKILL.md; the check's scope is {DECISION}",
             file=sys.stderr,
         )
         return 2
