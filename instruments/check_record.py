@@ -103,9 +103,15 @@ def _has_placeholder(value: str) -> bool:
     return False
 
 
-# A section or slot whose whole content says it is pending is the sanctioned
-# plan-stage state: the skills write the record before the analysis fills it.
+# A slot value, or a required section's whole content, that says it is
+# pending is the sanctioned plan-stage state: the skills write the record
+# before the analysis fills it.
 PENDING = re.compile(r"^\(?\s*pending\b", re.I)
+# The section-level marker must be the canonical parenthesized form (e.g.
+# "(pending -- to be completed after Analysis)"), not merely a passage that
+# happens to start with the word: a table cell or a sentence of ordinary
+# prose can start with "pending" without the section being in-progress.
+SECTION_PENDING = re.compile(r"^\(\s*pending\b.*\)\Z", re.I | re.S)
 
 DELIMITERS = (" —", " -", ";", ":", " (", ",")
 MIN_TABLE_ROWS = 2  # header + at least one data row
@@ -277,10 +283,29 @@ def _slot_values(body: str):
             )
 
 
+def _bullet_slot_values(body: str):
+    """Values of '- Label: value' bullet lines only -- not table cells, not
+    the title. This is the slot position a bare 'pending' value legitimately
+    sits in; a table cell (e.g. an Evidence column noting evidence is still
+    pending for one row) is ordinary content, not a record-wide marker."""
+    for line in body.split("\n")[1:]:
+        stripped = line.strip()
+        if stripped.startswith("- ") and ":" in stripped:
+            yield stripped.split(":", 1)[1]
+
+
 def _in_progress(body: str) -> bool:
     if any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body)):
         return True
-    return any(PENDING.match(line.strip()) for line in body.split("\n"))
+    # A slot value, or a required section's whole content, that says it is
+    # pending is the sanctioned plan-stage state. Prose that merely begins
+    # with the word is not.
+    if any(PENDING.match(v.strip()) for v in _bullet_slot_values(body)):
+        return True
+    kind = detect(body) or ""
+    return any(
+        SECTION_PENDING.match(_section(body, h).strip()) for h in REQUIRED_SECTIONS.get(kind, [])
+    )
 
 
 def _check_claim(value: str, where: str, findings: list[str]) -> None:

@@ -486,13 +486,31 @@ def test_pending_prose_marks_a_plan_stage_record_in_progress():
     assert cr.check(plan) == []
 
 
+def test_prose_beginning_with_pending_does_not_suppress_completeness():
+    ledger = GOOD_LEDGER.replace(
+        "## Data Validity\n\n- Collection method: exporter\n\n", ""
+    ).replace(
+        "- none\n", "Pending replication by the data team, we still report the finding below.\n"
+    )
+    assert "## Data Validity" not in ledger
+    findings = cr.check(ledger)
+    assert any("required section missing: ## Data Validity" in f for f in findings)
+
+
 def test_pending_record_still_reports_bad_vocab():
     plan = GOOD_LEDGER.replace(
         "| T1 | H1 | step at 09:10 | window compare | CONSISTENT |",
         "| T1 | H1 | step at 09:10 | window compare | SUPPORTED |",
     )
-    plan = plan.replace("- Answer: unresolved", "pending — answer after T2 runs")
-    assert cr._in_progress(cr._strip_fences(plan)[0])  # the pending line marks it in progress
+    plan = plan.replace(
+        "- Answer: unresolved\n- Per-hypothesis summary:\n\n"
+        "  | id | claim | status | basis |\n  | --- | --- | --- | --- |\n"
+        "  | H1 | causal | UNRESOLVED | best supported; T1 consistent |\n"
+        "  | H2 | data-artifact | UNRESOLVED | not tested |\n",
+        "(pending — to be completed after Analysis)\n",
+    )
+    # the section-level pending marker marks it in progress
+    assert cr._in_progress(cr._strip_fences(plan)[0])
     findings = cr.check(plan)
     assert any("outcome 'SUPPORTED'" in f for f in findings)
 
