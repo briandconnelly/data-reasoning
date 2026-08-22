@@ -273,6 +273,11 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     # Vocabulary checks still run on whatever body remains (the pre-fence
     # part).
     in_progress = unterminated_fence or _in_progress(body)
+    if unterminated_fence:
+        findings.append(
+            "unterminated code fence: completeness past it was not checked "
+            "(close the fence, then re-validate)"
+        )
 
     if not in_progress:
         for heading in REQUIRED_SECTIONS[kind]:

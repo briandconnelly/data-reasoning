@@ -334,7 +334,9 @@ def test_unclosed_fence_suppresses_completeness_not_correctness():
         "- Crossover: none within swept class",
         "- Crossover: none within swept class\n\n```\npasted log excerpt",
     )
-    assert cr.check(good) == []
+    findings = cr.check(good)
+    assert not any("required section missing" in f for f in findings)
+    assert any("unterminated code fence" in f for f in findings)
 
 
 def test_unclosed_fence_does_not_suppress_prefence_vocab():
@@ -418,3 +420,9 @@ def test_template_placeholders_still_count():
     assert not cr._has_placeholder("a < 1.5 or b > 2")
     assert not cr._has_placeholder("<5% and >2%")
     assert not cr._has_placeholder('<a href="x">')
+
+
+def test_lone_unterminated_fence_is_a_finding_not_a_pass():
+    findings = cr.check("# Decision Record: d\n\n```\n")
+    assert findings, "an unterminated fence must not produce a clean pass"
+    assert any("unterminated code fence" in f for f in findings)
