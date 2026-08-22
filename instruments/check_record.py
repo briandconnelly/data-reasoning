@@ -103,6 +103,10 @@ def _has_placeholder(value: str) -> bool:
     return False
 
 
+# A section or slot whose whole content says it is pending is the sanctioned
+# plan-stage state: the skills write the record before the analysis fills it.
+PENDING = re.compile(r"^\(?\s*pending\b", re.I)
+
 DELIMITERS = (" —", " -", ";", ":", " (", ",")
 MIN_TABLE_ROWS = 2  # header + at least one data row
 
@@ -268,7 +272,9 @@ def _slot_values(body: str):
 
 
 def _in_progress(body: str) -> bool:
-    return any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body))
+    if any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body)):
+        return True
+    return any(PENDING.match(line.strip()) for line in body.split("\n"))
 
 
 def _check_claim(value: str, where: str, findings: list[str]) -> None:
@@ -305,6 +311,8 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
         for heading in REQUIRED_SECTIONS[kind]:
             if ("\n" + heading + "\n") not in body:
                 findings.append(f"required section missing: {heading}")
+            elif not _section(body, heading).strip():
+                findings.append(f"required section empty: {heading}")
 
     if kind == "ledger":
         # No id-grammar check on `id` cells (e.g. H1 vs H4 (retrospective)):

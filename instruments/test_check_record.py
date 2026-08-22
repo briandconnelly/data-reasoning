@@ -469,3 +469,29 @@ def test_route_outside_closed_set_is_caught():
 
 def test_annotated_route_is_accepted():
     assert cr.check(REVIEW_SKELETON.format(route="construct — no design stated", disp="none")) == []
+
+
+def test_empty_required_section_is_a_finding():
+    findings = cr.check("# Exploration: e\n\n## Frame\n\n## Orientation record\n")
+    assert any("required section empty: ## Frame" in f for f in findings)
+    assert any("required section empty: ## Orientation record" in f for f in findings)
+
+
+def test_pending_prose_marks_a_plan_stage_record_in_progress():
+    plan = GOOD_LEDGER.replace(
+        "- Answer: unresolved\n- Per-hypothesis summary:\n\n  | id | claim | status | basis |\n  | --- | --- | --- | --- |\n  | H1 | causal | UNRESOLVED | best supported; T1 consistent |\n  | H2 | data-artifact | UNRESOLVED | not tested |\n",
+        "(pending — to be completed after Analysis)\n",
+    )
+    assert "(pending" in plan
+    assert cr.check(plan) == []
+
+
+def test_pending_record_still_reports_bad_vocab():
+    plan = GOOD_LEDGER.replace(
+        "| T1 | H1 | step at 09:10 | window compare | CONSISTENT |",
+        "| T1 | H1 | step at 09:10 | window compare | SUPPORTED |",
+    )
+    plan = plan.replace("- Answer: unresolved", "pending — answer after T2 runs")
+    assert cr._in_progress(cr._strip_fences(plan)[0])  # the pending line marks it in progress
+    findings = cr.check(plan)
+    assert any("outcome 'SUPPORTED'" in f for f in findings)
