@@ -247,7 +247,7 @@ def check(path: Path) -> list[str]:
                     # checked, and silence here would look like a pass.
                     violations.append(
                         f"{path.relative_to(REPO_ROOT)}:{lineno}: cited file "
-                        f"{name!r} does not resolve to any file in this repository, "
+                        f"{name!r} does not resolve to a unique file in this repository, "
                         f"so the quote attributed to it was not checked"
                     )
                     continue

@@ -270,10 +270,6 @@ def test_repo_local_citation_to_a_missing_file_is_a_violation(repo):
     assert any("nonexistent-file.md" in v and "does not resolve" in v for v in violations)
 
 
-def test_external_looking_citation_is_still_left_alone(repo):
-    path = write(
-        repo,
-        'The CommonMark spec says "a closer is the same character with a run at '
-        'least as long as the opener".\n',
-    )
+def test_unresolved_name_without_an_attributed_quote_is_left_alone(repo):
+    path = write(repo, "See nonexistent-file.md for the background; nothing is quoted here.\n")
     assert cc.check(path) == []
