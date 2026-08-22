@@ -1,7 +1,7 @@
 # Test Scenarios for exploratory-data-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each behavior scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status: authored only — no arm has run, and nothing below is a result.**
+**Status: behavior scenarios below are authored only — no behavior arm has run, and nothing below is a result; description-trigger arms ran 2026-08-11 and live in `tests/runs/`, governed by `decisions/005-generic-speech-acts-claimed.md`, not by this file.**
 The E1 fixture exists and is validated (`skills/hypothesis-driven-analysis/tests/fixtures/s5b-seam/`); every other fixture named here is still to be generated.
 Every "Expected" and "Fixture" line is a preregistration; generating fixtures deterministically and running arms is the recorded follow-up, and a fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.

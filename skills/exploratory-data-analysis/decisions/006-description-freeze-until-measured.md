@@ -23,3 +23,10 @@ A correction of an outright factual error in a description (a wrong skill name, 
 - Adding trigger surface to any skill now costs a measurement first — that is the point.
 - The freeze does not measure anything itself; it only stops the unmeasured surface from growing while the owed measurements remain owed.
 - The pin is a change detector: it makes an unmeasured edit loud and diff-visible, and this record governs the refresh; it cannot verify that the measurement happened.
+
+## Addendum 2026-08-22
+
+The Context above says this skill's description rests on zero arms.
+That was wrong on the day it was written: `tests/runs/2026-08-11-t13-trigger.md` and `2026-08-11-t14-trigger.md` are measured trigger arms for the description decision 005 adopted, run seven days before this record.
+The decision itself stands — those arms measured the generic-speech-act widening against a two-skill catalog, not routing across the four shipped skills — but the freeze's justification is "unmeasured against the shipped catalog", not "unmeasured".
+`causal-identification-review`'s description likewise has n=1 trigger cells (CS1, CS2, CS6a in its `tests/scenarios.md`) against a three-skill catalog.
