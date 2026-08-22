@@ -116,6 +116,21 @@ def _bullet_pattern(label: str) -> re.Pattern[str]:
     return re.compile(rf"^- {re.escape(label)}:[ \t]*(.*)$", re.MULTILINE)
 
 
+def _label_region(body: str, label: str) -> str:
+    """Raw text from ``- <label>:`` to the next top-level ``- `` bullet or
+    heading, exclusive of both. Unlike ``find_bullet``/``find_sublist``, this
+    returns the slot's content verbatim (not parsed into an inline value or a
+    stripped item list), so callers that need to regex over raw table rows or
+    raw sub-bullet lines -- rather than a presence/parsed check -- have
+    something to search."""
+    m = re.search(rf"^- {re.escape(label)}:.*$", body, re.M)
+    if m is None:
+        return ""
+    rest = body[m.end() :]
+    nxt = re.search(r"^(- [A-Z]|#{1,6} )", rest, re.M)
+    return rest if nxt is None else rest[: nxt.start()]
+
+
 def find_bullet(body: str, label: str) -> str | None:
     """The value of a ``- <label>:`` bullet, or None if the slot is empty.
 
@@ -327,6 +342,25 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
             "least one assumption probe run with its result recorded -- the "
             "probes slot is empty or records no run result ('none', 'none run')"
         )
+    # identified-if claims every *named* assumption was probed (SKILL.md's
+    # per-route procedure), not merely that some probe ran. Match assumption
+    # ids (`A1`, `A2`, ...) named in the sub-list against the probes table's
+    # first column -- this only fires when the record uses the `A<digits>`
+    # id convention; the template's free-text assumption form (no ids)
+    # never trips it.
+    assumption_ids = re.findall(
+        r"^\s*- (A\d+)\b", _label_region(body, "Identifying assumptions"), re.M
+    )
+    probed_ids = set(
+        re.findall(r"^\s*\|\s*(A\d+)\b", _label_region(body, "Assumption probes"), re.M)
+    )
+    if assumption_ids and disposition_value == "identified-if":
+        for aid in assumption_ids:
+            if aid not in probed_ids:
+                findings.append(
+                    f"Design block ({header!r}): assumption {aid} has no probe row, "
+                    "so identified-if is not available"
+                )
     return disposition_value if disposition_value in DISPOSITIONS else None
 
 

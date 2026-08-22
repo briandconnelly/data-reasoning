@@ -950,3 +950,29 @@ def test_main_exits_nonzero_on_gate_failure(tmp_path: Path) -> None:
 def test_main_fails_closed_on_unreadable_file(tmp_path: Path) -> None:
     missing = tmp_path / "does-not-exist.md"
     assert cr.main([str(missing)]) == cr.EXIT_UNVERIFIABLE
+
+
+# --------------------------------------------------------------------------- #
+# identified-if requires a probe row for every named assumption (spec B6) --
+# the probes-run gate above only checks that *some* probe ran, so a Design
+# block naming assumptions A1 and A2 but probing only A1 still passed with
+# `identified-if`, claiming probe support for an assumption never probed.
+# The rule keys on the `A<digits>` id convention only -- the template's
+# free-text assumption form (no ids) never trips it.
+# --------------------------------------------------------------------------- #
+TWO_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions:\n  - A1: pre-period exists\n  - A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(TWO_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
