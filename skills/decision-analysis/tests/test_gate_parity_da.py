@@ -22,7 +22,7 @@ HEADING = "### Authorization gate (always binds)"
 MIN_GATE_LENGTH = 1000
 
 
-COMMENT = re.compile(r"<!--.*?-->", re.S)
+COMMENT = re.compile(r"<!--.*?(?:-->|\Z)", re.S)
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 
 
@@ -88,5 +88,16 @@ def test_fenced_gate_is_not_a_gate():
     text = DA_SKILL.read_text(encoding="utf-8")
     block = gate_block(DA_SKILL)
     disabled = text.replace(block, "```text\n" + block + "\n```")
+    with pytest.raises(ValueError):  # noqa: PT011
+        gate_block_from_text(disabled)
+
+
+def test_unclosed_comment_also_hides_the_gate():
+    """CommonMark: an HTML comment opened and never closed runs to end of
+    document, so everything after `<!--` is hidden from a reader."""
+    text = DA_SKILL.read_text(encoding="utf-8")
+    block = gate_block(DA_SKILL)
+    disabled = text.replace(block, "<!--\n" + block)
+    assert disabled != text
     with pytest.raises(ValueError):  # noqa: PT011
         gate_block_from_text(disabled)
