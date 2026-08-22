@@ -38,7 +38,7 @@ hooks = [
 repo = "local"
 hooks = [
   { id = "check-skill-frontmatter", name = "Validate SKILL.md frontmatter against agentskills.io spec", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-skill-frontmatter.py", files = "(?:^|/)SKILL\\.md$", pass_filenames = true },
-  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = true },
+  { id = "check-citations", name = "skills: cross-file citations resolve and attributed quotes are accurate", language = "python", language_version = "python3", entry = "python scripts/check-citations.py", files = "^skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/(SKILL\\.md|references/.*\\.md|decisions/.*\\.md|tests/scenarios\\.md)$", pass_filenames = false },
   # decisions/001-shared-gate-authority.md (EDA) enumerates the invariants the
   # costly-collection and data-rules copies must preserve; rewording was
   # guarded only by a hand check nothing ran. This hook freezes each copy
@@ -51,6 +51,8 @@ hooks = [
   # scripts/frontmatter-descriptions/; the decision record governs any refresh.
   { id = "check-description-freeze", name = "skills: frontmatter descriptions are frozen against unmeasured change", language = "python", language_version = "python3", additional_dependencies = ["pyyaml>=6"], entry = "python scripts/check-description-freeze.py", files = "^(skills/(hypothesis-driven-analysis|exploratory-data-analysis|causal-identification-review|decision-analysis)/SKILL\\.md|scripts/(check-description-freeze\\.py|frontmatter-descriptions/.*))$", pass_filenames = false },
   { id = "description-freeze-tests", name = "skills: the description-freeze checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8", "pyyaml>=6"], entry = "python -m pytest -q scripts/test_check_description_freeze.py", files = "^scripts/(check-description-freeze\\.py|test_check_description_freeze\\.py)$", pass_filenames = false },
+  { id = "citations-tests", name = "skills: the citation checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q scripts/test_check_citations.py", files = "^scripts/(check-citations\\.py|test_check_citations\\.py)$", pass_filenames = false },
+  { id = "frontmatter-tests", name = "skills: the frontmatter checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8", "pyyaml>=6"], entry = "python -m pytest -q scripts/test_check_skill_frontmatter.py", files = "^scripts/(check-skill-frontmatter\\.py|test_check_skill_frontmatter\\.py)$", pass_filenames = false },
   # The instruments' own unit suite. Nothing ran it before, so an edit to
   # score_ledger.py landed unchecked. The whole tests tree is collected; the
   # deliberately-broken scenario-3 fixture is held out by

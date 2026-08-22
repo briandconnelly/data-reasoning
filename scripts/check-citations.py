@@ -241,7 +241,17 @@ def check(path: Path) -> list[str]:
                 if not attributed:
                     continue
                 target = resolve(name, path)
-                if target is None or (target == path and sha is None):
+                if target is None:
+                    # A `.md` name attributed to a long quote that resolves
+                    # nowhere is a typo or a deleted file: the quote was never
+                    # checked, and silence here would look like a pass.
+                    violations.append(
+                        f"{path.relative_to(REPO_ROOT)}:{lineno}: cited file "
+                        f"{name!r} does not resolve to any file in this repository, "
+                        f"so the quote attributed to it was not checked"
+                    )
+                    continue
+                if target == path and sha is None:
                     continue
                 key = (target, sha)
                 if key not in cache:
