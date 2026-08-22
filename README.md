@@ -16,11 +16,14 @@ Exploration generates hypotheses and never confirms them; adjudication is `hypot
 All four skills carry the same authorization gate verbatim, and `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` names `hypothesis-driven-analysis/SKILL.md` as its single authority — three parity tests (EDA↔HDA, CIR↔HDA, DA↔HDA) keep the copies from drifting.
 
 The pairing is a design claim, not a measured one.
-`hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`); `exploratory-data-analysis` has none — its scenarios are authored and no arm has run (`skills/exploratory-data-analysis/tests/scenarios.md`).
+`hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).
+`exploratory-data-analysis` has measured description-trigger arms only (`skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md`, `2026-08-11-t14-trigger.md`, and the repaired rerun; the lift is recorded in `skills/exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md`); its behavior scenarios in `tests/scenarios.md` are authored and unrun.
 No run has yet exercised a handoff between the two.
-Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 with one trigger arm per scenario; the other three descriptions, and the routing between all four, rest on zero valid arms — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds them there until that changes.
+Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against a two-skill catalog (HDA, EDA, and `systematic-debugging`), not the four skills that now ship.
+`causal-identification-review`'s description has n=1 trigger cells (CS1, CS2, CS6a) against a three-skill catalog; `decision-analysis`'s has none.
+Routing between all four skills rests on zero arms run against the full catalog — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds every description until that changes.
 Treat the routing between them, and the handoff itself, as unverified.
-`causal-identification-review` differs: measurement wave 1 (n=1 per cell) has been scored, with the verdict row recorded in `skills/causal-identification-review/tests/scenarios.md` § "Global verdict table".
+`causal-identification-review`'s measurement wave 1 (n=1 per cell) was scored on 2026-08-09 and then partly reopened the same day: CS4 and CS7 moved to "redesign and re-measure" and owe fresh arms before the wave is complete (`skills/causal-identification-review/tests/scenarios.md` § "Global verdict table", addendum).
 `decision-analysis` has authored scenarios and no run arms (`skills/decision-analysis/tests/scenarios.md`); treat its routing and its premium as unmeasured.
 
 The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.
