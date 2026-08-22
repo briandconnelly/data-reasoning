@@ -63,6 +63,15 @@ MIN_TABLE_ROWS = 2  # header + at least one data row
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 CELL_SPLIT = re.compile(r"(?<!\\)\|")
 
+COMMENT = re.compile(r"<!--.*?-->", re.S)
+
+
+def _strip_comments(text: str) -> str:
+    """Blank out HTML comments, preserving line count, so a commented-out
+    heading, slot, or verdict is never read as record content. An unclosed
+    `<!--` is left as ordinary text: there is nothing to hide past it."""
+    return COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+
 
 def _strip_fences(text: str) -> tuple[str, bool]:
     """Blank out fenced code blocks (backtick or tilde, up to 3-space indent)
@@ -212,7 +221,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    body, unterminated_fence = _strip_fences(text)
+    body, unterminated_fence = _strip_fences(_strip_comments(text))
     # An unterminated fence blanks everything after it (including any
     # genuinely-present later sections), so completeness findings there
     # would fail correct work — treat the record as in-progress instead.

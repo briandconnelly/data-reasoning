@@ -363,3 +363,21 @@ def test_required_headings_exist_in_shipped_templates():
         text = templates[kind].read_text(encoding="utf-8")
         for heading in sections:
             assert heading in text, (kind, heading)
+
+
+def test_html_commented_structure_is_not_record_content():
+    """A record whose headings and verdict sit only inside <!-- --> has none of
+    them: commented text is never loaded as content."""
+    hidden = (
+        "# Decision Record: d\n\n<!--\n## Decision frame\n\n## Decision-state model\n\n"
+        "## Evidence and update\n\n## Robustness\n\n## Verdict\n\n- Verdict: robust\n\n"
+        "## Handoff\n-->\n"
+    )
+    findings = cr.check(hidden)
+    assert any("required section missing: ## Verdict" in f for f in findings)
+    assert any("'- Verdict:' slot is missing" in f for f in findings)
+
+
+def test_comment_stripping_preserves_line_count():
+    text = "a\n<!-- one\ntwo\nthree -->\nb\n"
+    assert cr._strip_comments(text).count("\n") == text.count("\n")
