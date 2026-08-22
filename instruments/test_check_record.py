@@ -531,3 +531,17 @@ def test_signature_without_any_required_heading_is_not_a_record():
 
 def test_signature_with_one_required_heading_is_a_record():
     assert cr.detect("# Investigation: x\n\n## Problem\n") == "ledger"
+
+
+def test_invalid_utf8_is_unreadable_not_a_crash(tmp_path, capsys):
+    f = tmp_path / "bad.md"
+    f.write_bytes(b"# VoI Record: x\n\n## VoI\n\n- Verdict: worth-it \xff\n")
+    rc = cr.main([str(f)])
+    assert rc == 2  # noqa: PLR2004 -- 2 is the validator's documented exit code
+    assert capsys.readouterr().err.startswith("unreadable")
+
+
+def test_unreadable_file_reports_with_the_prefix_the_hook_keys_on(tmp_path, capsys):
+    rc = cr.main([str(tmp_path / "missing.md")])
+    assert rc == 2  # noqa: PLR2004 -- 2 is the validator's documented exit code
+    assert capsys.readouterr().err.startswith("unreadable")
