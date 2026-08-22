@@ -14,9 +14,11 @@ Dispositions slot reusing exactly the disposition values assigned above --
 set equality, neither fabricating nor omitting -- (or the literal ``none``
 when the record's route assigns none), an ``identified-if`` disposition
 carrying at least one assumption probe run with its result recorded (probes
-that are empty or ``none run`` reject that disposition and no other), and
-forbidden certification vocabulary (``valid``, ``certified``) absent from
-disposition slots. The
+that are empty or ``none run`` reject that disposition and no other) and,
+when assumptions carry ``A<n>`` ids, a probe row for every such id
+(free-text assumptions -- the template's default form -- are not
+individually matched to probes), and forbidden certification vocabulary
+(``valid``, ``certified``) absent from disposition slots. The
 closed-set vocabulary and its semantics are governed by
 ``../SKILL.md`` § Routing (authority) and are already fixed
 by decision -- see

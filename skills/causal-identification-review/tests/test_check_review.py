@@ -976,3 +976,15 @@ TWO_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
 def test_identified_if_with_an_unprobed_assumption_is_caught() -> None:
     findings, _ = cr.check_record(TWO_ASSUMPTIONS_ONE_PROBE)
     assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+TWO_ASSUMPTIONS_TWO_PROBES = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A2 | rollout-date placebo check | no break at the placebo date |\n",
+)
+
+
+def test_identified_if_with_every_assumption_probed_passes() -> None:
+    findings, _ = cr.check_record(TWO_ASSUMPTIONS_TWO_PROBES)
+    assert not any("no probe row" in f for f in findings), findings
