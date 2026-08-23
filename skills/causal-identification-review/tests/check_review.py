@@ -133,26 +133,27 @@ def _label_region(body: str, label: str) -> str:
     return rest if nxt is None else rest[: nxt.start()]
 
 
-_ASSUMPTION_ID = re.compile(r"\s*(?:[-*]\s+)?(A\d+)\b")
+# An assumption is *defined* as `A<digits>:` -- the shape every fixture and
+# the template's id convention use. Keying on the definition syntax rather
+# than on a list of item separators is what makes the scan independent of the
+# slot's shape: inline, sub-list, paragraph, and any separator between items
+# are all covered by the same rule, and a bare mention of `A1` with no colon
+# is a reference, not a definition.
+_ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)\s*:")
 
 
 def _assumption_ids(body: str) -> list[str]:
-    """Assumption ids named in the ``- Identifying assumptions:`` slot, in
-    every shape the slot is accepted in: inline on the label line, an indented
-    sub-list, or a prose paragraph. Reading the parsed ``find_bullet`` value is
-    not enough -- it joins paragraph lines with spaces, which hides every id
-    after the first -- so the inline value and the raw region below the label
-    are scanned with their line boundaries intact. Each id must head its item,
-    so a mid-sentence mention of ``A1`` is not read as a named assumption.
+    """Assumption ids defined in the ``- Identifying assumptions:`` slot.
+
+    Scans the inline value on the label line together with the raw region
+    below it, so every shape the slot is accepted in is covered without
+    enumerating separators.
     """
     m = re.search(r"^- Identifying assumptions:(.*)$", body, re.M)
     if m is None:
         return []
-    items = re.split(r"[;\n]", m.group(1)) + re.split(
-        r"[;\n]", _label_region(body, "Identifying assumptions")
-    )
-    found = [im.group(1) for item in items if (im := _ASSUMPTION_ID.match(item))]
-    return list(dict.fromkeys(found))
+    slot = m.group(1) + "\n" + _label_region(body, "Identifying assumptions")
+    return list(dict.fromkeys(d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)))
 
 
 def find_bullet(body: str, label: str) -> str | None:

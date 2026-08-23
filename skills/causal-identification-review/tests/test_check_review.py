@@ -1031,3 +1031,63 @@ PARAGRAPH_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
 def test_identified_if_with_an_unprobed_paragraph_assumption_is_caught() -> None:
     findings, _ = cr.check_record(PARAGRAPH_ASSUMPTIONS_ONE_PROBE)
     assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+# A comma is as plausible an inline separator as a semicolon, and the slot
+# takes free-form inline content, so it must not hide a named assumption.
+COMMA_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions: A1: pre-period exists, A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_comma_inline_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(COMMA_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_prose_comma_clause_naming_an_id_is_not_a_named_assumption() -> None:
+    """Splitting on commas must not turn a mid-sentence mention into an id."""
+    record = VALID_RECORD.replace(
+        _ASSUMPTIONS_BLOCK,
+        "- Identifying assumptions: parallel trends hold, as argued in A1 of the prior ledger\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+# Separator-driven parsing could neither see a conjunction-joined definition
+# nor tell a definition from a reference. Ids are keyed on the `A<n>:`
+# definition syntax instead, so neither shape depends on a separator list.
+CONJUNCTION_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions: A1: pre-period exists, and A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_a_conjunction_joined_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(CONJUNCTION_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_an_id_referenced_without_a_definition_is_not_a_named_assumption() -> None:
+    record = VALID_RECORD.replace(
+        _ASSUMPTIONS_BLOCK,
+        "- Identifying assumptions: no spillovers, A1 from the prior ledger provides detail\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("no probe row" in f for f in findings), findings
