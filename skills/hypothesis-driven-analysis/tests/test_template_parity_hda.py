@@ -2,8 +2,8 @@
 
 Mirrors test_template_parity_cir.py / test_template_parity_da.py: a template
 is read, a checker runs, so the labels necessarily live in both; this check
-keeps them from diverging silently (AGENTS.md: one home per normative rule;
-a copy gets an instrument, not trust).
+keeps them from diverging silently (the rule is AGENTS.md's; this test is
+its instrument).
 """
 
 from __future__ import annotations
