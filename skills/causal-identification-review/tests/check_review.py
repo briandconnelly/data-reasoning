@@ -142,6 +142,23 @@ def _label_region(body: str, label: str) -> str:
 _ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)\s*:")
 
 
+_TABLE_DELIMITER = re.compile(r"^[\s|:-]+$")
+MIN_TABLE_CELLS = 2
+
+
+def _data_row_cells(line: str) -> list[str] | None:
+    """Cells of a Markdown table data row, or None when `line` is not one: a
+    row is pipe-delimited on both sides with at least two cells, and the
+    header delimiter row (`| --- | --- |`) carries no data."""
+    stripped = line.strip()
+    if not stripped.startswith("|") or not stripped.endswith("|"):
+        return None
+    if _TABLE_DELIMITER.match(stripped):
+        return None
+    cells = [c.strip() for c in stripped[1:-1].split("|")]
+    return cells if len(cells) >= MIN_TABLE_CELLS else None
+
+
 def _assumption_ids(body: str) -> list[str]:
     """Assumption ids defined in the ``- Identifying assumptions:`` slot.
 
@@ -374,9 +391,14 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     # id convention; the template's free-text assumption form (no ids)
     # never trips it.
     assumption_ids = _assumption_ids(body)
-    probed_ids = set(
-        re.findall(r"^\s*\|\s*(A\d+)\b", _label_region(body, "Assumption probes"), re.M)
-    )
+    # Only a structurally valid data row counts: a line that merely starts
+    # with a pipe ("| A2 not run") is not a table row, and must not satisfy
+    # the probe requirement it appears to.
+    probed_ids = {
+        cells[0]
+        for line in _label_region(body, "Assumption probes").splitlines()
+        if (cells := _data_row_cells(line)) and re.fullmatch(r"A\d+", cells[0])
+    }
     if assumption_ids and disposition_value == "identified-if":
         for aid in assumption_ids:
             if aid not in probed_ids:

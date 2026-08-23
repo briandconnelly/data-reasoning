@@ -1091,3 +1091,16 @@ def test_an_id_referenced_without_a_definition_is_not_a_named_assumption() -> No
     )
     findings, _ = cr.check_record(record)
     assert not any("no probe row" in f for f in findings), findings
+
+
+PIPE_LINE_NOT_A_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n  | A2 not run\n",
+)
+
+
+def test_a_pipe_prefixed_line_is_not_a_probe_row() -> None:
+    """`| A2 not run` is not a table row, so it cannot satisfy the per-id
+    probe requirement."""
+    findings, _ = cr.check_record(PIPE_LINE_NOT_A_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
