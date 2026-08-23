@@ -122,15 +122,47 @@ MIN_TABLE_ROWS = 2  # header + at least one data row
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 CELL_SPLIT = re.compile(r"(?<!\\)\|")
+INLINE_COMMENT = re.compile(r"<!--.*?-->")
 
-COMMENT = re.compile(r"<!--.*?-->", re.S)
 
-
-def _strip_comments(text: str) -> str:
-    """Blank out HTML comments, preserving line count, so a commented-out
-    heading, slot, or verdict is never read as record content. An unclosed
-    `<!--` is left as ordinary text: there is nothing to hide past it."""
-    return COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+def _strip_hidden(text: str) -> tuple[str, bool]:
+    """Blank out what a reader never sees — fenced code blocks and HTML
+    comments — in one pass, so the two cannot hide each other's delimiters.
+    Line count is preserved. Per CommonMark: a fence closes only on a same-
+    character run at least as long as the opener with nothing but whitespace
+    after it; `<!--` inside a fence is code; a comment never closed runs to
+    the end of the document. Returns (body, fence_still_open_at_eof)."""
+    out: list[str] = []
+    fence: tuple[str, int] | None = None
+    in_comment = False
+    for line in text.split("\n"):
+        if fence is not None:
+            m = FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
+                fence = None
+            out.append("")
+            continue
+        if in_comment:
+            out.append("")
+            if "-->" in line:
+                in_comment = False
+            continue
+        m = FENCE.match(line)
+        if m:
+            fence = (m.group(1)[0], len(m.group(1)))
+            out.append("")
+            continue
+        visible = INLINE_COMMENT.sub("", line)
+        if "<!--" in visible:
+            visible = visible[: visible.index("<!--")]
+            in_comment = True
+        out.append(visible.rstrip())
+    return "\n".join(out), fence is not None
 
 
 LABEL_EMPHASIS = re.compile(r"^- (\*\*|__|\*|_)([^*_:\n]+?)(:?)\1:?\s*")
@@ -142,7 +174,7 @@ def _unemphasize(line: str) -> str:
     return LABEL_EMPHASIS.sub(lambda m: f"- {m.group(2)}: ", line, count=1)
 
 
-CODE_SPAN = re.compile(r"`[^`\n]*`")
+CODE_SPAN = re.compile(r"(`+)(?:(?!\1)[^\n])+?\1")
 
 
 def _mask_code_pipes(line: str) -> str:
@@ -153,32 +185,6 @@ def _mask_code_pipes(line: str) -> str:
 
 def _unmask(cell: str) -> str:
     return cell.replace("\x00", "|")
-
-
-def _strip_fences(text: str) -> tuple[str, bool]:
-    """Blank out fenced code blocks (backtick or tilde, up to 3-space indent)
-    so quoted records and code samples are never scanned as record content.
-    Line count is preserved. Also reports whether a fence was still open at
-    EOF (an unterminated fence blanks everything after it, including any
-    genuinely-present later sections)."""
-    out = []
-    fence: tuple[str, int] | None = None  # (char, opening run length)
-    for line in text.split("\n"):
-        m = FENCE.match(line)
-        if fence is None:
-            if m:
-                fence = (m.group(1)[0], len(m.group(1)))
-                out.append("")
-                continue
-            out.append(line.rstrip())
-        else:
-            # CommonMark: a closer is the same character with a run at least
-            # as long as the opener, so a ``` line inside a ```` block is
-            # content, not a closer.
-            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
-                fence = None
-            out.append("")
-    return "\n".join(out), fence is not None
 
 
 def detect(text: str) -> str | None:
@@ -329,7 +335,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    body, unterminated_fence = _strip_fences(_strip_comments(text))
+    body, unterminated_fence = _strip_hidden(text)
     # An unterminated fence blanks everything after it (including any
     # genuinely-present later sections), so completeness findings there
     # would fail correct work — treat the record as in-progress instead.

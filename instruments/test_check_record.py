@@ -382,7 +382,36 @@ def test_html_commented_structure_is_not_record_content():
 
 def test_comment_stripping_preserves_line_count():
     text = "a\n<!-- one\ntwo\nthree -->\nb\n"
-    assert cr._strip_comments(text).count("\n") == text.count("\n")
+    assert cr._strip_hidden(text)[0].count("\n") == text.count("\n")
+
+
+def test_unclosed_html_comment_hides_everything_after_it():
+    rec = (
+        "# Decision Record: d\n\n<!--\n## Decision frame\n\nx\n\n## Decision-state model\n\nx\n\n"
+        "## Evidence and update\n\nx\n\n## Robustness\n\nx\n\n## Verdict\n\n- Verdict: robust\n\n"
+        "## Handoff\n\nx\n"
+    )
+    findings = cr.check(rec)
+    assert any("required section missing: ## Verdict" in f for f in findings)
+
+
+def test_comment_opener_inside_a_fence_is_code_not_a_comment():
+    rec = "# VoI Record: x\n\n```\n<!--\n```\n\n## VoI\n\n- Verdict: worth-it\n"
+    assert cr.check(rec) == []
+
+
+def test_fence_closer_with_info_string_does_not_close():
+    rec = "# VoI Record: x\n\n```\ntext\n```python\n\n## VoI\n\n- Verdict: worth-it\n"
+    findings = cr.check(rec)
+    assert any("unterminated code fence" in f for f in findings)
+
+
+def test_double_backtick_code_span_pipe_does_not_shift_cells():
+    ledger = GOOD_LEDGER.replace(
+        "| T1 | H1 | step at 09:10 | window compare |",
+        "| T1 | H1 | step at 09:10 | run ``a | b`` |",
+    )
+    assert cr.check(ledger) == []
 
 
 INEQUALITY_DECISION = (
@@ -519,7 +548,7 @@ def test_pending_record_still_reports_bad_vocab():
         "(pending — to be completed after Analysis)\n",
     )
     # the section-level pending marker marks it in progress
-    assert cr._in_progress(cr._strip_fences(plan)[0])
+    assert cr._in_progress(cr._strip_hidden(plan)[0])
     findings = cr.check(plan)
     assert any("outcome 'SUPPORTED'" in f for f in findings)
 
