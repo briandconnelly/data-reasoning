@@ -58,17 +58,17 @@ def extract_section(text: str, heading: str) -> str:
     fenced = False
     commented = False
     for i, line in enumerate(lines):
+        if line.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
         if commented:
             if "-->" in line:
                 commented = False
             continue
         if "<!--" in line and "-->" not in line:
             commented = True
-            continue
-        if line.startswith("```"):
-            fenced = not fenced
-            continue
-        if fenced:
             continue
         if start is None:
             if line == heading:

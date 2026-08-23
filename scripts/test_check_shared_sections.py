@@ -149,3 +149,11 @@ def test_commented_out_heading_is_not_found():
     text = f"# Skill\n\n<!--\n{heading}\n\nhidden\n-->\n\n## Other\n\nvisible\n"
     with pytest.raises(ValueError, match="heading not found"):
         css.extract_section(text, heading)
+
+
+def test_comment_opener_inside_a_fence_does_not_hide_a_later_section():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n```\n<!--\n```\n\n{heading}\n\nvisible rule\n\n## Other\n\nx\n"
+    block = css.extract_section(text, heading)
+    assert block.startswith(heading + "\n")
+    assert "visible rule" in block
