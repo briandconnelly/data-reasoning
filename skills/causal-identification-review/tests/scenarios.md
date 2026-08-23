@@ -416,7 +416,9 @@ As of this preregistration (2026-08-08), zero arms have run for any of CS1–CS7
 Every fixture property, entanglement-neutralizing fact, and documented ground-truth disposition or bound above rests on argument alone, pending Task 2.2's generators and validators, Task 3's `SKILL.md` and template, and Phase 4's design review, canary arms, and scored arms.
 Nothing in this file is evidence; it is the contract the evidence will be measured against.
 
-**Update (2026-08-09): measurement wave 1 scored.** *(Superseded 2026-08-22: the same-day addendum under § "Global verdict table" reopened CS4 and CS7 as "redesign and re-measure" and made their fresh arms a precondition for calling the wave complete; the wave is scored, not complete, until those arms run.)*
+**Update (2026-08-09): measurement wave 1 scored.**
+*Superseded 2026-08-22: the same-day addendum under § "Global verdict table" reopened CS4 and CS7 as "Redesign and re-measure" and made their fresh arms a precondition for calling the wave complete.*
+*The wave is scored, not complete, until those arms run.*
 Every cell above (CS1–CS7 and the four HDA seam cells) now has one scored arm per role: run records in `tests/runs/2026-08-09-*.md`, evidence in `tests/runs/artifacts/2026-08-09-measurement-wave-1-evidence.md`, and the verdict-table resolution in § "Global verdict table" above.
 Every figure is n=1 per cell — one arm per role, one model (Sonnet), one day — so nothing here bounds variance; treat totals as existence results, not rates.
 The canary set (`canary-*` transcripts, one per cell plus `canary-s12b`) and the superseded first-wave CS4/CS7 arms (`sc-cs4-*`, `sc-cs7-*`, which predate the 2026-08-09 amendments and prompted them) are archived unscored in `.superpowers/sdd/2026-08-08-causal-identification-review-skill/task-4.3/`, per the amendment notes in the CS4 and CS7 sections and `PROTOCOL.md`'s canary principle.

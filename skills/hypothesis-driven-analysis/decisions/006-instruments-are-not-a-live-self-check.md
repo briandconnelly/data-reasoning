@@ -52,7 +52,11 @@ Live enforcement arrived as a plugin PostToolUse hook (`hooks/hooks.json`) rathe
 Per this record's constraint, the hook reports an unavailable validator on a record file as "not validated" via the same feedback channel as findings, never as a silent pass.)*
 
 *(Extended 2026-08-22: the 2026-08-18 extension called the hook "harness configuration, not agent-read prose".
-That is true of `hooks/hooks.json` and false of the hook's output: every finding is printed to the agent's context with an instruction ("Fix the record; closed vocabularies live in the owning SKILL.md"), so the wording of `hooks/check_record_hook.py`'s messages is agent-read prose by the Iron Law's own test — a reader's behavior can depend on it.
+That is true of `hooks/hooks.json` and false of the hook's output: every finding is printed to the agent's context, so the wording of `hooks/check_record_hook.py`'s messages is agent-read prose by the Iron Law's own test — a reader's behavior can depend on it.
 The obligation it owes is the one `decisions/001` scopes: a measured arm for any cell whose decision point a hook message can reach.
-No such arm has run.
-Until one does, treat the hook's effect on record-writing behavior as unmeasured, and keep its messages to structural facts plus a pointer, never a procedural instruction.)*
+No such arm has run.)*
+
+## Rules this record adds (2026-08-22)
+
+- Treat the hook's effect on record-writing behavior as unmeasured until an arm under `decisions/001` has run.
+- A hook message states structural facts and a pointer to the owning authority; it carries no procedural instruction.
