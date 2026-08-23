@@ -64,6 +64,11 @@ VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
 # record content, not a template blank, so it is excluded too. Residual:
 # `<q and r>` with a letter-initial inequality still reads as a placeholder.
 PLACEHOLDER = re.compile(r"<([A-Za-z][^<>\n=]*)>")
+# A CommonMark URI autolink is a scheme (RFC 3986: a letter, then letters,
+# digits, `+`, `.` or `-`) followed by `:` -- `tel:`, `urn:` and `news:` as
+# much as `https:`. Matching the scheme grammar rather than a list of schemes
+# keeps a real autolink from reading as a template blank.
+AUTOLINK_SCHEME = re.compile(r"[A-Za-z][A-Za-z0-9+.\-]*:")
 # The WHATWG element index as of 2026-08. HTML is a living vocabulary, so
 # this set is maintained, not complete for all time: a tag outside it reads
 # as a template placeholder, and one placeholder marks the whole record in
@@ -192,7 +197,7 @@ def _has_placeholder(value: str) -> bool:
         inner = m.group(1).strip().rstrip("/").strip().lower()
         if inner in HTML_TAGS:
             continue
-        if "://" in inner or "@" in inner or inner.startswith(("http", "mailto:")):
+        if AUTOLINK_SCHEME.match(inner) or "@" in inner:
             continue
         return True
     return False
@@ -451,7 +456,7 @@ def _bullet_slot_values(body: str):
     sits in; a table cell (e.g. an Evidence column noting evidence is still
     pending for one row) is ordinary content, not a record-wide marker."""
     for line in body.split("\n")[1:]:
-        stripped = line.strip()
+        stripped = _unemphasize(line.strip())
         if stripped.startswith("- ") and ":" in stripped:
             yield stripped.split(":", 1)[1]
 

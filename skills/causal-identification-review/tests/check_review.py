@@ -144,6 +144,7 @@ _ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)\s*:")
 
 _TABLE_DELIMITER = re.compile(r"^[\s|:-]+$")
 MIN_TABLE_CELLS = 2
+MIN_PROBE_ROW_CELLS = 3  # assumption, probe, result
 
 
 def _data_row_cells(line: str) -> list[str] | None:
@@ -157,6 +158,16 @@ def _data_row_cells(line: str) -> list[str] | None:
         return None
     cells = [c.strip() for c in stripped[1:-1].split("|")]
     return cells if len(cells) >= MIN_TABLE_CELLS else None
+
+
+def _row_records_a_run(cells: list[str]) -> bool:
+    """True when a probes-table row records a probe that actually ran: the
+    probe and result cells are populated and neither is a no-result marker.
+    An id on an empty or `not run` row names an assumption that was never
+    probed, which is exactly what `identified-if` claims did not happen."""
+    if len(cells) < MIN_PROBE_ROW_CELLS:
+        return False
+    return all(cell and not _NO_RESULT_PROBES.match(cell) for cell in cells[1:MIN_PROBE_ROW_CELLS])
 
 
 def _assumption_ids(body: str) -> list[str]:
@@ -397,7 +408,9 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     probed_ids = {
         cells[0]
         for line in _label_region(body, "Assumption probes").splitlines()
-        if (cells := _data_row_cells(line)) and re.fullmatch(r"A\d+", cells[0])
+        if (cells := _data_row_cells(line))
+        and re.fullmatch(r"A\d+", cells[0])
+        and _row_records_a_run(cells)
     }
     if assumption_ids and disposition_value == "identified-if":
         for aid in assumption_ids:

@@ -701,3 +701,26 @@ def test_unterminated_fence_finding_carries_no_procedural_instruction():
     fence = next(f for f in findings if "unterminated code fence" in f)
     assert "re-validate" not in fence, fence
     assert "close the fence" not in fence, fence
+
+
+def test_uri_autolinks_without_a_double_slash_are_not_placeholders():
+    """`<tel:...>` and `<urn:...>` are CommonMark autolinks, i.e. record
+    content, so they must not mark the record in progress."""
+    for link in ("<tel:+15551212>", "<urn:isbn:0451450523>", "<news:comp.lang.python>"):
+        ledger = GOOD_LEDGER.replace(
+            "## Data Validity\n\n- Collection method: exporter\n\n", ""
+        ).replace("- Answer: unresolved\n", f"- Answer: unresolved, see {link}\n")
+        findings = cr.check(ledger)
+        assert any("required section missing: ## Data Validity" in f for f in findings), link
+
+
+def test_a_template_blank_is_still_a_placeholder():
+    ledger = GOOD_LEDGER.replace("- Answer: unresolved\n", "- Answer: <the answer>\n")
+    assert cr._in_progress(cr._strip_hidden(ledger)[0])
+
+
+def test_an_emphasized_pending_slot_is_in_progress():
+    """Emphasis on a slot label is presentation, so the emphasized and plain
+    forms must reach the same verdict."""
+    assert cr._in_progress("## Conclusion\n- **Answer:** pending\n- Notes: x\n")
+    assert cr._in_progress("## Conclusion\n- *Answer*: pending\n- Notes: x\n")

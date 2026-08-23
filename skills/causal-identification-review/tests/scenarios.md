@@ -443,4 +443,5 @@ The run records in `tests/runs/2026-08-09-*.md` cite `.jsonl` transcripts by fil
 `.superpowers/` is gitignored and no transcript is tracked (`git ls-files skills/causal-identification-review/tests/runs/artifacts` lists one file).
 A reader of this repository can verify the evidence artifact's totals against the run records, and nothing further: no CIR cell is re-scorable from tracked files.
 Closing this means either tracking the transcripts (redacted as the HDA archive's are) or removing the transcript citations and saying the arms are unarchived.
-That choice is the maintainer's; until it is made, treat every CIR total as unreproducible from this repository.
+That choice is the maintainer's, and it has not been made.
+Every CIR total is therefore unreproducible from this repository as it stands.

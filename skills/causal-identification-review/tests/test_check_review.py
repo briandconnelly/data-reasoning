@@ -1104,3 +1104,29 @@ def test_a_pipe_prefixed_line_is_not_a_probe_row() -> None:
     probe requirement."""
     findings, _ = cr.check_record(PIPE_LINE_NOT_A_PROBE_ROW)
     assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+EMPTY_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n  | A2 | |\n",
+)
+NO_RESULT_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A2 | not run | none |\n",
+)
+
+
+def test_an_empty_probe_row_does_not_satisfy_the_gate() -> None:
+    findings, _ = cr.check_record(EMPTY_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_a_no_result_probe_row_does_not_satisfy_the_gate() -> None:
+    findings, _ = cr.check_record(NO_RESULT_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_a_populated_probe_row_still_satisfies_the_gate() -> None:
+    findings, _ = cr.check_record(TWO_ASSUMPTIONS_TWO_PROBES)
+    assert not any("no probe row" in f for f in findings), findings
