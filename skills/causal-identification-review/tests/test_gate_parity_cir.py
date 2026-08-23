@@ -22,24 +22,42 @@ HEADING = "### Authorization gate (always binds)"
 MIN_GATE_LENGTH = 1000
 
 
-COMMENT = re.compile(r"<!--.*?(?:-->|\Z)", re.S)
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+INLINE_COMMENT = re.compile(r"<!--.*?-->")
 
 
 def visible_text(text: str) -> str:
-    """Text an agent reads as instruction: no HTML comments, no fenced blocks."""
-    text = COMMENT.sub("", text)
+    """Text an agent reads as instruction: no fenced blocks, no HTML comments.
+    One pass tracks both states so neither can hide the other's delimiters;
+    per CommonMark a closer has nothing but whitespace after its run, `<!--`
+    inside a fence is code, and an unclosed comment runs to end of document."""
     out: list[str] = []
     fence: tuple[str, int] | None = None
+    in_comment = False
     for line in text.split("\n"):
+        if fence is not None:
+            m = FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
+                fence = None
+            continue
+        if in_comment:
+            if "-->" in line:
+                in_comment = False
+            continue
         m = FENCE.match(line)
-        if fence is None:
-            if m:
-                fence = (m.group(1)[0], len(m.group(1)))
-                continue
-            out.append(line)
-        elif m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
-            fence = None
+        if m:
+            fence = (m.group(1)[0], len(m.group(1)))
+            continue
+        visible = INLINE_COMMENT.sub("", line)
+        if "<!--" in visible:
+            visible = visible[: visible.index("<!--")]
+            in_comment = True
+        out.append(visible)
     return "\n".join(out)
 
 
@@ -98,6 +116,22 @@ def test_unclosed_comment_also_hides_the_gate():
     text = CIR_SKILL.read_text(encoding="utf-8")
     block = gate_block(CIR_SKILL)
     disabled = text.replace(block, "<!--\n" + block)
+    assert disabled != text
+    with pytest.raises(ValueError):  # noqa: PT011
+        gate_block_from_text(disabled)
+
+
+def test_comment_opener_inside_a_fence_does_not_hide_the_gate():
+    text = CIR_SKILL.read_text(encoding="utf-8")
+    block = gate_block(CIR_SKILL)
+    decoy = "```text\n<!--\n```\n\n"
+    assert gate_block_from_text(decoy + text) == block
+
+
+def test_fence_closer_with_info_string_keeps_the_fence_open():
+    text = CIR_SKILL.read_text(encoding="utf-8")
+    block = gate_block(CIR_SKILL)
+    disabled = text.replace(block, "```text\n```python\n" + block + "\n```")
     assert disabled != text
     with pytest.raises(ValueError):  # noqa: PT011
         gate_block_from_text(disabled)
