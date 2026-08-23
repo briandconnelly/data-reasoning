@@ -157,3 +157,17 @@ def test_comment_opener_inside_a_fence_does_not_hide_a_later_section():
     block = css.extract_section(text, heading)
     assert block.startswith(heading + "\n")
     assert "visible rule" in block
+
+
+def test_tilde_fenced_heading_is_not_found():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n~~~\n{heading}\n\nfenced, not live\n~~~\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_a_shorter_backtick_run_does_not_close_a_longer_fence():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n````\n```\n{heading}\n\nfenced, not live\n````\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)

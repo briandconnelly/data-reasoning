@@ -47,6 +47,8 @@ TARGETS = [
 
 DECISION = "skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md"
 
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+
 
 def extract_section(text: str, heading: str) -> str:
     """Return the exact byte slice from `heading` to the next same-or-higher
@@ -55,17 +57,30 @@ def extract_section(text: str, heading: str) -> str:
     level = len(heading) - len(heading.lstrip("#"))
     boundary = re.compile(rf"^#{{1,{level}}} ")
     start = None
-    fenced = False
+    fence: tuple[str, int] | None = None
     commented = False
     for i, line in enumerate(lines):
-        if line.startswith("```"):
-            fenced = not fenced
-            continue
-        if fenced:
+        # One pass tracks both hidden-text states so neither can hide the
+        # other's delimiters. Per CommonMark a fence closes only on a run of
+        # the same character at least as long as the opener with nothing but
+        # whitespace after it, and `<!--` inside a fence is code.
+        if fence is not None:
+            m = FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
+                fence = None
             continue
         if commented:
             if "-->" in line:
                 commented = False
+            continue
+        m = FENCE.match(line)
+        if m:
+            fence = (m.group(1)[0], len(m.group(1)))
             continue
         if "<!--" in line and "-->" not in line:
             commented = True
