@@ -64,34 +64,125 @@ VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
 # record content, not a template blank, so it is excluded too. Residual:
 # `<q and r>` with a letter-initial inequality still reads as a placeholder.
 PLACEHOLDER = re.compile(r"<([A-Za-z][^<>\n=]*)>")
+# The WHATWG element index as of 2026-08. HTML is a living vocabulary, so
+# this set is maintained, not complete for all time: a tag outside it reads
+# as a template placeholder, and one placeholder marks the whole record in
+# progress, so an omission here suppresses every completeness finding.
 HTML_TAGS = frozenset(
     {
         "a",
+        "abbr",
+        "address",
+        "area",
+        "article",
+        "aside",
+        "audio",
         "b",
+        "base",
+        "bdi",
+        "bdo",
+        "blockquote",
+        "body",
         "br",
+        "button",
+        "canvas",
+        "caption",
+        "cite",
         "code",
+        "col",
+        "colgroup",
+        "data",
+        "datalist",
+        "dd",
+        "del",
         "details",
+        "dfn",
+        "dialog",
         "div",
+        "dl",
+        "dt",
         "em",
+        "embed",
+        "fieldset",
+        "figcaption",
+        "figure",
+        "footer",
+        "form",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "head",
+        "header",
+        "hgroup",
         "hr",
+        "html",
         "i",
+        "iframe",
         "img",
+        "input",
+        "ins",
         "kbd",
+        "label",
+        "legend",
         "li",
+        "link",
+        "main",
+        "map",
+        "mark",
+        "menu",
+        "meta",
+        "meter",
+        "nav",
+        "noscript",
+        "object",
         "ol",
+        "optgroup",
+        "option",
+        "output",
         "p",
+        "picture",
         "pre",
+        "progress",
+        "q",
+        "rp",
+        "rt",
+        "ruby",
+        "s",
+        "samp",
+        "script",
+        "search",
+        "section",
+        "select",
+        "selectedcontent",
+        "slot",
+        "small",
+        "source",
         "span",
         "strong",
+        "style",
         "sub",
         "summary",
         "sup",
         "table",
+        "tbody",
         "td",
+        "template",
+        "textarea",
+        "tfoot",
         "th",
+        "thead",
+        "time",
+        "title",
         "tr",
+        "track",
         "u",
         "ul",
+        "var",
+        "video",
+        "wbr",
     }
 )
 
@@ -184,13 +275,49 @@ def _unemphasize(line: str) -> str:
     return LABEL_EMPHASIS.sub(lambda m: f"- {m.group(2)}: ", line, count=1)
 
 
-CODE_SPAN = re.compile(r"(`+)(?:(?!\1)[^\n])+?\1")
+BACKTICK_RUN = re.compile(r"`+")
+
+
+def _escaped(line: str, index: int) -> bool:
+    """True when the character at `index` is backslash-escaped, i.e. preceded
+    by an odd number of backslashes."""
+    slashes = 0
+    while index - slashes - 1 >= 0 and line[index - slashes - 1] == "\\":
+        slashes += 1
+    return slashes % 2 == 1
 
 
 def _mask_code_pipes(line: str) -> str:
     """Hide `|` inside inline code spans from the cell splitter; `_unmask`
-    restores it inside the cell."""
-    return CODE_SPAN.sub(lambda m: m.group(0).replace("|", "\x00"), line)
+    restores it inside the cell. Per CommonMark a code span closes on a
+    backtick run of exactly the opener's length, so runs are paired at equal
+    length -- a longer run inside a span is content, not a delimiter. A
+    backslash-escaped backtick outside a span is literal text and cannot open
+    one; inside an open span a backslash is ordinary content, so only opener
+    candidates are escape-checked."""
+    runs = [(m.start(), m.end()) for m in BACKTICK_RUN.finditer(line)]
+    out = list(line)
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        # an escaped leading backtick is literal, so it does not count toward
+        # the opening run
+        opener = start + 1 if _escaped(line, start) else start
+        width = end - opener
+        if width <= 0:
+            i += 1
+            continue
+        for j in range(i + 1, len(runs)):
+            nxt_start, nxt_end = runs[j]
+            if nxt_end - nxt_start == width:
+                for k in range(end, nxt_start):
+                    if out[k] == "|":
+                        out[k] = "\x00"
+                i = j + 1
+                break
+        else:
+            i += 1
+    return "".join(out)
 
 
 def _unmask(cell: str) -> str:

@@ -625,3 +625,52 @@ def test_spaced_hyphen_annotation_is_still_in_progress():
         "- Answer: unresolved\n", "- Answer: pending - waiting on export\n"
     )
     assert cr._in_progress(cr._strip_hidden(ledger)[0])
+
+
+def test_html_block_tags_are_not_template_placeholders():
+    """An HTML tag outside the allowlist read as a placeholder marks the whole
+    record in progress and suppresses every completeness finding."""
+    for tag in ("<section>", "<blockquote>", "<h1>", "<figure>", "<aside>"):
+        ledger = GOOD_LEDGER.replace(
+            "## Data Validity\n\n- Collection method: exporter\n\n", ""
+        ).replace("- Answer: unresolved\n", f"- Answer: unresolved {tag} see above\n")
+        findings = cr.check(ledger)
+        assert any("required section missing: ## Data Validity" in f for f in findings), tag
+
+
+def test_a_real_template_placeholder_is_still_in_progress():
+    ledger = GOOD_LEDGER.replace("- Answer: unresolved\n", "- Answer: <the answer>\n")
+    assert cr._in_progress(cr._strip_hidden(ledger)[0])
+
+
+def test_code_span_runs_pair_only_at_equal_length():
+    """Per CommonMark a code span closes on a run of exactly the opener's
+    length, so a longer run inside a span is content, not a delimiter."""
+    # the span is "x ``` y | z": its pipe is hidden, the three real cell
+    # separators outside it are untouched.
+    masked = cr._mask_code_pipes("| a `x ``` y | z` b | c |")
+    assert masked == "| a `x ``` y \x00 z` b | c |", masked
+
+
+def test_unpaired_backtick_runs_do_not_hide_a_cell_separator():
+    """A 1-backtick opener closes only on a 1-backtick run, so the trailing
+    2-run below opens nothing and the pipe is a real cell separator. The
+    previous regex paired the runs anyway and masked it, shifting every
+    column after it -- the validator then read the wrong cell for Outcome."""
+    row = "| T1 | H1 | pattern `a|b`` c | window compare | CONSISTENT | S1 |"
+    assert cr._mask_code_pipes(row) == row
+
+
+def test_escaped_backticks_do_not_hide_a_cell_separator():
+    """CommonMark treats a backslash-escaped backtick outside a code span as
+    literal text, so it opens nothing and the pipe stays a real separator."""
+    row = "| a \\` literal | b \\` c | d |"
+    assert cr._mask_code_pipes(row) == row
+
+
+def test_selectedcontent_is_not_a_template_placeholder():
+    ledger = GOOD_LEDGER.replace(
+        "## Data Validity\n\n- Collection method: exporter\n\n", ""
+    ).replace("- Answer: unresolved\n", "- Answer: unresolved <selectedcontent> x\n")
+    findings = cr.check(ledger)
+    assert any("required section missing: ## Data Validity" in f for f in findings), findings
