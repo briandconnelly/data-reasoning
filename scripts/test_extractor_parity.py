@@ -20,6 +20,7 @@ EXTRACTORS = (
     SKILLS / "causal-identification-review" / "tests" / "test_gate_parity_cir.py",
 )
 # the shared region: the code-span helpers through the end of visible_text
+MIN_REGION_LINES = 50
 REGION = re.compile(
     r"^BACKTICK_RUN = re\.compile.*?^def visible_text.*?(?=^def gate_block_from_text)",
     re.S | re.M,
@@ -46,4 +47,4 @@ def test_the_region_is_not_trivially_empty():
         region = shared_region(path)
         assert "code_span_interiors" in region, path.name
         assert "def visible_text" in region, path.name
-        assert len(region.splitlines()) > 50, path.name
+        assert len(region.splitlines()) > MIN_REGION_LINES, path.name
