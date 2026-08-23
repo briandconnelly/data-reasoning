@@ -59,4 +59,5 @@ No such arm has run.)*
 ## Rules this record adds (2026-08-22)
 
 - Treat the hook's effect on record-writing behavior as unmeasured until an arm under `decisions/001` has run.
-- A hook message states structural facts and a pointer to the owning authority; it carries no procedural instruction.
+- A hook message states structural facts and a pointer to the owning authority.
+- A hook message carries no procedural instruction.
