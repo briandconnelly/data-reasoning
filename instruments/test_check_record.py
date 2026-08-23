@@ -574,3 +574,54 @@ def test_unreadable_file_reports_with_the_prefix_the_hook_keys_on(tmp_path, caps
     rc = cr.main([str(tmp_path / "missing.md")])
     assert rc == 2  # noqa: PLR2004 -- 2 is the validator's documented exit code
     assert capsys.readouterr().err.startswith("unreadable")
+
+
+# --------------------------------------------------------------------------- #
+# Copilot review 2026-08-23: the slot-level pending marker matched any value
+# merely *starting* with the word, so ordinary prose in a filled slot
+# suppressed every completeness finding for the record.
+# --------------------------------------------------------------------------- #
+def test_prose_in_a_bullet_slot_beginning_with_pending_does_not_suppress():
+    ledger = GOOD_LEDGER.replace(
+        "## Data Validity\n\n- Collection method: exporter\n\n", ""
+    ).replace(
+        "- Answer: unresolved\n",
+        "- Answer: Pending replication by another team, the result remains valid\n",
+    )
+    assert "## Data Validity" not in ledger
+    findings = cr.check(ledger)
+    assert any("required section missing: ## Data Validity" in f for f in findings), findings
+
+
+def test_a_bullet_slot_that_says_only_pending_is_still_in_progress():
+    ledger = GOOD_LEDGER.replace("- Answer: unresolved\n", "- Answer: pending\n")
+    assert cr._in_progress(cr._strip_hidden(ledger)[0])
+
+
+def test_emphasized_label_without_a_colon_is_not_a_slot():
+    findings = cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict** worth-it\n")
+    assert findings, "a label with no colon delimiter must not satisfy the slot check"
+
+
+def test_disposition_error_lists_none_as_accepted():
+    findings = cr.check(REVIEW_SKELETON.format(route="review", disp="certified"))
+    msg = next(f for f in findings if "does not begin with a value" in f)
+    assert "none" in msg, msg
+
+
+def test_hyphenated_prose_beginning_with_pending_does_not_suppress():
+    """`pending-state` is one hyphenated word, not the marker plus an
+    annotation, so it must not suspend the completeness checks."""
+    for value in ("pending-state evaluation is complete", "pending-data analysis found no gaps"):
+        ledger = GOOD_LEDGER.replace(
+            "## Data Validity\n\n- Collection method: exporter\n\n", ""
+        ).replace("- Answer: unresolved\n", f"- Answer: {value}\n")
+        findings = cr.check(ledger)
+        assert any("required section missing: ## Data Validity" in f for f in findings), value
+
+
+def test_spaced_hyphen_annotation_is_still_in_progress():
+    ledger = GOOD_LEDGER.replace(
+        "- Answer: unresolved\n", "- Answer: pending - waiting on export\n"
+    )
+    assert cr._in_progress(cr._strip_hidden(ledger)[0])

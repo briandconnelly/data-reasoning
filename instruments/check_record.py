@@ -110,7 +110,14 @@ def _has_placeholder(value: str) -> bool:
 # A slot value, or a required section's whole content, that says it is
 # pending is the sanctioned plan-stage state: the skills write the record
 # before the analysis fills it.
-PENDING = re.compile(r"^\(?\s*pending\b", re.I)
+# "pending" states the slot is unfilled; it is the whole value, optionally
+# followed by an annotation introduced by a delimiter ("pending — waiting
+# on the export"); an ASCII dash must be whitespace-delimited so the
+# hyphenated word "pending-state" is not read as marker plus annotation.
+# Prose that merely opens with the word ("Pending replication by another
+# team, the result stands") is a filled slot and must not suspend the
+# completeness checks.
+PENDING = re.compile(r"^\(?\s*pending(?:\s*[)\u2014\u2013:;]|\s+-{1,2}(?=\s|\Z)|\s*\Z)", re.I)
 # The section-level marker must be the canonical parenthesized form (e.g.
 # "(pending -- to be completed after Analysis)"), not merely a passage that
 # happens to start with the word: a table cell or a sentence of ordinary
@@ -165,7 +172,10 @@ def _strip_hidden(text: str) -> tuple[str, bool]:
     return "\n".join(out), fence is not None
 
 
-LABEL_EMPHASIS = re.compile(r"^- (\*\*|__|\*|_)([^*_:\n]+?)(:?)\1:?\s*")
+# The colon must be present, either inside the emphasis ("**Verdict:**") or
+# immediately after it ("**Verdict**:"). Without it the line has no label
+# delimiter and is not a slot.
+LABEL_EMPHASIS = re.compile(r"^- (\*\*|__|\*|_)([^*_:\n]+?)(?::\1|\1:)\s*")
 
 
 def _unemphasize(line: str) -> str:
@@ -409,7 +419,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                 if _leading_token(value, DISPOSITIONS | {"none"}) is None:
                     findings.append(
                         f"disposition {_normalize(value)!r} does not begin with a value "
-                        f"from the closed set {sorted(DISPOSITIONS)} — 'valid' and "
+                        f"from the closed set {sorted(DISPOSITIONS | {'none'})} — 'valid' and "
                         f"'certified' are not dispositions"
                     )
             if stripped.startswith("- Route:"):
