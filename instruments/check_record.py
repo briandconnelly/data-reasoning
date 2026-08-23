@@ -195,7 +195,9 @@ HTML_TAGS = frozenset(
 def _has_placeholder(value: str) -> bool:
     for m in PLACEHOLDER.finditer(value):
         inner = m.group(1).strip().rstrip("/").strip().lower()
-        if inner in HTML_TAGS:
+        # a boolean attribute carries no `=` ("<details open>"), so compare
+        # the tag name rather than the whole span
+        if inner.split(" ", 1)[0] in HTML_TAGS:
             continue
         if AUTOLINK_SCHEME.match(inner) or "@" in inner:
             continue
@@ -228,6 +230,12 @@ CELL_SPLIT = re.compile(r"(?<!\\)\|")
 INLINE_COMMENT = re.compile(r"<!--.*?-->")
 
 
+def _opens_fence(line: str, m) -> bool:
+    """A fence opener's info string may not contain a backtick when the fence
+    is made of backticks (CommonMark): such a line is ordinary text."""
+    return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
+
+
 def _strip_hidden(text: str) -> tuple[str, bool]:
     """Blank out what a reader never sees — fenced code blocks and HTML
     comments — in one pass, so the two cannot hide each other's delimiters.
@@ -256,7 +264,7 @@ def _strip_hidden(text: str) -> tuple[str, bool]:
                 in_comment = False
             continue
         m = FENCE.match(line)
-        if m:
+        if m and _opens_fence(line, m):
             fence = (m.group(1)[0], len(m.group(1)))
             out.append("")
             continue

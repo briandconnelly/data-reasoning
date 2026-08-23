@@ -181,3 +181,19 @@ def test_comment_delimiter_inside_inline_code_does_not_hide_a_section():
     block = css.extract_section(text, heading)
     assert block.startswith(heading + "\n")
     assert "real rule" in block
+
+
+def test_escaped_backticks_do_not_shield_a_comment_opener():
+    """Both backticks are escaped, so CommonMark sees no code span and the
+    `<!--` really does open a comment that hides the section."""
+    heading = "## Data Rules"
+    text = f"# Skill\n\na \\`<!--\\` b\n\n{heading}\n\nhidden\n\n-->\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n```bad`info\n\n{heading}\n\nreal rule\n\n## Other\n\nx\n"
+    block = css.extract_section(text, heading)
+    assert "real rule" in block

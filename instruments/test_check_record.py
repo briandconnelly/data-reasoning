@@ -724,3 +724,27 @@ def test_an_emphasized_pending_slot_is_in_progress():
     forms must reach the same verdict."""
     assert cr._in_progress("## Conclusion\n- **Answer:** pending\n- Notes: x\n")
     assert cr._in_progress("## Conclusion\n- *Answer*: pending\n- Notes: x\n")
+
+
+def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
+    """CommonMark forbids a backtick in a backtick fence's info string, so
+    the line is ordinary text and the content after it stays visible."""
+    doc = "# Investigation: x\n\n## Problem\n\n```bad`info\n\n## Hypotheses\n\n- a\n"
+    visible, _ = cr._strip_hidden(doc)
+    assert "## Hypotheses" in visible, visible
+
+
+def test_a_well_formed_unclosed_fence_still_hides_what_follows():
+    doc = "# Investigation: x\n\n## Problem\n\n```python\n\n## Hypotheses\n\n- a\n"
+    visible, _ = cr._strip_hidden(doc)
+    assert "## Hypotheses" not in visible, visible
+
+
+def test_html_tags_with_boolean_attributes_are_not_placeholders():
+    """`<details open>` is a real tag; a boolean attribute carries no `=`."""
+    for tag in ("<details open>", "<td colspan>", "<input disabled>"):
+        ledger = GOOD_LEDGER.replace(
+            "## Data Validity\n\n- Collection method: exporter\n\n", ""
+        ).replace("- Answer: unresolved\n", f"- Answer: unresolved {tag}\n")
+        findings = cr.check(ledger)
+        assert any("required section missing: ## Data Validity" in f for f in findings), tag

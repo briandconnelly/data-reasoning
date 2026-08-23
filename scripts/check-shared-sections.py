@@ -51,6 +51,12 @@ FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 BACKTICK_RUN = re.compile(r"`+")
 
 
+def _opens_fence(line: str, m) -> bool:
+    """A fence opener's info string may not contain a backtick when the fence
+    is made of backticks (CommonMark): such a line is ordinary text."""
+    return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
+
+
 def _shadow(line: str) -> str:
     """`line` with inline code-span interiors blanked index-for-index, so a
     `<!--` that Markdown renders as code is not read as a comment opener.
@@ -60,7 +66,14 @@ def _shadow(line: str) -> str:
     i = 0
     while i < len(runs):
         start, end = runs[i]
-        width = end - start
+        slashes = 0
+        while start - slashes - 1 >= 0 and line[start - slashes - 1] == "\\":
+            slashes += 1
+        opener = start + 1 if slashes % 2 else start
+        width = end - opener
+        if width <= 0:
+            i += 1
+            continue
         for j in range(i + 1, len(runs)):
             nxt_start, nxt_end = runs[j]
             if nxt_end - nxt_start == width:
@@ -102,7 +115,7 @@ def extract_section(text: str, heading: str) -> str:
                 commented = False
             continue
         m = FENCE.match(line)
-        if m:
+        if m and _opens_fence(line, m):
             fence = (m.group(1)[0], len(m.group(1)))
             continue
         masked = _shadow(line)

@@ -29,6 +29,12 @@ INLINE_COMMENT = re.compile(r"<!--.*?-->")
 BACKTICK_RUN = re.compile(r"`+")
 
 
+def _opens_fence(line: str, m) -> bool:
+    """A fence opener's info string may not contain a backtick when the fence
+    is made of backticks (CommonMark): such a line is ordinary text."""
+    return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
+
+
 def code_span_interiors(line: str) -> list[tuple[int, int]]:
     """(start, end) of every inline code-span interior. Per CommonMark a span
     closes on a backtick run of exactly the opener's length, and a
@@ -105,7 +111,7 @@ def visible_text(text: str) -> str:
                 in_comment = False
             continue
         m = FENCE.match(line)
-        if m:
+        if m and _opens_fence(line, m):
             fence = (m.group(1)[0], len(m.group(1)))
             continue
         visible, opened = strip_comment(line)
@@ -196,3 +202,12 @@ def test_comment_delimiter_inside_inline_code_does_not_hide_the_gate():
     opener, so it must not blank the live gate below it."""
     text = "The token `<!--` is documented here.\n\n## Authorization\n\nGate text lives here.\n"
     assert "## Authorization" in visible_text(text)
+
+
+def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
+    """CommonMark forbids a backtick in a backtick fence's info string, so
+    the line is ordinary text and a live gate after it stays visible."""
+    text = "intro\n\n```bad`info\n\n## Authorization\n\nGate text.\n"
+    assert "## Authorization" in visible_text(text)
+    # a well-formed unclosed fence must still hide what follows
+    assert "## Authorization" not in visible_text("intro\n\n```python\n\n## Authorization\n\nG.\n")
