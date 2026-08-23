@@ -14,9 +14,11 @@ Dispositions slot reusing exactly the disposition values assigned above --
 set equality, neither fabricating nor omitting -- (or the literal ``none``
 when the record's route assigns none), an ``identified-if`` disposition
 carrying at least one assumption probe run with its result recorded (probes
-that are empty or ``none run`` reject that disposition and no other), and
-forbidden certification vocabulary (``valid``, ``certified``) absent from
-disposition slots. The
+that are empty or ``none run`` reject that disposition and no other) and,
+when assumptions carry ``A<n>`` ids, a probe row for every such id
+(free-text assumptions -- the template's default form -- are not
+individually matched to probes), and forbidden certification vocabulary
+(``valid``, ``certified``) absent from disposition slots. The
 closed-set vocabulary and its semantics are governed by
 ``../SKILL.md`` § Routing (authority) and are already fixed
 by decision -- see
@@ -114,6 +116,171 @@ _NUMERIC_ESTIMATE = re.compile(
 
 def _bullet_pattern(label: str) -> re.Pattern[str]:
     return re.compile(rf"^- {re.escape(label)}:[ \t]*(.*)$", re.MULTILINE)
+
+
+_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+_INLINE_COMMENT = re.compile(r"<!--.*?-->")
+_BACKTICK_RUN = re.compile(r"`+")
+
+
+def _code_span_interiors(line: str) -> list[tuple[int, int]]:
+    """(start, end) of every inline code-span interior. A span closes on a
+    backtick run of exactly the opener's length, and a backslash-escaped
+    backtick outside a span is literal text that opens nothing."""
+    runs = [(m.start(), m.end()) for m in _BACKTICK_RUN.finditer(line)]
+    spans: list[tuple[int, int]] = []
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        slashes = 0
+        while start - slashes - 1 >= 0 and line[start - slashes - 1] == "\\":
+            slashes += 1
+        opener = start + 1 if slashes % 2 else start
+        width = end - opener
+        if width <= 0:
+            i += 1
+            continue
+        for j in range(i + 1, len(runs)):
+            nxt_start, nxt_end = runs[j]
+            if nxt_end - nxt_start == width:
+                spans.append((end, nxt_start))
+                i = j + 1
+                break
+        else:
+            i += 1
+    return spans
+
+
+def visible_markdown(text: str) -> str:
+    """`text` with fenced blocks and HTML comments blanked, line count kept.
+    An assumption or probe row that survives only inside a comment or a
+    fenced example is documentation, not record content, and must not move
+    the disposition gate."""
+    out: list[str] = []
+    fence: tuple[str, int] | None = None
+    in_comment = False
+    for line in text.split("\n"):
+        if fence is not None:
+            m = _FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
+                fence = None
+            out.append("")
+            continue
+        if in_comment:
+            out.append("")
+            if "-->" in line:
+                in_comment = False
+            continue
+        m = _FENCE.match(line)
+        if m and not (m.group(1)[0] == "`" and "`" in line[m.end() :]):
+            fence = (m.group(1)[0], len(m.group(1)))
+            out.append("")
+            continue
+        visible = line
+        masked = list(visible)
+        for start, end in _code_span_interiors(visible):
+            for k in range(start, end):
+                masked[k] = "\x01"
+        shadow = "".join(masked)
+        for m2 in reversed(list(_INLINE_COMMENT.finditer(shadow))):
+            visible = visible[: m2.start()] + visible[m2.end() :]
+            shadow = shadow[: m2.start()] + shadow[m2.end() :]
+        opener = shadow.find("<!--")
+        if opener != -1:
+            visible = visible[:opener]
+            in_comment = True
+        out.append(visible)
+    return "\n".join(out)
+
+
+def _label_region(body: str, label: str) -> str:
+    """Raw text from ``- <label>:`` to the next top-level ``- `` bullet or
+    heading, exclusive of both. Unlike ``find_bullet``/``find_sublist``, this
+    returns the slot's content verbatim (not parsed into an inline value or a
+    stripped item list), so callers that need to regex over raw table rows or
+    raw sub-bullet lines -- rather than a presence/parsed check -- have
+    something to search."""
+    m = re.search(rf"^- {re.escape(label)}:.*$", body, re.M)
+    if m is None:
+        return ""
+    rest = body[m.end() :]
+    nxt = re.search(r"^(- [A-Z]|#{1,6} )", rest, re.M)
+    return rest if nxt is None else rest[: nxt.start()]
+
+
+# An assumption is *defined* as `A<digits>:` -- the shape every fixture and
+# the template's id convention use. Keying on the definition syntax rather
+# than on a list of item separators is what makes the scan independent of the
+# slot's shape: inline, sub-list, paragraph, and any separator between items
+# are all covered by the same rule, and a bare mention of `A1` with no colon
+# is a reference, not a definition.
+_ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)\s*:")
+
+
+_TABLE_DELIMITER = re.compile(r"^[\s|:-]+$")
+MIN_TABLE_CELLS = 2
+MIN_PROBE_ROW_CELLS = 3  # assumption, probe, result
+
+
+def _data_row_cells(line: str) -> list[str] | None:
+    """Cells of a Markdown table data row, or None when `line` is not one: a
+    row is pipe-delimited on both sides with at least two cells, and the
+    header delimiter row (`| --- | --- |`) carries no data."""
+    stripped = line.strip()
+    if not stripped.startswith("|") or not stripped.endswith("|"):
+        return None
+    if _TABLE_DELIMITER.match(stripped):
+        return None
+    inner = stripped[1:-1]
+    masked = list(inner)
+    for start, end in _code_span_interiors(inner):
+        for k in range(start, end):
+            if masked[k] == "|":
+                masked[k] = "\x00"
+    for i, ch in enumerate(inner):  # an escaped pipe is cell content
+        if ch == "|" and i and inner[i - 1] == "\\":
+            masked[i] = "\x00"
+    cells = ["".join(masked[a:b]).replace("\x00", "|").strip() for a, b in _cell_bounds(masked)]
+    return cells if len(cells) >= MIN_TABLE_CELLS else None
+
+
+def _cell_bounds(masked: list[str]) -> list[tuple[int, int]]:
+    bounds, start = [], 0
+    for i, ch in enumerate(masked):
+        if ch == "|":
+            bounds.append((start, i))
+            start = i + 1
+    bounds.append((start, len(masked)))
+    return bounds
+
+
+def _row_records_a_run(cells: list[str]) -> bool:
+    """True when a probes-table row records a probe that actually ran: the
+    probe and result cells are populated and neither is a no-result marker.
+    An id on an empty or `not run` row names an assumption that was never
+    probed, which is exactly what `identified-if` claims did not happen."""
+    if len(cells) < MIN_PROBE_ROW_CELLS:
+        return False
+    return all(cell and not _NO_RESULT_PROBES.match(cell) for cell in cells[1:MIN_PROBE_ROW_CELLS])
+
+
+def _assumption_ids(body: str) -> list[str]:
+    """Assumption ids defined in the ``- Identifying assumptions:`` slot.
+
+    Scans the inline value on the label line together with the raw region
+    below it, so every shape the slot is accepted in is covered without
+    enumerating separators.
+    """
+    m = re.search(r"^- Identifying assumptions:(.*)$", body, re.M)
+    if m is None:
+        return []
+    slot = m.group(1) + "\n" + _label_region(visible_markdown(body), "Identifying assumptions")
+    return list(dict.fromkeys(d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)))
 
 
 def find_bullet(body: str, label: str) -> str | None:
@@ -327,6 +494,30 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
             "least one assumption probe run with its result recorded -- the "
             "probes slot is empty or records no run result ('none', 'none run')"
         )
+    # identified-if claims every *named* assumption was probed (SKILL.md's
+    # per-route procedure), not merely that some probe ran. Match assumption
+    # ids (`A1`, `A2`, ...) named in the slot against the probes table's
+    # first column -- this only fires when the record uses the `A<digits>`
+    # id convention; the template's free-text assumption form (no ids)
+    # never trips it.
+    assumption_ids = _assumption_ids(body)
+    # Only a structurally valid data row counts: a line that merely starts
+    # with a pipe ("| A2 not run") is not a table row, and must not satisfy
+    # the probe requirement it appears to.
+    probed_ids = {
+        cells[0]
+        for line in _label_region(visible_markdown(body), "Assumption probes").splitlines()
+        if (cells := _data_row_cells(line))
+        and re.fullmatch(r"A\d+", cells[0])
+        and _row_records_a_run(cells)
+    }
+    if assumption_ids and disposition_value == "identified-if":
+        for aid in assumption_ids:
+            if aid not in probed_ids:
+                findings.append(
+                    f"Design block ({header!r}): assumption {aid} has no probe row, "
+                    "so identified-if is not available"
+                )
     return disposition_value if disposition_value in DISPOSITIONS else None
 
 

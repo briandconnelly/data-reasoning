@@ -1,7 +1,7 @@
 # Test Scenarios for exploratory-data-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each behavior scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status: authored only — no arm has run, and nothing below is a result.**
+**Status: behavior scenarios below are authored only — no behavior arm has run, and nothing below is a result; the shipped description's measured arms are the 2026-08-15 widening wave in `tests/runs/artifacts/2026-08-15-widening/`, governed by its own preregistration, and the 2026-08-11 trigger arms in `tests/runs/` measured the pre-C3 description under their own preregistration — neither is governed by this file.**
 The E1 fixture exists and is validated (`skills/hypothesis-driven-analysis/tests/fixtures/s5b-seam/`); every other fixture named here is still to be generated.
 Every "Expected" and "Fixture" line is a preregistration; generating fixtures deterministically and running arms is the recorded follow-up, and a fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.

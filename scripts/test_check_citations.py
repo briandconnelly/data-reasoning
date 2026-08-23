@@ -258,3 +258,18 @@ class TestDecisionAnalysisScope:
         path.write_text(f'SKILL.md\'s "{SENTENCE}" governs this catalog.\n')
         assert cc.in_scope(path)
         assert cc.check(path) == []
+
+
+def test_repo_local_citation_to_a_missing_file_is_a_violation(repo):
+    path = write(
+        repo,
+        'nonexistent-file.md says "An absent record does not by itself establish '
+        'the absence of the event."\n',
+    )
+    violations = cc.check(path)
+    assert any("nonexistent-file.md" in v and "does not resolve" in v for v in violations)
+
+
+def test_unresolved_name_without_an_attributed_quote_is_left_alone(repo):
+    path = write(repo, "See nonexistent-file.md for the background; nothing is quoted here.\n")
+    assert cc.check(path) == []

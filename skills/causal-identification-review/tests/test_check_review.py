@@ -950,3 +950,219 @@ def test_main_exits_nonzero_on_gate_failure(tmp_path: Path) -> None:
 def test_main_fails_closed_on_unreadable_file(tmp_path: Path) -> None:
     missing = tmp_path / "does-not-exist.md"
     assert cr.main([str(missing)]) == cr.EXIT_UNVERIFIABLE
+
+
+# --------------------------------------------------------------------------- #
+# identified-if requires a probe row for every named assumption (spec B6) --
+# the probes-run gate above only checks that *some* probe ran, so a Design
+# block naming assumptions A1 and A2 but probing only A1 still passed with
+# `identified-if`, claiming probe support for an assumption never probed.
+# The rule keys on the `A<digits>` id convention only -- the template's
+# free-text assumption form (no ids) never trips it.
+# --------------------------------------------------------------------------- #
+TWO_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions:\n  - A1: pre-period exists\n  - A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(TWO_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+TWO_ASSUMPTIONS_TWO_PROBES = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A2 | rollout-date placebo check | no break at the placebo date |\n",
+)
+
+
+def test_identified_if_with_every_assumption_probed_passes() -> None:
+    findings, _ = cr.check_record(TWO_ASSUMPTIONS_TWO_PROBES)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+# --------------------------------------------------------------------------- #
+# Copilot review 2026-08-23: assumption ids were read only from sub-bullets,
+# but the checker also accepts inline slot content, so an inline assumption
+# list let `identified-if` through with no probe row.
+# --------------------------------------------------------------------------- #
+INLINE_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions: A1: pre-period exists; A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_inline_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(INLINE_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+# The slot is also accepted as a prose paragraph, whose lines `find_bullet`
+# joins with spaces -- so an id-per-line paragraph must still yield every id.
+PARAGRAPH_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions:\n  A1: pre-period exists\n  A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_paragraph_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(PARAGRAPH_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+# A comma is as plausible an inline separator as a semicolon, and the slot
+# takes free-form inline content, so it must not hide a named assumption.
+COMMA_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions: A1: pre-period exists, A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_comma_inline_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(COMMA_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_prose_comma_clause_naming_an_id_is_not_a_named_assumption() -> None:
+    """Splitting on commas must not turn a mid-sentence mention into an id."""
+    record = VALID_RECORD.replace(
+        _ASSUMPTIONS_BLOCK,
+        "- Identifying assumptions: parallel trends hold, as argued in A1 of the prior ledger\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+# Separator-driven parsing could neither see a conjunction-joined definition
+# nor tell a definition from a reference. Ids are keyed on the `A<n>:`
+# definition syntax instead, so neither shape depends on a separator list.
+CONJUNCTION_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions: A1: pre-period exists, and A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_a_conjunction_joined_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(CONJUNCTION_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_an_id_referenced_without_a_definition_is_not_a_named_assumption() -> None:
+    record = VALID_RECORD.replace(
+        _ASSUMPTIONS_BLOCK,
+        "- Identifying assumptions: no spillovers, A1 from the prior ledger provides detail\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+PIPE_LINE_NOT_A_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n  | A2 not run\n",
+)
+
+
+def test_a_pipe_prefixed_line_is_not_a_probe_row() -> None:
+    """`| A2 not run` is not a table row, so it cannot satisfy the per-id
+    probe requirement."""
+    findings, _ = cr.check_record(PIPE_LINE_NOT_A_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+EMPTY_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n  | A2 | |\n",
+)
+NO_RESULT_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A2 | not run | none |\n",
+)
+
+
+def test_an_empty_probe_row_does_not_satisfy_the_gate() -> None:
+    findings, _ = cr.check_record(EMPTY_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_a_no_result_probe_row_does_not_satisfy_the_gate() -> None:
+    findings, _ = cr.check_record(NO_RESULT_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+def test_a_populated_probe_row_still_satisfies_the_gate() -> None:
+    findings, _ = cr.check_record(TWO_ASSUMPTIONS_TWO_PROBES)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+HIDDEN_ASSUMPTION = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "- Identifying assumptions:\n  - A1: pre-period exists\n  - A2: no concurrent rollout\n",
+    "- Identifying assumptions:\n  - A1: pre-period exists\n<!--\n  - A2: dropped in review\n-->\n",
+)
+
+
+def test_an_assumption_only_in_a_comment_is_not_a_named_assumption() -> None:
+    findings, _ = cr.check_record(HIDDEN_ASSUMPTION)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+HIDDEN_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  <!--\n  | A2 | notional probe | notional result |\n  -->\n",
+)
+
+
+def test_a_probe_row_only_in_a_comment_does_not_satisfy_the_gate() -> None:
+    findings, _ = cr.check_record(HIDDEN_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+ESCAPED_PIPE_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A2 | compare a \\| b | not run |\n",
+)
+
+
+def test_an_escaped_pipe_does_not_shift_the_result_cell() -> None:
+    """The escaped pipe is cell content, so the result cell is `not run`."""
+    findings, _ = cr.check_record(ESCAPED_PIPE_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings

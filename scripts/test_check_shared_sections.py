@@ -142,3 +142,58 @@ def test_boundary_blank_line_drift_fails_run(tmp_path):
 
 def test_clean_repo_passes():
     assert css.run(REPO, update=frozenset()) == 0
+
+
+def test_commented_out_heading_is_not_found():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n<!--\n{heading}\n\nhidden\n-->\n\n## Other\n\nvisible\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_comment_opener_inside_a_fence_does_not_hide_a_later_section():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n```\n<!--\n```\n\n{heading}\n\nvisible rule\n\n## Other\n\nx\n"
+    block = css.extract_section(text, heading)
+    assert block.startswith(heading + "\n")
+    assert "visible rule" in block
+
+
+def test_tilde_fenced_heading_is_not_found():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n~~~\n{heading}\n\nfenced, not live\n~~~\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_a_shorter_backtick_run_does_not_close_a_longer_fence():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n````\n```\n{heading}\n\nfenced, not live\n````\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_comment_delimiter_inside_inline_code_does_not_hide_a_section():
+    heading = "## Data Rules"
+    text = (
+        f"# Skill\n\nThe token `<!--` is documented.\n\n{heading}\n\nreal rule\n\n## Other\n\nx\n"
+    )
+    block = css.extract_section(text, heading)
+    assert block.startswith(heading + "\n")
+    assert "real rule" in block
+
+
+def test_escaped_backticks_do_not_shield_a_comment_opener():
+    """Both backticks are escaped, so CommonMark sees no code span and the
+    `<!--` really does open a comment that hides the section."""
+    heading = "## Data Rules"
+    text = f"# Skill\n\na \\`<!--\\` b\n\n{heading}\n\nhidden\n\n-->\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n```bad`info\n\n{heading}\n\nreal rule\n\n## Other\n\nx\n"
+    block = css.extract_section(text, heading)
+    assert "real rule" in block

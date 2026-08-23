@@ -47,6 +47,44 @@ TARGETS = [
 
 DECISION = "skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md"
 
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+BACKTICK_RUN = re.compile(r"`+")
+
+
+def _opens_fence(line: str, m) -> bool:
+    """A fence opener's info string may not contain a backtick when the fence
+    is made of backticks (CommonMark): such a line is ordinary text."""
+    return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
+
+
+def _shadow(line: str) -> str:
+    """`line` with inline code-span interiors blanked index-for-index, so a
+    `<!--` that Markdown renders as code is not read as a comment opener.
+    Per CommonMark a span closes on a run of exactly the opener's length."""
+    runs = [(m.start(), m.end()) for m in BACKTICK_RUN.finditer(line)]
+    out = list(line)
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        slashes = 0
+        while start - slashes - 1 >= 0 and line[start - slashes - 1] == "\\":
+            slashes += 1
+        opener = start + 1 if slashes % 2 else start
+        width = end - opener
+        if width <= 0:
+            i += 1
+            continue
+        for j in range(i + 1, len(runs)):
+            nxt_start, nxt_end = runs[j]
+            if nxt_end - nxt_start == width:
+                for k in range(end, nxt_start):
+                    out[k] = "\x01"
+                i = j + 1
+                break
+        else:
+            i += 1
+    return "".join(out)
+
 
 def extract_section(text: str, heading: str) -> str:
     """Return the exact byte slice from `heading` to the next same-or-higher
@@ -55,12 +93,34 @@ def extract_section(text: str, heading: str) -> str:
     level = len(heading) - len(heading.lstrip("#"))
     boundary = re.compile(rf"^#{{1,{level}}} ")
     start = None
-    fenced = False
+    fence: tuple[str, int] | None = None
+    commented = False
     for i, line in enumerate(lines):
-        if line.startswith("```"):
-            fenced = not fenced
+        # One pass tracks both hidden-text states so neither can hide the
+        # other's delimiters. Per CommonMark a fence closes only on a run of
+        # the same character at least as long as the opener with nothing but
+        # whitespace after it, and `<!--` inside a fence is code.
+        if fence is not None:
+            m = FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
+                fence = None
             continue
-        if fenced:
+        if commented:
+            if "-->" in line:
+                commented = False
+            continue
+        m = FENCE.match(line)
+        if m and _opens_fence(line, m):
+            fence = (m.group(1)[0], len(m.group(1)))
+            continue
+        masked = _shadow(line)
+        if "<!--" in masked and "-->" not in masked:
+            commented = True
             continue
         if start is None:
             if line == heading:

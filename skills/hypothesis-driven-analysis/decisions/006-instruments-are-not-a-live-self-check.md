@@ -50,3 +50,14 @@ The scorer's own applicability limits are stated in `tests/score_ledger.py`'s SC
 `instruments/check_record.py` is the fixture-neutral structural validator this record adopted in principle — public, outside `tests/`, stdlib-only, with its own unit suite — checking within the scope this record already stated, plus an in-progress rule so a template skeleton mid-fill is never flagged (the shipped templates validating clean is a unit test).
 Live enforcement arrived as a plugin PostToolUse hook (`hooks/hooks.json`) rather than a SKILL.md sentence: the hook is harness configuration, not agent-read prose, so it owes no measured arms under decisions/001 — the SKILL.md pointer this record deferred remains deferred on the same terms.
 Per this record's constraint, the hook reports an unavailable validator on a record file as "not validated" via the same feedback channel as findings, never as a silent pass.)*
+
+*(Extended 2026-08-22: the 2026-08-18 extension called the hook "harness configuration, not agent-read prose".
+That is true of `hooks/hooks.json` and false of the hook's output: every finding is printed to the agent's context, so the wording of `hooks/check_record_hook.py`'s messages is agent-read prose by the Iron Law's own test — a reader's behavior can depend on it.
+The obligation it owes is the one `decisions/001` scopes: a measured arm for any cell whose decision point a hook message can reach.
+No such arm has run.)*
+
+## Rules this record adds (2026-08-22)
+
+- Treat the hook's effect on record-writing behavior as unmeasured until an arm under `decisions/001` has run.
+- A hook message must state structural facts and a pointer to the owning authority.
+- A hook message must not carry procedural instruction.

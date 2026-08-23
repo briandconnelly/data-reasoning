@@ -53,54 +53,322 @@ REQUIRED_SECTIONS = {
 STATUSES = {"REFUTED", "UNRESOLVED"}
 OUTCOMES = {"NOT_TESTED", "CONSISTENT", "CONTRADICTED", "NON_DISCRIMINATING"}
 DISPOSITIONS = {"identified-if", "assumption-contradicted", "unresolved", "not-constructible"}
+ROUTES = {"review", "construct", "bound"}
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
 
-PLACEHOLDER = re.compile(r"<[^<>\n]+>")
+# A template placeholder is `<` + a letter + text without `<`, `>`, `=` + `>`.
+# Inequalities (`< 1.5`, `<5%`) start with a space or digit; HTML attributes
+# carry `=`; bare HTML tags are excluded by name below, and a Markdown
+# autolink (`<https://...>`, `<name@example.com>`, `<mailto:...>`) is real
+# record content, not a template blank, so it is excluded too. Residual:
+# `<q and r>` with a letter-initial inequality still reads as a placeholder.
+PLACEHOLDER = re.compile(r"<([A-Za-z][^<>\n=]*)>")
+# A CommonMark URI autolink is a scheme (RFC 3986: a letter, then letters,
+# digits, `+`, `.` or `-`) followed by `:` -- `tel:`, `urn:` and `news:` as
+# much as `https:`. Matching the scheme grammar rather than a list of schemes
+# keeps a real autolink from reading as a template blank.
+AUTOLINK_SCHEME = re.compile(r"[A-Za-z][A-Za-z0-9+.\-]*:")
+# The WHATWG element index as of 2026-08. HTML is a living vocabulary, so
+# this set is maintained, not complete for all time: a tag outside it reads
+# as a template placeholder, and one placeholder marks the whole record in
+# progress, so an omission here suppresses every completeness finding.
+HTML_TAGS = frozenset(
+    {
+        "a",
+        "abbr",
+        "address",
+        "area",
+        "article",
+        "aside",
+        "audio",
+        "b",
+        "base",
+        "bdi",
+        "bdo",
+        "blockquote",
+        "body",
+        "br",
+        "button",
+        "canvas",
+        "caption",
+        "cite",
+        "code",
+        "col",
+        "colgroup",
+        "data",
+        "datalist",
+        "dd",
+        "del",
+        "details",
+        "dfn",
+        "dialog",
+        "div",
+        "dl",
+        "dt",
+        "em",
+        "embed",
+        "fieldset",
+        "figcaption",
+        "figure",
+        "footer",
+        "form",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "head",
+        "header",
+        "hgroup",
+        "hr",
+        "html",
+        "i",
+        "iframe",
+        "img",
+        "input",
+        "ins",
+        "kbd",
+        "label",
+        "legend",
+        "li",
+        "link",
+        "main",
+        "map",
+        "mark",
+        "menu",
+        "meta",
+        "meter",
+        "nav",
+        "noscript",
+        "object",
+        "ol",
+        "optgroup",
+        "option",
+        "output",
+        "p",
+        "picture",
+        "pre",
+        "progress",
+        "q",
+        "rp",
+        "rt",
+        "ruby",
+        "s",
+        "samp",
+        "script",
+        "search",
+        "section",
+        "select",
+        "selectedcontent",
+        "slot",
+        "small",
+        "source",
+        "span",
+        "strong",
+        "style",
+        "sub",
+        "summary",
+        "sup",
+        "table",
+        "tbody",
+        "td",
+        "template",
+        "textarea",
+        "tfoot",
+        "th",
+        "thead",
+        "time",
+        "title",
+        "tr",
+        "track",
+        "u",
+        "ul",
+        "var",
+        "video",
+        "wbr",
+    }
+)
+
+
+def _has_placeholder(value: str) -> bool:
+    for m in PLACEHOLDER.finditer(value):
+        inner = m.group(1).strip().rstrip("/").strip().lower()
+        # a boolean attribute carries no `=` ("<details open>"), so compare
+        # the tag name rather than the whole span
+        if inner.split(" ", 1)[0] in HTML_TAGS:
+            continue
+        if AUTOLINK_SCHEME.match(inner) or "@" in inner:
+            continue
+        return True
+    return False
+
+
+# A slot value, or a required section's whole content, that says it is
+# pending is the sanctioned plan-stage state: the skills write the record
+# before the analysis fills it.
+# "pending" states the slot is unfilled; it is the whole value, optionally
+# followed by an annotation introduced by a delimiter ("pending — waiting
+# on the export"); an ASCII dash must be whitespace-delimited so the
+# hyphenated word "pending-state" is not read as marker plus annotation.
+# Prose that merely opens with the word ("Pending replication by another
+# team, the result stands") is a filled slot and must not suspend the
+# completeness checks.
+PENDING = re.compile(r"^\(?\s*pending(?:\s*[)\u2014\u2013:;]|\s+-{1,2}(?=\s|\Z)|\s*\Z)", re.I)
+# The section-level marker must be the canonical parenthesized form (e.g.
+# "(pending -- to be completed after Analysis)"), not merely a passage that
+# happens to start with the word: a table cell or a sentence of ordinary
+# prose can start with "pending" without the section being in-progress.
+SECTION_PENDING = re.compile(r"^\(\s*pending\b.*\)\Z", re.I | re.S)
+
 DELIMITERS = (" —", " -", ";", ":", " (", ",")
 MIN_TABLE_ROWS = 2  # header + at least one data row
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 CELL_SPLIT = re.compile(r"(?<!\\)\|")
+INLINE_COMMENT = re.compile(r"<!--.*?-->")
 
 
-def _strip_fences(text: str) -> tuple[str, bool]:
-    """Blank out fenced code blocks (backtick or tilde, up to 3-space indent)
-    so quoted records and code samples are never scanned as record content.
-    Line count is preserved. Also reports whether a fence was still open at
-    EOF (an unterminated fence blanks everything after it, including any
-    genuinely-present later sections)."""
-    out = []
-    fence: tuple[str, int] | None = None  # (char, opening run length)
+def _opens_fence(line: str, m) -> bool:
+    """A fence opener's info string may not contain a backtick when the fence
+    is made of backticks (CommonMark): such a line is ordinary text."""
+    return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
+
+
+def _strip_hidden(text: str) -> tuple[str, bool]:
+    """Blank out what a reader never sees — fenced code blocks and HTML
+    comments — in one pass, so the two cannot hide each other's delimiters.
+    Line count is preserved. Per CommonMark: a fence closes only on a same-
+    character run at least as long as the opener with nothing but whitespace
+    after it; `<!--` inside a fence is code; a comment never closed runs to
+    the end of the document. Returns (body, fence_still_open_at_eof)."""
+    out: list[str] = []
+    fence: tuple[str, int] | None = None
+    in_comment = False
     for line in text.split("\n"):
-        m = FENCE.match(line)
-        if fence is None:
-            if m:
-                fence = (m.group(1)[0], len(m.group(1)))
-                out.append("")
-                continue
-            out.append(line)
-        else:
-            # CommonMark: a closer is the same character with a run at least
-            # as long as the opener, so a ``` line inside a ```` block is
-            # content, not a closer.
-            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
+        if fence is not None:
+            m = FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
                 fence = None
             out.append("")
+            continue
+        if in_comment:
+            out.append("")
+            if "-->" in line:
+                in_comment = False
+            continue
+        m = FENCE.match(line)
+        if m and _opens_fence(line, m):
+            fence = (m.group(1)[0], len(m.group(1)))
+            out.append("")
+            continue
+        visible, opened = _strip_comment(line)
+        if opened:
+            in_comment = True
+        out.append(visible.rstrip())
     return "\n".join(out), fence is not None
 
 
+# The colon must be present, either inside the emphasis ("**Verdict:**") or
+# immediately after it ("**Verdict**:"). Without it the line has no label
+# delimiter and is not a slot.
+LABEL_EMPHASIS = re.compile(r"^- (\*\*|__|\*|_)([^*_:\n]+?)(?::\1|\1:)\s*")
+
+
+def _unemphasize(line: str) -> str:
+    """'- **Verdict:** x', '- **Verdict**: x', '- *Verdict*: x' -> '- Verdict: x'.
+    Emphasis on a slot label is presentation, not a different slot."""
+    return LABEL_EMPHASIS.sub(lambda m: f"- {m.group(2)}: ", line, count=1)
+
+
+BACKTICK_RUN = re.compile(r"`+")
+
+
+def _code_span_interiors(line: str) -> list[tuple[int, int]]:
+    """(start, end) of every inline code-span interior. Per CommonMark a span
+    closes on a backtick run of exactly the opener's length, and a
+    backslash-escaped backtick outside a span is literal text that opens
+    nothing."""
+    runs = [(m.start(), m.end()) for m in BACKTICK_RUN.finditer(line)]
+    spans: list[tuple[int, int]] = []
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        slashes = 0
+        while start - slashes - 1 >= 0 and line[start - slashes - 1] == "\\":
+            slashes += 1
+        opener = start + 1 if slashes % 2 else start
+        width = end - opener
+        if width <= 0:
+            i += 1
+            continue
+        for j in range(i + 1, len(runs)):
+            nxt_start, nxt_end = runs[j]
+            if nxt_end - nxt_start == width:
+                spans.append((end, nxt_start))
+                i = j + 1
+                break
+        else:
+            i += 1
+    return spans
+
+
+def _blank_code_spans(line: str, fill: str) -> str:
+    """`line` with code-span interiors replaced by `fill`, index-for-index."""
+    out = list(line)
+    for start, end in _code_span_interiors(line):
+        for k in range(start, end):
+            if fill != "\x00" or out[k] == "|":
+                out[k] = fill
+    return "".join(out)
+
+
+def _mask_code_pipes(line: str) -> str:
+    """Hide `|` inside inline code spans from the cell splitter; `_unmask`
+    restores it inside the cell."""
+    return _blank_code_spans(line, "\x00")
+
+
+def _strip_comment(line: str) -> tuple[str, bool]:
+    """Drop HTML comments a reader never sees, ignoring `<!--` and `-->` that
+    Markdown renders as code. Returns (visible, comment_left_open)."""
+    masked = _blank_code_spans(line, "\x01")
+    for m in reversed(list(INLINE_COMMENT.finditer(masked))):
+        line = line[: m.start()] + line[m.end() :]
+        masked = masked[: m.start()] + masked[m.end() :]
+    opener = masked.find("<!--")
+    if opener != -1:
+        return line[:opener], True
+    return line, False
+
+
+def _unmask(cell: str) -> str:
+    return cell.replace("\x00", "|")
+
+
 def detect(text: str) -> str | None:
+    """Kind of record, or None. A title signature alone is not enough: a
+    user's own note titled `# Investigation: …` is not a ledger. The record
+    must also carry at least one of its kind's required headings."""
     first = text.lstrip().split("\n", 1)[0]
     for prefix, kind in SIGNATURES.items():
         if first.startswith(prefix):
-            return kind
+            body = "\n" + "\n".join(line.rstrip() for line in text.split("\n")) + "\n"
+            if any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind]):
+                return kind
+            return None
     return None
 
 
 def _is_placeholder(value: str) -> bool:
     v = value.strip()
-    return not v or v == "..." or bool(PLACEHOLDER.search(v))
+    return not v or v == "..." or _has_placeholder(v)
 
 
 def _normalize(value: str) -> str:
@@ -134,16 +402,13 @@ def _table_rows(section: str) -> list[list[str]]:
 
     Cells are split on unescaped pipes only: a `\\|` inside a cell (e.g. a
     shell pipeline quoted in a Method cell) does not shift the columns.
-    Known residual leniency: a pipe inside an inline code span still splits;
-    that can only shift a cell downstream to a column the checks below don't
-    key on by name, which is at worst a false negative, never a false
-    positive on a checked column.
+    Pipes inside inline code spans are masked before the split.
     """
     rows = []
     for raw_line in section.splitlines():
         line = raw_line.strip()
         if line.startswith("|") and not set(line) <= {"|", "-", " ", ":"}:
-            cells = [c.strip() for c in CELL_SPLIT.split(line)]
+            cells = [_unmask(c.strip()) for c in CELL_SPLIT.split(_mask_code_pipes(line))]
             if cells and cells[0] == "":
                 cells = cells[1:]
             if cells and cells[-1] == "":
@@ -188,11 +453,34 @@ def _slot_values(body: str):
         if stripped.startswith("- ") and ":" in stripped:
             yield stripped.split(":", 1)[1]
         elif stripped.startswith("|") and not set(stripped) <= {"|", "-", " ", ":"}:
-            yield from (c.strip() for c in CELL_SPLIT.split(stripped.strip("|")))
+            yield from (
+                _unmask(c.strip()) for c in CELL_SPLIT.split(_mask_code_pipes(stripped.strip("|")))
+            )
+
+
+def _bullet_slot_values(body: str):
+    """Values of '- Label: value' bullet lines only -- not table cells, not
+    the title. This is the slot position a bare 'pending' value legitimately
+    sits in; a table cell (e.g. an Evidence column noting evidence is still
+    pending for one row) is ordinary content, not a record-wide marker."""
+    for line in body.split("\n")[1:]:
+        stripped = _unemphasize(line.strip())
+        if stripped.startswith("- ") and ":" in stripped:
+            yield stripped.split(":", 1)[1]
 
 
 def _in_progress(body: str) -> bool:
-    return any(v.strip() == "..." or PLACEHOLDER.search(v) for v in _slot_values(body))
+    if any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body)):
+        return True
+    # A slot value, or a required section's whole content, that says it is
+    # pending is the sanctioned plan-stage state. Prose that merely begins
+    # with the word is not.
+    if any(PENDING.match(v.strip()) for v in _bullet_slot_values(body)):
+        return True
+    kind = detect(body) or ""
+    return any(
+        SECTION_PENDING.match(_section(body, h).strip()) for h in REQUIRED_SECTIONS.get(kind, [])
+    )
 
 
 def _check_claim(value: str, where: str, findings: list[str]) -> None:
@@ -212,18 +500,22 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    body, unterminated_fence = _strip_fences(text)
+    body, unterminated_fence = _strip_hidden(text)
     # An unterminated fence blanks everything after it (including any
     # genuinely-present later sections), so completeness findings there
     # would fail correct work — treat the record as in-progress instead.
     # Vocabulary checks still run on whatever body remains (the pre-fence
     # part).
     in_progress = unterminated_fence or _in_progress(body)
+    if unterminated_fence:
+        findings.append("unterminated code fence: completeness past it was not checked")
 
     if not in_progress:
         for heading in REQUIRED_SECTIONS[kind]:
             if ("\n" + heading + "\n") not in body:
                 findings.append(f"required section missing: {heading}")
+            elif not _section(body, heading).strip():
+                findings.append(f"required section empty: {heading}")
 
     if kind == "ledger":
         # No id-grammar check on `id` cells (e.g. H1 vs H4 (retrospective)):
@@ -271,20 +563,30 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
 
     elif kind == "review":
         for line in body.splitlines():
-            stripped = line.strip()
+            stripped = _unemphasize(line.strip())
             if stripped.startswith(("- Disposition:", "- Dispositions:")):
                 value = stripped.split(":", 1)[1]
-                if _is_placeholder(value) or _normalize(value) == "none":
+                if _is_placeholder(value):
                     continue
-                if _leading_token(value, DISPOSITIONS) is None:
+                if _leading_token(value, DISPOSITIONS | {"none"}) is None:
                     findings.append(
                         f"disposition {_normalize(value)!r} does not begin with a value "
-                        f"from the closed set {sorted(DISPOSITIONS)} — 'valid' and "
+                        f"from the closed set {sorted(DISPOSITIONS | {'none'})} — 'valid' and "
                         f"'certified' are not dispositions"
+                    )
+            if stripped.startswith("- Route:"):
+                value = stripped.split(":", 1)[1]
+                if not _is_placeholder(value) and _leading_token(value, ROUTES) is None:
+                    findings.append(
+                        f"route {_normalize(value)!r} does not begin with a value from the "
+                        f"closed set {sorted(ROUTES)}"
                     )
         if not in_progress:
             handoff = _section(body, "## Handoff")
-            if not any(line.strip().startswith("- Dispositions:") for line in handoff.splitlines()):
+            if not any(
+                _unemphasize(line.strip()).startswith("- Dispositions:")
+                for line in handoff.splitlines()
+            ):
                 findings.append("Handoff: required '- Dispositions:' slot is missing")
 
     elif kind in ("decision", "voi"):
@@ -292,7 +594,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
         heading = "## Verdict" if kind == "decision" else "## VoI"
         section = _section(body, heading)
         for line in section.splitlines():
-            stripped = line.strip()
+            stripped = _unemphasize(line.strip())
             if stripped.startswith("- Verdict:"):
                 value = stripped.split(":", 1)[1]
                 if _is_placeholder(value):
@@ -303,7 +605,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                         f"from the closed set {sorted(allowed)}"
                     )
         if not in_progress and not any(
-            line.strip().startswith("- Verdict:") for line in section.splitlines()
+            _unemphasize(line.strip()).startswith("- Verdict:") for line in section.splitlines()
         ):
             findings.append("Verdict: required '- Verdict:' slot is missing")
 
@@ -316,7 +618,7 @@ def main(argv: list[str]) -> int:
         return 2
     try:
         text = Path(argv[0]).read_text(encoding="utf-8")
-    except OSError as exc:
+    except (OSError, UnicodeDecodeError) as exc:
         print(f"unreadable: {exc}", file=sys.stderr)
         return 2
     try:
