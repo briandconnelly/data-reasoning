@@ -133,6 +133,28 @@ def _label_region(body: str, label: str) -> str:
     return rest if nxt is None else rest[: nxt.start()]
 
 
+_ASSUMPTION_ID = re.compile(r"\s*(?:[-*]\s+)?(A\d+)\b")
+
+
+def _assumption_ids(body: str) -> list[str]:
+    """Assumption ids named in the ``- Identifying assumptions:`` slot, in
+    every shape the slot is accepted in: inline on the label line, an indented
+    sub-list, or a prose paragraph. Reading the parsed ``find_bullet`` value is
+    not enough -- it joins paragraph lines with spaces, which hides every id
+    after the first -- so the inline value and the raw region below the label
+    are scanned with their line boundaries intact. Each id must head its item,
+    so a mid-sentence mention of ``A1`` is not read as a named assumption.
+    """
+    m = re.search(r"^- Identifying assumptions:(.*)$", body, re.M)
+    if m is None:
+        return []
+    items = re.split(r"[;\n]", m.group(1)) + re.split(
+        r"[;\n]", _label_region(body, "Identifying assumptions")
+    )
+    found = [im.group(1) for item in items if (im := _ASSUMPTION_ID.match(item))]
+    return list(dict.fromkeys(found))
+
+
 def find_bullet(body: str, label: str) -> str | None:
     """The value of a ``- <label>:`` bullet, or None if the slot is empty.
 
@@ -346,13 +368,11 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
         )
     # identified-if claims every *named* assumption was probed (SKILL.md's
     # per-route procedure), not merely that some probe ran. Match assumption
-    # ids (`A1`, `A2`, ...) named in the sub-list against the probes table's
+    # ids (`A1`, `A2`, ...) named in the slot against the probes table's
     # first column -- this only fires when the record uses the `A<digits>`
     # id convention; the template's free-text assumption form (no ids)
     # never trips it.
-    assumption_ids = re.findall(
-        r"^\s*- (A\d+)\b", _label_region(body, "Identifying assumptions"), re.M
-    )
+    assumption_ids = _assumption_ids(body)
     probed_ids = set(
         re.findall(r"^\s*\|\s*(A\d+)\b", _label_region(body, "Assumption probes"), re.M)
     )

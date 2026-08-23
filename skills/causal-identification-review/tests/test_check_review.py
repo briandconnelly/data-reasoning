@@ -988,3 +988,46 @@ TWO_ASSUMPTIONS_TWO_PROBES = TWO_ASSUMPTIONS_ONE_PROBE.replace(
 def test_identified_if_with_every_assumption_probed_passes() -> None:
     findings, _ = cr.check_record(TWO_ASSUMPTIONS_TWO_PROBES)
     assert not any("no probe row" in f for f in findings), findings
+
+
+# --------------------------------------------------------------------------- #
+# Copilot review 2026-08-23: assumption ids were read only from sub-bullets,
+# but the checker also accepts inline slot content, so an inline assumption
+# list let `identified-if` through with no probe row.
+# --------------------------------------------------------------------------- #
+INLINE_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions: A1: pre-period exists; A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_inline_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(INLINE_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+# The slot is also accepted as a prose paragraph, whose lines `find_bullet`
+# joins with spaces -- so an id-per-line paragraph must still yield every id.
+PARAGRAPH_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
+    _ASSUMPTIONS_BLOCK,
+    "- Identifying assumptions:\n  A1: pre-period exists\n  A2: no concurrent rollout\n",
+).replace(
+    _PROBES_BLOCK,
+    "- Assumption probes:\n"
+    "\n"
+    "  | assumption | probe | result |\n"
+    "  | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+)
+
+
+def test_identified_if_with_an_unprobed_paragraph_assumption_is_caught() -> None:
+    findings, _ = cr.check_record(PARAGRAPH_ASSUMPTIONS_ONE_PROBE)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
