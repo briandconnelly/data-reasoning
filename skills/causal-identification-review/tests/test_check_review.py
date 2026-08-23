@@ -1130,3 +1130,39 @@ def test_a_no_result_probe_row_does_not_satisfy_the_gate() -> None:
 def test_a_populated_probe_row_still_satisfies_the_gate() -> None:
     findings, _ = cr.check_record(TWO_ASSUMPTIONS_TWO_PROBES)
     assert not any("no probe row" in f for f in findings), findings
+
+
+HIDDEN_ASSUMPTION = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "- Identifying assumptions:\n  - A1: pre-period exists\n  - A2: no concurrent rollout\n",
+    "- Identifying assumptions:\n  - A1: pre-period exists\n<!--\n  - A2: dropped in review\n-->\n",
+)
+
+
+def test_an_assumption_only_in_a_comment_is_not_a_named_assumption() -> None:
+    findings, _ = cr.check_record(HIDDEN_ASSUMPTION)
+    assert not any("no probe row" in f for f in findings), findings
+
+
+HIDDEN_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  <!--\n  | A2 | notional probe | notional result |\n  -->\n",
+)
+
+
+def test_a_probe_row_only_in_a_comment_does_not_satisfy_the_gate() -> None:
+    findings, _ = cr.check_record(HIDDEN_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+ESCAPED_PIPE_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A2 | compare a \\| b | not run |\n",
+)
+
+
+def test_an_escaped_pipe_does_not_shift_the_result_cell() -> None:
+    """The escaped pipe is cell content, so the result cell is `not run`."""
+    findings, _ = cr.check_record(ESCAPED_PIPE_PROBE_ROW)
+    assert any("A2" in f and "no probe" in f for f in findings), findings

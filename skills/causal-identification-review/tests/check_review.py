@@ -118,6 +118,86 @@ def _bullet_pattern(label: str) -> re.Pattern[str]:
     return re.compile(rf"^- {re.escape(label)}:[ \t]*(.*)$", re.MULTILINE)
 
 
+_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+_INLINE_COMMENT = re.compile(r"<!--.*?-->")
+_BACKTICK_RUN = re.compile(r"`+")
+
+
+def _code_span_interiors(line: str) -> list[tuple[int, int]]:
+    """(start, end) of every inline code-span interior. A span closes on a
+    backtick run of exactly the opener's length, and a backslash-escaped
+    backtick outside a span is literal text that opens nothing."""
+    runs = [(m.start(), m.end()) for m in _BACKTICK_RUN.finditer(line)]
+    spans: list[tuple[int, int]] = []
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        slashes = 0
+        while start - slashes - 1 >= 0 and line[start - slashes - 1] == "\\":
+            slashes += 1
+        opener = start + 1 if slashes % 2 else start
+        width = end - opener
+        if width <= 0:
+            i += 1
+            continue
+        for j in range(i + 1, len(runs)):
+            nxt_start, nxt_end = runs[j]
+            if nxt_end - nxt_start == width:
+                spans.append((end, nxt_start))
+                i = j + 1
+                break
+        else:
+            i += 1
+    return spans
+
+
+def visible_markdown(text: str) -> str:
+    """`text` with fenced blocks and HTML comments blanked, line count kept.
+    An assumption or probe row that survives only inside a comment or a
+    fenced example is documentation, not record content, and must not move
+    the disposition gate."""
+    out: list[str] = []
+    fence: tuple[str, int] | None = None
+    in_comment = False
+    for line in text.split("\n"):
+        if fence is not None:
+            m = _FENCE.match(line)
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= fence[1]
+                and not line[m.end() :].strip()
+            ):
+                fence = None
+            out.append("")
+            continue
+        if in_comment:
+            out.append("")
+            if "-->" in line:
+                in_comment = False
+            continue
+        m = _FENCE.match(line)
+        if m and not (m.group(1)[0] == "`" and "`" in line[m.end() :]):
+            fence = (m.group(1)[0], len(m.group(1)))
+            out.append("")
+            continue
+        visible = line
+        masked = list(visible)
+        for start, end in _code_span_interiors(visible):
+            for k in range(start, end):
+                masked[k] = "\x01"
+        shadow = "".join(masked)
+        for m2 in reversed(list(_INLINE_COMMENT.finditer(shadow))):
+            visible = visible[: m2.start()] + visible[m2.end() :]
+            shadow = shadow[: m2.start()] + shadow[m2.end() :]
+        opener = shadow.find("<!--")
+        if opener != -1:
+            visible = visible[:opener]
+            in_comment = True
+        out.append(visible)
+    return "\n".join(out)
+
+
 def _label_region(body: str, label: str) -> str:
     """Raw text from ``- <label>:`` to the next top-level ``- `` bullet or
     heading, exclusive of both. Unlike ``find_bullet``/``find_sublist``, this
@@ -156,8 +236,27 @@ def _data_row_cells(line: str) -> list[str] | None:
         return None
     if _TABLE_DELIMITER.match(stripped):
         return None
-    cells = [c.strip() for c in stripped[1:-1].split("|")]
+    inner = stripped[1:-1]
+    masked = list(inner)
+    for start, end in _code_span_interiors(inner):
+        for k in range(start, end):
+            if masked[k] == "|":
+                masked[k] = "\x00"
+    for i, ch in enumerate(inner):  # an escaped pipe is cell content
+        if ch == "|" and i and inner[i - 1] == "\\":
+            masked[i] = "\x00"
+    cells = ["".join(masked[a:b]).replace("\x00", "|").strip() for a, b in _cell_bounds(masked)]
     return cells if len(cells) >= MIN_TABLE_CELLS else None
+
+
+def _cell_bounds(masked: list[str]) -> list[tuple[int, int]]:
+    bounds, start = [], 0
+    for i, ch in enumerate(masked):
+        if ch == "|":
+            bounds.append((start, i))
+            start = i + 1
+    bounds.append((start, len(masked)))
+    return bounds
 
 
 def _row_records_a_run(cells: list[str]) -> bool:
@@ -180,7 +279,7 @@ def _assumption_ids(body: str) -> list[str]:
     m = re.search(r"^- Identifying assumptions:(.*)$", body, re.M)
     if m is None:
         return []
-    slot = m.group(1) + "\n" + _label_region(body, "Identifying assumptions")
+    slot = m.group(1) + "\n" + _label_region(visible_markdown(body), "Identifying assumptions")
     return list(dict.fromkeys(d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)))
 
 
@@ -407,7 +506,7 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     # the probe requirement it appears to.
     probed_ids = {
         cells[0]
-        for line in _label_region(body, "Assumption probes").splitlines()
+        for line in _label_region(visible_markdown(body), "Assumption probes").splitlines()
         if (cells := _data_row_cells(line))
         and re.fullmatch(r"A\d+", cells[0])
         and _row_records_a_run(cells)
