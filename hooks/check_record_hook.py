@@ -41,12 +41,21 @@ DECISION = (
 
 def looks_like_record(path: str) -> bool | None:
     """True: title signature matches. False: it does not. None: unreadable."""
+    # Read bytes and strictly decode only the title line. A replacement
+    # character could mutate the signature into a non-match, exiting clean
+    # without the validator ever running, so invalid UTF-8 *in the title* is
+    # unreadable and fails closed. Decoding no more than the title keeps a bad
+    # byte further down a non-record file from failing it closed: its title
+    # already proves it is not a record.
     try:
-        with Path(path).open(encoding="utf-8", errors="replace") as f:
+        with Path(path).open("rb") as f:
             head = f.read(4096)
     except OSError:
         return None
-    first = head.lstrip().split("\n", 1)[0]
+    try:
+        first = head.lstrip().split(b"\n", 1)[0].decode("utf-8")
+    except UnicodeDecodeError:
+        return None
     return first.startswith(SIGNATURES)
 
 

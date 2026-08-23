@@ -114,3 +114,23 @@ def test_unknown_validator_exit_code_is_not_a_silent_pass(tmp_path):
     r = run_hook({"tool_input": {"file_path": str(f)}}, plugin_root=str(fake_root))
     assert r.returncode == 2
     assert "not validated" in r.stderr
+
+
+def test_invalid_utf8_in_the_title_is_unreadable_not_a_silent_skip(tmp_path):
+    """A bad byte in the title must not mutate the signature into a non-match:
+    that would exit clean without the validator ever running."""
+    f = tmp_path / "record.md"
+    f.write_bytes(b"# Investigation\xe9: prod outage\n\n## Problem\n\n- x\n")
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2, r.stderr
+    assert "not validated" in r.stderr
+
+
+def test_invalid_byte_past_a_non_record_title_is_still_silent(tmp_path):
+    """The title proves the file is not a record, so a bad byte later in the
+    read-ahead buffer must not produce validator feedback."""
+    f = tmp_path / "notes.md"
+    f.write_bytes(b"# Ordinary notes\n\n" + b"a" * 5000 + b"\xff\n")
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0, r.stderr
+    assert not r.stderr
