@@ -27,6 +27,9 @@ A correction of an outright factual error in a description (a wrong skill name, 
 ## Addendum 2026-08-22
 
 The Context above says this skill's description rests on zero arms.
-That was wrong on the day it was written: `tests/runs/2026-08-11-t13-trigger.md` and `2026-08-11-t14-trigger.md` are measured trigger arms for the description decision 005 adopted, run seven days before this record.
-The decision itself stands — those arms measured the generic-speech-act widening against a two-skill catalog, not routing across the four shipped skills — but the freeze's justification is "unmeasured against the shipped catalog", not "unmeasured".
+That was wrong on the day it was written, though not for the reason first recorded here.
+The 2026-08-11 trigger arms (`tests/runs/2026-08-11-t13-trigger.md`, `2026-08-11-t14-trigger.md`) parsed both descriptions at `4efdeec`, so they measured the description as it stood before arm C3, which decision 005 adopted and commit `4c72ca2` applied on 2026-08-18.
+They are not arms for the shipped description.
+The measured arms for the description decision 005 adopted are the 2026-08-15 widening wave: `tests/runs/artifacts/2026-08-15-widening/BvC-gates.md` for the gain and cost gates, and `seam-gate4.md` for the seam, where T13 routed 5/5 to `exploratory-data-analysis` and T14 routed 5/5 to `hypothesis-driven-analysis` under C3.
+The decision itself stands — that wave measured the widening against a two-skill catalog, not routing across the four shipped skills — but the freeze's justification is "unmeasured against the shipped catalog", not "unmeasured".
 `causal-identification-review`'s description likewise has n=1 trigger cells (CS1, CS2, CS6a in its `tests/scenarios.md`) against a three-skill catalog.
