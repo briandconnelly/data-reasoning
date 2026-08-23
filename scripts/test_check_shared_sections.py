@@ -171,3 +171,13 @@ def test_a_shorter_backtick_run_does_not_close_a_longer_fence():
     text = f"# Skill\n\n````\n```\n{heading}\n\nfenced, not live\n````\n\n## Other\n\nx\n"
     with pytest.raises(ValueError, match="heading not found"):
         css.extract_section(text, heading)
+
+
+def test_comment_delimiter_inside_inline_code_does_not_hide_a_section():
+    heading = "## Data Rules"
+    text = (
+        f"# Skill\n\nThe token `<!--` is documented.\n\n{heading}\n\nreal rule\n\n## Other\n\nx\n"
+    )
+    block = css.extract_section(text, heading)
+    assert block.startswith(heading + "\n")
+    assert "real rule" in block

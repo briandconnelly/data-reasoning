@@ -255,9 +255,8 @@ def _strip_hidden(text: str) -> tuple[str, bool]:
             fence = (m.group(1)[0], len(m.group(1)))
             out.append("")
             continue
-        visible = INLINE_COMMENT.sub("", line)
-        if "<!--" in visible:
-            visible = visible[: visible.index("<!--")]
+        visible, opened = _strip_comment(line)
+        if opened:
             in_comment = True
         out.append(visible.rstrip())
     return "\n".join(out), fence is not None
@@ -278,31 +277,20 @@ def _unemphasize(line: str) -> str:
 BACKTICK_RUN = re.compile(r"`+")
 
 
-def _escaped(line: str, index: int) -> bool:
-    """True when the character at `index` is backslash-escaped, i.e. preceded
-    by an odd number of backslashes."""
-    slashes = 0
-    while index - slashes - 1 >= 0 and line[index - slashes - 1] == "\\":
-        slashes += 1
-    return slashes % 2 == 1
-
-
-def _mask_code_pipes(line: str) -> str:
-    """Hide `|` inside inline code spans from the cell splitter; `_unmask`
-    restores it inside the cell. Per CommonMark a code span closes on a
-    backtick run of exactly the opener's length, so runs are paired at equal
-    length -- a longer run inside a span is content, not a delimiter. A
-    backslash-escaped backtick outside a span is literal text and cannot open
-    one; inside an open span a backslash is ordinary content, so only opener
-    candidates are escape-checked."""
+def _code_span_interiors(line: str) -> list[tuple[int, int]]:
+    """(start, end) of every inline code-span interior. Per CommonMark a span
+    closes on a backtick run of exactly the opener's length, and a
+    backslash-escaped backtick outside a span is literal text that opens
+    nothing."""
     runs = [(m.start(), m.end()) for m in BACKTICK_RUN.finditer(line)]
-    out = list(line)
+    spans: list[tuple[int, int]] = []
     i = 0
     while i < len(runs):
         start, end = runs[i]
-        # an escaped leading backtick is literal, so it does not count toward
-        # the opening run
-        opener = start + 1 if _escaped(line, start) else start
+        slashes = 0
+        while start - slashes - 1 >= 0 and line[start - slashes - 1] == "\\":
+            slashes += 1
+        opener = start + 1 if slashes % 2 else start
         width = end - opener
         if width <= 0:
             i += 1
@@ -310,14 +298,41 @@ def _mask_code_pipes(line: str) -> str:
         for j in range(i + 1, len(runs)):
             nxt_start, nxt_end = runs[j]
             if nxt_end - nxt_start == width:
-                for k in range(end, nxt_start):
-                    if out[k] == "|":
-                        out[k] = "\x00"
+                spans.append((end, nxt_start))
                 i = j + 1
                 break
         else:
             i += 1
+    return spans
+
+
+def _blank_code_spans(line: str, fill: str) -> str:
+    """`line` with code-span interiors replaced by `fill`, index-for-index."""
+    out = list(line)
+    for start, end in _code_span_interiors(line):
+        for k in range(start, end):
+            if fill != "\x00" or out[k] == "|":
+                out[k] = fill
     return "".join(out)
+
+
+def _mask_code_pipes(line: str) -> str:
+    """Hide `|` inside inline code spans from the cell splitter; `_unmask`
+    restores it inside the cell."""
+    return _blank_code_spans(line, "\x00")
+
+
+def _strip_comment(line: str) -> tuple[str, bool]:
+    """Drop HTML comments a reader never sees, ignoring `<!--` and `-->` that
+    Markdown renders as code. Returns (visible, comment_left_open)."""
+    masked = _blank_code_spans(line, "\x01")
+    for m in reversed(list(INLINE_COMMENT.finditer(masked))):
+        line = line[: m.start()] + line[m.end() :]
+        masked = masked[: m.start()] + masked[m.end() :]
+    opener = masked.find("<!--")
+    if opener != -1:
+        return line[:opener], True
+    return line, False
 
 
 def _unmask(cell: str) -> str:
@@ -480,10 +495,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     # part).
     in_progress = unterminated_fence or _in_progress(body)
     if unterminated_fence:
-        findings.append(
-            "unterminated code fence: completeness past it was not checked "
-            "(close the fence, then re-validate)"
-        )
+        findings.append("unterminated code fence: completeness past it was not checked")
 
     if not in_progress:
         for heading in REQUIRED_SECTIONS[kind]:

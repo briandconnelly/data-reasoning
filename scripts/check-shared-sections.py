@@ -48,6 +48,29 @@ TARGETS = [
 DECISION = "skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md"
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+BACKTICK_RUN = re.compile(r"`+")
+
+
+def _shadow(line: str) -> str:
+    """`line` with inline code-span interiors blanked index-for-index, so a
+    `<!--` that Markdown renders as code is not read as a comment opener.
+    Per CommonMark a span closes on a run of exactly the opener's length."""
+    runs = [(m.start(), m.end()) for m in BACKTICK_RUN.finditer(line)]
+    out = list(line)
+    i = 0
+    while i < len(runs):
+        start, end = runs[i]
+        width = end - start
+        for j in range(i + 1, len(runs)):
+            nxt_start, nxt_end = runs[j]
+            if nxt_end - nxt_start == width:
+                for k in range(end, nxt_start):
+                    out[k] = "\x01"
+                i = j + 1
+                break
+        else:
+            i += 1
+    return "".join(out)
 
 
 def extract_section(text: str, heading: str) -> str:
@@ -82,7 +105,8 @@ def extract_section(text: str, heading: str) -> str:
         if m:
             fence = (m.group(1)[0], len(m.group(1)))
             continue
-        if "<!--" in line and "-->" not in line:
+        masked = _shadow(line)
+        if "<!--" in masked and "-->" not in masked:
             commented = True
             continue
         if start is None:

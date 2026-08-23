@@ -674,3 +674,30 @@ def test_selectedcontent_is_not_a_template_placeholder():
     ).replace("- Answer: unresolved\n", "- Answer: unresolved <selectedcontent> x\n")
     findings = cr.check(ledger)
     assert any("required section missing: ## Data Validity" in f for f in findings), findings
+
+
+def test_comment_delimiter_inside_inline_code_is_visible_text():
+    """CommonMark renders `<!--` in a code span as code, so a record that
+    documents the token must not have everything after it blanked."""
+    doc = (
+        "# Investigation: x\n\n## Problem\n\n"
+        "- The token `<!--` opens a comment.\n\n"
+        "## Hypotheses\n\n| id |\n| --- |\n| H1 |\n"
+    )
+    visible, _ = cr._strip_hidden(doc)
+    assert "## Hypotheses" in visible, visible
+
+
+def test_a_real_comment_after_inline_code_still_hides_the_rest():
+    doc = "# Investigation: x\n\n- token `<!--` here\n<!--\n## Hypotheses\n"
+    visible, _ = cr._strip_hidden(doc)
+    assert "## Hypotheses" not in visible, visible
+
+
+def test_unterminated_fence_finding_carries_no_procedural_instruction():
+    """decisions/006: a hook message states structural facts and a pointer to
+    the owning authority; the hook forwards these findings verbatim."""
+    findings = cr.check("# VoI Record: x\n\n## VoI\n\n- Verdict: worth-it\n\n```\nopen\n")
+    fence = next(f for f in findings if "unterminated code fence" in f)
+    assert "re-validate" not in fence, fence
+    assert "close the fence" not in fence, fence
