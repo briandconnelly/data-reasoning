@@ -242,6 +242,11 @@ def test_frontmatter_description_without_frontmatter_raises():
         mc.frontmatter_description("# no frontmatter\n")
 
 
+def test_frontmatter_description_unclosed_block_raises():
+    with pytest.raises(mc.SourceError, match="not closed"):
+        mc.frontmatter_description("---\nno close")
+
+
 def test_resolve_sha256_source_is_identity():
     assert mc.resolve_source(_entry(f"sha256:{EDA_GOLDEN}")) == EDA_GOLDEN
 
@@ -384,6 +389,15 @@ def test_file_under_covered_directory_passes(tmp_path):
     assert violations == []
 
 
+def test_same_basename_in_other_wave_is_not_covered(tmp_path):
+    violations, _ = _line_rules(
+        tmp_path,
+        "`2026-08-11-t13-t14-trigger/t13-rep3.jsonl` and `seam-gate4.md` "
+        f"measured the description. {ANNOT}",
+    )
+    assert any("R5" in v and "t13-rep3.jsonl" in v for v in violations)
+
+
 def test_ancestor_directory_mention_is_not_covered(tmp_path):  # [review]
     violations, _ = _line_rules(
         tmp_path, f"the arms in `tests/runs/` measured the description. {ANNOT}"
@@ -443,6 +457,21 @@ def test_main_reports_out_of_scope_explicit_file(tmp_path, capsys):
     err = capsys.readouterr().err
     assert rc == 0
     assert "NOT checked" in err
+
+
+def test_main_reports_invalid_registry_toml(monkeypatch, capsys):
+    # REGISTRY_PATH must stay under REPO_ROOT: main()'s error message calls
+    # REGISTRY_PATH.relative_to(REPO_ROOT), which raises for an unrelated path.
+    bad_toml = mc.REPO_ROOT / "scripts" / "_test_invalid_registry.toml"
+    bad_toml.write_text("this is not [valid toml\n", encoding="utf-8")
+    try:
+        monkeypatch.setattr(mc, "REGISTRY_PATH", bad_toml)
+        rc = mc.main([])
+        err = capsys.readouterr().err
+        assert rc == 1
+        assert "R2" in err
+    finally:
+        bad_toml.unlink()
 
 
 def _real_corpus_violations() -> list[str]:

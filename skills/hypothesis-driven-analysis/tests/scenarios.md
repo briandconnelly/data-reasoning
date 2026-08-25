@@ -1417,7 +1417,7 @@ Compressing the worker-return rules remains possible, but only inside SKILL.md a
 
 **5. The 2026-08-09 decision-analysis seam sentences rest on zero arms.**
 Two sentences were added to § Conclusion on 2026-08-09: the stop-with-limits continuation naming `decision-analysis`, and the numeric-policy non-conflict sentence after "Do not invent numeric confidence values."
-Neither touches the description (which stays at its 2026-07-20 wording, re-validated 2026-08-08), so the trigger surface is unaffected; what is unmeasured is conclusion-time behavior with both skills installed.
+Neither touches the description (which stays at its 2026-07-20 wording, re-validated 2026-08-08), so the trigger surface is unaffected; what is unmeasured is conclusion-time behavior with both skills installed. `[measured: skill=hypothesis-driven-analysis state=current evidence=hda-rerun-2026-08-08]`
 Paying this debt means at least one with-skill full-route arm that reaches stop-with-limits on an `UNRESOLVED` set with `decision-analysis` installed (does the report name it, and does the handoff carry the ledger rather than a manufactured confidence?), plus `decision-analysis`'s DA-S1 arm (`skills/decision-analysis/tests/scenarios.md`) exercising the receiving side.
 Until then, treat the seam as designed, not shown.
 

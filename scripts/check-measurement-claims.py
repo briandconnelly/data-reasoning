@@ -245,7 +245,10 @@ def frontmatter_description(text: str) -> str:
     """
     if not text.startswith("---\n"):
         raise SourceError("no frontmatter block")
-    end = text.index("\n---", 4)
+    try:
+        end = text.index("\n---", 4)
+    except ValueError as exc:
+        raise SourceError("frontmatter block is not closed") from exc
     try:
         meta = yaml.safe_load(text[4:end])
     except yaml.YAMLError as exc:
@@ -319,6 +322,10 @@ def check_state(path: Path, lineno: int, state: str, entry: Entry) -> list[str]:
 # directory), a dated markdown basename (this repo's run records are all
 # date-prefixed), or a gate-artifact basename (AvB-gate1.md, BvC-gates.md,
 # seam-gate4.md), or a path under a wave directory (seam/t13-rep1.jsonl).
+# The dated-basename branch matches ANY date-prefixed filename, including a
+# dated prereg or eval note that is not a run artifact, so R4 can fire on
+# lines about non-run documents -- a deliberate best-effort trade-off that
+# fails loudly at commit time rather than silently missing a real claim.
 ARTIFACT_MENTION = re.compile(
     r"(?<!\w)("
     r"tests/runs/[\w./-]*"
@@ -355,7 +362,7 @@ def _mention_covered(mention: str, entry: Entry) -> bool:
         if _is_suffix(c, m):
             return True
         if is_file and (REPO_ROOT / cov).is_dir():
-            if (REPO_ROOT / cov / m[-1]).is_file():
+            if _is_suffix(c, m[:-1]) and (REPO_ROOT / cov / m[-1]).is_file():
                 return True
             if any(m[i : i + len(c)] == c for i in range(len(m) - len(c) + 1)):
                 return True
@@ -446,7 +453,7 @@ def _report_skips(explicit: list[Path]) -> None:
 def main(argv: list[str]) -> int:
     try:
         registry = parse_registry(REGISTRY_PATH)
-    except RegistryError as exc:
+    except (RegistryError, tomllib.TOMLDecodeError) as exc:
         print(f"{REGISTRY_PATH.relative_to(REPO_ROOT)}: R2: {exc}", file=sys.stderr)
         return 1
 
