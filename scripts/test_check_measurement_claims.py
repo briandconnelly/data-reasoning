@@ -549,5 +549,15 @@ def test_prek_hook_regex_covers_checker_scope_and_dependencies():
         dependencies.add(e.artifact)  # [review]
         if e.source[0] == "file":
             dependencies.add(e.source[1])
+        # R5's coverage decisions consult files under covers directories
+        # (basename-under-dir, is_dir), so a covered non-.md artifact must
+        # also re-trigger the hook when it changes.
+        for cov in e.covers:
+            cov_path = mc.REPO_ROOT / cov
+            if cov_path.is_file():
+                dependencies.add(cov)
+            elif cov_path.is_dir():
+                sample = sorted(p for p in cov_path.iterdir() if p.is_file())[0]
+                dependencies.add(sample.relative_to(mc.REPO_ROOT).as_posix())
     for dep in sorted(dependencies):
         assert pattern.search(dep), f"dependency not matched by hook regex: {dep}"
