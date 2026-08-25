@@ -1,0 +1,128 @@
+# Evidence registry for description-measurement claims.
+# skills/exploratory-data-analysis/decisions/007-measurement-claim-binding.md
+# governs this file, including the review duty that comes with adding an entry.
+
+# ---- 2026-08-11 trigger wave (t13/t14), catalog parsed at 4efdeec ----
+# The harness-evidence artifact attests the commit for both descriptions;
+# EDA's text at that commit predates C3 (historical), HDA's is unchanged since
+# (current). Both entries share the artifact and anchor and differ by skill.
+
+[eda-trigger-2026-08-11]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-t13-t14-trigger-harness-evidence.md"
+source = "git:4efdeec"
+anchor = "repo at `4efdeec` throughout; per-invocation manifests in the archive record both `SKILL.md` SHA-256s, both parsed-description SHA-256s"
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md",
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t14-trigger.md",
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-t14-trigger-repaired.md",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-t13-t14-trigger",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-t13-t14-trigger-prereg.md",
+]
+
+[hda-trigger-2026-08-11]
+skill = "hypothesis-driven-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-t13-t14-trigger-harness-evidence.md"
+source = "git:4efdeec"
+anchor = "repo at `4efdeec` throughout; per-invocation manifests in the archive record both `SKILL.md` SHA-256s, both parsed-description SHA-256s"
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md",
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t14-trigger.md",
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-t14-trigger-repaired.md",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-t13-t14-trigger",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-11-t13-t14-trigger-prereg.md",
+]
+
+# ---- 2026-08-15 widening wave: one entry per measured text per gate ----
+
+# Gate 4 seam, corrected runs: C3 applied to the checkout, hash attested.
+[eda-widening-2026-08-15-seam]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/seam-gate4.md"
+source = "sha256:9a4e874b8af2220d1faa26d4a958a6e687439f44f49195b9abb64daef426e80d"
+anchor = "All three manifests written by the corrected run record `eda_description_sha256` `9a4e874b8af2220d1faa26d4a958a6e687439f44f49195b9abb64daef426e80d`, length 1021 — the sha256 of the rstripped C3 text"
+covers = ["skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/seam"]
+
+# Gate 4's invalid first attempt: the artifact attests which text those runs
+# actually measured.
+[eda-widening-2026-08-15-seam-first-attempt]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/seam-gate4.md"
+source = "sha256:a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38"
+anchor = "record `eda_description_sha256` `a80b97340c2c3b8bd412ac595f8b2d2f51f8c5ec20e709c7c49160d5562a0a38`, length 1019 — the shipped text, not C3"
+covers = ["skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/seam-invalid-wrong-checkout"]
+
+# Gates 2/3 (B vs C3): treatment leg, arm C3.
+[eda-widening-2026-08-15-bvc-c3]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-gates.md"
+source = "file:skills/exploratory-data-analysis/tests/eval/frozen-2026-08-15-C3.txt"
+anchor = "`treatment` (desc-b) is `frozen-2026-08-15-C3.txt` — this is arm C, the winner from screening"
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-fresh",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-cost",
+]
+
+# Gates 2/3 (B vs C3): baseline leg, arm B (the compressed text).
+[eda-widening-2026-08-15-bvc-b]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-gates.md"
+source = "file:skills/exploratory-data-analysis/tests/eval/frozen-2026-08-15-B-compressed.txt"
+anchor = "In this pair, `baseline` (desc-a) is `frozen-2026-08-15-B-compressed.txt` — this is arm B, the compressed description."
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-fresh",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-cost",
+]
+
+# Gate 1 (A vs B): baseline leg, arm A (the description as shipped 2026-08-11).
+[eda-widening-2026-08-15-avb-a]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-gate1.md"
+source = "file:skills/exploratory-data-analysis/tests/eval/frozen-2026-08-11-treatment.txt"
+anchor = "`baseline` (desc-a) is `frozen-2026-08-11-treatment.txt` — this is arm A, the shipped description."
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-fresh",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-cost",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-cost-full-fixture-partial-coverage-incomplete",
+]
+
+# Gate 1 (A vs B): treatment leg, arm B.
+[eda-widening-2026-08-15-avb-b]
+skill = "exploratory-data-analysis"
+artifact = "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-gate1.md"
+source = "file:skills/exploratory-data-analysis/tests/eval/frozen-2026-08-15-B-compressed.txt"
+anchor = "`treatment` (desc-b) is `frozen-2026-08-15-B-compressed.txt` — this is arm B, the compressed description."
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-fresh",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-cost",
+  "skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/AvB-cost-full-fixture-partial-coverage-incomplete",
+]
+
+# ---- 2026-08-08 HDA trigger reruns ----
+# The 2026-07-20 wording predates this repository's history; df83a8f (the
+# 2026-08-08 import) carries it, verified: 1020 chars, hash equal to the
+# current HDA golden.
+[hda-rerun-2026-08-08]
+skill = "hypothesis-driven-analysis"
+artifact = "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-08-08-trigger-rerun-evidence.md"
+source = "git:df83a8f"
+anchor = "This establishes that all four arms were dispatched against the descriptions committed at HEAD (the 2026-07-20 edit), not a stale copy"
+covers = [
+  "skills/hypothesis-driven-analysis/tests/runs/2026-08-08-scenario2-trigger-rerun.md",
+  "skills/hypothesis-driven-analysis/tests/runs/2026-08-08-scenario3-trigger-rerun.md",
+  "skills/hypothesis-driven-analysis/tests/runs/2026-08-08-scenario17-trigger-rerun.md",
+  "skills/hypothesis-driven-analysis/tests/runs/2026-08-08-scenario18-trigger-rerun.md",
+]
+
+# ---- 2026-08-09 CIR trigger cells ----
+# cs2 and cs6a state "skills at c5f4755" in their own line 4; cs1's line is
+# the fullest attestation, so it carries the anchor.
+[cir-trigger-2026-08-09]
+skill = "causal-identification-review"
+artifact = "skills/causal-identification-review/tests/runs/2026-08-09-cs1-trigger.md"
+source = "git:c5f4755"
+anchor = "Skill catalog: all three skill descriptions loaded (`hypothesis-driven-analysis`, `exploratory-data-analysis`, `causal-identification-review`), skills at commit c5f4755."
+covers = [
+  "skills/causal-identification-review/tests/runs/2026-08-09-cs2-trigger.md",
+  "skills/causal-identification-review/tests/runs/2026-08-09-cs6a-trigger.md",
+]

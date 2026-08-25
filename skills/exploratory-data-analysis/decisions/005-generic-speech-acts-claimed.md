@@ -17,7 +17,9 @@ Two edits shipped, in the order the prereg required: a compression, then the wid
 ### The compression (arm B)
 
 Commit `cd5d2b6` dropped the lead-purpose clause `, to confirm, never to conclude from`, shrinking the shipped description to 983 characters to free budget for the widening edit.
-Gate 1 (`AvB-gate1.md`) measured this compression against the shipped description (arm A) on the fresh crossed-pair fixture and the cost arms, and found it a null everywhere it could bite: every per-speech-act contrast interval and the pooled generic contrast interval included zero, and the N1 and N2 change intervals included zero.
+Gate 1 (`AvB-gate1.md`) measured this compression, arm B, on the fresh crossed-pair fixture and the cost arms. `[measured: skill=exploratory-data-analysis state=historical evidence=eda-widening-2026-08-15-avb-b]`
+Its baseline was the shipped description, arm A (`AvB-gate1.md`). `[measured: skill=exploratory-data-analysis state=historical evidence=eda-widening-2026-08-15-avb-a]`
+The gate found the compression a null everywhere it could bite: every per-speech-act contrast interval and the pooled generic contrast interval included zero, and the N1 and N2 change intervals included zero.
 **VERDICT: PASS.**
 The compression buys space without measurably changing triggering behaviour in either direction.
 
@@ -66,8 +68,10 @@ The screening pairs (C1/C2/C3) each showed baseline-first vs treatment-first spl
 
 Decision 004's per-speech-act table (`profile` 0.833, `overview` 0.100, `tell-me-about` 0.133, `rundown` 0.033) was measured under the shipped 2026-08-11 description and was the baseline that record said a widening must beat.
 That widening has now run.
-The pooled generic rate under the compressed description (arm B), measured in this wave's fresh fixture, was 0.0667 (Gate 2/3, `BvC-gates.md`); under C3 it is 0.5778, lift interval [+0.2889, +0.7333].
-The BvC pair never ran the shipped 2026-08-11 text itself (`BvC-gates.md`), but Gate 1 measured B statistically indistinguishable from the shipped description on this same pooled generic contrast (`AvB-gate1.md`), so 0.0667 stands in for the shipped baseline this table supersedes.
+The pooled generic rate under the compressed description (arm B), measured in this wave's fresh fixture, was 0.0667 (Gate 2/3, `BvC-gates.md`). `[measured: skill=exploratory-data-analysis state=historical evidence=eda-widening-2026-08-15-bvc-b]`
+Under C3, measured in the same gates (`BvC-gates.md`), it is 0.5778, lift interval [+0.2889, +0.7333]. `[measured: skill=exploratory-data-analysis state=current evidence=eda-widening-2026-08-15-bvc-c3]`
+The BvC pair never ran the shipped 2026-08-11 text itself (`BvC-gates.md`).
+But Gate 1 measured arm B (`AvB-gate1.md`) as statistically indistinguishable from the shipped 2026-08-11 description on this same pooled generic contrast, so 0.0667 stands in for the shipped baseline this table supersedes. `[measured: skill=exploratory-data-analysis state=historical evidence=eda-widening-2026-08-15-avb-b]`
 Any future widening work measures against C3's rates and this wave's crossed-pair instrument (`crossed-pairs-2026-08-15.json`), not against 004's table.
 
 ## Limits
@@ -78,7 +82,7 @@ It measured triggering only, not downstream behaviour; decision 004's recorded l
 C3 is the two-edit candidate: it combines an activity-naming opening with a phrasing-does-not-matter clause replacing part of the exemplar list, per `candidates-2026-08-15.md`.
 **Which of these two mechanisms carries the measured lift is unmeasured**; the prereg named this attribution gap before the wave ran and it was not closed.
 The seam instrument (`run_trigger.py`) reads the main checkout's `SKILL.md` at a hardcoded path (`REPO = Path("/Users/bdc/projects/data-reasoning")`, line 26), not the worktree's copy, regardless of the harness's own working directory.
-Gate 4's first attempt missed this and measured the shipped description, not C3; the correction, the evidence, and the re-run against the main checkout are documented in `seam-gate4.md`'s correction section.
+Gate 4's first attempt missed this and measured the shipped description, not C3; the correction, the evidence, and the re-run against the main checkout are documented in `seam-gate4.md`'s correction section. `[measured: skill=exploratory-data-analysis state=historical evidence=eda-widening-2026-08-15-seam-first-attempt]`
 The four-skill deployment check remains owed, per decision 003's statement of that debt, unchanged by this wave.
 
 ## When to reopen

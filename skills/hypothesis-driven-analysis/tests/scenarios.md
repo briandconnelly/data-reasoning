@@ -1395,7 +1395,7 @@ It also sits at 1020 of 1024 characters, so any future edit must displace text.
 Batch any description change with these four reruns rather than paying the measurement twice; a further ungated edit compounds an already unvalidated surface and makes attribution of later results harder.
 
 **Paid 2026-08-08.**
-All four arms were rerun against the current (2026-07-20) description, machine-verified against `SKILL.md` line 3 rather than assumed: `tests/runs/2026-08-08-scenario2-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario3-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario17-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario18-trigger-rerun.md` (2/2).
+All four arms were rerun against the current (2026-07-20) description, machine-verified against `SKILL.md` line 3 rather than assumed: `tests/runs/2026-08-08-scenario2-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario3-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario17-trigger-rerun.md` (2/2), `tests/runs/2026-08-08-scenario18-trigger-rerun.md` (2/2). `[measured: skill=hypothesis-driven-analysis state=current evidence=hda-rerun-2026-08-08]`
 Evidence, including the description-verification method and the three machine scans re-run with planted-positive validation: `tests/runs/artifacts/2026-08-08-trigger-rerun-evidence.md`.
 n=1 per scenario: this pays the debt (the surface now has a valid arm behind it), it does not close out the wider n=1-per-scenario caution the individual run files repeat.
 
@@ -1417,7 +1417,7 @@ Compressing the worker-return rules remains possible, but only inside SKILL.md a
 
 **5. The 2026-08-09 decision-analysis seam sentences rest on zero arms.**
 Two sentences were added to § Conclusion on 2026-08-09: the stop-with-limits continuation naming `decision-analysis`, and the numeric-policy non-conflict sentence after "Do not invent numeric confidence values."
-Neither touches the description (which stays at its 2026-07-20 wording, re-validated 2026-08-08), so the trigger surface is unaffected; what is unmeasured is conclusion-time behavior with both skills installed.
+Neither touches the description (which stays at its 2026-07-20 wording, re-validated 2026-08-08), so the trigger surface is unaffected; what is unmeasured is conclusion-time behavior with both skills installed. `[measured: skill=hypothesis-driven-analysis state=current evidence=hda-rerun-2026-08-08]`
 Paying this debt means at least one with-skill full-route arm that reaches stop-with-limits on an `UNRESOLVED` set with `decision-analysis` installed (does the report name it, and does the handoff carry the ledger rather than a manufactured confidence?), plus `decision-analysis`'s DA-S1 arm (`skills/decision-analysis/tests/scenarios.md`) exercising the receiving side.
 Until then, treat the seam as designed, not shown.
 
