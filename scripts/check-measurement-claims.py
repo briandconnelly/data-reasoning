@@ -394,3 +394,84 @@ def check_line_rules(
                         f"split the line or extend the entry's covers list"
                     )
     return violations, referenced
+
+
+def check_file(path: Path, registry: dict[str, Entry]) -> tuple[list[str], set[str]]:
+    violations: list[str] = []
+    referenced: set[str] = set()
+    lines = visible_lines(path.read_text(encoding="utf-8"))
+    violations.extend(check_annotations(path, lines, registry))
+    for lineno, line in lines:
+        line_violations, refs = check_line_rules(path, lineno, line, registry)
+        violations.extend(line_violations)
+        referenced.update(refs)
+        parsed = ANNOTATION.search(line)
+        if parsed is None:
+            continue
+        entry = registry.get(parsed.group(3))
+        if entry is not None and entry.skill == parsed.group(1):
+            violations.extend(check_state(path, lineno, parsed.group(2), entry))
+    return violations, referenced
+
+
+def scope_files() -> list[Path]:
+    found: list[Path] = []
+    for root in DEFAULT_SCOPE:
+        for pattern in SCOPE_PATTERNS:
+            found.extend(sorted((REPO_ROOT / root).glob(pattern)))
+    return found
+
+
+def in_scope(path: Path) -> bool:
+    try:
+        rel = path.resolve().relative_to(REPO_ROOT)
+    except ValueError:
+        return False
+    if not any(rel.is_relative_to(root) for root in DEFAULT_SCOPE):
+        return False
+    return any(rel.match(pattern) for pattern in SCOPE_PATTERNS)
+
+
+def _report_skips(explicit: list[Path]) -> None:
+    for p in explicit:
+        if not p.is_file():
+            print(f"skipped: {p}: not a file", file=sys.stderr)
+        elif not in_scope(p):
+            print(
+                f"skipped: {p}: outside this check's scope -- NOT checked, and this is not a pass",
+                file=sys.stderr,
+            )
+
+
+def main(argv: list[str]) -> int:
+    try:
+        registry = parse_registry(REGISTRY_PATH)
+    except RegistryError as exc:
+        print(f"{REGISTRY_PATH.relative_to(REPO_ROOT)}: R2: {exc}", file=sys.stderr)
+        return 1
+
+    explicit = [Path(a).resolve() for a in argv]
+    _report_skips(explicit)
+
+    # Line rules are reported for the requested files; registry-wide rules
+    # (R2, including dead entries) always evaluate against the FULL scope,
+    # because an entry's references live anywhere in it.
+    violations: list[str] = []
+    referenced: set[str] = set()
+    for target in scope_files():
+        file_violations, refs = check_file(target, registry)
+        referenced.update(refs)
+        if not argv or target.resolve() in explicit:
+            violations.extend(file_violations)
+    violations.extend(check_registry(registry, referenced))
+
+    for violation in violations:
+        print(violation, file=sys.stderr)
+    if violations:
+        print(f"\n{len(violations)} measurement-claim violation(s).", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

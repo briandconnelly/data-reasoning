@@ -395,3 +395,49 @@ def test_explicitly_covered_directory_mention_passes(tmp_path):
         f"the seam arms in `{WIDENING}/seam/` measured the description. {ANNOT}",
     )
     assert violations == []
+
+
+def test_check_file_runs_all_line_rules(tmp_path):
+    entries = _registry(tmp_path, GOOD_ENTRY)
+    f = tmp_path / "claims.md"
+    f.write_text(
+        "Fine line.\n"
+        "`seam-gate4.md` is a measured arm for the shipped description.\n"
+        f"Bound: `seam-gate4.md` measured the description. {ANNOT}\n",
+        encoding="utf-8",
+    )
+    violations, referenced = mc.check_file(f, entries)
+    assert len(violations) == 1
+    assert "R4" in violations[0]
+    assert ":2:" in violations[0]
+    assert referenced == {"eda-widening-2026-08-15"}
+
+
+def test_check_file_ignores_fenced_annotations(tmp_path):
+    entries = _registry(tmp_path, GOOD_ENTRY)
+    f = tmp_path / "claims.md"
+    f.write_text(
+        "Example follows.\n```\n`x.md` measured the description. "
+        "`[measured: skill=bad state=current evidence=bad]`\n```\n",
+        encoding="utf-8",
+    )
+    violations, _ = mc.check_file(f, entries)
+    assert violations == []
+
+
+def test_in_scope_matches_citation_checker_classes():
+    root = mc.REPO_ROOT
+    eda = root / "skills/exploratory-data-analysis"
+    assert mc.in_scope(eda / "decisions/006-description-freeze-until-measured.md")
+    assert mc.in_scope(root / "skills/hypothesis-driven-analysis/tests/scenarios.md")
+    assert not mc.in_scope(eda / "tests/runs/2026-08-11-t13-trigger.md")
+    assert not mc.in_scope(root / "README.md")
+
+
+def test_main_reports_out_of_scope_explicit_file(tmp_path, capsys):
+    outside = tmp_path / "outside.md"
+    outside.write_text("x\n", encoding="utf-8")
+    rc = mc.main([str(outside)])
+    err = capsys.readouterr().err
+    assert rc == 0
+    assert "NOT checked" in err
