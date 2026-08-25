@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -485,3 +487,38 @@ def test_known_positive_the_original_false_claim_unbound_fails(tmp_path):
     )
     violations, _ = mc.check_file(f, registry)
     assert any("R4" in v for v in violations)
+
+
+def test_prek_hook_regex_covers_checker_scope_and_dependencies():
+    """The hook's files regex and the checker's inputs must agree.
+
+    check-citations' history shows the failure mode: a hook that hands files
+    to a checker that skips them exits 0 while checking nothing. Artifacts
+    are inputs too: an anchor edited in a frozen record must re-run R2.
+    """
+    prek = tomllib.loads((mc.REPO_ROOT / "prek.toml").read_text(encoding="utf-8"))
+    hooks = [
+        h
+        for repo in prek["repos"]
+        for h in repo.get("hooks", [])
+        if h.get("id") == "check-measurement-claims"
+    ]
+    assert len(hooks) == 1
+    pattern = re.compile(hooks[0]["files"])
+
+    for f in mc.scope_files():
+        rel = f.relative_to(mc.REPO_ROOT).as_posix()
+        assert pattern.search(rel), f"scope file not matched by hook regex: {rel}"
+
+    registry = mc.parse_registry(mc.REGISTRY_PATH)
+    dependencies = {
+        "scripts/check-measurement-claims.py",
+        "scripts/measured-descriptions.toml",
+    }
+    dependencies.update(f"scripts/frontmatter-descriptions/{s}.txt" for s in mc.SKILLS)
+    for e in registry.values():
+        dependencies.add(e.artifact)  # [review]
+        if e.source[0] == "file":
+            dependencies.add(e.source[1])
+    for dep in sorted(dependencies):
+        assert pattern.search(dep), f"dependency not matched by hook regex: {dep}"
