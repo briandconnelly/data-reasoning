@@ -441,3 +441,47 @@ def test_main_reports_out_of_scope_explicit_file(tmp_path, capsys):
     err = capsys.readouterr().err
     assert rc == 0
     assert "NOT checked" in err
+
+
+def _real_corpus_violations() -> list[str]:
+    registry = mc.parse_registry(mc.REGISTRY_PATH)
+    violations: list[str] = []
+    referenced: set[str] = set()
+    for target in mc.scope_files():
+        v, refs = mc.check_file(target, registry)
+        violations.extend(v)
+        referenced.update(refs)
+    violations.extend(mc.check_registry(registry, referenced))
+    return violations
+
+
+def test_real_corpus_is_clean():
+    assert _real_corpus_violations() == []
+
+
+def test_known_positive_the_original_false_claim_bound_honestly_fails(tmp_path):
+    """The claim from b4e9d535, bound to the arms' true evidence with the
+    currency it asserted, must fail R3."""
+    registry = mc.parse_registry(mc.REGISTRY_PATH)
+    f = tmp_path / "decision.md"
+    f.write_text(
+        "`tests/runs/2026-08-11-t13-trigger.md` and `2026-08-11-t14-trigger.md` are measured "
+        "trigger arms for the description decision 005 adopted. "
+        "`[measured: skill=exploratory-data-analysis "
+        "state=current evidence=eda-trigger-2026-08-11]`\n",
+        encoding="utf-8",
+    )
+    violations, _ = mc.check_file(f, registry)
+    assert any("R3" in v and "state=current" in v for v in violations)
+
+
+def test_known_positive_the_original_false_claim_unbound_fails(tmp_path):
+    registry = mc.parse_registry(mc.REGISTRY_PATH)
+    f = tmp_path / "decision.md"
+    f.write_text(
+        "`tests/runs/2026-08-11-t13-trigger.md` and `2026-08-11-t14-trigger.md` are measured "
+        "trigger arms for the description decision 005 adopted.\n",
+        encoding="utf-8",
+    )
+    violations, _ = mc.check_file(f, registry)
+    assert any("R4" in v for v in violations)
