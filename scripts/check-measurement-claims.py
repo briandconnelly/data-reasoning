@@ -27,11 +27,15 @@ Exit non-zero on any violation. With no arguments, checks the default scope.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import importlib.util
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
+
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_PATH = REPO_ROOT / "scripts" / "measured-descriptions.toml"
@@ -226,3 +230,86 @@ def check_annotations(
                 f"[{evidence}] is for {entry.skill}"
             )
     return violations
+
+
+class SourceError(Exception):
+    """A registry source that cannot be resolved to description text."""
+
+
+def frontmatter_description(text: str) -> str:
+    """The frontmatter description scalar of a SKILL.md text.
+
+    Text-based twin of check-description-freeze.py's read_description (which
+    takes a Path and so cannot serve git: sources); the parity test keeps the
+    two from drifting.
+    """
+    if not text.startswith("---\n"):
+        raise SourceError("no frontmatter block")
+    end = text.index("\n---", 4)
+    try:
+        meta = yaml.safe_load(text[4:end])
+    except yaml.YAMLError as exc:
+        raise SourceError(f"frontmatter is not valid YAML: {exc}") from exc
+    if not isinstance(meta, dict):
+        raise SourceError("frontmatter is not a mapping")
+    desc = meta.get("description")
+    if not isinstance(desc, str) or not desc.strip():
+        raise SourceError("no description in frontmatter")
+    return desc
+
+
+def desc_hash(text: str) -> str:
+    return hashlib.sha256(text.rstrip().encode("utf-8")).hexdigest()
+
+
+def golden_hash(skill: str) -> str:
+    return desc_hash((GOLDEN_DIR / f"{skill}.txt").read_text(encoding="utf-8"))
+
+
+def shallow() -> bool:
+    # Same rationale as check-citations.py: a shallow CI clone must fail
+    # loudly on git: sources rather than pass quietly.
+    return (REPO_ROOT / ".git" / "shallow").exists()
+
+
+def resolve_source(entry: Entry) -> str:
+    form, value = entry.source
+    if form == "sha256":
+        return value
+    if form == "file":
+        target = REPO_ROOT / value
+        if not target.is_file():
+            raise SourceError(f"file source {value} does not exist")
+        return desc_hash(target.read_text(encoding="utf-8"))
+    rel = f"skills/{entry.skill}/SKILL.md"
+    result = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "show", f"{value}:{rel}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        detail = " (a shallow clone cannot see it -- fetch full history)" if shallow() else ""
+        raise SourceError(f"git source {value}:{rel} cannot be resolved{detail}")
+    return desc_hash(frontmatter_description(result.stdout))
+
+
+def check_state(path: Path, lineno: int, state: str, entry: Entry) -> list[str]:
+    """R3: state=current means source hash equals the golden; historical means it differs."""
+    try:
+        got = resolve_source(entry)
+    except SourceError as exc:
+        return [f"{path}:{lineno}: R3: [{entry.key}]: {exc}"]
+    want = golden_hash(entry.skill)
+    if state == "current" and got != want:
+        return [
+            f"{path}:{lineno}: R3: claim says state=current but [{entry.key}]'s source hashes "
+            f"to {got[:12]}… and {entry.skill}'s golden is {want[:12]}… -- the artifact did "
+            f"not measure the shipped description"
+        ]
+    if state == "historical" and got == want:
+        return [
+            f"{path}:{lineno}: R3: claim says state=historical but [{entry.key}]'s source "
+            f"equals {entry.skill}'s golden -- this evidence is for the shipped description"
+        ]
+    return []

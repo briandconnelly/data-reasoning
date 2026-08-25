@@ -205,3 +205,72 @@ def test_check_registry_flags_dead_entry(tmp_path):
     entries = _registry(tmp_path, GOOD_ENTRY)
     violations = mc.check_registry(entries, referenced=set())
     assert any("R2" in v and "no claim references" in v for v in violations)
+
+
+def _entry(source: str) -> mc.Entry:
+    form, _, value = source.partition(":")
+    return mc.Entry(
+        key="k",
+        skill="exploratory-data-analysis",
+        artifact=f"{WIDENING}/seam-gate4.md",
+        source=(form, value),
+        anchor="x",
+        covers=(),
+    )
+
+
+def test_desc_hash_rstrips():
+    assert mc.desc_hash("abc\n") == mc.desc_hash("abc")
+
+
+def test_golden_hash_matches_known_value():
+    assert mc.golden_hash("exploratory-data-analysis") == EDA_GOLDEN
+
+
+def test_frontmatter_description_parity_with_freeze_checker():
+    freeze = _load("check_description_freeze", SCRIPTS / "check-description-freeze.py")
+    for skill in mc.SKILLS:
+        skill_md = mc.REPO_ROOT / "skills" / skill / "SKILL.md"
+        text = skill_md.read_text(encoding="utf-8")
+        assert mc.frontmatter_description(text) == freeze.read_description(skill_md)
+
+
+def test_frontmatter_description_without_frontmatter_raises():
+    with pytest.raises(mc.SourceError, match="frontmatter"):
+        mc.frontmatter_description("# no frontmatter\n")
+
+
+def test_resolve_sha256_source_is_identity():
+    assert mc.resolve_source(_entry(f"sha256:{EDA_GOLDEN}")) == EDA_GOLDEN
+
+
+def test_resolve_file_source_hashes_frozen_file():
+    frozen = "skills/exploratory-data-analysis/tests/eval/frozen-2026-08-15-C3.txt"
+    assert mc.resolve_source(_entry(f"file:{frozen}")) == EDA_GOLDEN
+
+
+def test_resolve_git_source_reads_description_at_commit():
+    assert mc.resolve_source(_entry("git:4efdeec")) == EDA_AT_4EFDEEC
+
+
+def test_resolve_git_source_unresolvable_raises():
+    with pytest.raises(mc.SourceError, match="cannot be resolved"):
+        mc.resolve_source(_entry("git:0000000000000000000000000000000000000000"))
+
+
+def test_resolve_git_source_in_shallow_clone_names_the_cause(monkeypatch):  # [review]
+    monkeypatch.setattr(mc, "shallow", lambda: True)
+    with pytest.raises(mc.SourceError, match="shallow clone"):
+        mc.resolve_source(_entry("git:0000000000000000000000000000000000000000"))
+
+
+def test_state_current_requires_golden_match():
+    violations = mc.check_state(Path("f.md"), 3, "current", _entry("git:4efdeec"))
+    assert any("R3" in v and "state=current" in v for v in violations)
+    assert mc.check_state(Path("f.md"), 3, "current", _entry(f"sha256:{EDA_GOLDEN}")) == []
+
+
+def test_state_historical_requires_golden_mismatch():
+    violations = mc.check_state(Path("f.md"), 3, "historical", _entry(f"sha256:{EDA_GOLDEN}"))
+    assert any("R3" in v and "state=historical" in v for v in violations)
+    assert mc.check_state(Path("f.md"), 3, "historical", _entry("git:4efdeec")) == []
