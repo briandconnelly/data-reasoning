@@ -313,3 +313,84 @@ def check_state(path: Path, lineno: int, state: str, entry: Entry) -> list[str]:
             f"equals {entry.skill}'s golden -- this evidence is for the shipped description"
         ]
     return []
+
+
+# A run record or run-artifact mention: any tests/runs/… path (file or
+# directory), a dated markdown basename (this repo's run records are all
+# date-prefixed), or a gate-artifact basename (AvB-gate1.md, BvC-gates.md,
+# seam-gate4.md), or a path under a wave directory (seam/t13-rep1.jsonl).
+ARTIFACT_MENTION = re.compile(
+    r"(?<!\w)("
+    r"tests/runs/[\w./-]*"
+    r"|20\d{2}-\d{2}-\d{2}-[\w./-]*"
+    r"|[A-Za-z][\w-]*-gate[\w.-]*\.md"
+    r"|(?:seam|AvB-[\w-]+|BvC-[\w-]+|screening-[\w-]+)/[\w./-]+"
+    r")"
+)
+
+MEASURE_WORDS = ("measur", "re-validated", "ran against", "run against", "arms for")
+
+
+def _segments(path: str) -> list[str]:
+    return path.strip("`").rstrip(".").strip("/").split("/")
+
+
+def _is_suffix(whole: list[str], tail: list[str]) -> bool:
+    return len(tail) <= len(whole) and whole[-len(tail) :] == tail
+
+
+def _mention_covered(mention: str, entry: Entry) -> bool:
+    """Whether a mentioned path is the entry's artifact or inside its covers.
+
+    A file mention (ends in an extension) is covered when a covered path ends
+    with its segments, or when it sits under a covered directory. A directory
+    mention is covered only when the entry lists that directory itself: an
+    ancestor like `tests/runs/` is not covered merely because the entry has
+    descendants there.
+    """
+    m = _segments(mention)
+    is_file = "." in m[-1]
+    for cov in (entry.artifact, *entry.covers):
+        c = _segments(cov)
+        if _is_suffix(c, m):
+            return True
+        if is_file and (REPO_ROOT / cov).is_dir():
+            if (REPO_ROOT / cov / m[-1]).is_file():
+                return True
+            if any(m[i : i + len(c)] == c for i in range(len(m) - len(c) + 1)):
+                return True
+    return False
+
+
+def check_line_rules(
+    path: Path, lineno: int, line: str, registry: dict[str, Entry]
+) -> tuple[list[str], set[str]]:
+    """R4 and R5 for one visible line; returns (violations, referenced evidence keys)."""
+    violations: list[str] = []
+    parsed = ANNOTATION.search(line)
+    referenced = {parsed.group(3)} if parsed and parsed.group(3) in registry else set()
+
+    stripped = ANNOTATION.sub("", line)
+    mentions = [m.group(1) for m in ARTIFACT_MENTION.finditer(stripped)]
+    lower = stripped.lower()
+    claim_shaped = (
+        bool(mentions) and "description" in lower and any(w in lower for w in MEASURE_WORDS)
+    )
+
+    if claim_shaped and parsed is None:
+        violations.append(
+            f"{path}:{lineno}: R4: unbound description-measurement claim -- this line names "
+            f"{mentions[0]!r} beside a measurement statement about a description; add a "
+            f"trailing [measured: skill=… state=… evidence=…] annotation (see {DECISION})"
+        )
+    if parsed is not None and mentions:
+        entry = registry.get(parsed.group(3))
+        if entry is not None:
+            for mention in mentions:
+                if not _mention_covered(mention, entry):
+                    violations.append(
+                        f"{path}:{lineno}: R5: {mention!r} is not covered by registry entry "
+                        f"[{entry.key}] -- a second assertion cannot ride on this annotation; "
+                        f"split the line or extend the entry's covers list"
+                    )
+    return violations, referenced

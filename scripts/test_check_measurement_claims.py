@@ -274,3 +274,124 @@ def test_state_historical_requires_golden_mismatch():
     violations = mc.check_state(Path("f.md"), 3, "historical", _entry(f"sha256:{EDA_GOLDEN}"))
     assert any("R3" in v and "state=historical" in v for v in violations)
     assert mc.check_state(Path("f.md"), 3, "historical", _entry("git:4efdeec")) == []
+
+
+TRIGGER_ARTIFACT = (
+    "skills/exploratory-data-analysis/tests/runs/artifacts/"
+    "2026-08-11-t13-t14-trigger-harness-evidence.md"
+)
+TWO_ENTRIES = (
+    GOOD_ENTRY
+    + f"""
+[eda-trigger-2026-08-11]
+skill = "exploratory-data-analysis"
+artifact = "{TRIGGER_ARTIFACT}"
+source = "git:4efdeec"
+anchor = "repo at `4efdeec` throughout"
+covers = [
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md",
+  "skills/exploratory-data-analysis/tests/runs/2026-08-11-t14-trigger.md",
+]
+"""
+)
+
+
+def _line_rules(tmp_path, line):
+    entries = _registry(tmp_path, TWO_ENTRIES)
+    return mc.check_line_rules(Path("f.md"), 7, line, entries)
+
+
+def test_lint_unbound_claim_fails(tmp_path):
+    violations, _ = _line_rules(
+        tmp_path, "`seam-gate4.md` is a measured arm for the shipped description."
+    )
+    assert any("R4" in v and "unbound" in v for v in violations)
+
+
+def test_lint_bound_claim_passes(tmp_path):
+    violations, refs = _line_rules(
+        tmp_path, f"`seam-gate4.md` is a measured arm for the shipped description. {ANNOT}"
+    )
+    assert violations == []
+    assert refs == {"eda-widening-2026-08-15"}
+
+
+@pytest.mark.parametrize(
+    "verb_phrase",
+    ["measured", "measures", "re-validated against", "ran against", "rerun against", "arms for"],
+)
+def test_lint_vocabulary(tmp_path, verb_phrase):
+    violations, _ = _line_rules(tmp_path, f"`seam-gate4.md` {verb_phrase} the description.")
+    assert any("R4" in v for v in violations)
+
+
+def test_lint_directory_mention_counts(tmp_path):
+    violations, _ = _line_rules(
+        tmp_path,
+        "the description's measured arms are in `tests/runs/artifacts/2026-08-15-widening/`.",
+    )
+    assert any("R4" in v for v in violations)
+
+
+def test_lint_ignores_line_without_description_word(tmp_path):
+    violations, _ = _line_rules(tmp_path, "`seam-gate4.md` measured the seam routing.")
+    assert violations == []
+
+
+def test_lint_ignores_line_without_verb(tmp_path):
+    violations, _ = _line_rules(tmp_path, "`seam-gate4.md` and the description are both mentioned.")
+    assert violations == []
+
+
+def test_two_annotations_on_one_line_fail(tmp_path):
+    entries = _registry(tmp_path, TWO_ENTRIES)
+    other = ANNOT.replace("eda-widening-2026-08-15", "eda-trigger-2026-08-11")
+    line = f"claim one {ANNOT.rstrip('`')}` and claim two {other}"
+    violations = mc.check_annotations(Path("f.md"), [(7, line)], entries)
+    assert any("R1" in v for v in violations)
+
+
+def test_two_skills_in_one_sentence_need_two_lines(tmp_path):  # [review]
+    line = (
+        "`tests/runs/2026-08-11-t13-trigger.md` measured both descriptions at 4efdeec. "
+        + ANNOT.replace("eda-widening-2026-08-15", "eda-trigger-2026-08-11").replace(
+            "state=current", "state=historical"
+        )
+    )
+    violations, refs = _line_rules(tmp_path, line)
+    # One annotation binds one skill; the sentence about the other skill has no
+    # binding and the checker cannot see it. This test pins the documented
+    # limit: the line passes R4/R5, and decision 007 is what requires the split.
+    assert violations == []
+    assert refs == {"eda-trigger-2026-08-11"}
+
+
+def test_uncovered_mention_on_annotated_line_fails(tmp_path):
+    violations, _ = _line_rules(
+        tmp_path,
+        "`seam-gate4.md` and `tests/runs/2026-08-11-t13-trigger.md` measured the "
+        f"description. {ANNOT}",
+    )
+    assert any("R5" in v and "2026-08-11-t13-trigger.md" in v for v in violations)
+
+
+def test_file_under_covered_directory_passes(tmp_path):
+    violations, _ = _line_rules(
+        tmp_path, f"`seam/t13-rep3.jsonl` and `seam-gate4.md` measured the description. {ANNOT}"
+    )
+    assert violations == []
+
+
+def test_ancestor_directory_mention_is_not_covered(tmp_path):  # [review]
+    violations, _ = _line_rules(
+        tmp_path, f"the arms in `tests/runs/` measured the description. {ANNOT}"
+    )
+    assert any("R5" in v and "tests/runs" in v for v in violations)
+
+
+def test_explicitly_covered_directory_mention_passes(tmp_path):
+    violations, _ = _line_rules(
+        tmp_path,
+        f"the seam arms in `{WIDENING}/seam/` measured the description. {ANNOT}",
+    )
+    assert violations == []
