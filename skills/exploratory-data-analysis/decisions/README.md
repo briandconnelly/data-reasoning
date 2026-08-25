@@ -10,3 +10,4 @@ Each record states the context, the decision, and the consequences accepted with
 - [005-generic-speech-acts-claimed.md](005-generic-speech-acts-claimed.md) — the widening 004 anticipated: measured gain (pooled generic 0.0667 -> 0.5778) and null cost, shipped as two commits.
 - [006-description-freeze-until-measured.md](006-description-freeze-until-measured.md) — the four routing descriptions are frozen at their 2026-08-18 baselines against unmeasured change.
 - [007-measurement-claim-binding.md](007-measurement-claim-binding.md) — description-measurement claims are bound to registry evidence; the record owns the convention and `scripts/check-measurement-claims.py` enforces it.
+- [008-general-ancestry-rule-deferred.md](008-general-ancestry-rule-deferred.md) — the general ancestry rule #20 sketched is deferred: non-description claims are common but unstructured, and 007 has not yet earned the extension; reopening conditions named.
