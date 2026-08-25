@@ -27,7 +27,9 @@ Exit non-zero on any violation. With no arguments, checks the default scope.
 from __future__ import annotations
 
 import dataclasses
+import importlib.util
 import re
+import sys
 import tomllib
 from pathlib import Path
 
@@ -60,6 +62,73 @@ ANNOTATION_OPENER = re.compile(r"\[measured:")
 
 SOURCE_FORMS = ("sha256", "file", "git")
 HEX = re.compile(r"[0-9a-f]+")
+
+
+def _load_module(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+# Anchor matching reuses check-citations.py's normalization so both gates
+# agree on what "appears verbatim" means (dashes, curly quotes, backticks,
+# whitespace, case).
+_CITATIONS = Path(__file__).resolve().parent / "check-citations.py"
+normalize = _load_module("_check_citations", _CITATIONS).normalize
+
+# CommonMark fence: up to three spaces of indent, then three or more of one
+# fence character; closed only by the same character at the same or greater
+# length.
+FENCE_OPEN = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+HTML_COMMENT = re.compile(r"<!--.*?(?:-->|\Z)", re.DOTALL)
+
+
+def visible_lines(text: str) -> list[tuple[int, str]]:
+    """The file's visible Markdown, line by line, 1-indexed.
+
+    Fenced code blocks are dropped whole; HTML comments are cut out in place,
+    an unclosed one through end of file, each replaced by its own newline
+    count so later line numbers stay true. Inline code is kept: filenames and
+    annotations legitimately live in backticks.
+    """
+    text = HTML_COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    out: list[tuple[int, str]] = []
+    fence: tuple[str, int] | None = None
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        m = FENCE_OPEN.match(line)
+        if fence is None:
+            if m:
+                fence = (m.group(1)[0], len(m.group(1)))
+                continue
+            out.append((lineno, line))
+        elif m and m.group(1)[0] == fence[0] and len(m.group(1)) >= fence[1]:
+            fence = None
+    return out
+
+
+def check_registry(registry: dict[str, Entry], referenced: set[str]) -> list[str]:
+    """R2: every entry's artifact exists and visibly carries its anchor; no dead entries."""
+    violations: list[str] = []
+    rel = REGISTRY_PATH.relative_to(REPO_ROOT)
+    for key, entry in registry.items():
+        artifact = REPO_ROOT / entry.artifact
+        if not artifact.is_file():
+            violations.append(f"{rel}: R2: [{key}]: artifact {entry.artifact} does not exist")
+            continue
+        text = artifact.read_text(encoding="utf-8")
+        visible = normalize("\n".join(line for _, line in visible_lines(text)))
+        if normalize(entry.anchor) not in visible:
+            violations.append(
+                f"{rel}: R2: [{key}]: anchor quote does not appear in {entry.artifact}'s "
+                f'visible Markdown: "{entry.anchor[:70]}…"'
+            )
+        if key not in referenced:
+            violations.append(
+                f"{rel}: R2: [{key}]: no claim references this entry -- remove it or bind the claim"
+            )
+    return violations
 
 
 class RegistryError(ValueError):

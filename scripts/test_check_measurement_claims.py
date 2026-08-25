@@ -41,6 +41,12 @@ ANNOT = (
     "`[measured: skill=exploratory-data-analysis state=current evidence=eda-widening-2026-08-15]`"
 )
 
+# Line numbers for fencing tests
+FENCE_COMMENT_HIDDEN_LINE = 3
+FENCE_COMMENT_TAIL_LINE = 5
+FENCE_BACKTICK_HIDDEN_LINE = 4
+FENCE_BACKTICK_VISIBLE_LINE = 6
+
 
 def _registry(tmp_path: Path, body: str) -> dict:
     reg = tmp_path / "measured-descriptions.toml"
@@ -118,3 +124,84 @@ def test_malformed_or_misplaced_annotation_is_violation(tmp_path):
     violations = mc.check_annotations(Path("f.md"), lines, entries)
     assert len(violations) == 2  # noqa: PLR2004
     assert all("R1" in v for v in violations)
+
+
+def test_visible_lines_strips_fences_and_comments():
+    text = (
+        "one\n"
+        "```toml\n"
+        "[measured: skill=x state=current evidence=y]\n"
+        "```\n"
+        "two <!-- hidden [measured: skill=x state=current evidence=y] --> tail\n"
+        "three\n"
+    )
+    numbered = dict(mc.visible_lines(text))
+    assert numbered[1] == "one"
+    assert FENCE_COMMENT_HIDDEN_LINE not in numbered
+    assert "hidden" not in numbered[FENCE_COMMENT_TAIL_LINE]
+    assert "tail" in numbered[FENCE_COMMENT_TAIL_LINE]
+    assert numbered[6] == "three"
+
+
+def test_visible_lines_multiline_html_comment_keeps_numbering():
+    text = "a\n<!--\n[measured: skill=x state=current evidence=y]\n-->\nb\n"
+    numbered = dict(mc.visible_lines(text))
+    assert numbered[1] == "a"
+    assert "[measured:" not in numbered.get(3, "")
+    assert numbered[5] == "b"
+
+
+def test_visible_lines_unclosed_html_comment_hides_to_eof():  # [review]
+    text = "a\n<!-- never closed\n[measured: skill=x state=current evidence=y]\n"
+    joined = "\n".join(line for _, line in mc.visible_lines(text))
+    assert "[measured:" not in joined
+    assert "a" in joined
+
+
+def test_visible_lines_fence_tracks_opener_char_and_length():  # [review]
+    text = (
+        "````\n"
+        "~~~ not a closer for a backtick fence\n"
+        "``` not a closer either: shorter than the opener\n"
+        "[measured: skill=x state=current evidence=y] still fenced\n"
+        "````\n"
+        "visible [measured: skill=x state=current evidence=y]\n"
+    )
+    numbered = dict(mc.visible_lines(text))
+    assert FENCE_BACKTICK_HIDDEN_LINE not in numbered
+    assert FENCE_BACKTICK_VISIBLE_LINE in numbered
+
+
+def test_visible_lines_indented_code_is_not_a_fence():  # [review]
+    text = "    ```\nvisible\n    ```\n"
+    numbered = dict(mc.visible_lines(text))
+    assert numbered[2] == "visible"
+
+
+def test_check_registry_flags_missing_artifact(tmp_path):
+    entries = _registry(
+        tmp_path,
+        GOOD_ENTRY.replace(f"{WIDENING}/seam-gate4.md", f"{WIDENING}/does-not-exist.md"),
+    )
+    violations = mc.check_registry(entries, referenced={"eda-widening-2026-08-15"})
+    assert any("R2" in v and "does-not-exist.md" in v for v in violations)
+
+
+def test_check_registry_flags_anchor_not_in_artifact(tmp_path):
+    entries = _registry(
+        tmp_path,
+        GOOD_ENTRY.replace("the sha256 of the rstripped C3 text", "no such sentence anywhere"),
+    )
+    violations = mc.check_registry(entries, referenced={"eda-widening-2026-08-15"})
+    assert any("R2" in v and "anchor" in v for v in violations)
+
+
+def test_check_registry_accepts_real_anchor(tmp_path):
+    entries = _registry(tmp_path, GOOD_ENTRY)
+    assert mc.check_registry(entries, referenced={"eda-widening-2026-08-15"}) == []
+
+
+def test_check_registry_flags_dead_entry(tmp_path):
+    entries = _registry(tmp_path, GOOD_ENTRY)
+    violations = mc.check_registry(entries, referenced=set())
+    assert any("R2" in v and "no claim references" in v for v in violations)
