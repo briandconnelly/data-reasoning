@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -561,3 +562,60 @@ def test_prek_hook_regex_covers_checker_scope_and_dependencies():
                 dependencies.add(sample.relative_to(mc.REPO_ROOT).as_posix())
     for dep in sorted(dependencies):
         assert pattern.search(dep), f"dependency not matched by hook regex: {dep}"
+
+
+class TestShallowDetection:
+    """Sibling of the same class in test_check_citations.py.
+
+    The two checkers share this logic deliberately, so they share its tests:
+    in a worktree checkout `.git` is a file, and probing it as a directory
+    never finds the shallow marker.
+    """
+
+    @pytest.fixture
+    def committed(self, tmp_path, monkeypatch):
+        run = lambda *a: subprocess.run(  # noqa: E731
+            ["git", "-C", str(tmp_path), *a], check=True, capture_output=True, text=True
+        )
+        run("init", "-q")
+        run("config", "user.email", "t@example.com")
+        run("config", "user.name", "T")
+        (tmp_path / "README.md").write_text("seed\n")
+        run("add", "-A")
+        run("commit", "-qm", "initial")
+        monkeypatch.setattr(mc, "REPO_ROOT", tmp_path)
+        return tmp_path
+
+    def _worktree(self, committed: Path, monkeypatch) -> Path:
+        tree = committed / "wt"
+        subprocess.run(
+            ["git", "-C", str(committed), "worktree", "add", "-q", str(tree), "-b", "wt"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        monkeypatch.setattr(mc, "REPO_ROOT", tree)
+        return tree
+
+    def test_main_checkout_without_the_marker_is_not_shallow(self, committed):
+        assert not (committed / ".git" / "shallow").exists()
+        assert mc.shallow() is False
+
+    def test_main_checkout_with_the_marker_is_shallow(self, committed):
+        (committed / ".git" / "shallow").touch()
+        assert mc.shallow() is True
+
+    def test_worktree_without_the_marker_is_not_shallow(self, committed, monkeypatch):
+        self._worktree(committed, monkeypatch)
+        assert mc.shallow() is False
+
+    def test_worktree_with_the_marker_is_shallow(self, committed, monkeypatch):
+        """The known positive the old probe could not produce."""
+        tree = self._worktree(committed, monkeypatch)
+        (committed / ".git" / "shallow").touch()
+        assert (tree / ".git").is_file()
+        assert mc.shallow() is True
+
+    def test_outside_any_repository_falls_back_without_raising(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(mc, "REPO_ROOT", tmp_path)
+        assert mc.shallow() is False

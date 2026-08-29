@@ -273,3 +273,61 @@ def test_repo_local_citation_to_a_missing_file_is_a_violation(repo):
 def test_unresolved_name_without_an_attributed_quote_is_left_alone(repo):
     path = write(repo, "See nonexistent-file.md for the background; nothing is quoted here.\n")
     assert cc.check(path) == []
+
+
+class TestShallowDetection:
+    """The shallow marker must be found in a worktree checkout too.
+
+    Only the diagnostic hint hangs on this, but the hint is missing exactly
+    where this repo works: `.git` is a file in a worktree, so probing
+    `REPO_ROOT / ".git" / "shallow"` there never finds anything.
+    """
+
+    @pytest.fixture
+    def committed(self, repo):
+        run = lambda *a: subprocess.run(  # noqa: E731
+            ["git", "-C", str(repo), *a], check=True, capture_output=True, text=True
+        )
+        run("init", "-q")
+        run("config", "user.email", "t@example.com")
+        run("config", "user.name", "T")
+        run("add", "-A")
+        run("commit", "-qm", "initial")
+        return repo
+
+    def test_main_checkout_without_the_marker_is_not_shallow(self, committed):
+        assert not (committed / ".git" / "shallow").exists()
+        assert cc.shallow() is False
+
+    def test_main_checkout_with_the_marker_is_shallow(self, committed):
+        (committed / ".git" / "shallow").touch()
+        assert cc.shallow() is True
+
+    def test_worktree_without_the_marker_is_not_shallow(self, committed, tmp_path, monkeypatch):
+        tree = tmp_path / "wt"
+        subprocess.run(
+            ["git", "-C", str(committed), "worktree", "add", "-q", str(tree), "-b", "wt"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        monkeypatch.setattr(cc, "REPO_ROOT", tree)
+        assert cc.shallow() is False
+
+    def test_worktree_with_the_marker_is_shallow(self, committed, tmp_path, monkeypatch):
+        """The known positive the old probe could not produce."""
+        tree = tmp_path / "wt"
+        subprocess.run(
+            ["git", "-C", str(committed), "worktree", "add", "-q", str(tree), "-b", "wt"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        (committed / ".git" / "shallow").touch()
+        assert (tree / ".git").is_file()
+        monkeypatch.setattr(cc, "REPO_ROOT", tree)
+        assert cc.shallow() is True
+
+    def test_outside_any_repository_falls_back_without_raising(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(cc, "REPO_ROOT", tmp_path)
+        assert cc.shallow() is False

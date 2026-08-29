@@ -111,6 +111,25 @@ def normalize(text: str) -> str:
     return " ".join(text.split()).casefold()
 
 
+def git_common_dir() -> Path:
+    """The repository's shared git directory, or REPO_ROOT/.git if git cannot say.
+
+    In a worktree checkout `.git` is a file pointing elsewhere, so testing
+    `REPO_ROOT / ".git"` as a directory finds nothing there. `rev-parse
+    --git-common-dir` resolves the real one in every checkout shape.
+    """
+    result = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "rev-parse", "--git-common-dir"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return REPO_ROOT / ".git"
+    # The path git prints is relative to the directory it ran in, REPO_ROOT.
+    return REPO_ROOT / result.stdout.strip()
+
+
 def shallow() -> bool:
     """Whether this checkout lacks full history.
 
@@ -119,7 +138,7 @@ def shallow() -> bool:
     than pass quietly: a check that silently stops checking in the environment
     where it matters most is worse than no check.
     """
-    return (REPO_ROOT / ".git" / "shallow").exists()
+    return (git_common_dir() / "shallow").exists()
 
 
 def read_at(path: Path, sha: str | None) -> str:

@@ -269,10 +269,24 @@ def golden_hash(skill: str) -> str:
     return desc_hash((GOLDEN_DIR / f"{skill}.txt").read_text(encoding="utf-8"))
 
 
+def git_common_dir() -> Path:
+    # Same rationale as check-citations.py: in a worktree checkout `.git` is a
+    # file, so the shared git directory must be resolved, not assumed.
+    result = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "rev-parse", "--git-common-dir"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0 or not result.stdout.strip():
+        return REPO_ROOT / ".git"
+    return REPO_ROOT / result.stdout.strip()
+
+
 def shallow() -> bool:
     # Same rationale as check-citations.py: a shallow CI clone must fail
     # loudly on git: sources rather than pass quietly.
-    return (REPO_ROOT / ".git" / "shallow").exists()
+    return (git_common_dir() / "shallow").exists()
 
 
 def resolve_source(entry: Entry) -> str:
