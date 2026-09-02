@@ -9,6 +9,8 @@ import importlib.util
 import re
 from pathlib import Path
 
+import pytest
+
 HERE = Path(__file__).resolve().parent
 spec = importlib.util.spec_from_file_location("check_record", HERE / "check_record.py")
 cr = importlib.util.module_from_spec(spec)
@@ -753,3 +755,43 @@ def test_html_tags_with_boolean_attributes_are_not_placeholders():
         ).replace("- Answer: unresolved\n", f"- Answer: unresolved {tag}\n")
         findings = cr.check(ledger)
         assert any("required section missing: ## Data Validity" in f for f in findings), tag
+
+
+def test_two_verdicts_joined_by_comma_is_a_finding():
+    rec = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive", "- Verdict: prior-sensitive, dominated"
+    )
+    assert rec != GOOD_DECISION
+    findings = cr.check(rec)
+    assert any("verdict 'prior-sensitive, dominated" in f for f in findings)
+
+
+def test_two_routes_joined_by_comma_is_a_finding():
+    rec = GOOD_REVIEW.replace("- Route: review", "- Route: review, construct")
+    assert rec != GOOD_REVIEW
+    findings = cr.check(rec)
+    assert any("route 'review, construct' does not begin with" in f for f in findings)
+
+
+def test_two_dispositions_joined_by_comma_is_a_finding():
+    rec = GOOD_REVIEW.replace(
+        "- Dispositions: identified-if", "- Dispositions: identified-if, assumption-contradicted"
+    )
+    assert rec != GOOD_REVIEW
+    findings = cr.check(rec)
+    assert any("disposition 'identified-if, assumption-contradicted'" in f for f in findings)
+    assert not any("slot is missing" in f for f in findings)
+
+
+@pytest.mark.parametrize(
+    ("value", "allowed", "expect"),
+    [
+        ("REFUTED — see H2 (UNRESOLVED rival)", cr.STATUSES, "REFUTED"),
+        ("robust (across the swept class)", cr.DECIDE_VERDICTS, "robust"),
+        ("CONSISTENT; rerun pending", cr.OUTCOMES, "CONSISTENT"),
+        ("worth-it: at 3x", cr.VOI_VERDICTS, "worth-it"),
+        ("review - claimed A/B", cr.ROUTES, "review"),
+    ],
+)
+def test_annotation_after_a_delimiter_is_still_accepted(value, allowed, expect):
+    assert cr._leading_token(value, allowed) == expect

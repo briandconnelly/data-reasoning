@@ -222,7 +222,7 @@ PENDING = re.compile(r"^\(?\s*pending(?:\s*[)\u2014\u2013:;]|\s+-{1,2}(?=\s|\Z)|
 # prose can start with "pending" without the section being in-progress.
 SECTION_PENDING = re.compile(r"^\(\s*pending\b.*\)\Z", re.I | re.S)
 
-DELIMITERS = (" —", " -", ";", ":", " (", ",")
+DELIMITERS = (" —", " -", ";", ":", " (")
 MIN_TABLE_ROWS = 2  # header + at least one data row
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
@@ -378,7 +378,9 @@ def _normalize(value: str) -> str:
 
 def _leading_token(value: str, allowed: set[str]) -> str | None:
     """The value must BE an allowed token, or start with one followed by a
-    delimiter (annotations after the token are legitimate)."""
+    delimiter (annotations after the token are legitimate). A comma is not a
+    delimiter because it reads as a list, which would falsely accept
+    comma-separated token values."""
     v = _normalize(value)
     for tok in sorted(allowed, key=len, reverse=True):
         if v == tok:
