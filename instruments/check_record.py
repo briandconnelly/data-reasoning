@@ -376,6 +376,22 @@ def _normalize(value: str) -> str:
     return value.strip().strip("`*").strip()
 
 
+HEADER_ALIASES = {
+    # The shipped ledger template's header for the column the checks call
+    # `necessary prediction` (references/ledger-template.md § Hypotheses).
+    "necessary prediction (failure refutes)": "necessary prediction",
+}
+
+
+def _header_key(h: str) -> str:
+    """A header's identity: lower-cased, whitespace collapsed, then mapped
+    through the alias table. Identity, not containment: `unnecessary
+    prediction` is not `necessary prediction`, and `outcome (rationale)` is
+    not `outcome`."""
+    key = " ".join(_normalize(h).lower().split())
+    return HEADER_ALIASES.get(key, key)
+
+
 def _leading_token(value: str, allowed: set[str]) -> str | None:
     """The value must BE an allowed token, or start with one followed by a
     delimiter (annotations after the token are legitimate). A comma is not a
@@ -420,23 +436,23 @@ def _table_rows(section: str) -> list[list[str]]:
 
 
 def _column(rows: list[list[str]], name: str) -> list[str]:
-    """Values of the column whose header contains `name`; [] if absent."""
+    """Values of the column whose header is `name`; [] if absent."""
     if not rows:
         return []
-    header = [h.lower() for h in rows[0]]
-    idx = next((i for i, h in enumerate(header) if name.lower() in h), None)
+    keys = [_header_key(h) for h in rows[0]]
+    idx = next((i for i, k in enumerate(keys) if k == name.lower()), None)
     if idx is None:
         return []
     return [r[idx] for r in rows[1:] if idx < len(r)]
 
 
 def _require_column(rows: list[list[str]], name: str, where: str, findings: list[str]) -> bool:
-    """True if `rows`' header has a column matching `name`; else records a
+    """True if `rows`' header has a column named `name`; else records a
     finding and returns False. An empty table is left to the dedicated
     empty-table finding, not duplicated here."""
     if not rows:
         return False
-    if not any(name.lower() in h.lower() for h in rows[0]):
+    if not any(_header_key(h) == name.lower() for h in rows[0]):
         findings.append(f"{where}: table lacks a {name!r} column")
         return False
     return True
