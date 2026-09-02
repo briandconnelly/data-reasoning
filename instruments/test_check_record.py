@@ -795,3 +795,28 @@ def test_two_dispositions_joined_by_comma_is_a_finding():
 )
 def test_annotation_after_a_delimiter_is_still_accepted(value, allowed, expect):
     assert cr._leading_token(value, allowed) == expect
+
+
+def test_unnecessary_prediction_does_not_satisfy_necessary_prediction():
+    rec = GOOD_LEDGER.replace("Necessary prediction (failure refutes)", "Unnecessary prediction")
+    assert rec != GOOD_LEDGER
+    findings = cr.check(rec)
+    assert any("lacks a 'necessary prediction' column" in f for f in findings)
+
+
+def test_outcome_rationale_does_not_satisfy_outcome():
+    rec = GOOD_LEDGER.replace("| Outcome |", "| Outcome rationale |")
+    assert rec != GOOD_LEDGER
+    assert any("lacks a 'outcome' column" in f for f in cr.check(rec))
+
+
+def test_outcome_with_a_parenthetical_does_not_satisfy_outcome():
+    rec = GOOD_LEDGER.replace("| Outcome |", "| Outcome (rationale) |")
+    assert rec != GOOD_LEDGER
+    assert any("lacks a 'outcome' column" in f for f in cr.check(rec))
+
+
+def test_the_template_header_alias_still_matches():
+    assert cr._header_key("Necessary prediction (failure refutes)") == "necessary prediction"
+    assert cr._header_key("  Outcome ") == "outcome"
+    assert cr._header_key("Outcome (rationale)") == "outcome (rationale)"
