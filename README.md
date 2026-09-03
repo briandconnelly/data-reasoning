@@ -74,17 +74,14 @@ Adding the marketplace without it clones the full evidence archive.
 
 ### Codex
 
-Codex's marketplace source form (`git-subdir`, which is the only one that carries a `ref`) cannot address a plugin at the repository root.
-So it cannot be pinned to `release` the way the Claude Code marketplace entry above is.
-Add the marketplace from the `release` branch directly instead, then install the plugin from it:
+Add the marketplace pinned to the `release` branch, then install the plugin from it:
 
 ```bash
 codex plugin marketplace add briandconnelly/data-reasoning --ref release
 codex plugin add data-reasoning@data-reasoning
 ```
 
-Adding the marketplace without `--ref release` still clones the full evidence archive.
-Codex has no per-plugin ref indirection to pull an existing `main`-added install forward the way `.claude-plugin/marketplace.json` does for Claude Code.
+Adding the marketplace without `--ref release` clones the full evidence archive.
 Start a new Codex session after installation so the bundled skills are available.
 
 ## Development
