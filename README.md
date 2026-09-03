@@ -54,6 +54,8 @@ Codex has no equivalent, so a Codex install gets the four skills and no style.
 Claude Code installs also get a PostToolUse hook (`hooks/hooks.json`) that runs `instruments/check_record.py` on any record file the agent writes and feeds structural findings back to the agent.
 What the validator may and may not check is owned by `skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`.
 Codex has no hook mechanism, so a Codex install gets the validator file and no live enforcement.
+The hook needs `python3` on the host's `PATH`.
+Without it, a record write is reported as not validated and every other write stays silent; a record whose path contains a double quote cannot be sniffed without Python and is skipped.
 
 ## Installation
 
