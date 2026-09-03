@@ -3,13 +3,14 @@
 `references/identification-review-template.md` is the agent-facing statement
 of the record's shape; `check_review.py` is the operable one. The slot labels
 necessarily live in both -- a template is read, a checker runs -- so this
-check keeps the two sets from diverging silently, the same way the gate-parity
-tests keep the authorization-gate copies aligned (AGENTS.md: one home per
-normative rule; a copy gets an instrument, not trust). Before this test, a
-template edit renaming a slot ("Assumption probes" -> "Probes") left every
-hook green while every record written from the amended template failed the
-checker -- the exact mismatch class measurement wave 1 documented as the
-checker's dominant failure mode.
+check keeps the two sets from diverging silently, the same way
+`scripts/check-shared-sections.py` keeps every skill's rendered
+authorization-gate copy identical to the source it is rendered from
+(AGENTS.md: one home per normative rule; a copy gets an instrument, not
+trust). Before this test, a template edit renaming a slot ("Assumption
+probes" -> "Probes") left every hook green while every record written from
+the amended template failed the checker -- the exact mismatch class
+measurement wave 1 documented as the checker's dominant failure mode.
 
 The checker-side set is derived from check_review.py's source (the label
 literals its slot lookups pass), not restated here, so this file adds no

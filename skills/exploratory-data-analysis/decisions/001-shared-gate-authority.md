@@ -12,8 +12,9 @@ Two statements of one safety rule diverge silently, and nothing fails when they 
 
 ## Decision
 
-Authorization gate: `hypothesis-driven-analysis/SKILL.md` § "Authorization gate (always binds)" is the single authority.
-Every other skill carries a verbatim copy, each enforced by its own parity test as a prek hook — `skills/exploratory-data-analysis/tests/test_gate_parity.py`, `skills/causal-identification-review/tests/test_gate_parity_cir.py`, `skills/decision-analysis/tests/test_gate_parity_da.py` — which fails when that copy and the authority differ in any character inside the block (blank-line padding at the block edges is strip-masked by the tests).
+Authorization gate: one authority, carried verbatim by every skill.
+The authority was `hypothesis-driven-analysis/SKILL.md`'s gate section, with a per-skill parity test as the alarm on each copy; since 2026-09-02 it is `scripts/shared-sections/authorization-gate.md`, and the copies are rendered from it rather than hand-maintained (`skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md`, and the extension at the foot of this record).
+What has not changed is the obligation this paragraph exists to state: the text is identical in every carrier, and a copy that differs in any character fails a prek hook.
 
 Costly collection: worded for exploration in this skill, because HDA's text is written for investigations; the wording is free but the semantics are not.
 The invariants every carrier's statement must preserve:
@@ -43,9 +44,9 @@ Extended 2026-08-09: `decision-analysis` joined as a carrier with the same oblig
 
 ## Consequences
 
-- A deliberate change to HDA's authorization gate now requires touching this skill in the same change — that is the point, and the parity hook enforces it.
+- A deliberate change to the authorization gate reaches this skill in the same change — that is the point, and `scripts/check-shared-sections.py` enforces it.
 - The verbatim copy is safe to ship standalone; the costly-collection invariants remain review-enforced, which is the residual risk this record accepts.
-- Full extraction of the shared contract to one repo-level source both skills consume is deferred: it edits HDA, so it batches with the owed S2/S3/S17/S18 eval reruns.
+- Full extraction of the shared contract to one repo-level source both skills consume was deferred here on the grounds that it edits HDA and so batches with the owed S2/S3/S17/S18 eval reruns; decision 007 discharged it on 2026-09-02 without owing arms, because rendering left the shipped bytes unchanged.
 
 *(Extended 2026-08-18: silent drift is no longer possible.
 `scripts/check-shared-sections.py` freezes every carrier's costly-collection and data-rules section against a golden copy, so any rewording fails a prek hook whose message points back at this file's invariant lists.
