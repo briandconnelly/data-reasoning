@@ -22,9 +22,13 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+FRONTMATTER_SCAN_BYTES = 65536
+_FRONTMATTER = re.compile(rb"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
 
 SIGNATURES = (
     "# Investigation: ",
@@ -52,6 +56,10 @@ def looks_like_record(path: str) -> bool | None:
             head = f.read(4096)
     except OSError:
         return None
+    if head.startswith(b"---"):
+        with Path(path).open("rb") as f:
+            head = f.read(FRONTMATTER_SCAN_BYTES)
+        head = _FRONTMATTER.sub(b"", head, count=1)
     try:
         first = head.lstrip().split(b"\n", 1)[0].decode("utf-8")
     except UnicodeDecodeError:

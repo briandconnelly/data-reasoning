@@ -352,10 +352,20 @@ def _unmask(cell: str) -> str:
     return cell.replace("\x00", "|")
 
 
+_FRONTMATTER = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
+
+
+def strip_frontmatter(text: str) -> str:
+    """Drop a leading YAML frontmatter block. Frontmatter is metadata a host
+    added; the record starts after it. An unterminated block is left alone."""
+    return _FRONTMATTER.sub("", text, count=1)
+
+
 def detect(text: str) -> str | None:
     """Kind of record, or None. A title signature alone is not enough: a
     user's own note titled `# Investigation: …` is not a ledger. The record
     must also carry at least one of its kind's required headings."""
+    text = strip_frontmatter(text)
     first = text.lstrip().split("\n", 1)[0]
     for prefix, kind in SIGNATURES.items():
         if first.startswith(prefix):
@@ -514,6 +524,7 @@ def _check_claim(value: str, where: str, findings: list[str]) -> None:
 
 
 def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pass per record kind
+    text = strip_frontmatter(text)
     kind = detect(text)
     if kind is None:
         raise ValueError("not a recognized record")
