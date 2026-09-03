@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "data-reasoning",
-      "source": "./",
+      "source": { "source": "github", "repo": "briandconnelly/data-reasoning", "ref": "release" },
       "category": "productivity"
     }
   ]

@@ -62,22 +62,29 @@ Without it, a record write is reported as not validated and every other write st
 ### Claude Code
 
 This repository is its own plugin marketplace (`.claude-plugin/marketplace.json`).
-Add it, then install the plugin from it:
+Add it from the `release` branch, then install the plugin from it:
 
 ```
-/plugin marketplace add briandconnelly/data-reasoning
+/plugin marketplace add briandconnelly/data-reasoning#release
 /plugin install data-reasoning@data-reasoning
 ```
 
+`#release` is a runtime-only branch rebuilt by CI on every push to `main`.
+Adding the marketplace without it clones the full evidence archive.
+
 ### Codex
 
-Add this repository as a marketplace, then install the plugin from it:
+Codex's marketplace source form (`git-subdir`, which is the only one that carries a `ref`) cannot address a plugin at the repository root.
+So it cannot be pinned to `release` the way the Claude Code marketplace entry above is.
+Add the marketplace from the `release` branch directly instead, then install the plugin from it:
 
 ```bash
-codex plugin marketplace add briandconnelly/data-reasoning
+codex plugin marketplace add briandconnelly/data-reasoning --ref release
 codex plugin add data-reasoning@data-reasoning
 ```
 
+Adding the marketplace without `--ref release` still clones the full evidence archive.
+Codex has no per-plugin ref indirection to pull an existing `main`-added install forward the way `.claude-plugin/marketplace.json` does for Claude Code.
 Start a new Codex session after installation so the bundled skills are available.
 
 ## Development
