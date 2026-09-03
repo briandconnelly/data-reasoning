@@ -18,7 +18,7 @@ def test_hooks_json_shape():
     hook = entry["hooks"][0]
     assert hook["type"] == "command"
     assert "${CLAUDE_PLUGIN_ROOT}" in hook["command"]
-    assert "check_record_hook.py" in hook["command"]
+    assert "check_record_hook.sh" in hook["command"]
 
 
 def test_plugin_manifest_declares_hooks():
