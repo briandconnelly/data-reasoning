@@ -108,6 +108,8 @@ def main() -> int:  # noqa: PLR0911
     if result.returncode == 0:
         return 0
     if result.returncode == 1:
+        if not result.stdout.strip():
+            return unavailable(file_path, f"validator exited {result.returncode}")
         print(
             f"data-reasoning: the record at {file_path} has structural findings:\n"
             f"{result.stdout}"

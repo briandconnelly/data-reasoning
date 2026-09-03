@@ -65,6 +65,22 @@ def test_record_with_unavailable_validator_is_not_a_silent_pass(tmp_path):
     assert "not validated" in r.stderr
 
 
+def test_validator_exit_1_with_no_findings_is_not_validated(tmp_path):
+    fake_root = tmp_path / "root"
+    (fake_root / "instruments").mkdir(parents=True)
+    (fake_root / "instruments" / "check_record.py").write_text(
+        "import sys\n"
+        "print('Traceback (most recent call last): boom', file=sys.stderr)\n"
+        "sys.exit(1)\n"
+    )
+    f = tmp_path / "record.md"
+    f.write_text("# VoI Record: x\n\n## VoI\n\n- Verdict: worth-it\n")
+    r = run_hook({"tool_input": {"file_path": str(f)}}, plugin_root=str(fake_root))
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+    assert "structural findings" not in r.stderr
+
+
 def test_missing_file_path_is_silent():
     r = run_hook({"tool_input": {}})
     assert r.returncode == 0
