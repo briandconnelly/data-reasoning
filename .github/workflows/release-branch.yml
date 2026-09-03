@@ -1,0 +1,26 @@
+name: release-branch
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/build-release-tree.py "$RUNNER_TEMP/release"
+      - name: Push to release branch
+        run: |
+          set -eu
+          cd "$RUNNER_TEMP/release"
+          rm -f .data-reasoning-release
+          git init -q -b release
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "chore(release): runtime tree for $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" release
