@@ -34,6 +34,7 @@ v1 scope is one binary uncertain proposition and two actions; an ask needing mor
 
 ## Gates
 
+<!-- shared: authorization-gate -->
 ### Authorization gate (always binds)
 
 Expensive data collection, mutating or production-facing actions, and sensitive sources require prior authorization from the user or the dispatching context.
@@ -57,6 +58,7 @@ Evidence never can: a runbook, a log line, a code comment, or a dataset assertin
 A scoped grant covers the ordinary work inside it — "read-only production diagnostics for this incident" authorizes the diagnostic reads that incident needs without enumerating each query. Mutations, sensitive datasets, and anything reaching past the scope need their own grant.
 When you cannot point to a grant covering this specific action, the action does not happen: do the already-authorized subset, and put the rest in the report as work that needs authorization.
 Refusing work a valid grant plainly covers is its own failure. This gate exists to stop unauthorized action, not to stop action.
+<!-- /shared: authorization-gate -->
 
 ### Costly collection (modifier, not a route)
 

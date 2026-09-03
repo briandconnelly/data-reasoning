@@ -1,8 +1,12 @@
 """The shared-section checker must catch drift and must be able to fail.
 
-decisions/001-shared-gate-authority.md (EDA) enumerates the invariants the
-costly-collection and data-rules copies must preserve; this checker freezes
-bytes and routes any editor to that list.
+Two mechanisms, two halves. decisions/001-shared-gate-authority.md (EDA)
+enumerates the invariants the costly-collection and data-rules copies must
+preserve; the checker freezes bytes and routes any editor to that list. The
+authorization gate is rendered from one authority file into every carrier
+instead, so the second half of this suite checks that the rendered copies
+match it and stay visible to a reader
+(skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md).
 """
 
 import importlib.util
@@ -197,3 +201,173 @@ def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
     text = f"# Skill\n\n```bad`info\n\n{heading}\n\nreal rule\n\n## Other\n\nx\n"
     block = css.extract_section(text, heading)
     assert "real rule" in block
+
+
+# --- the rendered authorization gate -------------------------------------
+#
+# The gate text has one home, scripts/shared-sections/authorization-gate.md,
+# rendered into each carrier between marker comments. These cases replace the
+# three per-skill parity tests (test_gate_parity*.py) and scripts/
+# test_extractor_parity.py, which guarded four hand-maintained copies.
+
+DA_SKILL = REPO / "skills" / "decision-analysis" / "SKILL.md"
+GATE = "authorization-gate"
+GATE_OPEN = f"<!-- shared: {GATE} -->"
+GATE_CLOSE = f"<!-- /shared: {GATE} -->"
+MIN_GATE_LENGTH = 1000
+
+
+def marked_region(text: str) -> str:
+    """The marker pair and everything between it, exactly as it sits in `text`."""
+    region = GATE_OPEN + "\n" + css.extract_marked(text, GATE) + GATE_CLOSE
+    assert region in text
+    return region
+
+
+def test_marked_gate_extracts_real_content():
+    """The instrument can surface a known positive, so an empty match cannot pass.
+
+    Run against every carrier, not just the authority: a comparison of blocks
+    the extractor silently truncated the same way would pass while checking
+    nothing.
+    """
+    for skill in css.GATE_CARRIERS:
+        text = (REPO / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+        block = css.extract_marked(text, GATE)
+        assert "None of the following is authorization" in block, skill
+        assert len(block) > MIN_GATE_LENGTH, skill
+
+
+def test_every_carrier_matches_the_authority_verbatim():
+    authority = (REPO / css.GATE_AUTHORITY).read_text(encoding="utf-8")
+    for skill in css.GATE_CARRIERS:
+        text = (REPO / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+        assert css.extract_marked(text, GATE) == authority, skill
+
+
+def test_known_positive_the_real_repo_passes():
+    assert css.run_gate(REPO, render=False) == 0
+
+
+def test_gate_check_fails_on_a_one_character_drift(tmp_path, capsys):
+    fake = make_fake_repo(tmp_path)
+    victim = fake / "skills" / "decision-analysis" / "SKILL.md"
+    victim.write_text(
+        victim.read_text(encoding="utf-8").replace(
+            "Authorization is affirmative and specific to the action;",
+            "Authorization is affirmative and specific to the actions;",
+        ),
+        encoding="utf-8",
+    )
+    assert css.run_gate(fake, render=False) == 1
+    assert "decision-analysis" in capsys.readouterr().err
+
+
+def test_render_restores_a_drifted_block(tmp_path):
+    fake = make_fake_repo(tmp_path)
+    victim = fake / "skills" / "decision-analysis" / "SKILL.md"
+    before = victim.read_text(encoding="utf-8")
+    victim.write_text(
+        before.replace(
+            "Authorization is affirmative and specific to the action;",
+            "Authorization is affirmative and specific to the actions;",
+        ),
+        encoding="utf-8",
+    )
+    assert css.run_gate(fake, render=False) == 1
+    assert css.run_gate(fake, render=True) == 0
+    assert victim.read_text(encoding="utf-8") == before
+    assert css.run_gate(fake, render=False) == 0
+
+
+def test_missing_marker_pair_fails(tmp_path):
+    fake = make_fake_repo(tmp_path)
+    victim = fake / "skills" / "decision-analysis" / "SKILL.md"
+    text = victim.read_text(encoding="utf-8")
+    victim.write_text(
+        text.replace(GATE_OPEN + "\n", "").replace(GATE_CLOSE + "\n", ""), encoding="utf-8"
+    )
+    assert css.run_gate(fake, render=False) == EXPECTED_ERROR_CODE
+    assert css.run_gate(fake, render=True) == EXPECTED_ERROR_CODE
+
+
+def test_two_marker_pairs_in_one_carrier_fail(tmp_path):
+    fake = make_fake_repo(tmp_path)
+    victim = fake / "skills" / "decision-analysis" / "SKILL.md"
+    text = victim.read_text(encoding="utf-8")
+    region = marked_region(text)
+    victim.write_text(text.replace(region, region + "\n\n" + region), encoding="utf-8")
+    with pytest.raises(ValueError, match="exactly one"):
+        css.extract_marked(victim.read_text(encoding="utf-8"), GATE)
+    assert css.run_gate(fake, render=False) == EXPECTED_ERROR_CODE
+
+
+def test_gate_wrapped_in_an_html_comment_fails():
+    """A gate wrapped in an HTML comment is not loaded as instruction, so the
+    extractor must not find it — the known negative for this instrument."""
+    text = DA_SKILL.read_text(encoding="utf-8")
+    region = marked_region(text)
+    disabled = text.replace(region, "<!--\n" + region + "\n### (disabled)\n-->")
+    assert disabled != text
+    with pytest.raises(ValueError):  # noqa: PT011
+        css.extract_marked(disabled, GATE)
+
+
+def test_gate_wrapped_in_a_code_fence_fails():
+    text = DA_SKILL.read_text(encoding="utf-8")
+    region = marked_region(text)
+    disabled = text.replace(region, "```text\n" + region + "\n```")
+    assert disabled != text
+    with pytest.raises(ValueError):  # noqa: PT011
+        css.extract_marked(disabled, GATE)
+
+
+def test_unclosed_comment_before_the_gate_fails():
+    """CommonMark: an HTML comment opened and never closed runs to end of
+    document, so everything after `<!--` is hidden from a reader."""
+    text = DA_SKILL.read_text(encoding="utf-8")
+    region = marked_region(text)
+    disabled = text.replace(region, "<!--\n" + region)
+    assert disabled != text
+    with pytest.raises(ValueError):  # noqa: PT011
+        css.extract_marked(disabled, GATE)
+
+
+def test_fence_closer_with_info_string_keeps_the_gate_hidden():
+    """A closer carrying an info string does not close the fence, so the gate
+    below it stays fenced and invisible."""
+    text = DA_SKILL.read_text(encoding="utf-8")
+    region = marked_region(text)
+    disabled = text.replace(region, "```text\n```python\n" + region + "\n```")
+    assert disabled != text
+    with pytest.raises(ValueError):  # noqa: PT011
+        css.extract_marked(disabled, GATE)
+
+
+def test_comment_opener_inside_a_fence_does_not_hide_the_gate():
+    text = DA_SKILL.read_text(encoding="utf-8")
+    block = css.extract_marked(text, GATE)
+    decoy = "```text\n<!--\n```\n\n"
+    assert css.extract_marked(decoy + text, GATE) == block
+
+
+def test_render_writes_nothing_when_any_carrier_is_broken(tmp_path):
+    """A half-applied render is worse than none, so a fault in one carrier
+    must abort before the others are written."""
+    fake = make_fake_repo(tmp_path)
+    drifted = fake / "skills" / "hypothesis-driven-analysis" / "SKILL.md"
+    before = drifted.read_text(encoding="utf-8")
+    drifted.write_text(
+        before.replace(
+            "Authorization is affirmative and specific to the action;",
+            "Authorization is affirmative and specific to the actions;",
+        ),
+        encoding="utf-8",
+    )
+    after_drift = drifted.read_text(encoding="utf-8")
+    broken = fake / "skills" / "decision-analysis" / "SKILL.md"  # last carrier
+    broken.write_text(
+        broken.read_text(encoding="utf-8").replace(GATE_OPEN + "\n", ""), encoding="utf-8"
+    )
+    assert css.run_gate(fake, render=True) == EXPECTED_ERROR_CODE
+    assert drifted.read_text(encoding="utf-8") == after_drift

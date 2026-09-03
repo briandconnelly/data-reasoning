@@ -13,7 +13,7 @@ A Claude Code and Codex plugin for reasoning from data: structured exploration t
 
 Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work; `causal-identification-review` is the constructive continuation when adjudication concludes nothing identifies the effect, or when a claimed design needs its identifying assumptions checked before anyone trusts it.
 `decision-analysis` is the constructive continuation when a decision hangs on what an investigation left `UNRESOLVED`: it consumes ledgers and review records as evidence, and its verdicts recommend without authorizing.
-All four skills carry the same authorization gate verbatim, and `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` names `hypothesis-driven-analysis/SKILL.md` as its single authority — three parity tests (EDA↔HDA, CIR↔HDA, DA↔HDA) keep the copies from drifting.
+All four skills carry the same authorization gate; its text lives once in `scripts/shared-sections/authorization-gate.md` and is rendered into each skill by `scripts/check-shared-sections.py`, which fails when a rendered copy drifts or is hidden.
 
 The pairing is a design claim, not a measured one.
 `hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).

@@ -51,3 +51,7 @@ Extended 2026-08-09: `decision-analysis` joined as a carrier with the same oblig
 `scripts/check-shared-sections.py` freezes every carrier's costly-collection and data-rules section against a golden copy, so any rewording fails a prek hook whose message points back at this file's invariant lists.
 The check is a change detector, not a semantic check: refreshing a golden (`--update <slug>`) is an explicit, diff-visible act, and whether the hand check against the lists above actually happened remains a review question — that is the residual this record continues to accept, now with the drift itself made loud.
 The goldens were verified against both invariant lists when first generated on 2026-08-18.)*
+
+*(Extended 2026-09-02: the authorization gate is no longer a set of hand-maintained copies with parity tests over them.
+Its text now has one home, and the copies in the four `SKILL.md` files are rendered from it — see `skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md`, which supersedes this record's authorization-gate paragraph above and the three parity tests it names.
+The costly-collection and data-rules invariant lists in this record are unaffected: those sections are reworded per skill by design and keep the golden-freeze mechanism.)*
