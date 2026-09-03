@@ -46,3 +46,6 @@ A duplication appears that the citation check cannot see and inspection did not 
 ## Where the rule lives
 
 `AGENTS.md`, repo-wide. SKILL.md owns this skill's normative rules; the reference files point at it from the sites where a summary used to be.
+
+*(Extended 2026-09-02: text that must ship inside more than one standalone skill — where a pointer would not reach the reader — is rendered from one source rather than hand-copied.
+See `skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md`; the rule still lives in `AGENTS.md`.)*
