@@ -820,3 +820,23 @@ def test_the_template_header_alias_still_matches():
     assert cr._header_key("Necessary prediction (failure refutes)") == "necessary prediction"
     assert cr._header_key("  Outcome ") == "outcome"
     assert cr._header_key("Outcome (rationale)") == "outcome (rationale)"
+
+
+def test_frontmatter_does_not_hide_a_record():
+    rec = "---\ntags: [analysis]\n---\n" + GOOD_LEDGER.replace("CONSISTENT", "SUPPORTED")
+    assert any("outcome" in f.lower() for f in cr.check(rec))
+
+
+def test_crlf_frontmatter_does_not_hide_a_record():
+    rec = "---\r\ntags: [analysis]\r\n---\r\n" + GOOD_LEDGER.replace("CONSISTENT", "SUPPORTED")
+    assert any("outcome" in f.lower() for f in cr.check(rec))
+
+
+def test_frontmatter_alone_is_not_a_record():
+    assert cr.detect("---\ntitle: x\n---\n# Notes\n") is None
+
+
+def test_unterminated_frontmatter_is_left_alone():
+    assert cr.strip_frontmatter("---\ntitle: x\n# Investigation: y\n") == (
+        "---\ntitle: x\n# Investigation: y\n"
+    )

@@ -134,3 +134,24 @@ def test_invalid_byte_past_a_non_record_title_is_still_silent(tmp_path):
     r = run_hook({"tool_input": {"file_path": str(f)}})
     assert r.returncode == 0, r.stderr
     assert not r.stderr
+
+
+def test_record_under_frontmatter_reaches_the_validator(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(
+        "---\ntags: [x]\n---\n# Decision Record: ship?\n\n## Verdict\n\n- Verdict: optimal\n"
+    )
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2
+    assert "verdict" in r.stderr.lower()
+
+
+def test_record_under_long_frontmatter_reaches_the_validator(tmp_path):
+    f = tmp_path / "record.md"
+    padding = "".join(f"k{i}: {'v' * 60}\n" for i in range(120))  # > 4,096 bytes
+    f.write_text(
+        "---\n" + padding + "---\n# Decision Record: ship?\n\n## Verdict\n\n- Verdict: optimal\n"
+    )
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2
+    assert "verdict" in r.stderr.lower()
