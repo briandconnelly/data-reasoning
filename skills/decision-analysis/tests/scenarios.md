@@ -16,6 +16,7 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 - Every scenario below: 0 arms run.
 - The SKILL.md description's routing behavior: unmeasured.
 - The two HDA seam sentences: recorded as HDA's own debt in `skills/hypothesis-driven-analysis/tests/scenarios.md` § Owed measurements.
+- The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
 
 ## Scenarios
 

@@ -157,7 +157,10 @@ Report gross information value G = R0 - R1 before subtracting collection costs.
 With full cost C known, report net value G - C and compare it with zero.
 The probability that the signal flips the decision may appear as a diagnostic, never as the value: a rarely-flipping signal can be worth a great deal when it averts a catastrophic loss, and a frequently-flipping one can be worth nothing when the consequences are nearly tied.
 With `upper-bound` and defensible current state probabilities and losses, compute the expected value of perfect information: R0 minus the expected loss of choosing the best action with the state known.
-Without defensible state probabilities, a finite loss matrix can instead supply a loose bound, max(loss) - min(loss), over possible priors and signals; name that basis and label any hypothetical inputs as conditions.
+Without defensible state probabilities, a finite v1 binary loss matrix can instead supply the tightest perfect-information bound it licenses over the unrestricted prior p in [0,1].
+Compute B = max_p { min_a [p L(a,H) + (1-p) L(a,not-H)] - p min_a L(a,H) - (1-p) min_a L(a,not-H) }.
+The actual pull's value cannot exceed B; state that p is a `sensitivity-only` condition, never a belief.
+Do not substitute max(loss) - min(loss), which can be looser than B.
 When the inputs do not support a finite bound, report it as unavailable and name the missing inputs instead of inventing a number.
 An upper bound is never the actual pull's break-even price, and a cost below it does not establish that the pull is worth taking.
 
@@ -169,7 +172,8 @@ Report a numeric threshold for a remaining fee only when all other cost componen
 A negative remaining-fee threshold means no nonnegative fee breaks even; missing cost never discards an otherwise usable signal model.
 
 **Verdict.**
-Use `upper-bound-only` for `upper-bound`, including when the bound is unavailable; it makes no purchase recommendation.
+With `upper-bound`, use `not-worth-it` when the full stated cost is at least the finite bound, because net value is then nonpositive under every pull compatible with the inputs.
+Otherwise use `upper-bound-only`, including when the bound is unavailable; it makes no purchase recommendation.
 For `signal-model`, use `break-even-only` when full cost is unknown; otherwise use `worth-it` (net value positive across the robustness class), `not-worth-it` (net value nonpositive across it), or `sensitive` (positive and nonpositive net values both occur within the class; crossover reported).
 Those five values are the closed verdict set.
 A `worth-it` verdict does not authorize the pull (§ Numeric Policy).

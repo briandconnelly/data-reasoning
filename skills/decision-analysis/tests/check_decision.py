@@ -15,9 +15,10 @@ Identification basis and, when so, non-`none` Identification conditions; the
 binary/two-action v1 scope (two ' vs '-separated actions, exactly two
 consequence action rows and two state columns on every row -- records
 outside it are rejected, not approximated); exactly one provenance mention
-on each governed slot (Loss ratio, Decision threshold, Prior odds, Prior
-class swept, Loss range swept, voi Signal model), with a licensed sentinel
-accepted only bare -- never annotated; a sourced evidence row
+on each governed numeric slot (Loss ratio, Decision threshold, Prior odds,
+Prior class swept, Loss range swept), and one or more on the voi Signal
+model, with a licensed sentinel accepted only bare -- never annotated; a
+sourced evidence row
 (externally-sourced or estimated-from-data-in-hand) carrying a non-empty
 source cell in an exactly-four-cell row; loss numbers parsing as positive
 numbers or ranges and carrying belief-grade provenance under a robust
@@ -563,6 +564,19 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     return failures
 
 
+def _check_voi_signal_model(signal: str, basis: str, failures: list[str]) -> None:
+    """Apply the signal model's sentinel, provenance, and basis coupling."""
+    if _bare(signal) == "unavailable":
+        if signal.strip() != "unavailable":
+            failures.append(
+                "Signal model sentinel 'unavailable' must appear bare, with no annotation"
+            )
+    elif not _PROVENANCE_MENTION.findall(signal):
+        failures.append("slot '- Signal model:' must carry one or more provenance classes")
+    if ("sensitivity-only" in signal or _bare(signal) == "unavailable") and basis != "upper-bound":
+        failures.append("an unavailable or sensitivity-only Signal model requires upper-bound")
+
+
 def _check_voi(sections: dict[str, str]) -> list[str]:
     failures: list[str] = []
     voi = sections["VoI"]
@@ -572,14 +586,12 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
             f"Verdict value {verdict!r} is not in the closed set {sorted(VOI_VERDICTS)}"
         )
     signal = _voi_prose(voi, "Signal model:") or ""
-    failures.extend(_check_slot_provenance((("Signal model:", signal),), "unavailable"))
     basis = _bare(field(voi, "Value basis:") or "")
     if basis not in VOI_BASES:
         failures.append(f"Value basis {basis!r} is not in the closed set {sorted(VOI_BASES)}")
-    if ("sensitivity-only" in signal or _bare(signal) == "unavailable") and basis != "upper-bound":
-        failures.append("an unavailable or sensitivity-only Signal model requires upper-bound")
-    if basis == "upper-bound" and verdict != "upper-bound-only":
-        failures.append("upper-bound Value basis requires the upper-bound-only verdict")
+    _check_voi_signal_model(signal, basis, failures)
+    if basis == "upper-bound" and verdict not in {"upper-bound-only", "not-worth-it"}:
+        failures.append("upper-bound Value basis requires upper-bound-only or not-worth-it")
     if basis == "signal-model" and verdict == "upper-bound-only":
         failures.append("signal-model Value basis cannot carry an upper-bound-only verdict")
     cost = (field(voi, "Cost:") or "").strip()
@@ -590,6 +602,8 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
                 "price the deliverable; "
                 "the verdict must be break-even-only"
             )
+        if basis == "upper-bound" and verdict == "not-worth-it":
+            failures.append("an upper-bound not-worth-it verdict requires a stated full Cost")
     elif not re.search(r"\d", cost):
         failures.append(
             "Cost must state a measured cost containing a number, "

@@ -23,6 +23,7 @@ The change proceeds as a definition and schema correction: the previously confla
 Arithmetic and distinction scores are 7/7 for both arms; the new schema passes 7/7.
 For example, the new answer file says the missing-delay threshold is "$25-D", and the missing-model record distinguishes its 50 bound from the actual report's unknown value.
 The expected 14 validation records and 19 canary records are all archived; answer summaries are additional files, not additional scored cells.
+This evidence applies only to the archived input snapshots; the subsequent bound, provenance, and verdict amendments are listed as unmeasured in `../scenarios.md`.
 
 ## Canary findings
 

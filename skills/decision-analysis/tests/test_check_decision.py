@@ -118,13 +118,32 @@ def _upper_bound_voi() -> str:
     )
 
 
-def test_unknown_signal_model_with_stated_cost_accepts_only_bound_verdict():
+def test_unknown_signal_model_with_stated_cost_accepts_bound_or_nonpositive_verdict():
     assert check(_upper_bound_voi()) == []
-    for verdict in ("worth-it", "not-worth-it", "sensitive", "break-even-only"):
+    for verdict in ("worth-it", "sensitive", "break-even-only"):
         bad = replace_once(
             _upper_bound_voi(), "- Verdict: upper-bound-only", f"- Verdict: {verdict}"
         )
-        assert any("upper-bound-only" in msg for msg in check(bad)), verdict
+        assert any("upper-bound" in msg for msg in check(bad)), verdict
+
+
+def test_upper_bound_schema_permits_bound_determined_not_worth_it():
+    text = replace_once(
+        _upper_bound_voi(),
+        "- Value calculation: net expected improvement 0.4 incident-equivalents after "
+        "subtracting one day's delay, positive across the swept class",
+        "- Value calculation: finite perfect-information bound: 50; full cost: 200; "
+        "therefore net value is nonpositive",
+    )
+    text = replace_once(text, "- Cost: 1 day", "- Cost: 200")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert check(text) == []
+
+
+def test_unknown_signal_model_without_full_cost_cannot_be_not_worth_it():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: none stated")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("stated full Cost" in msg for msg in check(text))
 
 
 def test_unknown_signal_model_and_cost_still_accepts_bound_verdict():
@@ -180,13 +199,18 @@ def test_voi_prose_slots_accept_continuation_paragraphs():
         VALID_VOI,
         "- Signal model: a clean rerun halves the odds; a dirty rerun triples them "
         "— provenance: estimated-from-data-in-hand",
-        "- Signal model:\nA clean rerun halves the odds; a dirty rerun triples them.\n"
-        "Calibration provenance: `estimated-from-data-in-hand`",
+        "- Signal model:\nA clean rerun halves the odds — provenance: externally-sourced.\n"
+        "The owner-supplied prior has provenance: `user-elicited`.",
     )
     text = replace_once(
         text, "- Value calculation: net expected", "- Value calculation:\n\nnet expected"
     )
     assert check(text) == []
+
+
+def test_voi_signal_model_requires_at_least_one_provenance_class():
+    text = replace_once(VALID_VOI, "— provenance: estimated-from-data-in-hand", "")
+    assert any("one or more provenance" in msg for msg in check(text))
 
 
 def test_unknown_code_formatted_provenance_still_fails():
