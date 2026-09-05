@@ -17,7 +17,15 @@ actually contains.
 
 from pathlib import Path
 
-from check_decision import EXIT_UNVERIFIABLE, PROVENANCE, check, main, parse_range, parse_sections
+from check_decision import (
+    EXIT_UNVERIFIABLE,
+    PROVENANCE,
+    check,
+    main,
+    parse_quantity,
+    parse_range,
+    parse_sections,
+)
 
 FIXTURES = Path(__file__).parent
 
@@ -87,7 +95,9 @@ VALID_VOI = """# VoI Record: rerun the load test before deciding
 - Route: voi
 - Pending decision: ship now vs hold one week, leaning hold
 - Signal model: a clean rerun halves the odds; a dirty rerun triples them — provenance: estimated-from-data-in-hand
+- Value basis: signal-model
 - Value calculation: net expected improvement 0.4 incident-equivalents after subtracting one day's delay, positive across the swept class
+- Upper bound: not applicable
 - Cost: 1 day
 - Verdict: worth-it
 """
@@ -104,6 +114,180 @@ def test_known_positive_decide_passes():
 
 def test_known_positive_voi_passes():
     assert check(VALID_VOI) == []
+
+
+def _upper_bound_voi() -> str:
+    text = replace_once(VALID_VOI, "- Value basis: signal-model", "- Value basis: upper-bound")
+    text = replace_once(text, "- Verdict: worth-it", "- Verdict: upper-bound-only")
+    text = replace_once(
+        text,
+        "- Signal model: a clean rerun halves the odds; a dirty rerun triples them "
+        "— provenance: estimated-from-data-in-hand",
+        "- Signal model: unavailable",
+    )
+    return replace_once(
+        text, "- Upper bound: not applicable", "- Upper bound: 50 incident-equivalents"
+    )
+
+
+def test_unknown_signal_model_with_stated_cost_accepts_bound_or_nonpositive_verdict():
+    assert check(_upper_bound_voi()) == []
+    for verdict in ("worth-it", "sensitive", "break-even-only"):
+        bad = replace_once(
+            _upper_bound_voi(), "- Verdict: upper-bound-only", f"- Verdict: {verdict}"
+        )
+        assert any("upper-bound" in msg for msg in check(bad)), verdict
+
+
+def test_upper_bound_schema_permits_bound_determined_not_worth_it():
+    text = replace_once(
+        _upper_bound_voi(),
+        "- Value calculation: net expected improvement 0.4 incident-equivalents after "
+        "subtracting one day's delay, positive across the swept class",
+        "- Value calculation: finite perfect-information bound: 50; full cost: 200; "
+        "therefore net value is nonpositive",
+    )
+    text = replace_once(text, "- Cost: 1 day", "- Cost: 200 incident-equivalents")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert check(text) == []
+
+
+def test_unknown_signal_model_without_full_cost_cannot_be_not_worth_it():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: none stated")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("stated full Cost" in msg for msg in check(text))
+
+
+def test_upper_bound_not_worth_it_requires_cost_at_least_bound():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: 10 incident-equivalents")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("Cost at least Upper bound" in msg for msg in check(text))
+
+
+def test_upper_bound_not_worth_it_requires_matching_units():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: 200 days")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("Upper bound's unit" in msg for msg in check(text))
+
+
+def test_upper_bound_not_worth_it_requires_finite_bound():
+    text = replace_once(
+        _upper_bound_voi(), "- Upper bound: 50 incident-equivalents", "- Upper bound: unavailable"
+    )
+    text = replace_once(text, "- Cost: 1 day", "- Cost: 200 incident-equivalents")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("finite Upper bound" in msg for msg in check(text))
+
+
+def test_unknown_signal_model_and_cost_still_accepts_bound_verdict():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: none stated")
+    assert check(text) == []
+
+
+def test_hypothetical_signal_model_accepts_bound_basis():
+    text = replace_once(
+        _upper_bound_voi(),
+        "- Signal model: unavailable",
+        "- Signal model: perfect classification — provenance: sensitivity-only",
+    )
+    assert check(text) == []
+
+
+def test_unknown_model_cannot_claim_signal_specific_break_even():
+    text = replace_once(
+        _upper_bound_voi(), "- Value basis: upper-bound", "- Value basis: signal-model"
+    )
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: break-even-only")
+    text = replace_once(text, "- Cost: 1 day", "- Cost: none stated")
+    assert any("requires upper-bound" in msg for msg in check(text))
+
+
+def test_signal_model_cannot_claim_upper_bound_verdict():
+    text = replace_once(VALID_VOI, "- Verdict: worth-it", "- Verdict: upper-bound-only")
+    assert any("cannot carry" in msg for msg in check(text))
+
+
+def test_signal_model_requires_not_applicable_upper_bound():
+    text = replace_once(VALID_VOI, "- Upper bound: not applicable", "- Upper bound: unavailable")
+    assert any("not applicable" in msg for msg in check(text))
+
+
+def test_stated_full_cost_requires_net_value_verdict():
+    text = replace_once(VALID_VOI, "- Verdict: worth-it", "- Verdict: break-even-only")
+    assert any("net-value verdict" in msg for msg in check(text))
+
+
+def test_value_basis_is_required_and_closed():
+    for replacement in ("", "- Value basis: price-bound\n"):
+        text = replace_once(VALID_VOI, "- Value basis: signal-model\n", replacement)
+        assert any("Value basis" in msg for msg in check(text))
+
+
+def test_unavailable_model_sentinel_must_be_bare():
+    text = replace_once(
+        _upper_bound_voi(),
+        "- Signal model: unavailable",
+        "- Signal model: unavailable — provenance: sensitivity-only",
+    )
+    assert any("bare" in msg for msg in check(text))
+
+
+def test_voi_prose_slots_accept_continuation_paragraphs():
+    text = replace_once(
+        VALID_VOI,
+        "- Signal model: a clean rerun halves the odds; a dirty rerun triples them "
+        "— provenance: estimated-from-data-in-hand",
+        "- Signal model:\nA clean rerun halves the odds — provenance: externally-sourced.\n"
+        "The owner-supplied prior has provenance: `user-elicited`.",
+    )
+    text = replace_once(
+        text, "- Value calculation: net expected", "- Value calculation:\n\nnet expected"
+    )
+    assert check(text) == []
+
+
+def test_voi_signal_model_requires_at_least_one_provenance_class():
+    text = replace_once(VALID_VOI, "— provenance: estimated-from-data-in-hand", "")
+    assert any("one or more provenance" in msg for msg in check(text))
+
+
+def test_unknown_code_formatted_provenance_still_fails():
+    text = replace_once(
+        VALID_VOI,
+        "provenance: estimated-from-data-in-hand",
+        "provenance: `guessed`",
+    )
+    assert any("closed set" in msg for msg in check(text))
+
+
+def test_voi_empty_calculation_cannot_borrow_next_slot():
+    text = replace_once(
+        VALID_VOI,
+        "- Value calculation: net expected improvement 0.4 incident-equivalents after "
+        "subtracting one day's delay, positive across the swept class",
+        "- Value calculation:\n",
+    )
+    assert any("Value calculation" in msg and "empty" in msg for msg in check(text))
+
+
+def test_voi_signal_provenance_cannot_be_borrowed_from_calculation():
+    text = replace_once(VALID_VOI, "— provenance: estimated-from-data-in-hand", "")
+    text = replace_once(
+        text,
+        "- Value calculation:",
+        "- Value calculation: provenance: estimated-from-data-in-hand;",
+    )
+    assert any("Signal model" in msg and "provenance" in msg for msg in check(text))
+
+
+def test_voi_prose_stops_at_unrecognized_bullet_or_heading():
+    for boundary in ("- Note:", "### Note"):
+        text = replace_once(
+            VALID_VOI,
+            "— provenance: estimated-from-data-in-hand",
+            f"\n{boundary}\nprovenance: estimated-from-data-in-hand",
+        )
+        assert any("Signal model" in msg and "provenance" in msg for msg in check(text))
 
 
 def test_parse_sections_finds_all_decide_sections():
@@ -291,11 +475,11 @@ def test_robust_verdict_with_sensitivity_only_losses_fails():
     assert any("loss" in msg.lower() for msg in check(bad))
 
 
-def test_voi_sensitivity_only_signal_model_requires_break_even_only():
+def test_voi_sensitivity_only_signal_model_requires_upper_bound():
     bad = replace_once(
         VALID_VOI, "provenance: estimated-from-data-in-hand", "provenance: sensitivity-only"
     )
-    assert any("break-even-only" in msg for msg in check(bad))
+    assert any("upper-bound" in msg for msg in check(bad))
 
 
 def test_voi_missing_slot_fails():
@@ -328,6 +512,12 @@ def test_parse_range_single_dashes_and_order():
     assert parse_range("0.25-1.0") == (0.25, 1.0)
     assert parse_range("1.0–0.25") is None
     assert parse_range("unknown") is None
+
+
+def test_parse_quantity_requires_a_nonnegative_decimal_and_unit():
+    assert parse_quantity("50 incident-equivalents") == (50.0, "incident-equivalents")
+    assert parse_quantity("50") is None
+    assert parse_quantity("$50") is None
 
 
 def test_unparseable_prior_odds_fails_closed():

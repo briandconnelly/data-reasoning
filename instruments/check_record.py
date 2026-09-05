@@ -55,7 +55,7 @@ OUTCOMES = {"NOT_TESTED", "CONSISTENT", "CONTRADICTED", "NON_DISCRIMINATING"}
 DISPOSITIONS = {"identified-if", "assumption-contradicted", "unresolved", "not-constructible"}
 ROUTES = {"review", "construct", "bound"}
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
-VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only"}
+VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 
 # A template placeholder is `<` + a letter + text without `<`, `>`, `=` + `>`.
 # Inequalities (`< 1.5`, `<5%`) start with a space or digit; HTML attributes

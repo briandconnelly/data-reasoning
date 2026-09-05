@@ -1,7 +1,8 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status: authored only — no arm has run, and nothing below is a result.**
+**Status: the original scenarios below are authored only — no arm of those fixtures has run, and nothing below is a result.**
+Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
 Every fixture named here is still to be generated; generating fixtures deterministically (with validators in the house pattern) and running arms is the recorded follow-up, and a fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.
 Trigger scenarios load a catalog containing this skill's description AND the three siblings', because the failure under test is collision; record which skill activated and, if this one, which route it took.
@@ -15,6 +16,7 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 - Every scenario below: 0 arms run.
 - The SKILL.md description's routing behavior: unmeasured.
 - The two HDA seam sentences: recorded as HDA's own debt in `skills/hypothesis-driven-analysis/tests/scenarios.md` § Owed measurements.
+- The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
 
 ## Scenarios
 

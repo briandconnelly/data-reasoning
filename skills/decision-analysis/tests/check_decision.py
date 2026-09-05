@@ -15,9 +15,10 @@ Identification basis and, when so, non-`none` Identification conditions; the
 binary/two-action v1 scope (two ' vs '-separated actions, exactly two
 consequence action rows and two state columns on every row -- records
 outside it are rejected, not approximated); exactly one provenance mention
-on each governed slot (Loss ratio, Decision threshold, Prior odds, Prior
-class swept, Loss range swept, voi Signal model), with a licensed sentinel
-accepted only bare -- never annotated; a sourced evidence row
+on each governed numeric slot (Loss ratio, Decision threshold, Prior odds,
+Prior class swept, Loss range swept), and one or more on the voi Signal
+model, with a licensed sentinel accepted only bare -- never annotated; a
+sourced evidence row
 (externally-sourced or estimated-from-data-in-hand) carrying a non-empty
 source cell in an exactly-four-cell row; loss numbers parsing as positive
 numbers or ranges and carrying belief-grade provenance under a robust
@@ -25,8 +26,8 @@ verdict, each field checked independently; a Recommended action naming one
 of the two framed actions under `robust`/`dominated` and reading exactly
 `returned to owner` under a sensitive verdict; a `dominated` verdict's four
 belief slots reading exactly `none needed`, with no trailing annotation; the
-voi signal-model/verdict coupling and the Cost grammar (a value containing a
-number, or exactly `none stated`, which couples to `break-even-only`); and
+voi signal-model/value-basis/verdict coupling and the quantity grammar for
+Cost and Upper bound; and
 (arithmetic gates) recomputation of the posterior-odds interval and, when a
 numeric decision threshold is recorded, of the prior-odds crossover interval
 (both endpoints) against the swept prior class. Required numeric fields that
@@ -38,8 +39,8 @@ Explicitly NOT this checker's claim: whether the record preceded reasoning
 calibrated or its named source real, whether the state model is exhaustive,
 whether the swept prior class or loss range is honest, whether a `dominated`
 verdict's statewise-domination claim holds (structural presence only),
-whether the voi Value calculation's prose arithmetic is correct (voi numerics
-are not recomputed in v1), whether the route was the right one, or whether
+whether the voi Value calculation's prose arithmetic and bound derivation are
+correct (voi numerics are not recomputed in v1), whether the route was the right one, or whether
 any prose entry is semantically adequate. Passing this checker is
 consistency, not validity.
 
@@ -61,7 +62,10 @@ from pathlib import Path
 
 ROUTES = frozenset({"decide", "voi"})
 DECIDE_VERDICTS = frozenset({"robust", "prior-sensitive", "loss-sensitive", "dominated"})
-VOI_VERDICTS = frozenset({"worth-it", "not-worth-it", "sensitive", "break-even-only"})
+VOI_VERDICTS = frozenset(
+    {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
+)
+VOI_BASES = frozenset({"signal-model", "upper-bound"})
 PROVENANCE = frozenset(
     {"user-elicited", "externally-sourced", "estimated-from-data-in-hand", "sensitivity-only"}
 )
@@ -101,7 +105,9 @@ VOI_LABELS: dict[str, tuple[str, ...]] = {
         "Route:",
         "Pending decision:",
         "Signal model:",
+        "Value basis:",
         "Value calculation:",
+        "Upper bound:",
         "Cost:",
         "Verdict:",
     ),
@@ -118,8 +124,9 @@ _SCOPE_TABLE_COLUMNS = 3
 _EVIDENCE_ROW_CELLS = 4
 
 _SECTION = re.compile(r"^## (.+?)\s*$", re.MULTILINE)
-_PROVENANCE_MENTION = re.compile(r"provenance:\s*([a-z-]+)")
+_PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([a-z-]+)`?")
 _RANGE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*(?:[–-]\s*(\d+(?:\.\d+)?))?\s*$")  # noqa: RUF001
+_QUANTITY = re.compile(r"^\s*(\d+(?:\.\d+)?)\s+([A-Za-z][A-Za-z0-9 _/-]*)\s*$")
 _SEPARATOR_CELL = re.compile(r"^:?-+:?$")
 _REL_TOLERANCE = 0.01
 
@@ -150,6 +157,24 @@ def field(section_text: str, label: str) -> str | None:
     return None
 
 
+def _voi_prose(section_text: str, label: str) -> str | None:
+    """Read a VoI prose slot through its continuation paragraphs.
+
+    Stop at any following bullet or heading, including an unrecognized label,
+    so a neighboring slot cannot supply missing content or provenance.
+    """
+    value: list[str] | None = None
+    for line in section_text.splitlines():
+        stripped = line.strip()
+        if value is not None:
+            if stripped.startswith(("- ", "#")):
+                break
+            value.append(line)
+        elif stripped.startswith(f"- {label}"):
+            value = [stripped[len(f"- {label}") :].strip()]
+    return "\n".join(value).strip() if value is not None else None
+
+
 def parse_range(value: str) -> tuple[float, float] | None:
     """Parse ``3`` or ``0.25-1.0`` (en dash or hyphen) into an ordered (low, high)."""
     m = _RANGE.match(value)
@@ -160,6 +185,14 @@ def parse_range(value: str) -> tuple[float, float] | None:
     if low > high:
         return None
     return (low, high)
+
+
+def parse_quantity(value: str) -> tuple[float, str] | None:
+    """Parse a nonnegative decimal followed by its machine-comparable unit."""
+    m = _QUANTITY.match(value)
+    if not m:
+        return None
+    return float(m.group(1)), " ".join(m.group(2).lower().split())
 
 
 def _bare(value: str) -> str:
@@ -202,7 +235,11 @@ def _require_slots(
                     f"slot '- {label}' appears {count} times in '{section_name}'; "
                     "each label must appear exactly once"
                 )
-            value = field(body, label)
+            value = (
+                _voi_prose(body, label)
+                if section_name == "VoI" and label in ("Signal model:", "Value calculation:")
+                else field(body, label)
+            )
             if value is None:
                 failures.append(f"section '{section_name}' is missing required slot '- {label}'")
             elif not value and label not in ("Consequences:", "Evidence:"):
@@ -537,6 +574,51 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     return failures
 
 
+def _check_voi_signal_model(signal: str, basis: str, failures: list[str]) -> None:
+    """Apply the signal model's sentinel, provenance, and basis coupling."""
+    if _bare(signal) == "unavailable":
+        if signal.strip() != "unavailable":
+            failures.append(
+                "Signal model sentinel 'unavailable' must appear bare, with no annotation"
+            )
+    elif not _PROVENANCE_MENTION.findall(signal):
+        failures.append("slot '- Signal model:' must carry one or more provenance classes")
+    if ("sensitivity-only" in signal or _bare(signal) == "unavailable") and basis != "upper-bound":
+        failures.append("an unavailable or sensitivity-only Signal model requires upper-bound")
+
+
+def _check_voi_upper_bound(
+    basis: str, bound: str, cost: str, verdict: str, failures: list[str]
+) -> None:
+    """Validate the bound's basis-specific sentinel and a no-buy comparison."""
+    if basis == "signal-model":
+        if bound != "not applicable":
+            failures.append("signal-model Value basis requires Upper bound 'not applicable'")
+        return
+    if bound == "unavailable":
+        if verdict == "not-worth-it":
+            failures.append("an upper-bound not-worth-it verdict requires a finite Upper bound")
+        return
+    bound_quantity = parse_quantity(bound)
+    if bound_quantity is None:
+        failures.append(
+            "Upper bound must be 'unavailable' or a nonnegative decimal followed by its unit"
+        )
+        return
+    if verdict != "not-worth-it":
+        return
+    cost_quantity = parse_quantity(cost)
+    if cost_quantity is None:
+        failures.append("an upper-bound not-worth-it verdict requires a stated full Cost")
+        return
+    if cost_quantity[1] != bound_quantity[1]:
+        failures.append(
+            "an upper-bound not-worth-it verdict requires Cost in the Upper bound's unit"
+        )
+    elif cost_quantity[0] + _REL_TOLERANCE * max(bound_quantity[0], 1) < bound_quantity[0]:
+        failures.append("an upper-bound not-worth-it verdict requires Cost at least Upper bound")
+
+
 def _check_voi(sections: dict[str, str]) -> list[str]:
     failures: list[str] = []
     voi = sections["VoI"]
@@ -545,22 +627,34 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
         failures.append(
             f"Verdict value {verdict!r} is not in the closed set {sorted(VOI_VERDICTS)}"
         )
-    signal = field(voi, "Signal model:") or ""
-    failures.extend(_check_slot_provenance((("Signal model:", signal),)))
-    if "sensitivity-only" in signal and verdict != "break-even-only":
-        failures.append("a sensitivity-only signal model licenses only the break-even-only verdict")
+    signal = _voi_prose(voi, "Signal model:") or ""
+    basis = _bare(field(voi, "Value basis:") or "")
+    if basis not in VOI_BASES:
+        failures.append(f"Value basis {basis!r} is not in the closed set {sorted(VOI_BASES)}")
+    _check_voi_signal_model(signal, basis, failures)
+    if basis == "upper-bound" and verdict not in {"upper-bound-only", "not-worth-it"}:
+        failures.append("upper-bound Value basis requires upper-bound-only or not-worth-it")
+    if basis == "signal-model" and verdict == "upper-bound-only":
+        failures.append("signal-model Value basis cannot carry an upper-bound-only verdict")
+    bound = (field(voi, "Upper bound:") or "").strip()
     cost = (field(voi, "Cost:") or "").strip()
+    _check_voi_upper_bound(basis, bound, cost, verdict, failures)
     if cost == "none stated":
-        if verdict != "break-even-only":
+        if basis == "signal-model" and verdict != "break-even-only":
             failures.append(
-                "an unstated cost makes the break-even price the deliverable; "
+                "an unstated full cost with signal-model basis makes the break-even "
+                "price the deliverable; "
                 "the verdict must be break-even-only"
             )
-    elif not re.search(r"\d", cost):
+        if basis == "upper-bound" and verdict == "not-worth-it":
+            failures.append("an upper-bound not-worth-it verdict requires a stated full Cost")
+    elif parse_quantity(cost) is None:
         failures.append(
-            "Cost must state a measured cost containing a number, "
+            "Cost must state a nonnegative decimal followed by its unit, "
             f"or read exactly 'none stated'; found {cost!r}"
         )
+    elif basis == "signal-model" and verdict == "break-even-only":
+        failures.append("a stated full Cost with signal-model basis requires a net-value verdict")
     return failures
 
 

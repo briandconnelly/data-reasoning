@@ -80,7 +80,7 @@ Record provenance for every source, including the source of every number the rec
 This section is how the skill coexists with `hypothesis-driven-analysis`'s rule "Do not invent numeric confidence values": every number here is either sourced or explicitly hypothetical, and the two are never mixed.
 
 Every prior, likelihood ratio, loss, threshold, and signal-model number carries exactly one provenance class: `user-elicited`, `externally-sourced`, `estimated-from-data-in-hand`, or `sensitivity-only`.
-A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), and the voi route's bounds under § The VoI Route — never in Evidence and update as an update, and never reported as a probability the analysis holds.
+A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), and the voi route's break-even mode — never in Evidence and update as an update, and never reported as a probability the analysis holds.
 An `externally-sourced` or `estimated-from-data-in-hand` likelihood ratio names its source, reference class, and conditioning set; a number that cannot name them is `sensitivity-only`, whatever it looks like.
 
 Priors are robustness-first: the analysis may posit reference or skeptical priors as `sensitivity-only`, and a `robust` verdict requires the same action to be preferred across the entire stated prior class; otherwise the verdict is `prior-sensitive` with the crossover reported and the judgment handed back to the decision owner.
@@ -136,58 +136,26 @@ The block states facts, crossovers, and open questions only; it never prescribes
 ## The VoI Route
 
 Write the record's VoI block from the template before the analysis that fills it.
-Seven slots:
+Five slots:
 
 **Pending decision.**
 The two actions and the current leaning — by pointer when a decide record or costly-collection plan exists, restated in a sentence when not.
 When no decision can be named after one clarifying question, decline the route: information has value only through a decision it could change.
 
 **Signal model.**
-Record what the pull could return, each return's predictive probability, and the conditional state probabilities after each return, with provenance per § Numeric Policy.
-An absent model is recorded as exactly `unavailable`, without an annotation; explain the missing inputs in Value calculation.
-
-**Value basis.**
-The closed set is `signal-model` or `upper-bound`.
-Use `signal-model` only when the current state probabilities, signal model, and decision losses support an expected-value calculation; otherwise use `upper-bound`.
-If any required probability, signal-model, or loss input is missing or `sensitivity-only`, use `upper-bound`.
+What the pull could return, and what each return would do to the posterior, with provenance per § Numeric Policy.
+A `sensitivity-only` signal model drops the record to break-even mode, and the record says so.
 
 **Value calculation.**
-With `signal-model`, compute current minimum expected loss R0 and expected minimum loss after the signal R1, weighting each return by its predictive probability and choosing the action separately after each return.
-Report gross information value G = R0 - R1 before subtracting collection costs.
-With full cost C known, report net value G - C and compare it with zero.
+Value of information is the expected improvement in the chosen action's outcome from deciding after the signal instead of before, net of the pull's full cost — price, delay, opportunity — so the deliverable is one net value, compared with zero.
 The probability that the signal flips the decision may appear as a diagnostic, never as the value: a rarely-flipping signal can be worth a great deal when it averts a catastrophic loss, and a frequently-flipping one can be worth nothing when the consequences are nearly tied.
-
-**Upper-bound semantics.**
-With defensible current state probabilities and losses, the upper bound is the expected value of perfect information: R0 minus the expected loss of choosing the best action with the state known.
-Without defensible state probabilities, a finite v1 binary loss matrix defines B over the unrestricted prior p in [0,1]:
-B = max_p { min_a [p L(a,H) + (1-p) L(a,not-H)] - p min_a L(a,H) - (1-p) min_a L(a,not-H) }.
-B is the tightest perfect-information bound that matrix licenses.
-The actual pull's value cannot exceed B.
-An upper bound is never the actual pull's break-even price, and a cost below it does not establish that the pull is worth taking.
-
-**Upper-bound record rules.**
-
-- With `signal-model`, the Upper bound slot must read exactly `not applicable`.
-- With `upper-bound` and a finite bound, the Upper bound slot must state B as a nonnegative decimal followed by its unit, such as `50 incident-equivalents`.
-- With `upper-bound` and no finite bound, the Upper bound slot must read exactly `unavailable`.
-- With `upper-bound` and no finite bound, Value calculation must name the missing inputs.
-- When deriving B from a binary loss matrix, must use the formula above rather than max(loss) - min(loss).
-- When deriving B from a binary loss matrix, must state p as a `sensitivity-only` condition.
-- When deriving B from a binary loss matrix, must not state p as a belief.
+Break-even mode inverts the question — the largest price at which the pull could be worth taking, computed from the loss spread alone — and reports that bound as the whole deliverable.
 
 **Costs.**
-Full cost includes price, delay, and opportunity cost expressed in the same units as the losses; a missing component is unknown, never silently zero.
-When full cost is known, the Cost slot must state its nonnegative total as a decimal followed by its unit, such as `200 incident-equivalents`.
-When full cost is not known, the Cost slot must read exactly `none stated`, without an annotation, placing any known components in Value calculation.
-With `signal-model` and unknown full cost, report G as the total-cost break-even threshold.
-Report a numeric threshold for a remaining fee only when all other cost components are known, subtracting them from G; otherwise keep the unknown components in the threshold formula and state its conditions.
-A negative remaining-fee threshold means no nonnegative fee breaks even; missing cost never discards an otherwise usable signal model.
+The stated or measured cost of the pull, which the net value calculation above consumes; when none is stated, the deliverable is the break-even price by construction.
 
 **Verdict.**
-With `upper-bound`, use `not-worth-it` only when the Upper bound and full Cost are finite quantities in the same unit and Cost is at least Upper bound, because net value is then nonpositive under every pull compatible with the inputs.
-Otherwise use `upper-bound-only`, including when the bound is unavailable; it makes no purchase recommendation.
-For `signal-model`, use `break-even-only` when full cost is unknown; otherwise use `worth-it` (net value positive across the robustness class), `not-worth-it` (net value nonpositive across it), or `sensitive` (positive and nonpositive net values both occur within the class; crossover reported).
-Those five values are the closed verdict set.
+Closed set: `worth-it` (net value positive across the robustness class), `not-worth-it` (net value negative across it), `sensitive` (the net value crosses zero within the class; crossover reported), `break-even-only` (no defensible signal model, or no stated cost; the price bound is the deliverable).
 A `worth-it` verdict does not authorize the pull (§ Numeric Policy).
 The seam with the costly-collection gate: the plan's "cheapest adequate collection" line answers *which* pull; this route answers *whether any* pull at this price is worth making, and a voi record attaches to the plan rather than replacing it.
 
