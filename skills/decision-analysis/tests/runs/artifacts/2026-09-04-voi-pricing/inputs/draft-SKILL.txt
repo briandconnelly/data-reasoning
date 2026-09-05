@@ -144,12 +144,12 @@ When no decision can be named after one clarifying question, decline the route: 
 
 **Signal model.**
 Record what the pull could return, each return's predictive probability, and the conditional state probabilities after each return, with provenance per § Numeric Policy.
-An absent model is recorded as exactly `unavailable`, without an annotation; explain the missing inputs in Value calculation.
+An absent model is recorded as `unavailable`.
 
 **Value basis.**
 The closed set is `signal-model` or `upper-bound`.
 Use `signal-model` only when the current state probabilities, signal model, and decision losses support an expected-value calculation; otherwise use `upper-bound`.
-If any required probability, signal-model, or loss input is missing or `sensitivity-only`, use `upper-bound`.
+A missing or `sensitivity-only` signal model requires `upper-bound`.
 
 **Value calculation.**
 With `signal-model`, compute current minimum expected loss R0 and expected minimum loss after the signal R1, weighting each return by its predictive probability and choosing the action separately after each return.
@@ -163,9 +163,8 @@ An upper bound is never the actual pull's break-even price, and a cost below it 
 
 **Costs.**
 Full cost includes price, delay, and opportunity cost expressed in the same units as the losses; a missing component is unknown, never silently zero.
-Record exactly `none stated`, without an annotation, when full cost is not known, placing any known components in Value calculation.
-With `signal-model` and unknown full cost, report G as the total-cost break-even threshold.
-Report a numeric threshold for a remaining fee only when all other cost components are known, subtracting them from G; otherwise keep the unknown components in the threshold formula and state its conditions.
+Record `none stated` when full cost is not known, placing any known components in Value calculation.
+With `signal-model` and unknown full cost, report G as the total-cost break-even threshold, and subtract known other costs when reporting the threshold for a remaining fee.
 A negative remaining-fee threshold means no nonnegative fee breaks even; missing cost never discards an otherwise usable signal model.
 
 **Verdict.**

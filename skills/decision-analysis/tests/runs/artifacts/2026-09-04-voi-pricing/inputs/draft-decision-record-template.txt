@@ -78,7 +78,7 @@ It does not recommend or prescribe which route a receiving skill takes.
 - Pending decision: <the two actions and current leaning, or a pointer to the decide record or collection plan>
 - Signal model: <returns, predictive probabilities, and conditional state probabilities> — provenance: <class> — or `unavailable`
 - Value basis: <value> — value set and semantics per `../SKILL.md` § The VoI Route (authority)
-- Value calculation: <inputs and provenance, arithmetic, units, conditions, and result per `../SKILL.md` § The VoI Route (authority); continuation paragraphs may follow>
+- Value calculation: <inputs and provenance, arithmetic, units, conditions, and result per `../SKILL.md` § The VoI Route (authority)>
 - Cost: <full cost per `../SKILL.md` § The VoI Route (authority), or `none stated`>
 - Verdict: <value> — value set and semantics per `../SKILL.md` § The VoI Route (authority)
 ```

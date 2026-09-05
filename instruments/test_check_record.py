@@ -79,6 +79,11 @@ def test_good_ledger_passes():
     assert cr.check(GOOD_LEDGER) == []
 
 
+def test_voi_upper_bound_only_verdict_is_accepted():
+    record = "# VoI Record: price unknown\n\n## VoI\n\n- Verdict: upper-bound-only\n"
+    assert cr.check(record) == []
+
+
 def test_shipped_templates_validate_clean():
     """The skills mandate write-template-then-fill; a validator that flags a
     fresh skeleton fails correct work. Every record-shaped fenced block in the

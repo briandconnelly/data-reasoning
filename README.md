@@ -24,7 +24,8 @@ Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements
 Routing between all four skills rests on zero arms run against the full catalog — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds every description until that changes.
 Treat the routing between them, and the handoff itself, as unverified.
 `causal-identification-review`'s measurement wave 1 (n=1 per cell) was scored on 2026-08-09 and then partly reopened the same day: CS4 and CS7 moved to "redesign and re-measure" and owe fresh arms before the wave is complete (`skills/causal-identification-review/tests/scenarios.md` § "Global verdict table", addendum).
-`decision-analysis` has authored scenarios and no run arms (`skills/decision-analysis/tests/scenarios.md`); treat its routing and its premium as unmeasured.
+`decision-analysis`'s original scenarios remain unrun (`skills/decision-analysis/tests/scenarios.md`); focused VoI wording checks are recorded in `skills/decision-analysis/tests/runs/2026-09-04-voi-pricing.md`, with no observed behavioral lift over the old wording.
+Treat its routing and its premium as unmeasured.
 
 The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.
 As of 2026-08-18 (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,315 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 2,765 plus a 690-word template; `causal-identification-review` is 2,416 plus 492; `exploratory-data-analysis` is 2,415 plus 843.

@@ -25,8 +25,8 @@ verdict, each field checked independently; a Recommended action naming one
 of the two framed actions under `robust`/`dominated` and reading exactly
 `returned to owner` under a sensitive verdict; a `dominated` verdict's four
 belief slots reading exactly `none needed`, with no trailing annotation; the
-voi signal-model/verdict coupling and the Cost grammar (a value containing a
-number, or exactly `none stated`, which couples to `break-even-only`); and
+voi signal-model/value-basis/verdict coupling and the Cost grammar (a value
+containing a number, or exactly `none stated`); and
 (arithmetic gates) recomputation of the posterior-odds interval and, when a
 numeric decision threshold is recorded, of the prior-odds crossover interval
 (both endpoints) against the swept prior class. Required numeric fields that
@@ -61,7 +61,10 @@ from pathlib import Path
 
 ROUTES = frozenset({"decide", "voi"})
 DECIDE_VERDICTS = frozenset({"robust", "prior-sensitive", "loss-sensitive", "dominated"})
-VOI_VERDICTS = frozenset({"worth-it", "not-worth-it", "sensitive", "break-even-only"})
+VOI_VERDICTS = frozenset(
+    {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
+)
+VOI_BASES = frozenset({"signal-model", "upper-bound"})
 PROVENANCE = frozenset(
     {"user-elicited", "externally-sourced", "estimated-from-data-in-hand", "sensitivity-only"}
 )
@@ -101,6 +104,7 @@ VOI_LABELS: dict[str, tuple[str, ...]] = {
         "Route:",
         "Pending decision:",
         "Signal model:",
+        "Value basis:",
         "Value calculation:",
         "Cost:",
         "Verdict:",
@@ -118,7 +122,7 @@ _SCOPE_TABLE_COLUMNS = 3
 _EVIDENCE_ROW_CELLS = 4
 
 _SECTION = re.compile(r"^## (.+?)\s*$", re.MULTILINE)
-_PROVENANCE_MENTION = re.compile(r"provenance:\s*([a-z-]+)")
+_PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([a-z-]+)`?")
 _RANGE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*(?:[–-]\s*(\d+(?:\.\d+)?))?\s*$")  # noqa: RUF001
 _SEPARATOR_CELL = re.compile(r"^:?-+:?$")
 _REL_TOLERANCE = 0.01
@@ -148,6 +152,24 @@ def field(section_text: str, label: str) -> str | None:
         if stripped.startswith(f"- {label}"):
             return stripped[len(f"- {label}") :].strip()
     return None
+
+
+def _voi_prose(section_text: str, label: str) -> str | None:
+    """Read a VoI prose slot through its continuation paragraphs.
+
+    Stop at any following bullet or heading, including an unrecognized label,
+    so a neighboring slot cannot supply missing content or provenance.
+    """
+    value: list[str] | None = None
+    for line in section_text.splitlines():
+        stripped = line.strip()
+        if value is not None:
+            if stripped.startswith(("- ", "#")):
+                break
+            value.append(line)
+        elif stripped.startswith(f"- {label}"):
+            value = [stripped[len(f"- {label}") :].strip()]
+    return "\n".join(value).strip() if value is not None else None
 
 
 def parse_range(value: str) -> tuple[float, float] | None:
@@ -202,7 +224,11 @@ def _require_slots(
                     f"slot '- {label}' appears {count} times in '{section_name}'; "
                     "each label must appear exactly once"
                 )
-            value = field(body, label)
+            value = (
+                _voi_prose(body, label)
+                if section_name == "VoI" and label in ("Signal model:", "Value calculation:")
+                else field(body, label)
+            )
             if value is None:
                 failures.append(f"section '{section_name}' is missing required slot '- {label}'")
             elif not value and label not in ("Consequences:", "Evidence:"):
@@ -545,15 +571,23 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
         failures.append(
             f"Verdict value {verdict!r} is not in the closed set {sorted(VOI_VERDICTS)}"
         )
-    signal = field(voi, "Signal model:") or ""
-    failures.extend(_check_slot_provenance((("Signal model:", signal),)))
-    if "sensitivity-only" in signal and verdict != "break-even-only":
-        failures.append("a sensitivity-only signal model licenses only the break-even-only verdict")
+    signal = _voi_prose(voi, "Signal model:") or ""
+    failures.extend(_check_slot_provenance((("Signal model:", signal),), "unavailable"))
+    basis = _bare(field(voi, "Value basis:") or "")
+    if basis not in VOI_BASES:
+        failures.append(f"Value basis {basis!r} is not in the closed set {sorted(VOI_BASES)}")
+    if ("sensitivity-only" in signal or _bare(signal) == "unavailable") and basis != "upper-bound":
+        failures.append("an unavailable or sensitivity-only Signal model requires upper-bound")
+    if basis == "upper-bound" and verdict != "upper-bound-only":
+        failures.append("upper-bound Value basis requires the upper-bound-only verdict")
+    if basis == "signal-model" and verdict == "upper-bound-only":
+        failures.append("signal-model Value basis cannot carry an upper-bound-only verdict")
     cost = (field(voi, "Cost:") or "").strip()
     if cost == "none stated":
-        if verdict != "break-even-only":
+        if basis == "signal-model" and verdict != "break-even-only":
             failures.append(
-                "an unstated cost makes the break-even price the deliverable; "
+                "an unstated full cost with signal-model basis makes the break-even "
+                "price the deliverable; "
                 "the verdict must be break-even-only"
             )
     elif not re.search(r"\d", cost):
@@ -561,6 +595,8 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
             "Cost must state a measured cost containing a number, "
             f"or read exactly 'none stated'; found {cost!r}"
         )
+    elif basis == "signal-model" and verdict == "break-even-only":
+        failures.append("a stated full Cost with signal-model basis requires a net-value verdict")
     return failures
 
 

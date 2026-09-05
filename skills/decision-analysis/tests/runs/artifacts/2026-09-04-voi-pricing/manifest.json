@@ -1,0 +1,152 @@
+{
+  "base_commit": "0ed873f",
+  "arms": {
+    "old-canary": {
+      "agent": "/root/voi_old_canary",
+      "inputs": "old",
+      "cases": 6,
+      "outcome": "completed"
+    },
+    "draft-canary": {
+      "agent": "/root/voi_new_canary",
+      "inputs": "draft",
+      "cases": 6,
+      "outcome": "usage-limit error; artifacts recovered"
+    },
+    "final-canary": {
+      "agent": "/root/voi_final_canary",
+      "inputs": "final",
+      "cases": 7,
+      "outcome": "completed",
+      "stage": "canary",
+      "template": "inputs/final-canary-decision-record-template.txt"
+    },
+    "old-validation": {
+      "agent": "/root/voi_old_validation",
+      "inputs": "old",
+      "cases": 7,
+      "outcome": "completed",
+      "stage": "validation"
+    },
+    "new-validation": {
+      "agent": "/root/voi_new_validation",
+      "inputs": "final",
+      "cases": 7,
+      "outcome": "completed",
+      "stage": "validation"
+    }
+  },
+  "limitations": [
+    "Three canaries are excluded from scored validation; validation is one old-wording and one new-wording arm with seven dependent cells each.",
+    "No complete tool-call manifests are available from these delegated arms; timing and non-use of tools are unscored.",
+    "Draft input snapshot reconstructed from the offered revision before subsequent edits; no evaluator-read hash attestation.",
+    "Claude design review returned a session-limit error and did not run."
+  ],
+  "sha256": {
+    "draft-canary/answers.md": "fd5bcc5bfcb4bb581e1344a8f320db03551a68e5ce0989fca2feeaaeece11e25",
+    "draft-canary/equality.md": "a760b635436d9091f9800d673bda8b64cfa1a4b0367c8ae52677fd2403c44e55",
+    "draft-canary/missing-model.md": "70d2fa5a37452dd7f2ca557ac3d54c33cc32092b87fd354b509d965032a24808",
+    "draft-canary/missing-price.md": "5d1e964216849c5b2bd89edf018b98d806f2895f7f66ad4582f1150b38e5d304",
+    "draft-canary/missing-prior.md": "657b67c471dd893a855bfcb94919103c0074b7a60381360ea7a17958ecbbab02",
+    "draft-canary/priced.md": "b2b5722a11cd398649dc41df672b270af81ea8668d5e645276e1c070aa713fec",
+    "draft-canary/uninformative.md": "cd7b11400febb7200d433ba210a9f722a6c62b11a0f9d293b7870d828a2d9b16",
+    "final-canary/answers.md": "7758fa63a8edcece496bb5f22c284e4fc84106b32e3592d0b3d3afa835648c21",
+    "final-canary/equality.md": "b7d49ce3473c90d95845320f9e8c0e4fafcb2b98d72e8630df265d342352182f",
+    "final-canary/missing-delay.md": "d6828908e979e856a6fc129b401d2ee024b8984c899f28ffc62c945e99254251",
+    "final-canary/missing-model.md": "6983021fcd553021aec12fc62a20595f28214f85219519eb7eaf10cacdb27ed7",
+    "final-canary/missing-price.md": "d3d594792dd09ee8ee085a5036ee67e8432f43fc817f6b1b3a7577fcf3a975ee",
+    "final-canary/missing-prior.md": "95200d4efffb41db5ece859c0d45d70185932e1e26e3201b60b59d44a0262da6",
+    "final-canary/priced.md": "3bcb5eb794ceee8703e5037e7d78d039028b1639832e0534724435376077d33e",
+    "final-canary/uninformative.md": "45d99cbe14405791f905186a012ea213ad9cf574e1f859948f894219ecc2199e",
+    "inputs/draft-SKILL.txt": "c1aa3afe6906ef7ffe0c8c6c7f24afc7a2a4bbdff9422883738ed1dc5651e532",
+    "inputs/draft-decision-record-template.txt": "12f961db1938e37de2a8686b10fe49c07234eea82ac09fcb53467fce33fde0aa",
+    "inputs/final-SKILL.txt": "292e93eb6c104177f77e0a177594c4dc65cd239596c3d852bdf2e78807cf822c",
+    "inputs/final-canary-decision-record-template.txt": "1fef7f7f11c75524239069672f0f515c69ecc37cee4a43f8f558ab948c1924b8",
+    "inputs/final-decision-record-template.txt": "160f73a2ea421dff68fc32070ed720ce3c9c2b0dba0767506b02682f273f7cd3",
+    "inputs/old-SKILL.txt": "4316e8b0eb2089eaf0aed0e0462593d221a373944e06ef71b212656d4e185f26",
+    "inputs/old-decision-record-template.txt": "2387981c3cd3712fb5db563618767d399a64d1b7ff3f65744ad07ec693cf7f15",
+    "inputs/seven-case-prompts.json": "c9e85b514c46eb31cd6e47b9e34435ade402e8b255d828d9752f67b9244a76de",
+    "inputs/six-case-prompts.json": "3e4920874675ebeb5016f5930433e17d20ec90d3242b94d8db91175ec8fd72f6",
+    "new-validation/answers.md": "876200fe4294f9091377e429d1f24567265734999cbb07f0e2fff9cdf30c7b84",
+    "new-validation/equality.md": "bacace08b6bb1f3aaa573f0d4bc3752e650955183c97f0a90835afbef1e7c99a",
+    "new-validation/missing-delay.md": "03e01f7200f228c0caeaabf278ec720d4e265c455164686627ca036ed1216553",
+    "new-validation/missing-model.md": "56665013f26391d570a68b65b9a7362bb8522ccf2b5e59bf2902c6be430c2c8b",
+    "new-validation/missing-price.md": "d1e2a429bb7159df6d0ad15d7a79246225527f2d4f043c4212465d8516ae7d45",
+    "new-validation/missing-prior.md": "7e03e87f3d1609c8f5f8b032b2a3fa47768ad0c01cedbae8c2e7cb37acb62467",
+    "new-validation/priced.md": "5f2106624aab447da5494605d6819c9bb5f30427e2172de14e3f45aa1a699177",
+    "new-validation/uninformative.md": "8241de0cb53a6ffcb895ba6c938d10e8821de04b4358e113b723ff6aacd71c8a",
+    "old-canary/answers.md": "24be22af23ee10d1ae960104ee96f931a213d9c3507d26b9ded9d4db9b5e375d",
+    "old-canary/equality.md": "bd9f78d4df99655de4731e78f699f49a667d44947cadb86e45de1a954b83e709",
+    "old-canary/missing-model.md": "28c7c81dc859e24cdc596e2be14d07dce4e59384ffdcedb785892c5d5d069657",
+    "old-canary/missing-price.md": "33822d68f1d72b396b7fe4c7deed1d6988226310884121b4cd501e956d2872bd",
+    "old-canary/missing-prior.md": "0d0856c09377b9b15188a198f99f79d0c864e8ad7c6ad749a548a9af3e46cda2",
+    "old-canary/priced.md": "5aaed7ae699cb8fd56d18a5f7b695d4c0f702e3f2d38a72b05c93c6730557ae1",
+    "old-canary/uninformative.md": "80a26583fde3323ed7aabfe6df4973288105068640c35e7d6e170fe8d14f551d",
+    "old-validation/answers.md": "788e09716f04ad7685b6b6f5932ff0c980bc8aa2e69c387f2198eb55ad4641a8",
+    "old-validation/equality.md": "e27e081699c499e6d0130c81686e26e2b961c120b235d899d6e755bc991ac52f",
+    "old-validation/missing-delay.md": "f49e6cb86b25c72e7ebf21f7c1cda07a7229fa5d6dbd1d831159c8cc5ce2de49",
+    "old-validation/missing-model.md": "1e90bf8adef416249fe39764703813367a060792d426e8c70718148f04e4b120",
+    "old-validation/missing-price.md": "90456834bda91dcd63ca995a0fa3819ffa1b95a0024608c9e37966ed52f6cd40",
+    "old-validation/missing-prior.md": "ff0fba604ec36f0e2605a227d210a85e1d8c7a1a05beb18ac100a9b5885f3fc0",
+    "old-validation/priced.md": "35c591e5a69d834bda8877f4cf1e6072429aaf69f0950204f5fb8ae8a6023029",
+    "old-validation/uninformative.md": "82eb727f58f5d05f9d7f45afe212976a39e9f538cd9ee5e9175f56a9dc3d8032",
+    "reviews.md": "fc4532d44d4f3e70d0677ea544af369d5f598c720b9b227614d7dcb0d072bdbf"
+  },
+  "dispatch_contract": {
+    "context": "Fresh agents, no inherited turns. Read only named skill, template, and packet; write records and answers beneath the named temporary output directory. No network, other repository files, other agents, or purchases. Local arithmetic tools allowed. Expected results and preregistration withheld.",
+    "artifacts": "Output files copied byte-for-byte; no post-run rewriting."
+  },
+  "new_validation_schema_findings": {
+    "equality.md": [],
+    "missing-delay.md": [],
+    "missing-model.md": [],
+    "missing-price.md": [],
+    "missing-prior.md": [],
+    "priced.md": [],
+    "uninformative.md": []
+  },
+  "scored_validation": {
+    "uninformative": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    },
+    "missing-price": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    },
+    "missing-model": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    },
+    "missing-prior": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    },
+    "priced": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    },
+    "equality": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    },
+    "missing-delay": {
+      "old_arithmetic": true,
+      "old_distinction": true,
+      "new_arithmetic": true,
+      "new_distinction": true
+    }
+  }
+}
