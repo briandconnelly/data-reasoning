@@ -17,7 +17,15 @@ actually contains.
 
 from pathlib import Path
 
-from check_decision import EXIT_UNVERIFIABLE, PROVENANCE, check, main, parse_range, parse_sections
+from check_decision import (
+    EXIT_UNVERIFIABLE,
+    PROVENANCE,
+    check,
+    main,
+    parse_quantity,
+    parse_range,
+    parse_sections,
+)
 
 FIXTURES = Path(__file__).parent
 
@@ -89,6 +97,7 @@ VALID_VOI = """# VoI Record: rerun the load test before deciding
 - Signal model: a clean rerun halves the odds; a dirty rerun triples them — provenance: estimated-from-data-in-hand
 - Value basis: signal-model
 - Value calculation: net expected improvement 0.4 incident-equivalents after subtracting one day's delay, positive across the swept class
+- Upper bound: not applicable
 - Cost: 1 day
 - Verdict: worth-it
 """
@@ -110,11 +119,14 @@ def test_known_positive_voi_passes():
 def _upper_bound_voi() -> str:
     text = replace_once(VALID_VOI, "- Value basis: signal-model", "- Value basis: upper-bound")
     text = replace_once(text, "- Verdict: worth-it", "- Verdict: upper-bound-only")
-    return replace_once(
+    text = replace_once(
         text,
         "- Signal model: a clean rerun halves the odds; a dirty rerun triples them "
         "— provenance: estimated-from-data-in-hand",
         "- Signal model: unavailable",
+    )
+    return replace_once(
+        text, "- Upper bound: not applicable", "- Upper bound: 50 incident-equivalents"
     )
 
 
@@ -135,7 +147,7 @@ def test_upper_bound_schema_permits_bound_determined_not_worth_it():
         "- Value calculation: finite perfect-information bound: 50; full cost: 200; "
         "therefore net value is nonpositive",
     )
-    text = replace_once(text, "- Cost: 1 day", "- Cost: 200")
+    text = replace_once(text, "- Cost: 1 day", "- Cost: 200 incident-equivalents")
     text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
     assert check(text) == []
 
@@ -144,6 +156,27 @@ def test_unknown_signal_model_without_full_cost_cannot_be_not_worth_it():
     text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: none stated")
     text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
     assert any("stated full Cost" in msg for msg in check(text))
+
+
+def test_upper_bound_not_worth_it_requires_cost_at_least_bound():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: 10 incident-equivalents")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("Cost at least Upper bound" in msg for msg in check(text))
+
+
+def test_upper_bound_not_worth_it_requires_matching_units():
+    text = replace_once(_upper_bound_voi(), "- Cost: 1 day", "- Cost: 200 days")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("Upper bound's unit" in msg for msg in check(text))
+
+
+def test_upper_bound_not_worth_it_requires_finite_bound():
+    text = replace_once(
+        _upper_bound_voi(), "- Upper bound: 50 incident-equivalents", "- Upper bound: unavailable"
+    )
+    text = replace_once(text, "- Cost: 1 day", "- Cost: 200 incident-equivalents")
+    text = replace_once(text, "- Verdict: upper-bound-only", "- Verdict: not-worth-it")
+    assert any("finite Upper bound" in msg for msg in check(text))
 
 
 def test_unknown_signal_model_and_cost_still_accepts_bound_verdict():
@@ -172,6 +205,11 @@ def test_unknown_model_cannot_claim_signal_specific_break_even():
 def test_signal_model_cannot_claim_upper_bound_verdict():
     text = replace_once(VALID_VOI, "- Verdict: worth-it", "- Verdict: upper-bound-only")
     assert any("cannot carry" in msg for msg in check(text))
+
+
+def test_signal_model_requires_not_applicable_upper_bound():
+    text = replace_once(VALID_VOI, "- Upper bound: not applicable", "- Upper bound: unavailable")
+    assert any("not applicable" in msg for msg in check(text))
 
 
 def test_stated_full_cost_requires_net_value_verdict():
@@ -474,6 +512,12 @@ def test_parse_range_single_dashes_and_order():
     assert parse_range("0.25-1.0") == (0.25, 1.0)
     assert parse_range("1.0–0.25") is None
     assert parse_range("unknown") is None
+
+
+def test_parse_quantity_requires_a_nonnegative_decimal_and_unit():
+    assert parse_quantity("50 incident-equivalents") == (50.0, "incident-equivalents")
+    assert parse_quantity("50") is None
+    assert parse_quantity("$50") is None
 
 
 def test_unparseable_prior_odds_fails_closed():

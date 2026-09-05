@@ -26,8 +26,8 @@ verdict, each field checked independently; a Recommended action naming one
 of the two framed actions under `robust`/`dominated` and reading exactly
 `returned to owner` under a sensitive verdict; a `dominated` verdict's four
 belief slots reading exactly `none needed`, with no trailing annotation; the
-voi signal-model/value-basis/verdict coupling and the Cost grammar (a value
-containing a number, or exactly `none stated`); and
+voi signal-model/value-basis/verdict coupling and the quantity grammar for
+Cost and Upper bound; and
 (arithmetic gates) recomputation of the posterior-odds interval and, when a
 numeric decision threshold is recorded, of the prior-odds crossover interval
 (both endpoints) against the swept prior class. Required numeric fields that
@@ -39,8 +39,8 @@ Explicitly NOT this checker's claim: whether the record preceded reasoning
 calibrated or its named source real, whether the state model is exhaustive,
 whether the swept prior class or loss range is honest, whether a `dominated`
 verdict's statewise-domination claim holds (structural presence only),
-whether the voi Value calculation's prose arithmetic is correct (voi numerics
-are not recomputed in v1), whether the route was the right one, or whether
+whether the voi Value calculation's prose arithmetic and bound derivation are
+correct (voi numerics are not recomputed in v1), whether the route was the right one, or whether
 any prose entry is semantically adequate. Passing this checker is
 consistency, not validity.
 
@@ -107,6 +107,7 @@ VOI_LABELS: dict[str, tuple[str, ...]] = {
         "Signal model:",
         "Value basis:",
         "Value calculation:",
+        "Upper bound:",
         "Cost:",
         "Verdict:",
     ),
@@ -125,6 +126,7 @@ _EVIDENCE_ROW_CELLS = 4
 _SECTION = re.compile(r"^## (.+?)\s*$", re.MULTILINE)
 _PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([a-z-]+)`?")
 _RANGE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*(?:[–-]\s*(\d+(?:\.\d+)?))?\s*$")  # noqa: RUF001
+_QUANTITY = re.compile(r"^\s*(\d+(?:\.\d+)?)\s+([A-Za-z][A-Za-z0-9 _/-]*)\s*$")
 _SEPARATOR_CELL = re.compile(r"^:?-+:?$")
 _REL_TOLERANCE = 0.01
 
@@ -183,6 +185,14 @@ def parse_range(value: str) -> tuple[float, float] | None:
     if low > high:
         return None
     return (low, high)
+
+
+def parse_quantity(value: str) -> tuple[float, str] | None:
+    """Parse a nonnegative decimal followed by its machine-comparable unit."""
+    m = _QUANTITY.match(value)
+    if not m:
+        return None
+    return float(m.group(1)), " ".join(m.group(2).lower().split())
 
 
 def _bare(value: str) -> str:
@@ -577,6 +587,38 @@ def _check_voi_signal_model(signal: str, basis: str, failures: list[str]) -> Non
         failures.append("an unavailable or sensitivity-only Signal model requires upper-bound")
 
 
+def _check_voi_upper_bound(
+    basis: str, bound: str, cost: str, verdict: str, failures: list[str]
+) -> None:
+    """Validate the bound's basis-specific sentinel and a no-buy comparison."""
+    if basis == "signal-model":
+        if bound != "not applicable":
+            failures.append("signal-model Value basis requires Upper bound 'not applicable'")
+        return
+    if bound == "unavailable":
+        if verdict == "not-worth-it":
+            failures.append("an upper-bound not-worth-it verdict requires a finite Upper bound")
+        return
+    bound_quantity = parse_quantity(bound)
+    if bound_quantity is None:
+        failures.append(
+            "Upper bound must be 'unavailable' or a nonnegative decimal followed by its unit"
+        )
+        return
+    if verdict != "not-worth-it":
+        return
+    cost_quantity = parse_quantity(cost)
+    if cost_quantity is None:
+        failures.append("an upper-bound not-worth-it verdict requires a stated full Cost")
+        return
+    if cost_quantity[1] != bound_quantity[1]:
+        failures.append(
+            "an upper-bound not-worth-it verdict requires Cost in the Upper bound's unit"
+        )
+    elif cost_quantity[0] + _REL_TOLERANCE * max(bound_quantity[0], 1) < bound_quantity[0]:
+        failures.append("an upper-bound not-worth-it verdict requires Cost at least Upper bound")
+
+
 def _check_voi(sections: dict[str, str]) -> list[str]:
     failures: list[str] = []
     voi = sections["VoI"]
@@ -594,7 +636,9 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
         failures.append("upper-bound Value basis requires upper-bound-only or not-worth-it")
     if basis == "signal-model" and verdict == "upper-bound-only":
         failures.append("signal-model Value basis cannot carry an upper-bound-only verdict")
+    bound = (field(voi, "Upper bound:") or "").strip()
     cost = (field(voi, "Cost:") or "").strip()
+    _check_voi_upper_bound(basis, bound, cost, verdict, failures)
     if cost == "none stated":
         if basis == "signal-model" and verdict != "break-even-only":
             failures.append(
@@ -604,9 +648,9 @@ def _check_voi(sections: dict[str, str]) -> list[str]:
             )
         if basis == "upper-bound" and verdict == "not-worth-it":
             failures.append("an upper-bound not-worth-it verdict requires a stated full Cost")
-    elif not re.search(r"\d", cost):
+    elif parse_quantity(cost) is None:
         failures.append(
-            "Cost must state a measured cost containing a number, "
+            "Cost must state a nonnegative decimal followed by its unit, "
             f"or read exactly 'none stated'; found {cost!r}"
         )
     elif basis == "signal-model" and verdict == "break-even-only":
