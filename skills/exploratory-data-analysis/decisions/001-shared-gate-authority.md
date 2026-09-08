@@ -54,5 +54,5 @@ The check is a change detector, not a semantic check: refreshing a golden (`--up
 The goldens were verified against both invariant lists when first generated on 2026-08-18.)*
 
 *(Extended 2026-09-02: the authorization gate is no longer a set of hand-maintained copies with parity tests over them.
-Its text now has one home, and the copies in the four `SKILL.md` files are rendered from it — see `skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md`, which supersedes this record's authorization-gate paragraph above and the three parity tests it names.
+Its text now has one home, and the copies in the four `SKILL.md` files are rendered from it — see `skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md`, which supersedes the parity-test mechanism this record's authorization-gate paragraph prescribed before that paragraph was rewritten, along with the three per-skill parity tests that mechanism named.
 The costly-collection and data-rules invariant lists in this record are unaffected: those sections are reworded per skill by design and keep the golden-freeze mechanism.)*
