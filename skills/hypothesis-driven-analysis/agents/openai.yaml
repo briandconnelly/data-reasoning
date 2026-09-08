@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hypothesis-Driven Analysis"
+  short_description: "Test claims and competing explanations with evidence"
+  default_prompt: "Use $hypothesis-driven-analysis to investigate this question using competing hypotheses."

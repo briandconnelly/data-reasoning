@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decision Analysis"
+  short_description: "Decide under uncertainty with robustness-checked evidence"
+  default_prompt: "Use $decision-analysis to work out whether to act, wait, or collect more data given this evidence."

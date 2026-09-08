@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exploratory Data Analysis"
+  short_description: "Explore datasets for quality issues and honest leads"
+  default_prompt: "Use $exploratory-data-analysis to explore this dataset and identify the strongest leads."

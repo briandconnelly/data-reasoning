@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "data-reasoning",
+  "description": "Marketplace serving the data-reasoning plugin from its own repository.",
+  "owner": {
+    "name": "Brian Connelly",
+    "url": "https://github.com/briandconnelly"
+  },
+  "plugins": [
+    {
+      "name": "data-reasoning",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
