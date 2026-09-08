@@ -22,9 +22,13 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
+
+FRONTMATTER_SCAN_BYTES = 65536
+_FRONTMATTER = re.compile(rb"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
 
 SIGNATURES = (
     "# Investigation: ",
@@ -40,7 +44,8 @@ DECISION = (
 
 
 def looks_like_record(path: str) -> bool | None:
-    """True: title signature matches. False: it does not. None: unreadable."""
+    """True: title signature matches. False: it does not. None: unreadable, or
+    a frontmatter block whose end lies past the scan budget -- indeterminate."""
     # Read bytes and strictly decode only the title line. A replacement
     # character could mutate the signature into a non-match, exiting clean
     # without the validator ever running, so invalid UTF-8 *in the title* is
@@ -50,6 +55,20 @@ def looks_like_record(path: str) -> bool | None:
     try:
         with Path(path).open("rb") as f:
             head = f.read(4096)
+        if head.startswith(b"---"):
+            # The file can disappear between the two opens, so this read shares
+            # the handler above.
+            with Path(path).open("rb") as f:
+                head = f.read(FRONTMATTER_SCAN_BYTES)
+            stripped = _FRONTMATTER.sub(b"", head, count=1)
+            # No closing delimiter found. Two cases look alike and are not:
+            # a short file simply opening with a horizontal rule has been seen
+            # whole and is not a record, while a read that filled the whole
+            # budget may hide a closing --- and a title just past it. Only the
+            # second is indeterminate, and only it fails closed.
+            if stripped == head and len(head) == FRONTMATTER_SCAN_BYTES:
+                return None
+            head = stripped
     except OSError:
         return None
     try:
@@ -100,6 +119,8 @@ def main() -> int:  # noqa: PLR0911
     if result.returncode == 0:
         return 0
     if result.returncode == 1:
+        if not result.stdout.strip():
+            return unavailable(file_path, f"validator exited {result.returncode}")
         print(
             f"data-reasoning: the record at {file_path} has structural findings:\n"
             f"{result.stdout}"

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "data-reasoning",
   "description": "Marketplace serving the data-reasoning plugin from its own repository.",
   "owner": {
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "data-reasoning",
-      "source": "./",
+      "source": { "source": "github", "repo": "briandconnelly/data-reasoning", "ref": "release" },
       "category": "productivity"
     }
   ]

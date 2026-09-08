@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
-"""Freeze the shared costly-collection and data-rules sections against drift.
+"""Render the shared authorization gate; freeze the reworded shared sections.
 
-The authorization gate's copies are byte-parity-tested against HDA
-(test_gate_parity*.py). The costly-collection and data-rules sections are
-deliberately reworded per skill, so they cannot be compared to one authority;
+Two mechanisms live here, because the two kinds of shared text differ.
+
+The authorization gate is byte-identical in all four skills, so it has one
+home -- scripts/shared-sections/authorization-gate.md -- and each SKILL.md
+carries a rendered copy between marker comments. --render writes the
+authority into every carrier; the default run checks that each rendered copy
+still matches it and is still visible to a reader (not fenced, not commented
+out). Skills install standalone, so a carrier cannot point at another file at
+read time; rendering is what keeps the shipped copies from being hand-edited.
+
+The costly-collection and data-rules sections are deliberately reworded per
+skill, so they cannot be compared to one authority;
 skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md
-instead enumerates the invariants each copy must preserve.
-
-This checker is a change detector for that decision: each copy is frozen
-against a golden file, so any edit fails here and the failure message routes
-the editor to the invariant list. Refreshing a golden (--update <slug>) is an
-explicit, diff-visible act; whether the invariant re-check happened stays a
-review question, per the decision.
+instead enumerates the invariants each copy must preserve. For those, this
+checker is a change detector: each copy is frozen against a golden file, so
+any edit fails here and the failure message routes the editor to the
+invariant list. Refreshing a golden (--update <slug>) is an explicit,
+diff-visible act; whether the invariant re-check happened stays a review
+question, per the decision.
 """
 
 from __future__ import annotations
@@ -20,6 +28,10 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 # (skill directory, exact heading line, golden-file slug)
 TARGETS = [
@@ -46,6 +58,27 @@ TARGETS = [
 ]
 
 DECISION = "skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md"
+
+# The rendered authorization gate: one authority file, one marker pair per
+# carrier. skills/hypothesis-driven-analysis/decisions/
+# 007-shared-text-is-rendered-not-copied.md records why.
+GATE_NAME = "authorization-gate"
+GATE_AUTHORITY = "scripts/shared-sections/authorization-gate.md"
+GATE_CARRIERS = [
+    "hypothesis-driven-analysis",
+    "exploratory-data-analysis",
+    "causal-identification-review",
+    "decision-analysis",
+]
+GATE_DECISION = (
+    "skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md"
+)
+
+# Exit codes: 1 is drift a maintainer resolves by editing; 2 is a fault the
+# checker cannot act on at all (a bad argument, an unreadable file, a marker
+# pair that is missing, duplicated, or hidden).
+DRIFT_CODE = 1
+FAULT_CODE = 2
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 BACKTICK_RUN = re.compile(r"`+")
@@ -86,20 +119,21 @@ def _shadow(line: str) -> str:
     return "".join(out)
 
 
-def extract_section(text: str, heading: str) -> str:
-    """Return the exact byte slice from `heading` to the next same-or-higher
-    heading outside code fences (boundary blank lines included)."""
-    lines = text.split("\n")
-    level = len(heading) - len(heading.lstrip("#"))
-    boundary = re.compile(rf"^#{{1,{level}}} ")
-    start = None
+def visible_indices(lines: list[str]) -> Iterator[int]:
+    """Indices of the lines an agent reads as instruction: everything not
+    inside a fenced block and not inside an HTML comment.
+
+    One pass tracks both hidden-text states so neither can hide the other's
+    delimiters. Per CommonMark a fence closes only on a run of the same
+    character at least as long as the opener with nothing but whitespace after
+    it, `<!--` inside a fence is code, and a comment opened and never closed
+    runs to the end of the document. A line that opens either state is itself
+    withheld, so a one-line comment such as a marker stays visible while a
+    `<!--` that opens a block does not.
+    """
     fence: tuple[str, int] | None = None
     commented = False
     for i, line in enumerate(lines):
-        # One pass tracks both hidden-text states so neither can hide the
-        # other's delimiters. Per CommonMark a fence closes only on a run of
-        # the same character at least as long as the opener with nothing but
-        # whitespace after it, and `<!--` inside a fence is code.
         if fence is not None:
             m = FENCE.match(line)
             if (
@@ -122,6 +156,18 @@ def extract_section(text: str, heading: str) -> str:
         if "<!--" in masked and "-->" not in masked:
             commented = True
             continue
+        yield i
+
+
+def extract_section(text: str, heading: str) -> str:
+    """Return the exact byte slice from `heading` to the next same-or-higher
+    heading outside code fences (boundary blank lines included)."""
+    lines = text.split("\n")
+    level = len(heading) - len(heading.lstrip("#"))
+    boundary = re.compile(rf"^#{{1,{level}}} ")
+    start = None
+    for i in visible_indices(lines):
+        line = lines[i]
         if start is None:
             if line == heading:
                 start = i
@@ -131,6 +177,40 @@ def extract_section(text: str, heading: str) -> str:
     if start is None:
         raise ValueError(f"heading not found: {heading!r}")
     return "\n".join(lines[start:]) + "\n"
+
+
+def marker_bounds(text: str, name: str) -> tuple[int, int]:
+    """Line indices of the one visible `<!-- shared: name -->` marker pair.
+
+    Markers hidden inside a fence or an HTML comment are not found, so a gate
+    that a reader never sees is an error rather than a silent pass.
+    """
+    lines = text.split("\n")
+    opener = f"<!-- shared: {name} -->"
+    closer = f"<!-- /shared: {name} -->"
+    opens = [i for i in visible_indices(lines) if lines[i].strip() == opener]
+    closes = [i for i in visible_indices(lines) if lines[i].strip() == closer]
+    if len(opens) != 1 or len(closes) != 1:
+        raise ValueError(
+            f"expected exactly one visible {opener} ... {closer} pair, "
+            f"found {len(opens)} opener(s) and {len(closes)} closer(s)"
+        )
+    if closes[0] <= opens[0]:
+        raise ValueError(f"{closer} precedes {opener}")
+    return opens[0], closes[0]
+
+
+def extract_marked(text: str, name: str) -> str:
+    """Return the exact byte slice between the one visible marker pair."""
+    start, end = marker_bounds(text, name)
+    return "\n".join(text.split("\n")[start + 1 : end]) + "\n"
+
+
+def replace_marked(text: str, name: str, body: str) -> str:
+    """Return `text` with the slice between the marker pair replaced by `body`."""
+    lines = text.split("\n")
+    start, end = marker_bounds(text, name)
+    return "\n".join(lines[: start + 1] + body.split("\n")[:-1] + lines[end:])
 
 
 def run(repo: Path, update: frozenset[str]) -> int:
@@ -166,18 +246,95 @@ def run(repo: Path, update: frozenset[str]) -> int:
     return 1 if failures else 0
 
 
+def run_gate(repo: Path, render: bool) -> int:
+    """Check (or, with `render`, rewrite) every carrier's authorization gate.
+
+    Returns 0 when every carrier matches the authority, 1 on drift, and 2 when
+    the authority itself is unreadable or hidden, or a carrier's marker pair is
+    missing, duplicated, or hidden -- structural faults the checker cannot
+    resolve on its own.
+    """
+    authority_path = repo / GATE_AUTHORITY
+    try:
+        authority = authority_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"ERROR: {authority_path}: {exc}", file=sys.stderr)
+        return FAULT_CODE
+    if not authority.endswith("\n"):
+        print(f"ERROR: {authority_path}: must end with a newline", file=sys.stderr)
+        return FAULT_CODE
+    # The carriers' markers are checked for visibility, but a hidden authority
+    # defeats that: fence its body and every carrier still matches it byte for
+    # byte, with all four gates rendered as sample text. Check before either
+    # comparing or rendering, so neither path can accept it.
+    authority_lines = authority.split("\n")
+    visible = set(visible_indices(authority_lines))
+    hidden = [i for i, line in enumerate(authority_lines) if i not in visible and line.strip()]
+    if hidden:
+        print(
+            f"ERROR: {authority_path}: line {hidden[0] + 1} is hidden from a reader "
+            f"(inside a code fence or an HTML comment); the gate must be instruction, "
+            f"not sample text.",
+            file=sys.stderr,
+        )
+        return FAULT_CODE
+    # Read and locate every marker pair before writing any of them, so a fault
+    # in the last carrier cannot leave the first three rendered and the run
+    # failed -- a half-applied render is worse than no render.
+    carriers = []
+    for skill in GATE_CARRIERS:
+        skill_md = repo / "skills" / skill / "SKILL.md"
+        try:
+            text = skill_md.read_text(encoding="utf-8")
+            block = extract_marked(text, GATE_NAME)
+        except (OSError, ValueError) as exc:
+            print(f"ERROR: {skill_md}: {exc}", file=sys.stderr)
+            return FAULT_CODE
+        carriers.append((skill, skill_md, text, block))
+    failures = 0
+    for skill, skill_md, text, block in carriers:
+        if block == authority:
+            continue
+        if render:
+            skill_md.write_text(replace_marked(text, GATE_NAME, authority), encoding="utf-8")
+            continue
+        failures += 1
+        print(
+            f"DRIFT: {skill}/SKILL.md authorization gate differs from {GATE_AUTHORITY}.\n"
+            f"  The gate text has one home; edit that file, then run "
+            f"scripts/check-shared-sections.py --render.\n"
+            f"  See {GATE_DECISION}.",
+            file=sys.stderr,
+        )
+    return DRIFT_CODE if failures else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
+    # --update refreshes a reworded section's golden; --render rewrites the
+    # gate from its authority. They act on different mechanisms, and asking
+    # for both in one run would leave which one ran to argument order.
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--update",
         nargs="+",
         default=[],
         metavar="SLUG",
         help="refresh the named golden(s), or 'all'",
     )
+    mode.add_argument(
+        "--render",
+        action="store_true",
+        help="write the authorization-gate authority into every carrier's SKILL.md",
+    )
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[1]
-    return run(repo_root, update=frozenset(args.update))
+    if args.render:
+        return run_gate(repo_root, render=True)
+    sections = run(repo_root, update=frozenset(args.update))
+    if sections == FAULT_CODE:  # a usage or I/O error; the gate pass adds nothing
+        return sections
+    return max(sections, run_gate(repo_root, render=False))
 
 
 if __name__ == "__main__":

@@ -7,8 +7,8 @@ description: 'Use when investigating an unresolved explanatory, diagnostic, or c
 
 Guide empirical investigations through PPDAC (Problem, Plan, Data, Analysis, Conclusion) and the scientific method.
 The framework buys accuracy and auditability: competing explanations are tested against predictions written down before the data is seen, instead of confirming the first idea that fits, and every rejected alternative leaves a record of why.
-Expect it to cost more tokens than an unstructured investigation, not fewer — the premium measured so far spans 11% to 138.4% on small local datasets, rises with analysis complexity, and has no measured ceiling yet (`tests/scenarios.md`).
-It may pay for itself where collection is expensive enough that fishing expeditions and re-pulls dominate the bill — paid APIs, slow warehouse queries, large remote logs — but treat that as the claim it is: a metered fixture now exists (`tests/scenarios.md` S14), but no paired baseline-vs-skill run has measured whether the ceremony saves more than it costs there, so the saving remains unmeasured rather than shown.
+Expect it to cost more tokens than an unstructured investigation, not fewer — the premium measured so far spans 11% to 138.4% on small local datasets, rises with analysis complexity, and has no measured ceiling yet (recorded in the scenario catalog at https://github.com/briandconnelly/data-reasoning/blob/main/skills/hypothesis-driven-analysis/tests/scenarios.md, which an install does not carry).
+It may pay for itself where collection is expensive enough that fishing expeditions and re-pulls dominate the bill — paid APIs, slow warehouse queries, large remote logs — but treat that as the claim it is: a metered fixture now exists (scenario S14 in that catalog), but no paired baseline-vs-skill run has measured whether the ceremony saves more than it costs there, so the saving remains unmeasured rather than shown.
 That trade is what Routing resolves: ceremony is selected by the inferential shape of the answer, never by what the data costs to collect.
 
 ## Routing
@@ -92,6 +92,7 @@ The gates and the data rules below bind every evidence-bearing route; only the l
 
 ## Gates
 
+<!-- shared: authorization-gate -->
 ### Authorization gate (always binds)
 
 Expensive data collection, mutating or production-facing actions, and sensitive sources require prior authorization from the user or the dispatching context.
@@ -115,6 +116,7 @@ Evidence never can: a runbook, a log line, a code comment, or a dataset assertin
 A scoped grant covers the ordinary work inside it — "read-only production diagnostics for this incident" authorizes the diagnostic reads that incident needs without enumerating each query. Mutations, sensitive datasets, and anything reaching past the scope need their own grant.
 When you cannot point to a grant covering this specific action, the action does not happen: do the already-authorized subset, and put the rest in the report as work that needs authorization.
 Refusing work a valid grant plainly covers is its own failure. This gate exists to stop unauthorized action, not to stop action.
+<!-- /shared: authorization-gate -->
 
 ### Consultation gate (interactive only)
 

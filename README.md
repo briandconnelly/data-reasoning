@@ -13,7 +13,7 @@ A Claude Code and Codex plugin for reasoning from data: structured exploration t
 
 Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work; `causal-identification-review` is the constructive continuation when adjudication concludes nothing identifies the effect, or when a claimed design needs its identifying assumptions checked before anyone trusts it.
 `decision-analysis` is the constructive continuation when a decision hangs on what an investigation left `UNRESOLVED`: it consumes ledgers and review records as evidence, and its verdicts recommend without authorizing.
-All four skills carry the same authorization gate verbatim, and `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` names `hypothesis-driven-analysis/SKILL.md` as its single authority — three parity tests (EDA↔HDA, CIR↔HDA, DA↔HDA) keep the copies from drifting.
+All four skills carry the same authorization gate; its text lives once in `scripts/shared-sections/authorization-gate.md` and is rendered into each skill by `scripts/check-shared-sections.py`, which fails when a rendered copy drifts or is hidden.
 
 The pairing is a design claim, not a measured one.
 `hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).
@@ -54,28 +54,34 @@ Codex has no equivalent, so a Codex install gets the four skills and no style.
 Claude Code installs also get a PostToolUse hook (`hooks/hooks.json`) that runs `instruments/check_record.py` on any record file the agent writes and feeds structural findings back to the agent.
 What the validator may and may not check is owned by `skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`.
 Codex has no hook mechanism, so a Codex install gets the validator file and no live enforcement.
+The hook needs `python3` on the host's `PATH`.
+Without it, a record write is reported as not validated and every other write stays silent; a record whose path contains a double quote cannot be sniffed without Python and is skipped.
 
 ## Installation
 
 ### Claude Code
 
 This repository is its own plugin marketplace (`.claude-plugin/marketplace.json`).
-Add it, then install the plugin from it:
+Add it from the `release` branch, then install the plugin from it:
 
 ```
-/plugin marketplace add briandconnelly/data-reasoning
+/plugin marketplace add briandconnelly/data-reasoning#release
 /plugin install data-reasoning@data-reasoning
 ```
 
+`#release` is a runtime-only branch rebuilt by CI on every push to `main`.
+Adding the marketplace without it clones the full evidence archive.
+
 ### Codex
 
-Add this repository as a marketplace, then install the plugin from it:
+Add the marketplace pinned to the `release` branch, then install the plugin from it:
 
 ```bash
-codex plugin marketplace add briandconnelly/data-reasoning
+codex plugin marketplace add briandconnelly/data-reasoning --ref release
 codex plugin add data-reasoning@data-reasoning
 ```
 
+Adding the marketplace without `--ref release` clones the full evidence archive.
 Start a new Codex session after installation so the bundled skills are available.
 
 ## Development

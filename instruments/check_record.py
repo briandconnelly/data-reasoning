@@ -222,7 +222,7 @@ PENDING = re.compile(r"^\(?\s*pending(?:\s*[)\u2014\u2013:;]|\s+-{1,2}(?=\s|\Z)|
 # prose can start with "pending" without the section being in-progress.
 SECTION_PENDING = re.compile(r"^\(\s*pending\b.*\)\Z", re.I | re.S)
 
-DELIMITERS = (" —", " -", ";", ":", " (", ",")
+DELIMITERS = (" —", " -", ";", ":", " (")
 MIN_TABLE_ROWS = 2  # header + at least one data row
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
@@ -352,10 +352,20 @@ def _unmask(cell: str) -> str:
     return cell.replace("\x00", "|")
 
 
+_FRONTMATTER = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
+
+
+def strip_frontmatter(text: str) -> str:
+    """Drop a leading YAML frontmatter block. Frontmatter is metadata a host
+    added; the record starts after it. An unterminated block is left alone."""
+    return _FRONTMATTER.sub("", text, count=1)
+
+
 def detect(text: str) -> str | None:
     """Kind of record, or None. A title signature alone is not enough: a
     user's own note titled `# Investigation: …` is not a ledger. The record
     must also carry at least one of its kind's required headings."""
+    text = strip_frontmatter(text)
     first = text.lstrip().split("\n", 1)[0]
     for prefix, kind in SIGNATURES.items():
         if first.startswith(prefix):
@@ -376,9 +386,27 @@ def _normalize(value: str) -> str:
     return value.strip().strip("`*").strip()
 
 
+HEADER_ALIASES = {
+    # The shipped ledger template's header for the column the checks call
+    # `necessary prediction` (references/ledger-template.md § Hypotheses).
+    "necessary prediction (failure refutes)": "necessary prediction",
+}
+
+
+def _header_key(h: str) -> str:
+    """A header's identity: lower-cased, whitespace collapsed, then mapped
+    through the alias table. Identity, not containment: `unnecessary
+    prediction` is not `necessary prediction`, and `outcome (rationale)` is
+    not `outcome`."""
+    key = " ".join(_normalize(h).lower().split())
+    return HEADER_ALIASES.get(key, key)
+
+
 def _leading_token(value: str, allowed: set[str]) -> str | None:
     """The value must BE an allowed token, or start with one followed by a
-    delimiter (annotations after the token are legitimate)."""
+    delimiter (annotations after the token are legitimate). A comma is not a
+    delimiter because it reads as a list, which would falsely accept
+    comma-separated token values."""
     v = _normalize(value)
     for tok in sorted(allowed, key=len, reverse=True):
         if v == tok:
@@ -418,23 +446,23 @@ def _table_rows(section: str) -> list[list[str]]:
 
 
 def _column(rows: list[list[str]], name: str) -> list[str]:
-    """Values of the column whose header contains `name`; [] if absent."""
+    """Values of the column whose header is `name`; [] if absent."""
     if not rows:
         return []
-    header = [h.lower() for h in rows[0]]
-    idx = next((i for i, h in enumerate(header) if name.lower() in h), None)
+    keys = [_header_key(h) for h in rows[0]]
+    idx = next((i for i, k in enumerate(keys) if k == name.lower()), None)
     if idx is None:
         return []
     return [r[idx] for r in rows[1:] if idx < len(r)]
 
 
 def _require_column(rows: list[list[str]], name: str, where: str, findings: list[str]) -> bool:
-    """True if `rows`' header has a column matching `name`; else records a
+    """True if `rows`' header has a column named `name`; else records a
     finding and returns False. An empty table is left to the dedicated
     empty-table finding, not duplicated here."""
     if not rows:
         return False
-    if not any(name.lower() in h.lower() for h in rows[0]):
+    if not any(_header_key(h) == name.lower() for h in rows[0]):
         findings.append(f"{where}: table lacks a {name!r} column")
         return False
     return True
@@ -496,6 +524,7 @@ def _check_claim(value: str, where: str, findings: list[str]) -> None:
 
 
 def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pass per record kind
+    text = strip_frontmatter(text)
     kind = detect(text)
     if kind is None:
         raise ValueError("not a recognized record")
