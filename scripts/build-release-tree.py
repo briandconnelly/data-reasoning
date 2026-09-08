@@ -2,10 +2,11 @@
 """Copy the plugin's runtime files into a clean directory.
 
 The release tree is what an install should fetch: the four skills, their
-references and decision records, the hook, the validator, the output style,
-and the manifests. Evaluation fixtures, archived runs, and test suites stay
-on `main`. The output directory is created fresh; an existing directory is
-rebuilt only when it carries this builder's marker file."""
+references, decision records, and agent interface metadata, the hook, the
+validator, the output style, and the manifests. Evaluation fixtures, archived
+runs, and test suites stay on `main`. The output directory is created fresh;
+an existing directory is rebuilt only when it carries this builder's marker
+file."""
 
 import json
 import shutil
@@ -27,7 +28,9 @@ ALLOW = [
     "instruments/check_record.py",
     "output-styles/data-answer.md",
 ]
-SKILL_SUBTREES = ("SKILL.md", "references", "decisions")
+# Every per-skill subtree an install needs. `agents/` carries each skill's
+# openai.yaml interface metadata, which a Codex install reads.
+SKILL_SUBTREES = ("SKILL.md", "references", "decisions", "agents")
 
 
 def prepare_output(out: Path) -> None:
