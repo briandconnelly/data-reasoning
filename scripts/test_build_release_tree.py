@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 import sys
 from fnmatch import fnmatch
@@ -138,6 +139,50 @@ def test_every_tracked_runtime_file_reaches_the_release_tree(tmp_path):
     assert build(out).returncode == 0
     missing = [rel for rel in tracked_runtime_files() if not (out / rel).is_file()]
     assert not missing, f"tracked runtime files absent from the release tree: {missing}"
+
+
+# --- No shipped SKILL.md may cite a path that is not in the tree -----------
+
+# A cited path is a Markdown link target or a backticked token that ends in
+# one of these extensions. Anything else backticked is prose.
+_CITED_EXTS = ("md", "py", "json", "yaml", "yml", "sh", "toml", "csv", "txt", "log")
+_BACKTICKED = re.compile(r"`([^`\n]+)`")
+_MD_LINK = re.compile(r"\]\(([^)\s]+)\)")
+_PATH_LIKE = re.compile(r"^[\w.@~+-]+(?:/[\w.@~+-]+)*\.(?:" + "|".join(_CITED_EXTS) + r")$")
+
+
+def cited_relative_paths(text: str) -> set[str]:
+    """Relative file paths a reader of this Markdown is pointed at."""
+    found = {m.group(1) for m in _MD_LINK.finditer(text)}
+    found |= {m.group(1).strip() for m in _BACKTICKED.finditer(text)}
+    return {
+        p
+        for p in found
+        if _PATH_LIKE.match(p) and not p.startswith(("/", "#", "http://", "https://"))
+    }
+
+
+def test_the_citation_scan_finds_the_citations_that_are_there():
+    """Guard the instrument: an empty scan would make the next test vacuous."""
+    cited = cited_relative_paths(
+        (REPO / "skills" / "hypothesis-driven-analysis" / "SKILL.md").read_text()
+    )
+    assert "references/ledger-template.md" in cited
+    assert "https://github.com/briandconnelly/data-reasoning" not in cited
+
+
+def test_no_shipped_skill_cites_a_path_missing_from_the_release_tree(tmp_path):
+    out = tmp_path / "release"
+    assert build(out).returncode == 0
+    skills = sorted((out / "skills").glob("*/SKILL.md"))
+    assert len(skills) == EXPECTED_SKILL_COUNT
+    dangling = []
+    for skill in skills:
+        for cited in sorted(cited_relative_paths(skill.read_text())):
+            # Cited either from the skill's own directory or from the tree root.
+            if not (skill.parent / cited).exists() and not (out / cited).exists():
+                dangling.append(f"{skill.parent.name}/SKILL.md -> {cited}")
+    assert not dangling, f"citations that dangle in a release install: {dangling}"
 
 
 # Files the fixed-list assertions at the top of this module already name; the

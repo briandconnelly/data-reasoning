@@ -7,7 +7,7 @@ description: 'Use for any request about a named entity — an account, customer,
 
 Guide open-ended data exploration through a phased lifecycle: frame, orient, explore, consolidate, hand off.
 The discipline buys honest leads: patterns found by search are reported with the search that found them, quality artifacts are caught before they masquerade as findings, and exploration stops at a precommitted budget instead of when the context runs out.
-Expect the ceremony to cost tokens rather than save them; no baseline-vs-skill premium has been measured for this skill yet (`tests/scenarios.md` holds the preregistered scenarios), so treat any cost claim as unmeasured.
+Expect the ceremony to cost tokens rather than save them; no baseline-vs-skill premium has been measured for this skill yet — the preregistered scenarios are at https://github.com/briandconnelly/data-reasoning/blob/main/skills/exploratory-data-analysis/tests/scenarios.md, which an install does not carry — so treat any cost claim as unmeasured.
 Exploration generates hypotheses; it never confirms them — adjudication is `hypothesis-driven-analysis`'s work, and Handoff below is how a lead gets there.
 
 ## Routing
