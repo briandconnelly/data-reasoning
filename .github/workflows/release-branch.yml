@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+# Two pushes to main must not race: the loser's push would leave `release`,
+# the branch every install fetches, stale with no alarm and no self-heal.
+concurrency: { group: release-branch, cancel-in-progress: true }
+
 permissions:
   contents: write
 
