@@ -16,6 +16,12 @@ REPO = Path(__file__).resolve().parents[1]
 HOOK = REPO / "hooks" / "check_record_hook.py"
 SIGNATURE_RECORD = "# Decision Record: ship?\n\n## Verdict\n\n- Verdict: optimal\n"
 
+_spec = importlib.util.spec_from_file_location("check_record_hook", HOOK)
+assert _spec
+assert _spec.loader
+hook_module = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(hook_module)
+
 
 def run_hook(payload: dict, plugin_root: str | None = None) -> subprocess.CompletedProcess:
     env = {"CLAUDE_PLUGIN_ROOT": plugin_root if plugin_root is not None else str(REPO)}
@@ -167,6 +173,33 @@ def test_record_under_frontmatter_reaches_the_validator(tmp_path):
     assert "verdict" in r.stderr.lower()
 
 
+def test_record_under_oversized_frontmatter_is_not_a_silent_pass(tmp_path):
+    """The closing delimiter falls past the scan budget, so the sniff cannot
+    tell a record from an ordinary file. Indeterminate is not a clean pass."""
+    f = tmp_path / "record.md"
+    padding = "".join(f"k{i}: {'v' * 60}\n" for i in range(1200))
+    f.write_text(
+        "---\n" + padding + "---\n# Decision Record: ship?\n\n## Verdict\n\n- Verdict: optimal\n"
+    )
+    assert f.stat().st_size > hook_module.FRONTMATTER_SCAN_BYTES  # the case really is oversized
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2, r.stderr
+    assert "not validated" in r.stderr
+
+
+def test_unterminated_frontmatter_seen_whole_stays_a_non_record(tmp_path):
+    """The other side of the boundary: a document opening with a horizontal
+    rule is smaller than the budget and has been read entirely, so there is
+    nothing left to discover. It is not a record, and failing it closed would
+    fire "not validated" on ordinary Markdown."""
+    f = tmp_path / "notes.md"
+    f.write_text("---\n\nNotes that open with a horizontal rule.\n" + "filler\n" * 200)
+    assert f.stat().st_size < hook_module.FRONTMATTER_SCAN_BYTES  # the case really is short
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0, r.stderr
+    assert not r.stderr
+
+
 def test_record_under_long_frontmatter_reaches_the_validator(tmp_path):
     f = tmp_path / "record.md"
     padding = "".join(f"k{i}: {'v' * 60}\n" for i in range(120))  # > 4,096 bytes
@@ -251,11 +284,4 @@ def test_shell_sniff_signatures_match_python_signatures():
     assert match, "could not find the signature grep in check_record_hook.sh"
     sh_signatures = {f"# {name}: " for name in match.group(1).split("|")}
 
-    spec = importlib.util.spec_from_file_location(
-        "check_record_hook", REPO / "hooks" / "check_record_hook.py"
-    )
-    assert spec
-    assert spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    assert sh_signatures == set(module.SIGNATURES)
+    assert sh_signatures == set(hook_module.SIGNATURES)
