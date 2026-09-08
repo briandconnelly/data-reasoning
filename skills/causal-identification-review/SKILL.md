@@ -10,7 +10,7 @@ description: >-
 
 Review whether a design — proposed, claimed, or still to be found — identifies a causal effect, and on what assumptions.
 The discipline buys a constructive ending: "nothing identifies this effect" stops being a dead end and becomes a reviewed design with named assumptions, probes run against them, and a disposition a downstream investigation can act on.
-Expect the ceremony to cost tokens rather than save them: measurement wave 1 recorded baseline-vs-skill premiums from −3.3% to +78.9% (n=1 per cell, `tests/scenarios.md`).
+Expect the ceremony to cost tokens rather than save them: measurement wave 1 recorded baseline-vs-skill premiums from −3.3% to +78.9% (n=1 per cell, listed in the scenario catalog at https://github.com/briandconnelly/data-reasoning/blob/main/skills/causal-identification-review/tests/scenarios.md, which an install does not carry).
 Treat that range as a first wave's figures, not a bound.
 A review reports evidence-bounded dispositions; it never certifies — no outcome here is an unconditional pass a reader can cite instead of rerunning the review.
 
