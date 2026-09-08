@@ -1,6 +1,7 @@
 import json
 import subprocess
 import sys
+from fnmatch import fnmatch
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -58,3 +59,94 @@ def test_builder_rebuilds_its_own_output(tmp_path):
     assert build(out).returncode == 0
     assert build(out).returncode == 0
     assert (out / ".data-reasoning-release").is_file()
+
+
+# --- Completeness: the tree must carry every tracked runtime file ----------
+#
+# The presence assertions above name a fixed list, so they cannot notice a
+# runtime file added later that never reaches the tree. The helpers below
+# instead enumerate the runtime directories from the git index -- tracked
+# files only, so untracked scratch cannot break them -- and require every
+# file under them to be in the built tree unless it is denylisted here.
+
+_RUNTIME_PREFIXES = (
+    "hooks/",
+    "output-styles/",
+    "instruments/",
+    ".claude-plugin/",
+    ".codex-plugin/",
+    ".agents/",
+)
+_RUNTIME_TOP_LEVEL = ("LICENSE", "README.md")
+
+# Tracked files under a runtime directory that the release tree omits on
+# purpose. Glob-matched against the repo-relative path; keep this list short
+# and say why each entry is out.
+RELEASE_DENYLIST = (
+    # The validator's own pytest suite is development evidence, not runtime:
+    # an install runs instruments/check_record.py, it does not test it.
+    "instruments/test_*.py",
+    # A repo-local authoring skill for agents working on this repository
+    # (added in bb73b29), not one of the plugin's four shipped skills. Both
+    # plugin manifests point their `skills` key at ./skills/, and only the
+    # four skills under it ship.
+    ".agents/skills/*",
+    # Scenario catalogs, fixtures, and archived runs: ~43 MB of evaluation
+    # evidence that stays on `main` by the release tree's design.
+    "skills/*/tests/*",
+)
+
+
+def is_runtime_path(rel: str) -> bool:
+    """Does this repo-relative tracked path belong in an install?"""
+    if rel in _RUNTIME_TOP_LEVEL or rel.startswith(_RUNTIME_PREFIXES):
+        return True
+    # Everything under a skill directory is runtime unless denylisted, so a
+    # subtree added later fails here instead of being silently dropped.
+    parts = rel.split("/")
+    return len(parts) >= 3 and parts[0] == "skills"  # noqa: PLR2004
+
+
+def tracked_runtime_files() -> list[str]:
+    out = subprocess.run(
+        ["git", "-C", str(REPO), "ls-files", "-z"], capture_output=True, text=True, check=True
+    ).stdout
+    tracked = [p for p in out.split("\0") if p]
+    assert tracked, "git ls-files returned nothing; the walk below would pass vacuously"
+    return [
+        p
+        for p in tracked
+        if is_runtime_path(p) and not any(fnmatch(p, d) for d in RELEASE_DENYLIST)
+    ]
+
+
+def test_the_runtime_walk_sees_more_than_the_fixed_list_names():
+    """Guard the instrument: a walk that matched nothing would pass vacuously."""
+    found = tracked_runtime_files()
+    assert len(found) > len(NAMED_IN_FIXED_LIST)
+    assert set(NAMED_IN_FIXED_LIST) <= set(found)
+    # Reached only by walking, never by the fixed list -- the class of file
+    # this test exists to notice.
+    assert "skills/hypothesis-driven-analysis/agents/openai.yaml" in found
+    # And the denylist really removes things.
+    assert "instruments/test_check_record.py" not in found
+    assert not any(p.startswith("skills/hypothesis-driven-analysis/tests/") for p in found)
+
+
+def test_every_tracked_runtime_file_reaches_the_release_tree(tmp_path):
+    out = tmp_path / "release"
+    assert build(out).returncode == 0
+    missing = [rel for rel in tracked_runtime_files() if not (out / rel).is_file()]
+    assert not missing, f"tracked runtime files absent from the release tree: {missing}"
+
+
+# Files the fixed-list assertions at the top of this module already name; the
+# walk above must reach strictly more than these.
+NAMED_IN_FIXED_LIST = (
+    ".claude-plugin/plugin.json",
+    ".claude-plugin/marketplace.json",
+    "hooks/check_record_hook.py",
+    "hooks/check_record_hook.sh",
+    "instruments/check_record.py",
+    "skills/hypothesis-driven-analysis/SKILL.md",
+)
