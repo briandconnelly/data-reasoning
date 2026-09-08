@@ -371,3 +371,32 @@ def test_render_writes_nothing_when_any_carrier_is_broken(tmp_path):
     )
     assert css.run_gate(fake, render=True) == EXPECTED_ERROR_CODE
     assert drifted.read_text(encoding="utf-8") == after_drift
+
+
+@pytest.mark.parametrize(
+    ("prefix", "suffix"),
+    [("```text\n", "```\n"), ("<!--\n", "-->\n")],
+    ids=["fenced", "commented"],
+)
+def test_a_hidden_authority_fails_both_check_and_render(tmp_path, capsys, prefix, suffix):
+    """The visibility rule guards the authority too, or it guards nothing.
+
+    Hiding the authority body leaves every carrier's markers visible and every
+    rendered block equal to it byte for byte, so nothing else in the checker
+    notices — while all four skills now carry the gate as sample text. Render
+    is how that damage gets written and check is how it should be caught, so
+    neither path may accept it.
+    """
+    fake = make_fake_repo(tmp_path)
+    authority = fake / css.GATE_AUTHORITY
+    authority.write_text(prefix + authority.read_text(encoding="utf-8") + suffix, encoding="utf-8")
+    before = {
+        skill: (fake / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+        for skill in css.GATE_CARRIERS
+    }
+    assert css.run_gate(fake, render=True) == EXPECTED_ERROR_CODE
+    assert css.run_gate(fake, render=False) == EXPECTED_ERROR_CODE
+    err = capsys.readouterr().err
+    assert css.GATE_AUTHORITY in err
+    for skill, text in before.items():
+        assert (fake / "skills" / skill / "SKILL.md").read_text(encoding="utf-8") == text, skill

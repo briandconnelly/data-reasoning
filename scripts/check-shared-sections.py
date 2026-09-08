@@ -250,8 +250,9 @@ def run_gate(repo: Path, render: bool) -> int:
     """Check (or, with `render`, rewrite) every carrier's authorization gate.
 
     Returns 0 when every carrier matches the authority, 1 on drift, and 2 when
-    a carrier's marker pair is missing, duplicated, or hidden -- a structural
-    fault the checker cannot resolve on its own.
+    the authority itself is unreadable or hidden, or a carrier's marker pair is
+    missing, duplicated, or hidden -- structural faults the checker cannot
+    resolve on its own.
     """
     authority_path = repo / GATE_AUTHORITY
     try:
@@ -261,6 +262,21 @@ def run_gate(repo: Path, render: bool) -> int:
         return FAULT_CODE
     if not authority.endswith("\n"):
         print(f"ERROR: {authority_path}: must end with a newline", file=sys.stderr)
+        return FAULT_CODE
+    # The carriers' markers are checked for visibility, but a hidden authority
+    # defeats that: fence its body and every carrier still matches it byte for
+    # byte, with all four gates rendered as sample text. Check before either
+    # comparing or rendering, so neither path can accept it.
+    authority_lines = authority.split("\n")
+    visible = set(visible_indices(authority_lines))
+    hidden = [i for i, line in enumerate(authority_lines) if i not in visible and line.strip()]
+    if hidden:
+        print(
+            f"ERROR: {authority_path}: line {hidden[0] + 1} is hidden from a reader "
+            f"(inside a code fence or an HTML comment); the gate must be instruction, "
+            f"not sample text.",
+            file=sys.stderr,
+        )
         return FAULT_CODE
     # Read and locate every marker pair before writing any of them, so a fault
     # in the last carrier cannot leave the first three rendered and the run
