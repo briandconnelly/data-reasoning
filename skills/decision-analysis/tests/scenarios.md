@@ -18,7 +18,7 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 - The two HDA seam sentences: recorded as HDA's own debt in `skills/hypothesis-driven-analysis/tests/scenarios.md` § Owed measurements.
 - The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
 - The 2026-09-15 wording: § Verdict's precedence rule when both sensitivities fire (`prior-sensitive`, loss crossover in Conditions), and § Degraded Modes' no-defensible-prior procedure with its worked example: unmeasured.
-  Reachability: DA-S1 (an `UNRESOLVED` ledger with one sourced LR) and any scenario whose ledger supplies no LR traverse the degraded mode; a scenario whose sweep flips on both axes traverses the precedence rule.
+  Reachability: DA-S1 (an `UNRESOLVED` ledger with one sourced LR and no elicited prior) traverses the degraded mode's no-supported-prior branch and must keep that LR in the sweep; a scenario whose sweep flips on both axes traverses the precedence rule.
   Both sentences owe their arms with the rest of this catalog's first run; no earlier arm exists for them to invalidate.
 
 ## Scenarios

@@ -37,7 +37,7 @@ Three pieces of evidence are owed and not started, named here so the gap is not 
 - Measured simplification experiments: the checkers below preserve wording and provenance, but nothing yet establishes whether each accumulated rule still earns its context cost.
 
 The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.
-As of 2026-09-15 (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,419 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 3,475 plus a 689-word template; `causal-identification-review` is 2,440 plus 492; `exploratory-data-analysis` is 2,510 plus 843.
+As of 2026-09-15 (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,419 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 3,569 plus a 715-word template; `causal-identification-review` is 2,440 plus 492; `exploratory-data-analysis` is 2,510 plus 843.
 Co-loading two skills — the designed handoff case — pays the verbatim authorization gate (~350 words) and a near-duplicate costly-collection section once per skill loaded.
 Reducing that duplication means extracting the shared contract, which edits `hypothesis-driven-analysis` and is deferred on the terms in `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` § Consequences.
 

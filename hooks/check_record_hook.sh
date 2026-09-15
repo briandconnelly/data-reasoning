@@ -20,7 +20,11 @@ if [ -z "$file_path" ]; then
     exit 0
   fi
   cwd=$(printf '%s' "$payload" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"\\]*\)".*/\1/p' | head -n 1)
-  for p in $(printf '%s' "$payload" | grep -o -E '\*\*\* (Add File|Update File|Move to): [^"\\]*' | sed 's/^\*\*\* [A-Za-z ]*: //'); do
+  paths=$(printf '%s' "$payload" | grep -o -E '\*\*\* (Add File|Update File|Move to): [^"\\]*' | sed 's/^\*\*\* [A-Za-z ]*: //')
+  # One path per line: a name with spaces must stay one candidate, so the
+  # loop reads lines rather than word-splitting a command substitution.
+  while IFS= read -r p; do
+    [ -n "$p" ] || continue
     case "$p" in
       *.md) ;;
       *) continue ;;
@@ -34,7 +38,9 @@ if [ -z "$file_path" ]; then
       printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$full" >&2
       exit 2
     fi
-  done
+  done <<EOF_PATHS
+$paths
+EOF_PATHS
   if printf '%s' "$payload" | grep -q -E '# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
     printf 'data-reasoning: a record written by apply_patch was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' >&2
     exit 2

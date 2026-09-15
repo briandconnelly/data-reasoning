@@ -593,25 +593,31 @@ def _unfilled(value: str) -> bool:
     return value.strip() == "..." or _has_placeholder(value) or bool(PENDING.match(value.strip()))
 
 
+def _check_labels(section: str, heading: str, labels, final: bool, findings: list[str]) -> None:
+    """Missing / empty / (final mode) still-unfilled findings for each
+    `- label:` bullet in `section`, reported under `heading`."""
+    for label in labels:
+        value = _slot_value(section, label)
+        if value is None:
+            findings.append(f"{heading}: required '- {label}:' slot is missing")
+        elif not value:
+            findings.append(f"{heading}: required slot '{label}' is empty")
+        elif final and _unfilled(value):
+            findings.append(f"{heading}: required slot '{label}' is still unfilled: {value!r}")
+
+
 def _check_slots(body: str, kind: str, final: bool, findings: list[str]) -> None:
     for heading, labels in REQUIRED_SLOTS.get(kind, {}).items():
         section = _section(body, heading)
         if not section.strip():
             continue  # the missing/empty-section finding already covers it
-        for label in labels:
-            value = _slot_value(section, label)
-            if value is None:
-                findings.append(f"{heading}: required '- {label}:' slot is missing")
-            elif not value:
-                findings.append(f"{heading}: required slot '{label}' is empty")
-            elif final and _unfilled(value):
-                findings.append(f"{heading}: required slot '{label}' is still unfilled: {value!r}")
+        _check_labels(section, heading, labels, final, findings)
 
 
-def _nested_table_rows(section: str, label: str) -> list[list[str]] | None:
-    """Data rows of the table nested under the `- label:` bullet in `section`,
-    or None when the bullet itself is absent. The nested span runs from the
-    bullet to the next top-level bullet or the section's end."""
+def _nested_span(section: str, label: str) -> str | None:
+    """The lines nested under the `- label:` bullet in `section` -- up to the
+    next top-level bullet or the section's end -- or None when the bullet is
+    absent."""
     lines = section.splitlines()
     start = next(
         (
@@ -628,10 +634,50 @@ def _nested_table_rows(section: str, label: str) -> list[list[str]] | None:
         if ln.startswith("- "):
             break
         span.append(ln)
-    return _table_rows("\n".join(span))[1:]
+    return "\n".join(span)
 
 
-def _check_nested_tables(body: str, kind: str, findings: list[str]) -> None:
+def _check_nested_table(
+    section: str, heading: str, label: str, final: bool, findings: list[str]
+) -> None:
+    """A `- label:` bullet with a table of at least one data row under it; in
+    final mode every cell of that table must be filled."""
+    span = _nested_span(section, label)
+    if span is None:
+        findings.append(f"{heading}: required '- {label}:' slot is missing")
+        return
+    rows = _table_rows(span)[1:]
+    if not rows:
+        findings.append(f"{heading}: '- {label}:' has no table rows under it")
+        return
+    if final:
+        for i, row in enumerate(rows, 1):
+            for cell in row:
+                if _unfilled(cell):
+                    findings.append(
+                        f"{heading}: '- {label}:' row {i} cell still unfilled: {cell!r}"
+                    )
+
+
+def _check_nested_list(
+    section: str, heading: str, label: str, final: bool, findings: list[str]
+) -> None:
+    """A `- label:` bullet with at least one indented sub-bullet under it."""
+    span = _nested_span(section, label)
+    if span is None:
+        findings.append(f"{heading}: required '- {label}:' slot is missing")
+        return
+    items = [ln.strip()[2:] for ln in span.splitlines() if ln.strip().startswith("- ")]
+    if not items:
+        findings.append(f"{heading}: '- {label}:' has no items under it")
+        return
+    if final:
+        for item in items:
+            if _unfilled(item):
+                findings.append(f"{heading}: '- {label}:' item still unfilled: {item!r}")
+
+
+def _check_nested_tables(body: str, kind: str, final: bool, findings: list[str]) -> None:
     """Completed decision records carry a Consequences table and an Evidence
     table; a `- Label:` line with nothing under it is the omission finding 2
     of the 2026-09-15 review reproduced."""
@@ -642,37 +688,37 @@ def _check_nested_tables(body: str, kind: str, findings: list[str]) -> None:
         ("## Evidence and update", "Evidence"),
     ):
         section = _section(body, heading)
-        if not section.strip():
-            continue
-        rows = _nested_table_rows(section, label)
-        if rows is None:
-            findings.append(f"{heading}: required '- {label}:' slot is missing")
-        elif not rows:
-            findings.append(f"{heading}: '- {label}:' has no table rows under it")
+        if section.strip():
+            _check_nested_table(section, heading, label, final, findings)
 
 
-def _check_review_route_blocks(body: str, findings: list[str]) -> None:
-    """A review or construct record owes at least one Design block ending in a
-    Disposition; a bound record owes the Bound block and its slots. The
-    route's own value is checked elsewhere; here an unrecognized route owes
-    nothing extra."""
+DESIGN_SLOTS = ["Design", "Data requirements", "Disposition"]
+BOUND_SLOTS = ["Assumption ledger", "Bound logic", "Computed endpoints"]
+
+
+def _check_review_route_blocks(body: str, final: bool, findings: list[str]) -> None:
+    """A review or construct record owes at least one Design block carrying
+    the template's slots, assumption list, and probe and threat tables; a
+    bound record owes the Bound block and its slots. The route's own value is
+    checked elsewhere; here an unrecognized route owes nothing extra."""
     route = _slot_value(_section(body, "## Question"), "Route")
     token = _leading_token(route, ROUTES) if route else None
     if token in ("review", "construct"):
-        designs = [h for h in re.findall(r"^## Design: .*$", body, re.M) if h.strip()]
+        designs = [h.rstrip() for h in re.findall(r"^## Design: .*$", body, re.M)]
         if not designs:
             findings.append(f"route {token!r}: no '## Design: <name>' block")
         for h in designs:
-            if _slot_value(_section(body, h.rstrip()), "Disposition") is None:
-                findings.append(f"{h.rstrip()}: required '- Disposition:' slot is missing")
+            section = _section(body, h)
+            _check_labels(section, h, DESIGN_SLOTS, final, findings)
+            _check_nested_list(section, h, "Identifying assumptions", final, findings)
+            _check_nested_table(section, h, "Assumption probes", final, findings)
+            _check_nested_table(section, h, "Threat register", final, findings)
     elif token == "bound":
         bound = _section(body, "## Bound")
         if not bound.strip():
             findings.append("route 'bound': required section missing: ## Bound")
         else:
-            for label in ("Assumption ledger", "Bound logic", "Computed endpoints"):
-                if _slot_value(bound, label) is None:
-                    findings.append(f"## Bound: required '- {label}:' slot is missing")
+            _check_labels(bound, "## Bound", BOUND_SLOTS, final, findings)
 
 
 def _in_progress(body: str) -> bool:
@@ -692,11 +738,10 @@ def _in_progress(body: str) -> bool:
 def _unfilled_cell(value: str, where: str, final: bool, findings: list[str]) -> bool:
     """True when `value` is template state the vocabulary check must skip; in
     final mode that state is itself a finding."""
-    if not _is_placeholder(value):
-        return False
-    if final:
+    if final and _unfilled(value):
         findings.append(f"{where}: cell still unfilled: {value!r}")
-    return True
+        return True
+    return _is_placeholder(value)
 
 
 def _check_claim(value: str, where: str, findings: list[str], final: bool = False) -> None:
@@ -736,9 +781,9 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             elif not _section(body, heading).strip():
                 findings.append(f"required section empty: {heading}")
         _check_slots(body, kind, final, findings)
-        _check_nested_tables(body, kind, findings)
+        _check_nested_tables(body, kind, final, findings)
         if kind == "review":
-            _check_review_route_blocks(body, findings)
+            _check_review_route_blocks(body, final, findings)
 
     if kind == "ledger":
         # No id-grammar check on `id` cells (e.g. H1 vs H4 (retrospective)):

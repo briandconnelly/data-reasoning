@@ -452,3 +452,20 @@ def test_without_python_a_patch_to_source_files_is_silent(tmp_path):
     r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
     assert r.returncode == 0
     assert not r.stderr
+
+
+def test_without_python_a_spaced_filename_is_one_candidate(tmp_path):
+    (tmp_path / "decision record.md").write_text(SIGNATURE_RECORD)
+    patch = "*** Begin Patch\n*** Update File: decision record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 2
+    assert str(tmp_path / "decision record.md") in r.stderr
+
+
+def test_a_spaced_filename_reaches_the_python_hook(tmp_path):
+    f = tmp_path / "decision record.md"
+    f.write_text(BAD_RECORD)
+    patch = "*** Begin Patch\n*** Update File: decision record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_hook(codex_payload(tmp_path, patch))
+    assert r.returncode == 2
+    assert str(f) in r.stderr

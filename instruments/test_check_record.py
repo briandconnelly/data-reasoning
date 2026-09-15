@@ -213,6 +213,22 @@ GOOD_REVIEW = """\
 
 ## Design: pilot-vs-rest difference-in-differences
 
+- Design: difference-in-differences, pilot depots vs the rest
+- Identifying assumptions:
+  - throughput at pilot and non-pilot depots would have moved in parallel absent the pilot
+- Assumption probes:
+
+  | assumption | probe | result |
+  | --- | --- | --- |
+  | parallel trends | pre-period slope comparison | slopes within 0.2 |
+
+- Data requirements: weekly throughput per depot, 12 pre-weeks
+- Threat register:
+
+  | threat | probe | result |
+  | --- | --- | --- |
+  | concurrent staffing change | staffing log review | none in window |
+
 - Disposition: identified-if — parallel pre-trends; probe attached
 
 ## Handoff
@@ -567,7 +583,11 @@ REVIEW_SKELETON = (
     "# Identification Review: q\n\n## Question\n\n"
     "- Causal question, restated as a counterfactual contrast: c\n- Estimand: e\n"
     "- Assignment mechanism as stated: UNSTATED\n- Route: {route}\n\n"
-    "## Design: d\n\n- Disposition: {disp}\n\n"
+    "## Design: d\n\n- Design: d\n- Identifying assumptions:\n  - a\n- Assumption probes:\n\n"
+    "  | assumption | probe | result |\n  | --- | --- | --- |\n  | a | p | r |\n\n"
+    "- Data requirements: dr\n- Threat register:\n\n"
+    "  | threat | probe | result |\n  | --- | --- | --- |\n  | t | p | r |\n\n"
+    "- Disposition: {disp}\n\n"
     "## Handoff\n\n- Facts: f\n- Assumptions: a\n- Dispositions: {disp}\n"
 )
 BOUND_BLOCK = (
@@ -1093,3 +1113,67 @@ def test_final_mode_rejects_placeholder_table_cells():
         "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: <value>"
     )
     assert any("Verdict: cell still unfilled" in f for f in cr.check(rec, final=True))
+
+
+# Codex review pass 2: a Design block of one Disposition line, a Bound block of
+# empty / placeholder / pending values, a placeholder Evidence row, and a
+# `pending` necessary prediction all passed --final.
+
+
+def test_design_block_of_only_a_disposition_is_incomplete():
+    rec = re.sub(
+        r"(## Design: pilot-vs-rest difference-in-differences\n\n).*?(- Disposition: [^\n]*\n)",
+        r"\1\2",
+        GOOD_REVIEW,
+        flags=re.S,
+    )
+    assert "Identifying assumptions" not in rec
+    findings = cr.check(rec, final=True)
+    h = "## Design: pilot-vs-rest difference-in-differences"
+    assert f"{h}: required '- Design:' slot is missing" in findings
+    assert f"{h}: required '- Identifying assumptions:' slot is missing" in findings
+    assert f"{h}: required '- Assumption probes:' slot is missing" in findings
+    assert f"{h}: required '- Data requirements:' slot is missing" in findings
+    assert f"{h}: required '- Threat register:' slot is missing" in findings
+
+
+def test_design_nested_structures_must_have_content():
+    rec = GOOD_REVIEW.replace(
+        "  - throughput at pilot and non-pilot depots would have moved in parallel absent the pilot\n",
+        "",
+    ).replace("  | parallel trends | pre-period slope comparison | slopes within 0.2 |\n", "")
+    findings = cr.check(rec, final=True)
+    assert any("'- Identifying assumptions:' has no items under it" in f for f in findings)
+    assert any("'- Assumption probes:' has no table rows under it" in f for f in findings)
+
+
+def test_bound_block_template_state_is_caught_in_final_mode():
+    bound = (
+        "## Bound\n\n- Assumption ledger:\n- Bound logic: <logic>\n"
+        "- Computed endpoints: pending\n\n"
+    )
+    rec = REVIEW_SKELETON.format(route="bound", disp="none").replace(
+        "## Handoff", bound + "## Handoff"
+    )
+    findings = cr.check(rec, final=True)
+    assert "## Bound: required slot 'Assumption ledger' is empty" in findings
+    assert "## Bound: required slot 'Bound logic' is still unfilled: '<logic>'" in findings
+    assert "## Bound: required slot 'Computed endpoints' is still unfilled: 'pending'" in findings
+
+
+def test_placeholder_evidence_row_is_caught_in_final_mode():
+    rec = GOOD_DECISION.replace(
+        "  | T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+        "  | <item> | <ratio> | <class> | <source> |",
+    )
+    assert cr.check(rec) == []
+    findings = cr.check(rec, final=True)
+    assert any("'- Evidence:' row 1 cell still unfilled: '<item>'" in f for f in findings)
+
+
+def test_pending_necessary_prediction_is_caught_in_final_mode():
+    rec = GOOD_LEDGER.replace("step aligns with deploy window", "pending")
+    assert cr.check(rec) == []  # a bare pending cell is ordinary content in default mode
+    assert any(
+        "Hypotheses row 1: cell still unfilled: 'pending'" in f for f in cr.check(rec, final=True)
+    )
