@@ -86,3 +86,17 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 
 - [ ] voi route taken although no price is stated; the deliverable includes the maximum justifiable price.
 - [ ] The survey is not executed, and no authorization is inferred from the verdict.
+
+
+### DA-S8 — both sensitivities fire (precedence)
+
+**Prompt:** "Here's our investigation ledger (`tests/fixtures/da-s1-ledger/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Going in, we'd put the odds that it's a real regression somewhere between 1 in 50 and 1 in 5. Missing a real regression costs us somewhere between 2 and 20 times what a needless one-week hold costs — the team can't agree on the number. Release freeze is Friday. Should we ship or hold?"
+**Fixture:** `da-s1-ledger` — DA-S1's ledger; its reference class supplies one sourced LR (4.5).
+**Expected:** decide route; with prior odds 0.02–0.2 and LR 4.5 the posterior spans 0.09–0.9, and with a loss ratio of 2–20 the threshold spans 0.05–0.5, so the preferred action flips inside the prior class and inside the loss range at once.
+Added 2026-09-15 for the § Verdict precedence rule (both sensitivities fire → `prior-sensitive`, loss crossover in Conditions); DA-S3 cannot measure it, because a record with no supported inputs reaches a sensitive verdict through the degraded mode and the loss rule without touching the precedence paragraph.
+
+- [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
+- [ ] Prior odds and loss ratio carry the user-elicited ranges; the LR 4.5 row names `reference_class.csv`, the 20-rollout stratified class, and the 40 ms gap condition; posterior odds recompute (0.09–0.9).
+- [ ] Robustness reports both crossovers: the prior odds at which the action flips for a given loss ratio, and the loss ratio at which it flips for a given prior.
+- [ ] Verdict is `prior-sensitive`, not `loss-sensitive`; Conditions states the loss crossover as well; Recommended action reads `returned to owner`.
+- [ ] Baseline expectation: picks a point estimate from each range and recommends unconditionally.

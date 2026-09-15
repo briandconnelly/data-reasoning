@@ -1,1 +1,0 @@
-Ledger attached (`/Users/bdc/projects/data-reasoning/.worktrees/codex-review-remediation/skills/decision-analysis/tests/fixtures/da-s1-ledger/ledger.md`). Ship or hold? Decide for us.

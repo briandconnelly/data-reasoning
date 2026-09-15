@@ -18,8 +18,13 @@ Properties, each a trap the DA-S1 / DA-S3 cells depend on:
    real regressions with the gap, 2/10 without, so LR = 4.5.
 4. The per-host data supports T1 as written: canary mean minus control mean
    exceeds 40 ms and every canary host exceeds every control host.
-5. No prior, probability, or loss appears anywhere in the fixture -- the
+5. Nothing in the fixture supports a prior: the reference class states that
+   its strata were drawn to fixed quotas (so its 10/10 split is not a base
+   rate), and no prior, probability, or loss token appears anywhere -- the
    decision skill must not find one to lean on, and must not invent one.
+7. H1 is non-causal (`descriptive`), so the decision proposition it feeds is
+   "the regression is real", which the reference-class labels settle, and no
+   identification review is owed before a posterior over it.
 6. Regenerating from the committed generator reproduces the CSV bytes.
 """
 
@@ -99,7 +104,11 @@ def main() -> None:
     if min(canary) <= max(control):
         fail("not every canary host exceeds every control host")
 
-    # 5. nothing to lean on
+    # 5. nothing to lean on: quota statement present, no belief/loss tokens
+    if "quotas fixed by the analyst" not in text or "not a base rate" not in text:
+        fail("the ledger must state that the reference class was drawn to fixed quotas")
+    if not re.search(r"^\| H1 \| descriptive \(estimand:", text, re.M):
+        fail("H1 must carry a descriptive claim class, not a causal one")
     for path in [ledger, *sorted((fx / "evidence").iterdir())]:
         for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if FORBIDDEN.search(line):

@@ -886,3 +886,51 @@ def test_none_supported_lr_row_contributes_no_update():
     assert any("provenance cell must read" in f for f in check(bad))
     bad = replace_once(text, "| raw logs not acquired; no ratio defensible |", "| |")
     assert any("no reason in its source cell" in f for f in check(bad))
+
+
+# Design review 2026-09-15: the sentinel must be coupled to its verdict and
+# sweep, or a forbidden record passes.
+
+
+def test_no_prior_with_robust_verdict_fails():
+    bad = replace_once(_no_prior_decide(), "- Verdict: prior-sensitive", "- Verdict: robust")
+    bad = replace_once(
+        bad, "- Recommended action: returned to owner", "- Recommended action: hold one week"
+    )
+    assert any("must be 'prior-sensitive'" in f for f in check(bad))
+
+
+def test_no_prior_with_loss_sensitive_verdict_fails():
+    bad = replace_once(
+        _no_prior_decide(), "- Verdict: prior-sensitive", "- Verdict: loss-sensitive"
+    )
+    assert any("must be 'prior-sensitive'" in f for f in check(bad))
+
+
+def test_no_prior_with_dominated_verdict_fails():
+    bad = replace_once(_no_prior_decide(), "- Verdict: prior-sensitive", "- Verdict: dominated")
+    bad = replace_once(
+        bad, "- Recommended action: returned to owner", "- Recommended action: hold one week"
+    )
+    assert any("dominated verdict requires" in f for f in check(bad))
+
+
+def test_no_prior_sweep_must_be_sensitivity_only():
+    bad = replace_once(
+        _no_prior_decide(),
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: user-elicited",
+    )
+    assert any("must carry provenance 'sensitivity-only'" in f for f in check(bad))
+
+
+def test_all_none_supported_evidence_passes_with_crossover_at_threshold():
+    text = replace_once(
+        _no_prior_decide(),
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | T1 consistent | none supported | none supported | non-discriminating on its own |",
+    )
+    text = replace_once(
+        text, "- Crossover: flips at prior odds 0.025", "- Crossover: flips at prior odds 0.1"
+    )
+    assert check(text) == []

@@ -12,10 +12,10 @@ entity, Northgate Clinic, resolves to two ids: `ACC-1042` through March and
 in `accounts.csv`. It has no billing or ticket rows in February and in June.
 `contract_status.csv` covers February (status `paused`) and says nothing about
 June, so one hole is genuine inactivity on independent evidence and the other
-is UNKNOWN. Its plan changes from `standard` to `enterprise-annual` in March
-and its billed volume drops in April -- the causal story the fixture invites
-and does not support. Deterministic from a fixed seed on this module's own
-`random.Random`. Run from the repo root:
+is UNKNOWN. `plan_changes.csv` dates its plan change from `standard` to
+`enterprise-annual` at 2026-03-01, and its billed volume drops in April --
+the causal story the fixture invites and does not support. Deterministic from a
+fixed seed on this module's own `random.Random`. Run from the repo root:
 
     uv run skills/exploratory-data-analysis/tests/fixtures/generate_b10.py
 """
@@ -167,6 +167,24 @@ def contract_status() -> list[dict[str, str]]:
     return rows
 
 
+def plan_changes() -> list[dict[str, str]]:
+    # Independently dated plan-change events from the subscriptions system.
+    return [
+        {
+            "account_id": "ACC-1019",
+            "effective_date": "2025-11-01",
+            "from_plan": "standard",
+            "to_plan": "enterprise-annual",
+        },
+        {
+            "account_id": "ACC-1042",
+            "effective_date": "2026-03-01",
+            "from_plan": "standard",
+            "to_plan": "enterprise-annual",
+        },
+    ]
+
+
 def write(rows: list[dict[str, str]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -180,11 +198,13 @@ def main() -> None:
     write(tickets(), OUT / "tickets.csv")
     write(accounts(), OUT / "accounts.csv")
     write(contract_status(), OUT / "contract_status.csv")
+    write(plan_changes(), OUT / "plan_changes.csv")
     (OUT / "README.md").write_text(
         "Account data extract, 2026-01 through 2026-06.\n"
         "billing.csv: one row per account per billed month. tickets.csv: support tickets.\n"
         "accounts.csv: account ids and names with validity windows.\n"
-        "contract_status.csv: monthly contract status from the contracts system.\n",
+        "contract_status.csv: monthly contract status from the contracts system.\n"
+        "plan_changes.csv: dated plan-change events from the subscriptions system.\n",
         encoding="utf-8",
     )
     print(f"wrote {OUT}")

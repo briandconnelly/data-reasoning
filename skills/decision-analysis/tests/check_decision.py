@@ -487,6 +487,22 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             failures.append(
                 f"'- Prior odds' sentinel {NO_PRIOR!r} must appear bare, with no annotation"
             )
+        # The degraded mode couples the sentinel to its verdict and sweep:
+        # the verdict is prior-sensitive (dominated carries `none needed`
+        # instead, and is handled above), and the swept prior class is
+        # sensitivity-only -- a belief-grade sweep would be a prior the
+        # record says it does not have.
+        if verdict != "prior-sensitive":
+            failures.append(
+                f"with '- Prior odds' reading {NO_PRIOR!r} the verdict must be "
+                f"'prior-sensitive'; found {verdict!r}"
+            )
+        swept_text = field(robustness, "Prior class swept:") or ""
+        if "sensitivity-only" not in _PROVENANCE_MENTION.findall(swept_text):
+            failures.append(
+                f"with '- Prior odds' reading {NO_PRIOR!r}, '- Prior class swept' must carry "
+                f"provenance 'sensitivity-only'; found {swept_text!r}"
+            )
     else:
         prior = parse_range(_bare(prior_text))
         if prior is None or prior[0] <= 0:

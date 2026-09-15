@@ -1,1 +1,1 @@
-Tell me about the Northgate Clinic account. Everything we have is under `/Users/bdc/projects/data-reasoning/.worktrees/codex-review-remediation/skills/exploratory-data-analysis/tests/fixtures/b10-entity/` and covers January through June.
+Tell me about the Northgate Clinic account. Everything we have is under `{FIXTURE_PATH}/` and covers January through June.

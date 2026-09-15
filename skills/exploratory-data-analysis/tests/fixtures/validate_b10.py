@@ -13,8 +13,9 @@
 2. The entity has no billing and no ticket rows in exactly two months.
 3. contract_status.csv covers exactly one of those months (as `paused`) and
    is silent about the other, for every account.
-4. The plan changes exactly once, and billed volume drops by more than 30%
-   exactly one month later.
+4. plan_changes.csv dates exactly one change for the entity; billing's first
+   month on the new plan is that effective month, and billed volume drops by
+   more than 30% exactly one month later.
 5. Every other account has a billing row in every month.
 6. Regenerating from the committed generator reproduces the bytes.
 """
@@ -55,6 +56,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915 -- one linear pass per fixture pro
     billing = read(fx / "billing.csv")
     tickets = read(fx / "tickets.csv")
     contract = read(fx / "contract_status.csv")
+    changes = read(fx / "plan_changes.csv")
 
     entity_ids = [a["account_id"] for a in accounts if "Northgate" in a["account_name"]]
     if len(entity_ids) != ENTITY_IDS:
@@ -88,11 +90,19 @@ def main() -> None:  # noqa: PLR0912, PLR0915 -- one linear pass per fixture pro
         fail(f"contract_status must be silent about {silent} for every account")
 
     by_month = {b["month"]: b for b in ent_bill}
-    plans = [(m, by_month[m]["plan"]) for m in MONTHS if m in by_month]
-    changes = [m for (m, p), (_, q) in zip(plans[1:], plans[:-1], strict=True) if p != q]
-    if len(changes) != 1:
-        fail(f"plan should change exactly once, changes at {changes}")
-    change_m = changes[0]
+    ent_changes = [c for c in changes if c["account_id"] in entity_ids]
+    if len(ent_changes) != 1:
+        fail(f"plan_changes.csv should date exactly one entity change, found {len(ent_changes)}")
+    change_m = ent_changes[0]["effective_date"][:7]
+    first_new = next(
+        (m for m in MONTHS if m in by_month and by_month[m]["plan"] == ent_changes[0]["to_plan"]),
+        None,
+    )
+    if first_new != change_m:
+        fail(
+            f"billing's first {ent_changes[0]['to_plan']} month {first_new} is not the dated "
+            f"change month {change_m}"
+        )
     later = [m for m in MONTHS if m in by_month and m > change_m]
     if not later:
         fail("no billed month after the plan change")

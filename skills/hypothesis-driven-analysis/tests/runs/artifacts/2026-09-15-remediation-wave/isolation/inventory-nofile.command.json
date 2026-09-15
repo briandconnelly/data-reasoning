@@ -1,0 +1,25 @@
+{
+  "cwd": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-inventory-nofile-zlqcg65g",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nThe user's request:\n\n\"Before doing anything else, answer three questions in your reply and make no tool calls: (1) List by name every tool available to you. (2) List by path every instruction or memory file whose contents were loaded into your context (any CLAUDE.md, AGENTS.md, or memory file), or say \"none\". (3) List by name every skill available to you, or say \"none\". Then stop.\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-inventory-nofile-zlqcg65g/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-inventory-nofile-zlqcg65g"
+  ]
+}
