@@ -1,0 +1,99 @@
+{
+  "name": "da-s1-baseline",
+  "started_utc": "2026-09-15T17:53:45.076708+00:00",
+  "duration_s": 56.0,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "6b848b7c-081f-459f-9eb3-67306e849738",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "7f00b425413be4120cd49422d2f9186615ed2ddbc11ffba3a25f17d74f4c14f1",
+  "jsonl_sha256": "69a52966c809fbf0349e40500e9bc5fe12f4af8af7fa78f023e4e8850b39c1f4",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-baseline-7fhv0rbq",
+  "files_written": [
+    "ship-hold-decision-notes.md"
+  ],
+  "files_written_sha256": {
+    "ship-hold-decision-notes.md": "eab53999ab441ccbe566d26af498ac818b99a50c2b174f215f6f6122d872ddda"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-baseline-7fhv0rbq/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-baseline-7fhv0rbq/work\", \"description\": \"Ensure work directory exists\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-baseline-7fhv0rbq/work/ship-hold-decision-notes.md\", \"content\": \"# Ship/hold decision notes \\u2014 checkout p95 regression (2026-09-12 release)\\n\\nSource: ledger.md (unresolved investigation, H1 real-regression vs H2 data-artifact)\\n\\n## What the ledger actually supports\\n\\n- T1 (H1, CONSISTENT): canary mean 468ms vs control 411ms, gap 57ms > 40ms noise\\n  band. Every single canary host beats every single control host \\u2014 full\\n  separation, not just a mean difference inside overlapping distributions.\\n  Strong direct"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 18488,
+    "cache_read_input_tokens": 560345,
+    "output_tokens": 4225,
+    "output_tokens_details": {
+      "thinking_tokens": 1700
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18488,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 758,
+        "cache_read_input_tokens": 187257,
+        "cache_creation_input_tokens": 1662,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1662
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.22949999999999998,
+    "duration_ms": 55399,
+    "num_turns": 4
+  },
+  "result_text": "## Recommendation: Hold\n\nThe ledger left both hypotheses UNRESOLVED, but \"unresolved\" doesn't mean the evidence is neutral \u2014 it isn't, and the asymmetric cost you gave makes the call clear.\n\n**What the evidence actually shows:**\n- **T1** (real-regression test): canary/control gap is 57ms, well past the 40ms noise band, with *every single* canary host above *every single* control host \u2014 a clean, fully-separated signal, not a marginal one.\n- **T3** (reference-class test): in 20 past rollouts, a >40ms gap showed up in 9/10 cases that turned out to be real regressions, vs. 2/10 that didn't. That's roughly a 4.5:1 likelihood ratio favoring \"real\" whenever this gap is observed.\n- **T2** (the one test that could isolate a real regression from an exporter artifact) never ran \u2014 raw logs aren't restored yet. This makes H2 *untested*, not *supported*. There's no evidence for the artifact explanation, only an unfilled gap.\n\n**Why the cost ratio settles it:** with missing a real regression costing 10x a needless hold, shipping is only the better expected-cost choice if you're more than ~91% confident this is a measurement artifact. Nothing in the ledger gets you there \u2014 both direct pieces of evidence (T1, T3) point toward a real regression, and the artifact hypothesis has zero support, just an open question. Treating \"H2 is untested\" as grounds to ship would mean betting against the only two tests you actually ran, under a cost structure that punishes that bet heavily if wrong.\n\n**Recommendation:** Hold the release. In parallel, expedite the S3 raw-log restore \u2014 if it lands before Friday, run T2 immediately; that's the only test that can actually resolve H1 vs. H2 rather than lean on this cost-ratio argument.\n\nOne caveat worth flagging: T3's 9/10 vs 2/10 comes from quota-drawn strata (fixed 10-real/10-not sample), so it's a likelihood ratio, not a base rate \u2014 it still supports \"hold,\" it just shouldn't be read as \"90% of gaps are real.\"\n\nFull reasoning and the cost-ratio derivation are saved to `work/ship-hold-decision-notes.md`."
+}

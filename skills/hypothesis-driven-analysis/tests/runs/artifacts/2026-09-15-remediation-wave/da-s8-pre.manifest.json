@@ -1,0 +1,120 @@
+{
+  "name": "da-s8-pre",
+  "started_utc": "2026-09-15T17:55:44.901639+00:00",
+  "duration_s": 246.9,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "fbf2ff29-04ca-48a0-a472-bad36e770f50",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "main",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "4219293061b228a71cb3111a091ae580d7d907e129dc38f3747116e9cd7cbc42",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "884a061a5bb0458871fdbaefe44099c0564b4b0325aec12fa7e92ec9a276e5ac"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "a851fba8225c217c88173029e1f21fba094fdee8edfbe5f55af3679e77d2f623",
+  "jsonl_sha256": "baabfe750562c120e1cfa5f76f3ec3b5d6e71c846f407db9b263dc8c429ff1be",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-pre-himiwruz",
+  "files_written": [
+    "decision-record-p95-regression.md"
+  ],
+  "files_written_sha256": {
+    "decision-record-p95-regression.md": "59e4ec0fe8cf36de86660cdddc5aff00e5f049e060875500c0619a27985fdb21"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-pre-himiwruz/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-pre-himiwruz/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"find /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-pre-himiwruz/skills/decision-analysis -type f | sort\", \"description\": \"List files in decision-analysis skill directory\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-pre-himiwruz/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-pre-himiwruz/work/decision-record-p95-regression.md\", \"content\": \"# Decision Record: ship the 2026-09-12 release (pool change) or hold it a week, given the UNRESOLVED p95-regression ledger\\n\\n## Decision frame\\n\\n- Route: decide \\u2014 value set per `../skills/decision-analysis/SKILL.md` \\u00a7 Routing (authority)\\n- Actions: Ship (proceed with the 2026-09-12 release carrying the connection-pool change) vs Hold (delay the release at least one week, pending discrimination between H1 and H2)\\n- Decision owner: the release-"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 46593,
+    "cache_read_input_tokens": 770818,
+    "output_tokens": 22196,
+    "output_tokens_details": {
+      "thinking_tokens": 17677
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 46593,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 883,
+        "cache_read_input_tokens": 196014,
+        "cache_creation_input_tokens": 20863,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 20863
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.5638635999999999,
+    "duration_ms": 246036,
+    "num_turns": 6
+  },
+  "result_text": "## Ship or hold: **prior-sensitive \u2014 returned to you/the team, not a clean call**\n\nFull record: `work/decision-record-p95-regression.md`\n\n**The arithmetic, in odds form:**\n\n- **Prior odds** (your \"going in\" range): 1/50\u20131/5 \u2192 0.02\u20130.2 \u2014 *user-elicited*\n- **Evidence in hand:** T1 confirms a real 57ms gap in the metrics pipeline (>40ms noise band), but per the ledger's own limitation, this doesn't discriminate H1 (real regression) from H2 (exporter artifact) \u2014 both would produce the same signal from that pipeline. T3's reference class (20 past rollouts, 9/10 \"real\" showed a >40ms gap vs. 2/10 \"not real\") gives the one usable likelihood ratio: **LR = 4.5**, *estimated-from-data-in-hand*. This LR only tells you the gap reflects *something real* (regression or systematic artifact) \u2014 not which.\n- **Posterior odds** = prior \u00d7 4.5 \u2192 **0.09\u20130.9**\n- **Decision threshold** = 1/(loss ratio), loss ratio 2\u201320 \u2192 threshold odds **0.05\u20130.5** \u2014 *user-elicited, and the team disagrees on it*\n\n**Where it lands:** Ship only wins in the corner where you're both near the skeptical end of your prior (\u2264~1-in-9) *and* near the low end of the disputed loss ratio (\u2264~11x). Anywhere your prior sits above ~1-in-9 odds (posterior odds above ~0.5), **Hold wins regardless of which loss number the team eventually agrees on** \u2014 even at the most ship-favorable end of the 2\u201320x range. Conversely, if the loss ratio turns out to be near 20x, Hold wins for your entire stated prior range.\n\n**Bottom line:** this isn't robust to either the prior or the loss-ratio disagreement \u2014 it genuinely turns on numbers your team hasn't converged on. The evidence moves you off \"nothing's there,\" but the one test that would actually separate a real regression from a pipeline artifact (T2, using raw access logs) never ran \u2014 S3 wasn't restored in time. That's a fact worth surfacing to whoever forces this before Friday: agreeing on the loss ratio, or getting the raw-log restore in before the freeze, would resolve this cleanly; guessing at either doesn't.\n\nI did not run a VoI calculation on restoring S3 \u2014 the ledger states the restore's cost/timing as unknown (\"restore request pending\"), so there's nothing to price yet; I've flagged it as an open question in the Handoff section rather than inventing a number for it."
+}

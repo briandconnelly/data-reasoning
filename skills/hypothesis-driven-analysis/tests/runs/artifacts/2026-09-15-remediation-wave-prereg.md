@@ -143,3 +143,30 @@ Each was scored on rationale only, per the canary rule; none enters the scored t
 - **B10.6a boundary is unchanged**, and the canary shows what it will catch: that arm read every data file, attempted a Write it did not have, and only then emitted Frame-lite.
   Whether the scored post arm does the same decides B10.6a; the canary's result is not carried forward.
 - The contamination scan was corrected between the canaries: it had flagged a Write whose *content* mentioned "SKILL.md"; it now reads only path-bearing fields, and every canary manifest was rescanned with the previous value preserved under `rescans`.
+
+## Results (2026-09-15, after all fourteen scored arms)
+
+Run records: `../2026-09-15-scenario9-estimation-route.md`, `../../../decision-analysis/tests/runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md`, `../../../exploratory-data-analysis/tests/runs/2026-09-15-b10-entity-profile.md`.
+Every arm resolved to `claude-sonnet-5`, exited 0, and passed the contamination scan; no arm was void; no checker rejected a record the skill licenses (row 2 did not fire in the scored batch).
+
+| Cell | Sentence | Added-assertion outcome (pre → post) | Row | Regression | Skill needed vs baseline |
+| --- | --- | --- | --- | --- | --- |
+| S9 | Estimation route inherits coverage and completeness obligations | pre fails S9.4b, post passes S9.4a–b | **4 — reaches behavior** | none | yes (S9.1) |
+| DA-S1 | No-supported-prior degraded mode | pre invents a `sensitivity-only` prior in Evidence and update; post uses the sentinel but annotates it (5a fails on form); 5b–5d both pass; 5e both fail on the checker | **6 on form, 5 on substance** | none | yes |
+| DA-S8 | Verdict precedence when both sensitivities fire | pre and post both `prior-sensitive` with the loss crossover in Conditions | **5 — not needed** | none | yes |
+| B10 | Profile route: dated sequence recorded, attribution unresolved | 5a and 5c both pass; 5b both fail (neither names the volume fall as a change) | **5 on 5a/5c, 6 on 5b** | none | yes (B10.1, B10.3, B10.4) |
+| B10-nofile | Degraded mode names Frame-lite | 6b and 6c both pass; 6a both fail (frame emitted after every data read and a failed Write) | **5 on 6b/6c; 6a is shared debt** | none | — |
+
+What ships as measured under the table: the S9 sentence (row 4).
+What is a clarification carrying no measured claim, the owner's call to keep or drop: the DA-S8 precedence paragraph, the B10 profile-route sentence's dated-sequence and handoff halves, and the Frame-lite naming (row 5).
+What the table blocks as measured: the DA-S1 sentinel on form (annotated, not bare) and B10.5b (neither arm named the volume fall).
+Both blocked items are argued in their run records to be shared, pre-existing behavior — the annotation habit every DA arm shows on every slot, and a summarizing choice the changed sentence does not govern — rather than defects of the sentences; that argument is the scorer's and is recorded as such, not as a row of this table.
+
+Debts this wave surfaced, recorded in the catalogs:
+
+- Every decision-analysis record, pre and post, fails `check_decision.py` on form while its arithmetic and verdict logic are right: annotated slots, odds written `1:49` where the checker parses `0.02`, relabelled slots, extra evidence cells.
+  The template's slot text invites annotation; the checker forbids it.
+  Debt against the template and checker together.
+- Without file tools, both skill arms read every data file, attempted a Write they had not been given, and only then fell back to response text.
+  The degraded mode's "before any exploration output" is not what an agent does when it discovers tool poverty late; debt against § Degraded Modes as a whole.
+- The S9 fixture is complete by construction; the estimation route's data-validity inheritance on a fixture with a hole is unmeasured.

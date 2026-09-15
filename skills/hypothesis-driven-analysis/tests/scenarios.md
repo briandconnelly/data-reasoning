@@ -1387,7 +1387,10 @@ Two agent-read sentences changed in `SKILL.md` § Estimation Route: the route no
 Reachability, per `PROTOCOL.md` § What owes a rerun: the only cell whose decision point traverses that section is S9 (estimation on a stated A/B test); every other scenario routes `full`, `mini`, or `direct` and never reads it.
 S9 is already recorded above as unrun since its 2026-07-16 prompt correction, so no existing result is invalidated; the owed arm is S9's first valid run, against the current wording, with the assertion that the estimate's Limitations name the analysis population's coverage and outcome completeness.
 The authorization gate's last sentence moved to a labelled rationale line in every carrier; that is a relabel of the same words, reaches no decision point, and owes nothing.
-Until the S9 arm runs, treat the estimation route's data-validity inheritance as a design claim.
+**Paid 2026-09-15.**
+Three S9 arms ran under `tests/run_arm.py` (baseline, the `main` wording, this wording), preregistered in `tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` and recorded in `tests/runs/2026-09-15-scenario9-estimation-route.md`.
+The post arm passed S9.1–S9.3 and both added assertions; the pre arm passed S9.1–S9.3 and recorded coverage but said nothing about completeness; baseline scored 2/5.
+The sentence is measured as reaching behavior at n=1 on one model; the fixture is complete by construction, so its value on a fixture with a hole stays unmeasured.
 
 ### Owed measurements as of 2026-08-08 (external audit, instrument-only pass)
 

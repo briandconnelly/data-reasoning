@@ -1,0 +1,115 @@
+{
+  "name": "da-s1-pre",
+  "started_utc": "2026-09-15T17:54:41.198111+00:00",
+  "duration_s": 232.1,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "ebce7626-ebcb-496b-ade2-1dfdce43fa31",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "main",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "4219293061b228a71cb3111a091ae580d7d907e129dc38f3747116e9cd7cbc42",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "884a061a5bb0458871fdbaefe44099c0564b4b0325aec12fa7e92ec9a276e5ac"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "02ee23cc1ba2a407cf3e867e8108fba2896c5de34a542df8a70aa67042fd9b5c",
+  "jsonl_sha256": "369b4209bb9ca59fc65189c35ec88d3910880e3e8f25ce9da19edad2da2e6569",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-pre-yu_4sqo2",
+  "files_written": [
+    "decision-record-p95-ship-or-hold.md"
+  ],
+  "files_written_sha256": {
+    "decision-record-p95-ship-or-hold.md": "8e32c0cf7a7a9b6c10f2ecf946cebae74253a9f6da66596ffe077fd0a0bf4084"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-pre-yu_4sqo2/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-pre-yu_4sqo2/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-pre-yu_4sqo2/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-pre-yu_4sqo2/work/decision-record-p95-ship-or-hold.md\", \"content\": \"# Decision Record: ship the 2026-09-12-carried release now vs. hold for one week pending p95-regression investigation\\n\\n## Decision frame\\n\\n- Route: decide \\u2014 value set per `../skills/decision-analysis/SKILL.md` \\u00a7 Routing (authority)\\n- Actions: Ship (proceed with the pending release now) vs Hold (delay ~one week, using the window to restore S3 and run T2)\\n- Decision owner: the release/on-call decision owner \\u2014 not named in the request; p"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 44013,
+    "cache_read_input_tokens": 575740,
+    "output_tokens": 20411,
+    "output_tokens_details": {
+      "thinking_tokens": 16331
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 44013,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 807,
+        "cache_read_input_tokens": 195034,
+        "cache_creation_input_tokens": 19303,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 19303
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.49662300000000004,
+    "duration_ms": 231314,
+    "num_turns": 5
+  },
+  "result_text": "## Verdict: Hold \u2014 robust\n\nI ran this as a decide-route decision analysis (full record: `work/decision-record-p95-ship-or-hold.md`). Summary:\n\n**Framing.** The two UNRESOLVED ledger rows aren't a coin flip \u2014 `UNRESOLVED` carries no likelihood information by itself. I built the update from the actual test outcomes instead:\n- T1: canary/control gap is 57ms, exceeding the pre-registered 40ms noise band \u2014 this rules out \"nothing happened,\" but is predicted equally by H1 (real regression) and H2 (exporter artifact), so it doesn't by itself discriminate the two.\n- T3: in a 20-rollout reference class, a qualifying gap appeared in 9/10 rollouts later confirmed as real regressions vs. 2/10 confirmed as not \u2014 likelihood ratio \u22484.5. (T1 and T3 combine into one evidence item, not two multiplied, since T3's rate is conditioned on the same gap T1 established.)\n- T2 \u2014 the one test that could actually separate H1 from H2 \u2014 never ran (raw access logs not restored).\n\n**No usable prior exists.** The reference-class source (S2) is quota-sampled 10/10 by construction, so per the ledger's own validity notes it can supply a likelihood ratio but no base rate. I swept the prior across a wide skeptical-to-credulous range (9%\u201380% probability of a real regression) as sensitivity-only.\n\n**Your stated loss ratio (~10x) sets a low bar for holding**: the threshold posterior probability for shipping is only ~9.1%. Combining that with the evidence above, Hold wins at every point in the swept prior range \u00d7 loss range (5\u201315, to cover \"roughly\"). The only way to flip to Ship is a prior so skeptical (>95% confident upfront it's *not* real) that it's outside any defensible sweep \u2014 and it would still need to survive T1 already having ruled out pure noise.\n\n**Bottom line:** given the asymmetric cost you specified, the evidence in hand doesn't need to resolve H1 vs. H2 to make the call \u2014 it just needs to not rule out a real regression, and it doesn't. Recommend **Hold**, using the week to restore S3 and run T2, which is the only test that can actually settle this.\n\nThis is a recommendation, not an authorization \u2014 the actual hold/ship action and the S3-restore pull are yours (or your team's) to execute."
+}

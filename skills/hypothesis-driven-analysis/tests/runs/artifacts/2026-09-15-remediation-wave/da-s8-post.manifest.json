@@ -1,0 +1,125 @@
+{
+  "name": "da-s8-post",
+  "started_utc": "2026-09-15T17:59:51.880303+00:00",
+  "duration_s": 174.7,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "c9a5dfef-06e6-4023-a4b3-788741222111",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "60d68e531caa5d024274ea84f686acf1c4f53c2ff3930cc7a6f69ba6d12ce260",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "c2ecfeba0d9e4d1d57491b2431fa48505eebd2abafdb7e4948cc5e85b8bcd0fb"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "549e77e8ce820d03d9fca70903bd01852a15ac45212314659b2e5669be6e946f",
+  "jsonl_sha256": "751421735cc52a98d7675267732268fea759fb0cc11c366dbf8d062594d26dc7",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "6b499ad9cb4be38c4aa874a6eb709f0e6c0e716213c73f30489e3468a01c59b2"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix/skills/decision-analysis/references/\", \"description\": \"List decision-analysis reference files\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls -la /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix/work 2>/dev/null || echo \\\"MISSING\\\"\", \"description\": \"Check work directory exists\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-post-8qm98fix/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release (connection-pool change) given the checkout p95 investigation\\n\\n## Decision frame\\n\\n- Route: decide \\u2014 value set per `../skills/decision-analysis/SKILL.md` \\u00a7 Routing (authority)\\n- Actions: Ship (proceed with / release the connection-pool change) vs Hold (extend a one-week hold past the Friday freeze)\\n- Decision owner: the team that owns the release/freeze call (user's team)\\n- Reversibility: Hold is che"
+    }
+  ],
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 134889,
+    "cache_read_input_tokens": 785438,
+    "output_tokens": 15934,
+    "output_tokens_details": {
+      "thinking_tokens": 10977
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 134889,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1019,
+        "cache_read_input_tokens": 207272,
+        "cache_creation_input_tokens": 3602,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3602
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.8573586,
+    "duration_ms": 174036,
+    "num_turns": 7
+  },
+  "result_text": "## Ship or hold: **returned to you \u2014 the answer depends on numbers your team hasn't agreed on yet**\n\nI ran this as a full decision analysis (record: `work/decision-record.md`). Short version:\n\n**What the ledger actually gives you as evidence:**\n- T1 (the 57ms canary/control gap) confirms there's a real signal above noise \u2014 but it does **not** discriminate a real regression from an exporter artifact, because it comes from the exact same metrics pipeline that H2 questions. Both hypotheses predict the identical T1 result. It contributes nothing to the odds.\n- T2, the one test that would actually separate \"real\" from \"artifact,\" never ran (raw logs not restored).\n- T3 (the reference-class check: 9/10 real regressions showed a >40ms gap vs 2/10 non-regressions) is the only usable evidence. It's a likelihood ratio of **4.5\u00d7** in favor of \"real.\"\n\n**Updating your stated odds (1/50 to 1/5 prior) by that 4.5\u00d7 gives a posterior of roughly 8% to 53% probability of a real regression** \u2014 a wide range, driven almost entirely by where your prior actually sits.\n\n**Weighing that against your stated loss ratio (2\u201320\u00d7):**\n- Ship is only the better bet in the corner where your prior is at the *low* end (~2%) **and** you believe missing a real regression costs *less* than ~11\u00d7 a needless hold.\n- If your prior is above ~10%, Hold wins regardless of which loss ratio (2\u201320\u00d7) you pick.\n- If your loss ratio is at or above ~11\u00d7, Hold wins regardless of which prior (2%\u201320%) you pick.\n- So across the honest range of both numbers, **Hold wins in most of the space; Ship only survives in the low-prior/low-loss-ratio corner.**\n\n**Verdict: `prior-sensitive`** \u2014 the two open disagreements (how likely is this real, and how bad is missing it) both individually swing the answer, so this isn't something I can round to a single recommendation without picking a number for you.\n\n**What would actually resolve it, cheaply:**\n1. Pin down where your prior really sits relative to ~10% \u2014 if everyone's honest guess is closer to 5-20% rather than 1-2%, that alone puts you in Hold territory regardless of the loss debate.\n2. The loss-ratio disagreement (2\u00d7 vs 20\u00d7) only matters at the low end of the prior; if #1 lands above ~10%, stop arguing about it \u2014 it doesn't change the answer.\n3. Separately: T3's 4.5\u00d7 LR rests on a small reference class (9 vs 2, out of 10 each). If the incident tracker has more than the 20 settled rollouts used here, tightening that number could meaningfully move the posterior.\n4. The restore of S3 (raw access logs, pending) is the one pull that could actually resolve H1 vs. H2 rather than just weighing your priors \u2014 worth asking whether it can land before Friday.\n\nFull arithmetic, provenance, and the crossover sweep are in `work/decision-record.md` if you want to plug in your team's actual numbers."
+}

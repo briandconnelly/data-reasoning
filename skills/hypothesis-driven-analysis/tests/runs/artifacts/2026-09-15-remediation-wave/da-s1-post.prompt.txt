@@ -1,0 +1,14 @@
+You are the main agent on a data-analysis task for a user.
+
+A skill is installed. Its full instructions live at:
+/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-post-f200mypn/skills/decision-analysis/SKILL.md
+
+Read that file and follow it as your working method; its references live beside it.
+
+The user's request:
+
+"Here's our investigation ledger (`/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-post-f200mypn/data/da-s1-ledger/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Release freeze is Friday. Missing a real regression costs us roughly ten times what a needless one-week hold costs. Should we ship or hold?"
+
+Write any working files you produce (notes, logs, records, intermediate results) to /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s1-post-f200mypn/work.
+Read only what the request and these instructions name; do not read anything else on this machine.
+Your final message is your report to the user.

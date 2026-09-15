@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-pre-lqccx663",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nA skill is installed. Its full instructions live at:\n/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-pre-lqccx663/skills/exploratory-data-analysis/SKILL.md\n\nRead that file and follow it as your working method; its references live beside it.\n\nThe user's request:\n\n\"Tell me about the Northgate Clinic account. Everything we have is under `/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-pre-lqccx663/data/b10-entity/` and covers January through June.\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-pre-lqccx663/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-pre-lqccx663"
+  ]
+}

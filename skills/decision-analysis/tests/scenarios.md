@@ -19,7 +19,11 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 - The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
 - The 2026-09-15 wording: § Verdict's precedence rule when both sensitivities fire (`prior-sensitive`, loss crossover in Conditions), and § Degraded Modes' no-defensible-prior procedure with its worked example: unmeasured.
   Reachability: DA-S1 (an `UNRESOLVED` ledger with one sourced LR and no elicited prior) traverses the degraded mode's no-supported-prior branch and must keep that LR in the sweep; a scenario whose sweep flips on both axes traverses the precedence rule.
-  Both sentences owe their arms with the rest of this catalog's first run; no earlier arm exists for them to invalidate.
+  **Paid 2026-09-15** for DA-S1 and DA-S8 (three arms each: baseline, `main` wording, this wording), preregistered in `../../hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` and recorded in `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md`.
+  The degraded mode changed the record's content (the post arm used the `none supported — see Robustness` sentinel where the pre arm put an invented `sensitivity-only` prior in Evidence and update) but the sentinel was annotated, not bare; the precedence paragraph was not needed — the pre arm already chose `prior-sensitive` with the loss crossover in Conditions.
+  Neither arm's record passed `check_decision.py`, every failure on form; see the debt below.
+- Debt surfaced 2026-09-15: every decision record in that wave, under either wording, failed `check_decision.py` on annotated slots, `1:49`-style odds, relabelled slots, and six-cell evidence rows, with correct arithmetic underneath.
+  The template's slot text invites the annotations the checker forbids; the two need reconciling before DA-S1.1's "passes `check_decision.py`" can be a fair bar.
 
 ## Scenarios
 

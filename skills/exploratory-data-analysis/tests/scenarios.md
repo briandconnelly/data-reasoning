@@ -217,7 +217,10 @@ The prompt must say nothing about whether production access is authorized — de
 
 Three agent-read passages changed in `SKILL.md`: § Profile Route now separates dated sequence (recorded) from attribution (left unresolved and handed off); § Degraded Modes names Frame-lite for a profile without file tools; § Data Rules is four bullets instead of one sentence, same obligations.
 Reachability, per `hypothesis-driven-analysis/tests/PROTOCOL.md` § What owes a rerun: the entity-profile behavior scenarios in § Behavior surface traverse the profile-route change; a no-file-tools arm of a profile scenario traverses the degraded-mode change; the data-rules split changes no obligation and owes nothing.
-Every behavior scenario in this file is unrun, so no result is invalidated; the changed sentences owe their arms with the suite's first run, and the profile-route assertion to add is that an entity record states dated changes without attributing them.
+**Paid 2026-09-15** for B10 (baseline, `main` wording, this wording) and a no-file-tools variant (`main` and this wording), preregistered in `../../hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` and recorded in `runs/2026-09-15-b10-entity-profile.md`.
+Both skill arms passed B10.1–B10.4 and baseline failed three of them; on the added assertions neither the profile-route sentence nor the Frame-lite naming changed behavior at n=1 — pre and post alike dated the plan change, left attribution unresolved with a handoff, and declined to name the volume fall as a change.
+Debt surfaced: without file tools, both arms read every data file, attempted a Write they had not been given, and only then emitted a frame as response text, so § Degraded Modes' "before any exploration output" is unmet under either wording.
+The remaining behavior scenarios (B1–B9) are still unrun.
 
 Beyond per-assertion pass/fail, record for each behavior run: correctness of any descriptive facts, whether a lead was stated as a conclusion anywhere (the central failure), tool-call count, and approximate tokens — the skill's token premium is unmeasured until these runs exist.
 
