@@ -172,7 +172,7 @@ Model `claude-sonnet-5`; no contamination.
 | DA-S8.3 | Both crossovers reported | PASS | PASS — "prior odds above ≈0.111" and "about 10.9 at the 2% prior floor" (w3-da-s8-post.scratch/decision-record.md) |
 | DA-S8.4 (revised) | `prior-sensitive`; both crossovers in Robustness; `returned to owner` | PASS | PASS — "Verdict: prior-sensitive" and "Recommended action: returned to owner" (w3-da-s8-post.scratch/decision-record.md), crossovers in Robustness as quoted above |
 
-Totals: pre 2/4 (carried; 8.4 revised, which pre satisfies), w3 post 2/4.
+Totals: pre 3/4 (carried; fails 8.1 only, since the revised 8.4 is one it satisfies), w3 post 2/4.
 
 ### Verdict for DA-S8 after wave 3
 

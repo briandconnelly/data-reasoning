@@ -1246,3 +1246,29 @@ def test_evidence_table_needs_its_source_column():
         "'- Evidence:' table lacks a 'source, reference class, conditioning' column" in f
         for f in cr.check(rec, final=True)
     )
+
+
+# Re-review 2026-09-15: the VoI record's prose slots may continue on the
+# following paragraph (check_decision.py accepts that form); the structural
+# validator read only the label's line and reported the slot empty.
+
+
+def test_multiline_voi_prose_slot_is_read_as_filled():
+    rec = (
+        "# VoI Record: x\n\n## VoI\n\n- Route: voi\n- Pending decision: ship vs wait\n"
+        "- Signal model:\n\n  a 2-week holdout that reports the p95 gap with a 40 ms band\n\n"
+        "- Value basis: expected loss avoided\n- Value calculation:\n\n"
+        "  0.4 probability of a flip times a loss of 3 is 1.2\n\n"
+        "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: worth-it\n"
+    )
+    assert cr.check(rec) == []
+    assert cr.check(rec, final=True) == []
+
+
+def test_multiline_slot_with_no_continuation_is_still_empty():
+    rec = (
+        "# VoI Record: x\n\n## VoI\n\n- Route: voi\n- Pending decision: ship vs wait\n"
+        "- Signal model:\n- Value basis: expected loss avoided\n- Value calculation: 1.2\n"
+        "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: worth-it\n"
+    )
+    assert any("required slot 'Signal model' is empty" in f for f in cr.check(rec))

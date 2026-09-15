@@ -579,11 +579,28 @@ def _bullet_slot_values(body: str):
 def _slot_value(section: str, label: str) -> str | None:
     """The value of the first `- label:` bullet in `section`, or None when
     no such bullet exists. Emphasis around the label is ignored; the label
-    itself must match the template's byte for byte."""
-    for line in section.splitlines():
+    itself must match the template's byte for byte. A value may continue on
+    the following non-bullet, non-heading, non-table lines (the VoI record's
+    prose slots do), so those are read when the label's own line is empty."""
+    lines = section.splitlines()
+    for i, line in enumerate(lines):
         stripped = _unemphasize(line.strip())
-        if stripped.startswith("- " + label + ":"):
-            return stripped[len(label) + 3 :].strip()
+        if not stripped.startswith("- " + label + ":"):
+            continue
+        value = stripped[len(label) + 3 :].strip()
+        if value:
+            return value
+        continuation: list[str] = []
+        for nxt in lines[i + 1 :]:
+            t = nxt.strip()
+            if not t:
+                if continuation:
+                    break
+                continue
+            if t.startswith(("- ", "#", "|")):
+                break
+            continuation.append(t)
+        return " ".join(continuation)
     return None
 
 

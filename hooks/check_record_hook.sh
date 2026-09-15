@@ -51,7 +51,10 @@ if [ -z "$file_path" ]; then
     printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$hit" >&2
     exit 2
   fi
-  if printf '%s' "$payload" | grep -q -E '# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
+  # A record title inside the patch text counts only as an added line
+  # (`\n+# Title: `, JSON-escaped) of a patch that names a Markdown file; a
+  # title string quoted in source code is not a record.
+  if printf '%s\n' "$paths" | grep -q '\.md$' && printf '%s' "$payload" | grep -q -E '\\n\+# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
     printf 'data-reasoning: a record written by apply_patch was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' >&2
     exit 2
   fi

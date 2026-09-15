@@ -154,7 +154,7 @@ Row 2 fired once, after scoring: cross-model review found the decision checker s
 | --- | --- | --- | --- | --- | --- |
 | S9 | Estimation route inherits coverage and completeness obligations | pre fails S9.4b, post passes S9.4a–b | **4 — reaches behavior** | none | yes (S9.1) |
 | DA-S1 | No-supported-prior degraded mode | pre invents a `sensitivity-only` prior in Evidence and update; post uses the sentinel but annotates it (5a fails on form); 5b–5d both pass; 5e both fail on the checker | **6 on form, 5 on substance** | none | yes |
-| DA-S8 | Verdict precedence when both sensitivities fire | pre and post both `prior-sensitive` with the loss crossover in Conditions; post fails 8.2 by reading the prior as probabilities (corrected on final review; first scored PASS) | **3 — regression on 8.2** at wave 1; superseded by wave 2 | on 8.2 | yes |
+| DA-S8 | Verdict precedence when both sensitivities fire | both `prior-sensitive`; only post states the loss crossover in Conditions (pre fails 8.4, corrected on re-review); post fails 8.2 by reading the prior as probabilities (corrected on final review) | **3 — regression on 8.2** at wave 1; superseded by waves 2 and 3 | on 8.2 | yes |
 | B10 | Profile route: dated sequence recorded, attribution unresolved | 5a and 5c both pass; 5b both fail (neither names the volume fall as a change) | **5 on 5a/5c, 6 on 5b** | none | yes (B10.1, B10.3, B10.4) |
 | B10-nofile | Degraded mode names Frame-lite | 6b and 6c both pass; 6a both fail (frame emitted after every data read and a failed Write) | **5 on 6b/6c; 6a is shared debt** | none | — |
 

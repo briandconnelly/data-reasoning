@@ -469,3 +469,21 @@ def test_a_spaced_filename_reaches_the_python_hook(tmp_path):
     r = run_hook(codex_payload(tmp_path, patch))
     assert r.returncode == 2
     assert str(f) in r.stderr
+
+
+def test_without_python_a_title_string_in_source_code_is_silent(tmp_path):
+    """Re-review 2026-09-15: the fallback scanned the whole payload for a
+    title and flagged a Python file that quoted one."""
+    patch = (
+        "*** Begin Patch\n*** Add File: example.py\n"
+        '+signature = "# Decision Record: example"\n*** End Patch\n'
+    )
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_an_added_title_line_in_a_markdown_patch_is_not_validated(tmp_path):
+    r = run_command_without_python(codex_payload(tmp_path, codex_patch("record.md")), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
