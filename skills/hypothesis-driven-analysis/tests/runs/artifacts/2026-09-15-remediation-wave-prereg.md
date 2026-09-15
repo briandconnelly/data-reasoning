@@ -147,7 +147,8 @@ Each was scored on rationale only, per the canary rule; none enters the scored t
 ## Results (2026-09-15, after all fourteen scored arms)
 
 Run records: `../2026-09-15-scenario9-estimation-route.md`, `../../../decision-analysis/tests/runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md`, `../../../exploratory-data-analysis/tests/runs/2026-09-15-b10-entity-profile.md`.
-Every arm resolved to `claude-sonnet-5`, exited 0, and passed the contamination scan; no arm was void; no checker rejected a record the skill licenses (row 2 did not fire in the scored batch).
+Every arm resolved to `claude-sonnet-5`, exited 0, and passed the contamination scan; no arm was void.
+Row 2 fired once, after scoring: cross-model review found the decision checker split escaped pipes inside a cell into extra columns; the checker was fixed with tests and every archived DA record rescored (results in the DA run record).
 
 | Cell | Sentence | Added-assertion outcome (pre → post) | Row | Regression | Skill needed vs baseline |
 | --- | --- | --- | --- | --- | --- |
@@ -159,14 +160,17 @@ Every arm resolved to `claude-sonnet-5`, exited 0, and passed the contamination 
 
 What ships as measured under the table: the S9 sentence (row 4).
 What is a clarification carrying no measured claim, the owner's call to keep or drop: the DA-S8 precedence paragraph, the B10 profile-route sentence's dated-sequence and handoff halves, and the Frame-lite naming (row 5).
-What the table blocks as measured: the DA-S1 sentinel on form (annotated, not bare) and B10.5b (neither arm named the volume fall).
-Both blocked items are argued in their run records to be shared, pre-existing behavior — the annotation habit every DA arm shows on every slot, and a summarizing choice the changed sentence does not govern — rather than defects of the sentences; that argument is the scorer's and is recorded as such, not as a row of this table.
+What the table blocks: the DA-S1 degraded-mode sentence (row 6: post fails DA-S1.5a and DA-S1.5e) and the B10 profile-route sentence (row 6: post fails B10.5b).
+Row 6 means what it said before any arm ran: the sentence is revised and remeasured, or dropped, before the PR merges; it is not a labelling restriction.
+The scorer's reading that both failures are shared, pre-existing behavior is recorded in the run records as commentary; it does not change the row.
+(Corrected 2026-09-15, same day, on cross-model review: an earlier draft of this section wrote "blocks as measured", which read as if row 6 could be discharged by a label.)
 
 Debts this wave surfaced, recorded in the catalogs:
 
-- Every decision-analysis record, pre and post, fails `check_decision.py` on form while its arithmetic and verdict logic are right: annotated slots, odds written `1:49` where the checker parses `0.02`, relabelled slots, extra evidence cells.
-  The template's slot text invites annotation; the checker forbids it.
-  Debt against the template and checker together.
+- Every decision-analysis record, pre and post, fails `check_decision.py`.
+  Most failures are form — annotated slots, odds written `1:49` where the checker parses `0.02`, relabelled slots — and the template's slot text invites the annotations the checker forbids: debt against the two together.
+  One failure was the checker's: `\|` inside an evidence cell split into extra columns, so three records read as six-cell rows; fixed with tests and the archive rescored (row 2, see the DA run record).
+  One failure is substantive and was miscalled "form" in the first draft of this section: the DA-S1 post arm swept a `sensitivity-only` loss range and returned `robust`, which § Numeric Policy caps at `loss-sensitive`; the pre arm's loss sweep carries a mixed provenance for the same reason.
 - Without file tools, both skill arms read every data file, attempted a Write they had not been given, and only then fell back to response text.
   The degraded mode's "before any exploration output" is not what an agent does when it discovers tool poverty late; debt against § Degraded Modes as a whole.
 - The S9 fixture is complete by construction; the estimation route's data-validity inheritance on a fixture with a hole is unmeasured.

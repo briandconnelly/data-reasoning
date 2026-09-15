@@ -26,7 +26,8 @@ Totals: baseline 3/7, pre 6/7, post 6/7.
 
 B10.5a and B10.5c: pre and post both pass — **row 5, not needed**: the pre-edit profile route already dated the plan change and left attribution unresolved with a handoff on this fixture.
 B10.5b: pre and post both fail — the sentence did not reach the behavior it names on this cell either; the arms recorded the dated figures and declined to call the fall a change.
-Under the preregistered precedence this is row 6 for B10.5b (post fails an added assertion the sentence addresses) and row 5 for the rest; the sentence does not ship as *measured*, and whether it stays as a clarification is the owner's call.
+Under the preregistered precedence the cell lands on row 6 (post fails an added assertion the sentence addresses), and row 6 governs the whole sentence: it is revised and remeasured, or dropped, before the PR merges.
+The passing halves (5a, 5c) are recorded but do not authorize the passage; the scorer's view that 5b is a summarizing choice rather than a defect of the sentence is commentary, not the disposition.
 No regression: post passes every catalog assertion pre passes.
 Skill needed on this cell: yes — baseline fails B10.1, B10.3, and B10.4, both skill arms pass all four catalog assertions.
 

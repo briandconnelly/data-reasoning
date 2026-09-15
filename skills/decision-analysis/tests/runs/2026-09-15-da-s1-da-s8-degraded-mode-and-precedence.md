@@ -29,8 +29,13 @@ Totals: baseline 0/9, pre 6/9, post 6/9.
 The changed sentence's content reached behavior: the pre arm invented a `sensitivity-only` prior and put it in Evidence and update, exactly what the degraded mode exists to stop; the post arm used the prescribed sentinel and kept the arithmetic in Robustness.
 Everything downstream — the kept ratio, the sweep, the crossover, the `robust` call the amended rule licenses — was reached by both arms.
 On the preregistered form, post fails DA-S1.5a (the sentinel is annotated, not bare) and DA-S1.5e (the checker), and pre fails both too, for different reasons.
-Under the precedence table this is **row 6 on form** (post fails an added assertion) and **row 5 on 5b–5d** (pre and post both pass); the sentence does not ship as *measured* on this table.
-The scorer's reading, recorded so the owner can weigh it: the failing form is the annotation habit every DA arm in this wave shows on every slot, which is the checker's bar and is shared by pre and post on DA-S1.1 (row 7, pre-existing debt); it is not something the changed sentence says or could have said.
+Under the precedence table the cell lands on **row 6** (post fails DA-S1.5a and DA-S1.5e), which governs: the sentence is revised and remeasured, or dropped, before the PR merges.
+Commentary, not the disposition: the 5a failure is the annotation habit every DA arm in this wave shows on every slot, shared by pre and post on DA-S1.1 (row 7).
+Not every failure is form.
+The post arm's Robustness block reads "Loss range swept: 5 to 20 (around the user's \"roughly ten,\" which is not stated as an exact point) — provenance: sensitivity-only around a user-elicited central value of 10" (da-s1-post.scratch/decision-record-p95-regression-ship-or-hold.md) and its verdict is `robust`; § Numeric Policy caps a `sensitivity-only` loss sweep at `loss-sensitive`, so that verdict is not licensed by the record's own provenance, and `check_decision.py` says so.
+The pre arm's sweep carries the same mixed provenance: "provenance: user-elicited point value 10 (\"roughly ten times\"), swept ±50% as sensitivity-only to test the \"roughly\" qualifier" (da-s1-pre.scratch/decision-record-p95-ship-or-hold.md).
+The user gave one number; the arms extended it into a range and kept the belief-grade label for the verdict.
+That is shared behavior under both wordings, and it is a Numeric Policy finding, not a format one.
 No regression: post passes every catalog assertion pre passes.
 Skill needed on this cell: yes — baseline writes no record, uses no vocabulary, and classes no number, though its threshold arithmetic ("shipping is only justified if we're >91% confident this is a measurement artifact" (da-s1-baseline.scratch/ship-hold-decision-notes.md)) is right.
 
@@ -52,6 +57,14 @@ The pre-edit skill, with no precedence paragraph, chose `prior-sensitive` over `
 At n=1 the paragraph is a clarification that carries no measured claim; whether it stays is the owner's call.
 No regression.
 Skill needed on this cell: yes — baseline's arithmetic is correct but it recommends unconditionally and writes no record.
+
+## Rescore after a checker defect (row 2)
+
+Cross-model review of the scored results found that `check_decision.py` split every pipe, so `\|` inside an evidence source cell (a conditional probability such as `P(gap \| real)`) read as extra columns; the structural validator in `instruments/check_record.py` already handled this.
+Three archived records — `da-s1-post`, `da-s8-pre`, `da-s8-post` — had reported "Evidence row has 6 cells" for that reason.
+The checker was fixed with a positive and a negative test and the six archived DA records were rescored without editing them; the six-cell failure disappears from all three, and every other failure stands, so no assertion result above changes.
+Gate-failure counts before → after: `canary-da-s1-post` 15 → 14, `canary-da-s8-post` 14 → 14, `da-s1-pre` 11 → 11, `da-s1-post` 14 → 13, `da-s8-pre` 12 → 12, `da-s8-post` 14 → 13 (the canaries and `da-s8-pre` had a six-cell finding only where a `\|` fell in a scored row).
+The original scoring stands as scored; DA-S1.1, DA-S1.5e, and DA-S8.1 remain FAIL for every skill arm.
 
 ## Cost
 

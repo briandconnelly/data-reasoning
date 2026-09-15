@@ -204,13 +204,20 @@ def _close(a: float, b: float) -> bool:
     return abs(a - b) <= _REL_TOLERANCE * max(abs(a), abs(b), 1e-12)
 
 
+# A cell boundary is an unescaped pipe; `\|` inside a cell (a conditional
+# probability such as P(gap | real)) is content, not a column. Found by the
+# 2026-09-15 remediation wave: three archived records parsed as six-cell
+# evidence rows because of it (row 2 of that wave's preregistration).
+_CELL_SPLIT = re.compile(r"(?<!\\)\|")
+
+
 def _table_rows(section_text: str) -> list[list[str]]:
     """All pipe-table rows in a section, as cell lists (outer pipes stripped)."""
     rows = []
     for line in section_text.splitlines():
         stripped = line.strip()
         if stripped.startswith("|") and stripped.endswith("|"):
-            rows.append([c.strip() for c in stripped[1:-1].split("|")])
+            rows.append([c.strip().replace("\\|", "|") for c in _CELL_SPLIT.split(stripped[1:-1])])
     return rows
 
 

@@ -946,3 +946,26 @@ def test_all_none_supported_evidence_passes_with_crossover_at_threshold():
         text, "- Crossover: flips at prior odds 0.025", "- Crossover: flips at prior odds 0.1"
     )
     assert check(text) == []
+
+
+# Remediation wave 2026-09-15, row 2: three archived records carried `\|`
+# inside an evidence source cell and parsed as six-cell rows.
+
+
+def test_escaped_pipe_inside_an_evidence_cell_is_content():
+    text = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | P(gap \\| real)=9/10, "
+        "P(gap \\| not)=2/10 |",
+    )
+    assert check(text) == []
+
+
+def test_unescaped_extra_pipe_is_still_an_extra_cell():
+    text = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | P(gap | real) | extra |",
+    )
+    assert any("cells; the template requires exactly 4" in f for f in check(text))
