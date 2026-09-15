@@ -46,17 +46,16 @@ Skill needed on this cell: yes — baseline writes no record, uses no vocabulary
 | DA-S8.1 | Record from the template; passes `check_decision.py` | FAIL — no record | FAIL — record written; 12 gate failures, all on form (a six-cell evidence row, an annotated verdict, `k` prose in the loss slot) | FAIL — record written; 14 gate failures, all on form (loss ratio and threshold slots relabelled, a six-cell evidence row, an annotated verdict) |
 | DA-S8.2 | Prior odds 0.02–0.2 and loss ratio 2–20 user-elicited; the 4.5 row names source, class, conditioning; posterior recomputes 0.09–0.9 | FAIL — the arithmetic is right ("LR = 4.5 in favor of \"real\"" and posterior "8.4%" to "52.9%" (da-s8-baseline.manifest.json)) but nothing carries a provenance class | PASS — "Prior odds: 0.02–0.2 (1 in 50 to 1 in 5, as stated by the user \"going in\") — provenance: user-elicited" and "Posterior odds: 0.09–0.9 (= prior odds × 4.5)" (da-s8-pre.scratch/decision-record-p95-regression.md) | FAIL (corrected on final review; first scored PASS) — the arm read "1 in 50 to 1 in 5" as probabilities and recorded "Prior odds: 1:49 to 1:4" with "Posterior odds: 1:10.9 to 1.13:1 (prior odds × 4.5)" (da-s8-post.scratch/decision-record.md), not the 0.02–0.2 and 0.09–0.9 the assertion states; the T3 row itself is sourced correctly |
 | DA-S8.3 | Robustness reports both crossovers | FAIL — a grid share ("~73% of the plausible prior × cost-ratio combinations favor holding" (da-s8-baseline.manifest.json)), not crossovers | PASS — "crossover prior odds ≈ 0.111" at loss ratio 2 and "crossover loss ratio ≈ 11.1" at prior 0.02 (da-s8-pre.scratch/decision-record-p95-regression.md) | PASS — "prior crossover at odds 0.111" at loss ratio 2 and "loss-ratio crossover ≈ 10.9" at prior 1/50 (da-s8-post.scratch/decision-record.md) |
-| DA-S8.4 | Verdict `prior-sensitive`, not `loss-sensitive`; Conditions states the loss crossover too; Recommended action `returned to owner` | FAIL — "Recommendation: Hold" and "holding is the better bet under most of the uncertainty you described" (da-s8-baseline.manifest.json) | PASS — "Verdict: prior-sensitive" … "Recommended action: returned to owner" … "Ship is defensible only if both the team's going-in skepticism is near the low end of its stated range *and* the loss ratio is agreed to be near the low end of its stated range." (da-s8-pre.scratch/decision-record-p95-regression.md) | PASS — "Verdict: prior-sensitive (the preferred action flips within the stated prior class, and separately within the stated loss range — both crossovers are reported above per the rule for a double flip)" and "Recommended action: returned to owner" (da-s8-post.scratch/decision-record.md) |
+| DA-S8.4 | Verdict `prior-sensitive`, not `loss-sensitive`; Conditions states the loss crossover too; Recommended action `returned to owner` | FAIL — "Recommendation: Hold" and "holding is the better bet under most of the uncertainty you described" (da-s8-baseline.manifest.json) | FAIL (corrected on re-review; first scored PASS) — verdict and handback are right, but Conditions describes the loss dependence only qualitatively: "the loss ratio is agreed to be near the low end of its stated range" (da-s8-pre.scratch/decision-record-p95-regression.md); the ≈11.1 loss crossover is stated in Robustness, not in Conditions | PASS — "Verdict: prior-sensitive (the preferred action flips within the stated prior class, and separately within the stated loss range — both crossovers are reported above per the rule for a double flip)" and, in Conditions, "the loss ratio is judged well below ~11×" (da-s8-post.scratch/decision-record.md) |
 
-Totals: baseline 0/4, pre 3/4, post 2/4 (corrected; first written as 3/4).
+Totals: baseline 0/4, pre 2/4, post 2/4 (both corrected; first written as 3/4 and 3/4).
 
-### Verdict for DA-S8 (wave 1, corrected on final review)
+### Verdict for DA-S8 (wave 1, corrected twice on review)
 
 At wave 1 the cell lands on **row 3, regression**: post fails DA-S8.2, which pre passes, by reading the elicited prior as probabilities rather than odds.
-That is a prompt reading the precedence paragraph does not touch, and n=1 cannot say whether it is variance or an effect; the row is recorded as the table requires.
-On the paragraph itself, pre and post both pass DA-S8.4: the pre-edit skill chose `prior-sensitive` over `loss-sensitive` when both flipped and put the loss crossover in Conditions; the post arm did the same and cited "the rule for a double flip".
-Wave 2's post arm (below) reads the prior as odds and passes 8.2, so wave 2 supersedes this cell's row.
-The first version of this section scored 8.2 PASS and said "no regression"; both were wrong, and the correction is dated here rather than silently made.
+On the paragraph itself, pre fails 8.4 and post passes it: both chose `prior-sensitive` over `loss-sensitive` when both flipped, but only the post arm stated the loss crossover in Conditions, as the paragraph then required.
+The first version of this section scored 8.2 PASS for post and 8.4 PASS for pre; the final review caught the first and the re-review the second; both corrections are dated here rather than silently made.
+Wave 2 supersedes this cell's row.
 Skill needed on this cell: yes — baseline's arithmetic is correct but it recommends unconditionally and writes no record.
 
 ## Rescore after a checker defect (row 2)
@@ -136,13 +135,15 @@ Debt, recorded in the catalog: when a user gives a loss as a rounded point ("rou
 | DA-S8.1 | Record from the template; passes `check_decision.py` | FAIL | FAIL — one gate: the Crossover slot carries both crossovers as prose, so the checker's first number is the LR ("prior_odds × 4.5") rather than a flip point; every other slot is bare and numeric |
 | DA-S8.2 | User-elicited prior and loss ranges; sourced 4.5 row; posterior recomputes | PASS | PASS — "Prior odds: 0.02–0.2 — provenance: user-elicited", "Loss ratio: 2–20 — provenance: user-elicited", "Posterior odds: 0.09–0.9" (w2-da-s8-post.scratch/decision-record-p95-regression.md) |
 | DA-S8.3 | Both crossovers reported | PASS | PASS — "the flip is at loss ratio ≈11.1" and "the flip is at prior odds ≈0.111" (w2-da-s8-post.scratch/decision-record-p95-regression.md) |
-| DA-S8.4 | `prior-sensitive`; loss crossover in Conditions; `returned to owner` | PASS | PASS — "Verdict: prior-sensitive" and "Recommended action: returned to owner" (w2-da-s8-post.scratch/decision-record-p95-regression.md) |
+| DA-S8.4 | `prior-sensitive`; loss crossover in Conditions; `returned to owner` | FAIL (corrected) | FAIL (corrected on re-review; first scored PASS) — "Verdict: prior-sensitive" and "Recommended action: returned to owner" hold, but Conditions says only "The crossover falls inside both the stated prior class and the stated loss range" (w2-da-s8-post.scratch/decision-record-p95-regression.md); the ≈11.1 loss crossover is in Robustness |
 
-Totals: pre 3/4 (carried), w2 post 3/4.
+Totals: pre 2/4 (carried, corrected), w2 post 2/4 (corrected).
 
-#### Verdict for DA-S8 after wave 2
+#### Verdict for DA-S8 after wave 2 (corrected on re-review)
 
-**Row 5, not needed** on the precedence paragraph: pre and post both pass 8.4, and the wave-2 post arm passes 8.2 ("Prior odds: 0.02–0.2 — provenance: user-elicited" (w2-da-s8-post.scratch/decision-record-p95-regression.md)), so the wave-1 regression on 8.2 does not recur; 8.1 remains a shared failure.
+**Row 6**: the post arm fails 8.4 on the Conditions clause, which the paragraph then required.
+The wave-2 post arm passes 8.2 ("Prior odds: 0.02–0.2 — provenance: user-elicited" (w2-da-s8-post.scratch/decision-record-p95-regression.md)), so the wave-1 regression does not recur; 8.1 remains a shared failure.
+Row 6 permits revision and remeasurement, and amendment 2's drop rule is for a cell landing on row 6 again; DA-S8's corrected wave-1 row is 3, so the paragraph is revised (the Conditions clause removed; both crossovers required in Robustness, where every skill arm put them) and remeasured in wave 3, per amendment 4.
 The template repair removed every form failure but one — a prose Crossover slot, which the slot notes forbid ("A value stands bare") and the arm did anyway.
 Under a `prior-sensitive` verdict two crossovers must be stated and the slot has one line; the checker reads the first number.
 Recorded as debt against the template's Crossover slot, which has no two-crossover form.

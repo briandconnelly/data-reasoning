@@ -227,7 +227,7 @@ Both canaries are excluded from scoring; the scored arms run fresh.
 | --- | --- | --- | --- |
 | B10 | Profile-route sentence names each change with its date | pre fails 5b; post passes 5a–5c | **4 — reaches behavior** |
 | DA-S1 | Template skeletons bare, guidance in slot notes (degraded-mode sentence unchanged) | pre fails 5a and 5e; post passes 5a–5d, fails 5e on a `sensitivity-only` loss sweep under `robust` | **sentence reaches behavior on 5a–5d; 5e is a shared Numeric Policy failure recorded as debt** — row 6 does not apply by its text (the failing reason is not one the sentence addresses); flagged for the final cross-model review, and dropped per amendment 2 if that reading fails |
-| DA-S8 | Same template | pre and post pass 8.4; both fail 8.1 (post on a prose Crossover slot) | **5 — not needed**, unchanged |
+| DA-S8 | Same template | pre and post both fail 8.4 on its Conditions clause (corrected on re-review; first scored PASS/PASS); post passes 8.2; both fail 8.1 | **6** — the paragraph is revised and remeasured in wave 3 (amendment 4) |
 
 No arm was void or contaminated; row 2 fired once between the canary and the scored arms (amendment 3).
 The wave-1 row for B10 is superseded by wave 2; the wave-1 rows for S9, DA-S8, and B10-nofile stand.
@@ -242,5 +242,23 @@ The measurement stands in the DA run record as what it showed.
 The review also corrected the wave-1 DA-S8 score (8.2 was a FAIL for the post arm, a row-3 regression at wave 1, superseded by wave 2), found the checker's expanded crossover acceptance used a narrower interval for its intersection gate than for its acceptance (fixed: one interval, every stated number checked), found the structural validator's Evidence schema omitted the source column (fixed with a test), and found the template's slot notes reached into VoI slots and paraphrased two normative rules (fixed: decide-scoped, pointers).
 
 What ships as measured: the S9 estimation-route sentence (row 4) and the revised B10 profile-route sentence (row 4).
-What ships as a clarification carrying no measured claim, by the owner's decision: the DA precedence paragraph and the Frame-lite naming (row 5).
+What ships as a clarification carrying no measured claim, by the owner's decision: the Frame-lite naming (row 5); the DA precedence paragraph's disposition awaits wave 3 (amendment 4), after the re-review corrected its 8.4 scores.
 What is withdrawn: the DA degraded mode (row 6); the external review's finding 7 is recorded as owed.
+
+## Amendment 4 — wave 3, written before any wave-3 arm ran (2026-09-15)
+
+The re-review (`codex_review_changes` job `f37099008fe3498da19389e123192d7c`) found DA-S8.4 mis-scored: the assertion required the loss crossover in Conditions, and only the wave-1 post arm put it there ("well below ~11×"); the pre arm and the wave-2 post arm stated it in Robustness and described it qualitatively in Conditions.
+Corrected, wave 2 lands DA-S8 on row 6.
+Row 6 permits revision and remeasurement; amendment 2's drop rule is for a cell landing on row 6 *again*, and DA-S8's corrected wave-1 row is 3, so revision is taken.
+
+**Change under test**: `decision-analysis/SKILL.md` § Verdict, the precedence paragraph, now requires the verdict `prior-sensitive` and both crossovers in Robustness; the Conditions clause is removed.
+Every skill arm in waves 1 and 2 put both crossovers in Robustness, so the revised clause names where the arms already write them.
+Reachability: DA-S8 only.
+DA-S8.4 in the catalog is revised to match.
+
+**Arms**: `w3-canary-da-s8-post` (rationale), `w3-da-s8-post` (scored); baseline and `da-s8-pre` carried.
+
+**Expected outcome**: the pre arm already satisfies the revised 8.4 (its Robustness names ≈0.111 and ≈11.1), so the reachable rows are 5 (not needed: post passes too), 6 (post fails 8.4 — then the paragraph is dropped, per amendment 2's "again"), 3 (post fails 8.2 or 8.3 that pre passes), or void.
+Row 4 is unreachable by construction and is said so here: this wave cannot show the paragraph reaching behavior; it can only show it does no harm and resolves the stated R5 conflict.
+
+**Verdict rows**: unchanged; a row-6 result drops the paragraph from the PR.

@@ -889,3 +889,22 @@ def test_every_number_in_a_stated_crossover_must_be_in_the_interval():
         "- Crossover: flips at prior odds 0.06–999",
     )
     assert any("robust verdict requires Crossover" in f for f in check(bad))
+
+
+# Re-review 2026-09-15: digit fragments were accepted wherever they appeared.
+
+
+def test_crossover_grammar_rejects_signs_reversed_ranges_and_prose():
+    for value in ("-0.025", "0.06–0.02", "none known at 0.025", "roughly 0.025 or so"):
+        bad = replace_once(
+            VALID_DECIDE, "- Crossover: none within swept class", f"- Crossover: {value}"
+        )
+        assert any("robust verdict requires Crossover" in f for f in check(bad)), value
+
+
+def test_crossover_grammar_accepts_the_stated_forms():
+    for value in ("0.025", "prior odds 0.025", "flips at prior odds 0.02–0.03"):
+        ok = replace_once(
+            VALID_DECIDE, "- Crossover: none within swept class", f"- Crossover: {value}"
+        )
+        assert check(ok) == [], value

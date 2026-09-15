@@ -130,7 +130,7 @@ The verdict set is closed, and every value is evidence-bounded:
 - `loss-sensitive` — the preferred action flips within the loss range, or the losses are `sensitivity-only`; the crossover is reported and the judgment returns to the decision owner.
 - `dominated` — one action wins under every state; no probabilities are needed, and the record's belief slots say `none needed`.
 
-When the action flips within the prior class and within the loss range, the verdict is `prior-sensitive` and its Conditions slot states the loss crossover too: the record has one verdict slot, belief is what the owner is asked to settle first, and neither crossover is dropped.
+When the action flips within the prior class and within the loss range, the verdict is `prior-sensitive` — the record has one verdict slot, and belief is what the owner is asked to settle first — and Robustness reports both crossovers, so neither is dropped.
 
 The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive` and `loss-sensitive` it reads `returned to owner`, because the crossover, not the record, locates the choice.
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).

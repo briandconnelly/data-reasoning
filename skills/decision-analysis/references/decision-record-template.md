@@ -102,8 +102,8 @@ Provenance is exactly one class from `../SKILL.md` § Numeric Policy on the deci
 `derived` is not a class; a threshold derived from an elicited loss ratio carries the loss ratio's class.
 
 Sentinels replace the whole value and appear bare, with no suffix and no provenance.
-The decide record's sentinels are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover, under a `dominated` verdict); `none within swept class` (Crossover, under `robust`, when the record does not name the flip point that lies outside the class); `single item` (Independence); `returned to owner` (Recommended action, under a sensitive verdict); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
-Which verdict each sentinel goes with, and what Recommended action names under each verdict, is `../SKILL.md` § The Decide Route's to say.
+The decide record's sentinels, by slot, are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` (Recommended action); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's to say; a stated Crossover is a bare number or ordered range, optionally introduced by `flips at prior odds`.
 
 The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
 

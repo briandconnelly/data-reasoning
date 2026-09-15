@@ -211,6 +211,23 @@ def _close(a: float, b: float) -> bool:
 _CELL_SPLIT = re.compile(r"(?<!\\)\|")
 
 
+# A stated crossover is a bare number or ordered range, optionally introduced
+# by one of these phrases and nothing else: "flips at prior odds 0.025",
+# "prior odds 0.02-0.03", "0.025". Signs, reversed ranges, and prose around
+# the number are not a crossover statement.
+_CROSSOVER_PREFIX = re.compile(r"^(?:flips at\s+)?(?:prior odds\s+)?", re.I)
+
+
+def _crossover_value(text: str) -> tuple[float, float] | None:
+    body = _CROSSOVER_PREFIX.sub("", text.strip(), count=1)
+    if not body or body[0] in "-+":
+        return None
+    parsed = parse_range(body)
+    if parsed is None or parsed[0] <= 0:
+        return None
+    return parsed
+
+
 def _table_rows(section_text: str) -> list[list[str]]:
     """All pipe-table rows in a section, as cell lists (outer pipes stripped)."""
     rows = []
@@ -559,10 +576,10 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         intersects = cross_low <= swept[1] * (1 + _REL_TOLERANCE) and cross_high >= swept[0] * (
             1 - _REL_TOLERANCE
         )
-        numbers = [float(n) for n in re.findall(r"\d+(?:\.\d+)?", crossover_text)]
-        stated_in_interval = bool(numbers) and all(
-            cross_low * (1 - _REL_TOLERANCE) <= n <= cross_high * (1 + _REL_TOLERANCE)
-            for n in numbers
+        stated = _crossover_value(crossover_text)
+        stated_in_interval = stated is not None and (
+            cross_low * (1 - _REL_TOLERANCE) <= stated[0]
+            and stated[1] <= cross_high * (1 + _REL_TOLERANCE)
         )
         if verdict == "robust":
             if intersects:
