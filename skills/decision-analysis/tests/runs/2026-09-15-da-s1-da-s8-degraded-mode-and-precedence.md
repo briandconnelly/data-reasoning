@@ -83,3 +83,69 @@ n=1 per arm, one model, one day.
 The checker failures are uniform across pre and post and are form, not arithmetic: every DA arm annotated slots the checker requires bare, wrote odds as `1:49` where the checker parses `0.02`, and added cells to the evidence row.
 That is debt against the template and checker together — the template's slot text invites annotation — and it is recorded in the catalog's owed measurements, not attributed to this change.
 DA-S1's post arm swept 1:4 to 4:1 and said why: "Matches the width of the worked example in SKILL.md § Degraded Modes" (da-s1-post.scratch/decision-record-p95-regression-ship-or-hold.md); the worked example's numbers reached behavior as an anchor, which is worth knowing when writing examples.
+
+## Wave 2 — the repaired template (amendments 2 and 3 of the preregistration)
+
+The degraded-mode sentence is unchanged; `references/decision-record-template.md` now shows bare values and exact labels, with the guidance in § Slot notes outside the skeleton.
+Arms: `w2-canary-da-s1-post` (rationale only), `w2-da-s1-post`, `w2-da-s8-post`; the baseline and pre arms are carried from wave 1, their skill wording unchanged.
+Model `claude-sonnet-5`; no contamination.
+Between the canary and the scored arms, `check_decision.py` was changed once (amendment 3, row 2): under `robust` it accepts either the sentinel or a flip point its own arithmetic places in the crossover interval implied by the stated threshold and the swept loss range; nothing the arms read changed.
+
+### DA-S1
+
+| # | Assertion | pre (carried) | w2 post |
+| --- | --- | --- | --- |
+| DA-S1.1 | Record before the report; passes `check_decision.py` | FAIL | FAIL — one gate: "a robust verdict requires '- Loss range swept:' to carry exactly one user-elicited or externally-sourced provenance" |
+| DA-S1.2 | Binary state with explicit residual; no LR from a status token | PASS | PASS — "H1 UNRESOLVED folds into the true state; H2 UNRESOLVED folds into the false/residual state" appears in the canary and the same mapping in the scored record |
+| DA-S1.3 | Every number classed; arithmetic recomputes | PASS | PASS — "0.0222 at loss 10" (w2-da-s1-post.scratch/decision-record-ship-or-hold.md) is 0.1 ÷ 4.5 |
+| DA-S1.4 | Closed-set verdict with conditions; no execution | PASS | PASS — "Verdict: robust" and "Recommended action: hold" (w2-da-s1-post.scratch/decision-record-ship-or-hold.md) |
+| DA-S1.5a | Sentinels bare | FAIL | PASS — "Prior odds: none supported — see Robustness" and "Posterior odds: none supported — see Robustness" (w2-da-s1-post.scratch/decision-record-ship-or-hold.md), nothing after either |
+| DA-S1.5b | Ratio kept, sourced, nothing invented or dropped | PASS | PASS — T3 row "4.5 \| estimated-from-data-in-hand" naming the file, the 20-rollout class, and the gap condition; T1 and T2 rows read "none supported" in both cells |
+| DA-S1.5c | Sensitivity-only prior sweep applying the LR; crossover ≈ 0.022 | PASS | PASS — "Prior class swept: 0.25–4 — provenance: sensitivity-only" and "0.0444 at loss 5, 0.0222 at loss 10, 0.0148 at loss 15" (w2-da-s1-post.scratch/decision-record-ship-or-hold.md) |
+| DA-S1.5d (amended) | `robust` or `prior-sensitive` per Numeric Policy; under `robust`, Conditions names the class and the unsupported prior, Recommended action names the action | PASS | PASS — Conditions: "sensitivity-only, unsupported by the ledger itself — no base rate is available" (w2-da-s1-post.scratch/decision-record-ship-or-hold.md) |
+| DA-S1.5e (amended) | Passes both checkers; belief-grade loss range under `robust` | FAIL | FAIL — `check_record.py --final` clean; `check_decision.py` fails the one gate above: "Loss range swept: 5–15 — provenance: sensitivity-only" (w2-da-s1-post.scratch/decision-record-ship-or-hold.md) under a `robust` verdict |
+
+Totals: pre 6/9 (carried), w2 post 8/9.
+
+#### Verdict for DA-S1 after wave 2
+
+The template repair reached behavior: every form failure of wave 1 is gone — bare sentinels, decimal odds, exact labels, four-cell rows — and 5a now passes where pre fails it.
+One failure remains, and it is the same one on the pre arm, the wave-1 post arm, and this arm: the user said "roughly ten", the arm swept `5–15`, labelled the sweep `sensitivity-only`, and returned `robust`, which § Numeric Policy caps at `loss-sensitive`.
+The canary got it right ("Loss range swept: 8–12 — provenance: user-elicited" (w2-canary-da-s1-post.scratch/decision-record.md)) and passed both checkers; the scored arm did not.
+
+Which row governs is a reading of the table's own words.
+Row 6 is "post fails an added assertion for a reason the sentence addresses"; the sentence under test is the degraded mode for a missing prior, and the failing reason is the provenance of a loss sweep, which § Numeric Policy governs and the sentence does not mention.
+Row 7's logic — a failure shared by pre and post is pre-existing debt — fits the facts, though row 7 is written for catalog assertions.
+The scorer's disposition: **the sentence's own content reaches behavior (5a–5d: post passes, pre fails 5a); 5e is a shared Numeric Policy failure recorded as debt**, and amendment 2's "dropped rather than revised a third time" is not triggered because row 6 does not apply by its text.
+That reading is flagged for the final cross-model review; if it does not hold, the sentence is dropped per amendment 2.
+
+Debt, recorded in the catalog: when a user gives a loss as a rounded point ("roughly ten"), Sonnet extends it into a range, labels the range `sensitivity-only`, and still calls the verdict `robust`; three of four skill arms did this.
+§ Numeric Policy is unambiguous; the behavior is a candidate for a worked example or a slot note, which would be a wording change owing its own arm.
+
+### DA-S8
+
+| # | Assertion | pre (carried) | w2 post |
+| --- | --- | --- | --- |
+| DA-S8.1 | Record from the template; passes `check_decision.py` | FAIL | FAIL — one gate: the Crossover slot carries both crossovers as prose, so the checker's first number is the LR ("prior_odds × 4.5") rather than a flip point; every other slot is bare and numeric |
+| DA-S8.2 | User-elicited prior and loss ranges; sourced 4.5 row; posterior recomputes | PASS | PASS — "Prior odds: 0.02–0.2 — provenance: user-elicited", "Loss ratio: 2–20 — provenance: user-elicited", "Posterior odds: 0.09–0.9" (w2-da-s8-post.scratch/decision-record-p95-regression.md) |
+| DA-S8.3 | Both crossovers reported | PASS | PASS — "the flip is at loss ratio ≈11.1" and "the flip is at prior odds ≈0.111" (w2-da-s8-post.scratch/decision-record-p95-regression.md) |
+| DA-S8.4 | `prior-sensitive`; loss crossover in Conditions; `returned to owner` | PASS | PASS — "Verdict: prior-sensitive" and "Recommended action: returned to owner" (w2-da-s8-post.scratch/decision-record-p95-regression.md) |
+
+Totals: pre 3/4 (carried), w2 post 3/4.
+
+#### Verdict for DA-S8 after wave 2
+
+Unchanged: **row 5, not needed** on the precedence paragraph; 8.1 remains a shared failure.
+The template repair removed every form failure but one — a prose Crossover slot, which the slot notes forbid ("A value stands bare") and the arm did anyway.
+Under a `prior-sensitive` verdict two crossovers must be stated and the slot has one line; the checker reads the first number.
+Recorded as debt against the template's Crossover slot, which has no two-crossover form.
+
+### Cost
+
+| arm | tool calls | output tokens | wall clock |
+| --- | --- | --- | --- |
+| w2-canary-da-s1-post | 6 | — | — |
+| w2-da-s1-post | 6 | — | — |
+| w2-da-s8-post | 5 | — | — |
+
+Wall clock and tokens are in each manifest's `duration_s` and `usage`.

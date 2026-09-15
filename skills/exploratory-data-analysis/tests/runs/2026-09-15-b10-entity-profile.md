@@ -70,3 +70,29 @@ Output tokens are from each manifest's `usage.output_tokens` where the runner ca
 n=1 per arm, one model, one day.
 Neither profile-route sentence is shown to change behavior on this fixture at that size; the skill as a whole is shown to matter against baseline.
 The B10.6a failure is the more useful finding: the degraded mode's "before any exploration output" is not what an agent does when it discovers tool poverty late.
+
+## Wave 2 — the revised profile-route sentence (amendment 2 of the preregistration)
+
+The sentence now reads that the record names each change as a change with its date rather than leaving a reader to infer it from the figures on either side.
+Arms: `w2-canary-b10-post` (rationale only) and `w2-b10-post` (scored); `b10-baseline` and `b10-pre` are carried from wave 1, their skill wording unchanged.
+Model `claude-sonnet-5`; no contamination; the post arm's manifest records the revised skill's file hashes.
+
+| # | Assertion | pre (carried) | w2 post |
+| --- | --- | --- | --- |
+| B10.1 | Frame-lite pins entity, identifier, sources, timeframe | PASS | PASS — "## Frame-lite (entity profile)" with both ids, five sources, the window, a budget and stop rule (w2-b10-post.scratch/exploration-log.md) |
+| B10.2 | Absence semantics for both empty months | PASS | PASS — February "no bill issued" on the paused status; June "the data alone can't tell you whether it means the account went inactive/paused again or the June bill simply wasn't exported" (w2-b10-post.manifest.json) |
+| B10.3 | Deliverable is orientation record plus entity record | PASS | PASS — the final message is the profile; the log's Leads section holds two unchased data-quality observations dispositioned `reported`, per amendment 1's clarification |
+| B10.4 | No causal attribution | PASS | PASS — "I'm not attributing the volume drop to either" (w2-b10-post.manifest.json) |
+| B10.5a | Plan change dated | PASS | PASS — "Plan changed standard → enterprise-annual effective 2026-03-01, matching the March bill." (w2-b10-post.manifest.json) |
+| B10.5b | Billed volume fall stated as a change | FAIL | PASS — "billed volume dropped from 1840-1910 units/month (Jan, Mar under old id) to roughly 1085-1120 units/month (Apr-May under new id)" (w2-b10-post.scratch/exploration-log.md) |
+| B10.5c | Attribution unresolved or handed off | PASS | PASS — "that would need a follow-up investigation if you want it settled" (w2-b10-post.manifest.json) |
+
+Totals: pre 6/7 (carried), w2 post 7/7.
+
+### Verdict for B10 after wave 2
+
+**Row 4, reaches behavior**: post passes every added assertion and pre fails B10.5b.
+No regression.
+The canary, excluded from scoring, also named the fall ("Billed volume and amount fell from $772.80/1840 units (Jan, standard) to $592.10/1910 units (Mar, enterprise-annual) to $347.20/1120 units (Apr) to $336.35/1085 units (May)" (w2-canary-b10-post.scratch/exploration-log.md)).
+Two post arms under the revised sentence named the change that none of the three wave-1 skill arms named; that is still n=1 scored, one model, one day.
+Cost: 12 tool calls, 7,046 output tokens, 87 s.

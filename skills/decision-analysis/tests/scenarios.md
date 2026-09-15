@@ -24,6 +24,10 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
   Neither arm's record passed `check_decision.py`, every failure on form; see the debt below.
 - Debt surfaced 2026-09-15: every decision record in that wave, under either wording, failed `check_decision.py` on annotated slots, `1:49`-style odds, relabelled slots, and six-cell evidence rows, with correct arithmetic underneath.
   The template's slot text invites the annotations the checker forbids; the two need reconciling before DA-S1.1's "passes `check_decision.py`" can be a fair bar.
+  **Reconciled 2026-09-15 (wave 2):** the template's skeletons now show bare values and exact labels with the guidance in § Slot notes; under it the DA-S1 and DA-S8 post arms wrote bare sentinels, decimal odds, exact labels, and four-cell rows, and each failed `check_decision.py` on exactly one gate (`runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 2).
+- Debt surfaced 2026-09-15 (wave 2): given a rounded loss ("roughly ten"), three of four skill arms swept a range around it, labelled the sweep `sensitivity-only`, and still called the verdict `robust`, which § Numeric Policy caps at `loss-sensitive`; the one arm that read "roughly ten" as `8–12 — user-elicited` passed both checkers.
+  A worked example or slot note for a rounded elicited loss is a wording change owing its own arm.
+- Debt surfaced 2026-09-15 (wave 2): a `prior-sensitive` record must state two crossovers and the template's Crossover slot has one line; the DA-S8 post arm wrote both as prose and the checker read the wrong number.
 
 ## Scenarios
 

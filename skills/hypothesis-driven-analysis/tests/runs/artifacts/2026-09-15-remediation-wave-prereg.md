@@ -220,3 +220,16 @@ Three tests added; the slot note for `none within swept class` says when it appl
 No wording under measurement changed.
 `w2-canary-b10-post` named the volume fall as a change with its dates under a "stated as sequence, not cause" heading; rationale passes.
 Both canaries are excluded from scoring; the scored arms run fresh.
+
+## Results, wave 2 (2026-09-15)
+
+| Cell | Change | Added-assertion outcome (carried pre → w2 post) | Row |
+| --- | --- | --- | --- |
+| B10 | Profile-route sentence names each change with its date | pre fails 5b; post passes 5a–5c | **4 — reaches behavior** |
+| DA-S1 | Template skeletons bare, guidance in slot notes (degraded-mode sentence unchanged) | pre fails 5a and 5e; post passes 5a–5d, fails 5e on a `sensitivity-only` loss sweep under `robust` | **sentence reaches behavior on 5a–5d; 5e is a shared Numeric Policy failure recorded as debt** — row 6 does not apply by its text (the failing reason is not one the sentence addresses); flagged for the final cross-model review, and dropped per amendment 2 if that reading fails |
+| DA-S8 | Same template | pre and post pass 8.4; both fail 8.1 (post on a prose Crossover slot) | **5 — not needed**, unchanged |
+
+No arm was void or contaminated; row 2 fired once between the canary and the scored arms (amendment 3).
+The wave-1 row for B10 is superseded by wave 2; the wave-1 rows for S9, DA-S8, and B10-nofile stand.
+
+Debts added by wave 2: a rounded user-elicited loss ("roughly ten") is extended into a `sensitivity-only` range and still called `robust` by three of four skill arms; the Crossover slot has no form for the two crossovers a `prior-sensitive` record must state.
