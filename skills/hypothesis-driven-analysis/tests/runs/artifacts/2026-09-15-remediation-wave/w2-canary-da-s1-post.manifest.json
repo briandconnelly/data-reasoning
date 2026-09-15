@@ -1,0 +1,120 @@
+{
+  "name": "w2-canary-da-s1-post",
+  "started_utc": "2026-09-15T22:57:05.233187+00:00",
+  "duration_s": 198.3,
+  "exit_code": 0,
+  "claude_version": "2.1.273 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "f1553eb8-e10c-4783-b391-93bef444801f",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "60d68e531caa5d024274ea84f686acf1c4f53c2ff3930cc7a6f69ba6d12ce260",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "13a4ae351bca42264047ac7f1960bbc50310d7dd98c2a32efd220f1bd444fd59"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "079832e2f3cf65cf7af474ff9c269082cf863f89da63b7fd8c8f70a4295c66c8",
+  "jsonl_sha256": "3c13a7f32f3a7ba1206447a3256accccd2856365f0861a0344772cb7373cf9fe",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-canary-da-s1-post-qg5oglv2",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "0cf81e0e9b54c94d0adf1cc4c70e2b1809d54d84b969b7efbfabef32657826f2"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-canary-da-s1-post-qg5oglv2/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-canary-da-s1-post-qg5oglv2/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-canary-da-s1-post-qg5oglv2/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls -la /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-canary-da-s1-post-qg5oglv2/work 2>/dev/null || echo \\\"MISSING\\\"\", \"description\": \"Check work directory exists\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-canary-da-s1-post-qg5oglv2/work/decision-record.md\", \"content\": \"# Decision Record: ship the 2026-09-12 release (connection-pool change) or hold for the p95 regression investigation\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: Ship vs Hold\\n- Decision owner: release owner (user)\\n- Reversibility: Ship is not cheaply undone \\u2014 once live, backing out needs a fresh rollback decision under production exposure; Hold is cheaply reversible \\u2014 the release ships later once the block is lifted, at the cost of the delay"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 219211,
+    "cache_read_input_tokens": 610499,
+    "output_tokens": 17496,
+    "output_tokens_details": {
+      "thinking_tokens": 14239
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 219211,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 878,
+        "cache_read_input_tokens": 211053,
+        "cache_creation_input_tokens": 2007,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2007
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 1.1752488,
+    "duration_ms": 197593,
+    "num_turns": 6
+  },
+  "result_text": "## Ship-or-hold: **Hold**\n\nFull record: `work/decision-record.md`\n\n**Why:** The ledger left both explanations unresolved because the one test that would separate them (raw access logs, T2) never ran \u2014 S3 wasn't acquired in time. But you don't need that discrimination to decide; you need to know whether the observed 57 ms gap is *real* (H1) versus *not real* (H2 or anything else), and one piece of evidence in the ledger bears on exactly that, even with H1/H2 unresolved:\n\n- T3's reference class (20 past rollouts, quota-sampled by settled outcome) shows the qualifying >40 ms gap appeared in 9/10 real regressions vs. 2/10 non-regressions. That's a valid likelihood ratio of **4.5\u00d7** toward \"real\" \u2014 the quota sampling kills the base rate, not the within-stratum hit/false-alarm rates, so this number survives even though the ledger explicitly warns off using the 10/10 split as a base rate.\n- T1 (the metrics-pipeline gap itself) doesn't add anything on top of that: it's the same instrument H2 questions, so it can't discriminate H1 from H2 \u2014 it's just the event T3's frequencies are conditioned on.\n- There's no supported prior for \"is this specific gap real\" \u2014 nothing in the ledger licenses one, so I swept a wide, deliberately-uninformative range (1:4 to 4:1) rather than assume one.\n\n**Your 10\u00d7 loss ratio sets the bar low.** With missing-a-real-regression costing 10\u00d7 a needless hold, you only need ~9% posterior probability of a real regression to justify holding. Applying the 4.5\u00d7 LR across that entire prior sweep, and letting the loss ratio wobble 8\u201312 (reading your \"roughly ten times\" as a band), Hold wins everywhere in that space. Ship only becomes correct if your *starting* belief that this is a real regression was below about 1-in-40 \u2014 hard to defend given a uniform 57 ms gap on all six canary hosts before you even look at the reference class.\n\n**Verdict: `robust` \u2014 Hold**, across the swept priors and loss range. This isn't close to a coin flip; the crossover is far outside any reasonable starting belief.\n\n**One thing worth doing before Friday, not part of this record's job to price:** T2 (raw access-log p95) is still the only test that could actually settle H1 vs. H2, and S3's restore is \"pending,\" not \"impossible.\" If it can land before the freeze, it's the cheapest way to convert this from a probabilistic call into a resolved one \u2014 I'd flag that to whoever owns the restore request, separate from this hold decision."
+}

@@ -900,7 +900,7 @@ def test_no_prior_with_robust_verdict_needs_no_crossover_in_class():
         rec, "- Recommended action: returned to owner", "- Recommended action: hold one week"
     )
     # a named flip point inside the class contradicts robust
-    assert any("Crossover" in f for f in check(rec))
+    assert any("crossover" in f.lower() for f in check(rec))
     ok = replace_once(
         rec, "- Crossover: flips at prior odds 0.025", "- Crossover: none within swept class"
     )
@@ -969,3 +969,34 @@ def test_unescaped_extra_pipe_is_still_an_extra_cell():
         "  | repro on staging | 3–5 | estimated-from-data-in-hand | P(gap | real) | extra |",
     )
     assert any("cells; the template requires exactly 4" in f for f in check(text))
+
+
+# Wave-2 canary 2026-09-15: a robust record named the flip point outside the
+# swept class, which § Robustness asks for; the checker demanded the sentinel.
+
+
+def test_robust_may_name_the_flip_point_outside_the_swept_class():
+    # VALID_DECIDE: threshold 0.1, LR 3-5 -> flip interval [0.02, 0.0333]; swept 0.25-1.0
+    ok = replace_once(
+        VALID_DECIDE,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.025",
+    )
+    assert check(ok) == []
+
+
+def test_robust_with_a_flip_point_not_matching_the_arithmetic_fails():
+    bad = replace_once(
+        VALID_DECIDE, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.5"
+    )
+    assert any("robust verdict requires Crossover" in f for f in check(bad))
+
+
+def test_robust_flip_point_may_span_the_swept_loss_range():
+    # loss range 5-20 implies thresholds 0.05-0.2; with LR 3-5 the flip spans [0.01, 0.0667]
+    ok = replace_once(
+        VALID_DECIDE,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.06",
+    )
+    assert check(ok) == []

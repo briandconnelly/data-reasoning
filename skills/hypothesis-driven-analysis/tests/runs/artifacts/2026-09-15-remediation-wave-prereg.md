@@ -208,3 +208,15 @@ DA-S8 post passes 8.1 with the new template and keeps 8.2–8.4.
 B10 post names the volume fall as a change (5b) and keeps 5a and 5c; at risk: the arm selects other changes to name, as the wave-1 arms did.
 
 **Verdict rows**: the same table applies; a cell that lands on row 6 again is dropped from the PR rather than revised a third time, and that outcome is written here before the arms run.
+
+## Amendment 3 — after the wave-2 canaries, before the wave-2 scored DA arms (2026-09-15)
+
+`w2-canary-da-s1-post` wrote bare sentinels, decimal odds, exact labels, four-cell evidence rows, and a user-elicited loss range (`8–12` as its reading of "roughly ten"), and `check_record.py --final` passed it; the slot notes reached behavior on rationale.
+`check_decision.py` rejected it on one gate: under `robust` it demanded the literal `none within swept class`, and the record instead named the flip point (prior odds ≈0.0185–0.0278) that lies outside the swept class.
+`SKILL.md` § Robustness asks for "the crossover statements: at what prior, or what loss ratio, the preferred action flips", and § Degraded Modes says to report where the action flips; the checker's literal demand contradicted both.
+That is row 2: the checker now accepts, under `robust`, either the sentinel or a flip point that its own arithmetic places in the computed crossover interval (which the existing intersection gate already requires to lie outside the swept class); a number that does not match the arithmetic still fails.
+The accepted interval spans the thresholds the swept loss range implies as well as the Decision threshold slot's odds, because § Robustness sweeps both and the canary stated its flip across `8–12`.
+Three tests added; the slot note for `none within swept class` says when it applies.
+No wording under measurement changed.
+`w2-canary-b10-post` named the volume fall as a change with its dates under a "stated as sequence, not cause" heading; rationale passes.
+Both canaries are excluded from scoring; the scored arms run fresh.

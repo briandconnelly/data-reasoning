@@ -101,7 +101,7 @@ Provenance is exactly one class from `../SKILL.md` § Numeric Policy, on the slo
 `derived` is not a class; a threshold derived from an elicited loss ratio carries the loss ratio's class.
 
 Sentinels replace the whole value and appear bare, with no suffix and no provenance.
-They are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover, under a `dominated` verdict); `none supported — see Robustness` (Prior odds and Posterior odds, under `../SKILL.md` § Degraded Modes); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` (Recommended action, under a sensitive verdict); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+They are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover, under a `dominated` verdict); `none supported — see Robustness` (Prior odds and Posterior odds, under `../SKILL.md` § Degraded Modes); `none within swept class` (Crossover, under `robust`, when the record does not name the flip point that lies outside the class); `single item` (Independence); `returned to owner` (Recommended action, under a sensitive verdict); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
 
 The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
 An item with no defensible ratio reads `none supported` in both its LR and provenance cells with the reason in its source cell (`../SKILL.md` § Degraded Modes).

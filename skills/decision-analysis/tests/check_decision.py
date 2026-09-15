@@ -621,10 +621,34 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                     f"robust verdict, but the computed prior-odds crossover "
                     f"[{cross_low:g}, {cross_high:g}] lies inside the swept prior class"
                 )
-            if crossover_text != "none within swept class":
+            # SKILL.md § Robustness asks for the crossover statement and
+            # § Degraded Modes says to report where the action flips, so a
+            # robust record may name the flip point that lies outside the
+            # swept class -- checked against the computed interval -- or
+            # carry the sentinel. Prose around the number is still rejected
+            # by the slot rules; here only the number is judged.
+            # The flip point may be stated across the swept loss range, not
+            # only at the Decision threshold slot's odds: § Robustness sweeps
+            # both, so the accepted interval spans the thresholds the swept
+            # loss range implies (1 / loss ratio) as well as the stated one.
+            loss_swept = parse_range(_bare(field(robustness, "Loss range swept:") or ""))
+            thr_lo, thr_hi = threshold
+            if loss_swept and loss_swept[0] > 0:
+                thr_lo = min(thr_lo, 1 / loss_swept[1])
+                thr_hi = max(thr_hi, 1 / loss_swept[0])
+            flip_lo = thr_lo / lr_product[1]
+            flip_hi = thr_hi / lr_product[0]
+            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
+            names_flip = bool(numbers) and (
+                flip_lo * (1 - _REL_TOLERANCE)
+                <= float(numbers[0])
+                <= flip_hi * (1 + _REL_TOLERANCE)
+            )
+            if crossover_text != "none within swept class" and not names_flip:
                 failures.append(
-                    "a robust verdict requires Crossover 'none within swept class'; "
-                    f"found {crossover_text!r}"
+                    "a robust verdict requires Crossover 'none within swept class' or the "
+                    f"flip point outside the swept class (computed [{flip_lo:g}, "
+                    f"{flip_hi:g}]); found {crossover_text!r}"
                 )
         else:
             numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
