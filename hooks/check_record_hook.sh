@@ -52,9 +52,16 @@ if [ -z "$file_path" ]; then
     exit 2
   fi
   # A record title inside the patch text counts only as an added line
-  # (`\n+# Title: `, JSON-escaped) of a patch that names a Markdown file; a
-  # title string quoted in source code is not a record.
-  if printf '%s\n' "$paths" | grep -q '\.md$' && printf '%s' "$payload" | grep -q -E '\\n\+# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
+  # (`\n+# Title: `, JSON-escaped) belonging to a Markdown file's own
+  # operation. The command string is extracted with grep -E (alternation is
+  # portable there, not in sed's basic regex); each `*** ` marker is then
+  # moved to its own line, so one line is one file operation with its hunk
+  # still JSON-escaped, and the title is looked for only on lines whose
+  # operation names a .md file. A title added to a Python file, or quoted in
+  # source, is not a record, whatever else the patch touches.
+  command=$(printf '%s' "$payload" | grep -o -E '"command"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -n 1 | sed 's/^"command"[[:space:]]*:[[:space:]]*"//; s/"$//')
+  if printf '%s' "$command" | sed 's/\\n\*\*\* /\
+*** /g' | grep -E '^\*\*\* (Add File|Update File|Move to): [^\\]*\.md\\n' | grep -q -E '\\n\+# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
     printf 'data-reasoning: a record written by apply_patch was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' >&2
     exit 2
   fi

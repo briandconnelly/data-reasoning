@@ -487,3 +487,27 @@ def test_without_python_an_added_title_line_in_a_markdown_patch_is_not_validated
     r = run_command_without_python(codex_payload(tmp_path, codex_patch("record.md")), tmp_path)
     assert r.returncode == 2
     assert "not validated" in r.stderr
+
+
+def test_without_python_a_mixed_patch_attributes_titles_per_file(tmp_path):
+    """Re-review 2026-09-15: a README edit plus a Python file quoting a record
+    title was reported as a record write; the title belongs to the .py file."""
+    one, two = tmp_path / "one", tmp_path / "two"
+    one.mkdir()
+    two.mkdir()
+    (one / "README.md").write_text("# Readme\n")
+    patch = (
+        "*** Begin Patch\n*** Update File: README.md\n@@\n-a\n+b\n"
+        "*** Add File: example.py\n+# Decision Record: this is a Python comment\n*** End Patch\n"
+    )
+    r = run_command_without_python(codex_payload(one, patch), one)
+    assert r.returncode == 0
+    assert not r.stderr
+    # the same title added to a Markdown file in the same patch is a record
+    patch = (
+        "*** Begin Patch\n*** Add File: example.py\n+x = 1\n"
+        "*** Add File: record.md\n+# Decision Record: ship?\n*** End Patch\n"
+    )
+    r = run_command_without_python(codex_payload(two, patch), two)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr

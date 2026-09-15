@@ -159,7 +159,8 @@ Row 2 fired once, after scoring: cross-model review found the decision checker s
 | B10-nofile | Degraded mode names Frame-lite | 6b and 6c both pass; 6a both fail (frame emitted after every data read and a failed Write) | **5 on 6b/6c; 6a is shared debt** | none | — |
 
 What ships as measured under the table: the S9 sentence (row 4).
-What is a clarification carrying no measured claim, the owner's call to keep or drop: the DA-S8 precedence paragraph, the B10 profile-route sentence's dated-sequence and handoff halves, and the Frame-lite naming (row 5).
+What is a clarification carrying no measured claim, the owner's call to keep or drop: the Frame-lite naming (row 5).
+(This line first also listed the DA-S8 precedence paragraph and the B10 halves; both were corrected on review — DA-S8's wave-1 row is 3 and the paragraph was later withdrawn, and B10 was revised and remeasured in wave 2 — see § Final disposition below, which governs.)
 What the table blocks: the DA-S1 degraded-mode sentence (row 6: post fails DA-S1.5a and DA-S1.5e) and the B10 profile-route sentence (row 6: post fails B10.5b).
 Row 6 means what it said before any arm ran: the sentence is revised and remeasured, or dropped, before the PR merges; it is not a labelling restriction.
 The scorer's reading that both failures are shared, pre-existing behavior is recorded in the run records as commentary; it does not change the row.

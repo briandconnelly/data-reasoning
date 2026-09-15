@@ -80,8 +80,8 @@ The original scoring stands as scored; DA-S1.1, DA-S1.5e, and DA-S8.1 remain FAI
 ## What this does not show
 
 n=1 per arm, one model, one day.
-The checker failures are uniform across pre and post and are form, not arithmetic: every DA arm annotated slots the checker requires bare, wrote odds as `1:49` where the checker parses `0.02`, and added cells to the evidence row.
-That is debt against the template and checker together — the template's slot text invites annotation — and it is recorded in the catalog's owed measurements, not attributed to this change.
+Most checker failures in wave 1 were form shared by pre and post — annotated slots, odds written `1:49` where the checker parses `0.02`, relabelled slots — and are debt against the template and checker together, since the template's slot text invited the annotations; one failure was the checker's own (escaped pipes, rescored above), and one was substantive (a `sensitivity-only` loss sweep under a `robust` verdict, § Verdict for DA-S1 after wave 2).
+(This paragraph first said every failure was form; corrected 2026-09-15 on review — the corrected tables above govern.)
 DA-S1's post arm swept 1:4 to 4:1 and said why: "Matches the width of the worked example in SKILL.md § Degraded Modes" (da-s1-post.scratch/decision-record-p95-regression-ship-or-hold.md); the worked example's numbers reached behavior as an anchor, which is worth knowing when writing examples.
 
 ## Wave 2 — the repaired template (amendments 2 and 3 of the preregistration)
