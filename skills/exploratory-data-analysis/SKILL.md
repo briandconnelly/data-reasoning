@@ -129,7 +129,7 @@ Frame-lite then pins the entity and the identifier that resolves it, the sources
 Orient runs as above against those sources, and its absence-semantics rule does the load-bearing work here: for an entity, "no records in this window" and "no activity in this window" are different claims, and only evidence outside the entity's own rows can tell them apart.
 The entity record is the descriptive facts the sources settle about the entity across the framed window, in associational wording.
 A change over time is reported as a change, never as a cause: § Handoff's no-causal-assertions rule binds here exactly as it binds on the explore route.
-Dated sequence is descriptive and belongs in the record — "the plan changed to annual on 2026-02-03; monthly spend fell from March" states two facts the sources settle.
+Dated sequence is descriptive and belongs in the record, and the record names each change as a change with its date — "the plan changed to annual on 2026-02-03; monthly spend fell from March" states two changes the sources settle — rather than leaving a reader to infer a change from the figures on either side of it.
 Attribution is what this route does not make: "spend fell after they moved to the annual plan" reads as one event explaining the other, so the record states the sequence, names the attribution as unresolved, and hands it to `hypothesis-driven-analysis` as a lead when the user wants it settled.
 When the ask names an effect to explain rather than an entity to describe — "why did this account's spend drop" — the `out: adjudicate` row governs and this route does not run.
 

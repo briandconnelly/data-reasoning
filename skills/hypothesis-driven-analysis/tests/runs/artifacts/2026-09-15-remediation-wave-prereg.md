@@ -174,3 +174,37 @@ Debts this wave surfaced, recorded in the catalogs:
 - Without file tools, both skill arms read every data file, attempted a Write they had not been given, and only then fell back to response text.
   The degraded mode's "before any exploration output" is not what an agent does when it discovers tool poverty late; debt against § Degraded Modes as a whole.
 - The S9 fixture is complete by construction; the estimation route's data-validity inheritance on a fixture with a hole is unmeasured.
+
+## Amendment 2 — wave 2, written before any wave-2 arm ran (2026-09-15)
+
+Two row-6 sentences are revised per the owner's decision, developed with Codex (`codex_consult` job `6477673d9b144f4094b5041dac17cf74`) and recorded in the run records' commentary.
+The precedence table, harness, fixtures, and scorer are unchanged.
+
+**Changes under test**
+
+- `decision-analysis/references/decision-record-template.md`: the skeletons now show bare values and exact labels; every instructional suffix moved to a § Slot notes section outside the record, which also states the bare-sentinel rule, the decimal-odds form, the four-cell evidence row with `\|` for an in-cell pipe, and that `derived` is not a provenance class.
+  The degraded-mode sentence in `SKILL.md` § Degraded Modes is unchanged; the template is what the arms copied their annotations from.
+  Reachability: the template is read on every decide and voi route, so every decision-analysis cell reaches it; DA-S1 and DA-S8 are remeasured here, and the rest of the catalog remains unrun as before, now against the new template.
+- `exploratory-data-analysis/SKILL.md` § Profile Route: "the record names each change as a change with its date … rather than leaving a reader to infer a change from the figures on either side of it".
+  Reachability: B10 only (the profile route); B10-nofile reads the same sentence but its added assertions do not score it, so it is not rerun.
+- `decision-analysis/tests/check_decision.py`: escaped-pipe fix (row 2, already applied and rescored); no behavioral wording.
+
+**Cells and arms**
+
+| Cell | Arms run in wave 2 | Carried from wave 1 |
+| --- | --- | --- |
+| DA-S1 | canary post, scored post | baseline, pre (the `main` wording is unchanged, so `da-s1-pre` stands) |
+| DA-S8 | scored post | baseline, pre (`da-s8-pre` stands) |
+| B10 | canary post, scored post | baseline, pre (`b10-pre` stands) |
+
+Carrying a pre arm is licensed by the Iron Law itself: the measured result belongs to the exact wording it was measured against, and `main`'s wording has not moved; each carried manifest's `skill_files_sha256` is the proof.
+Wave-2 arms are named `w2-*`.
+
+**Assertions**: unchanged from the cells' original lists, with DA-S1.5a–e and B10.5a–c scored exactly as written.
+DA-S1.5e now also requires the record to carry a belief-grade `Loss range swept` under a `robust` verdict, or a `loss-sensitive` verdict otherwise — that is § Numeric Policy, and the wave-1 post arm failed it.
+
+**Expected outcomes**: DA-S1 post writes bare sentinels and passes both checkers (5a, 5e), keeps 5b–5d; at risk: an annotation habit that survives the slot notes, or a `sensitivity-only` loss sweep under `robust`.
+DA-S8 post passes 8.1 with the new template and keeps 8.2–8.4.
+B10 post names the volume fall as a change (5b) and keeps 5a and 5c; at risk: the arm selects other changes to name, as the wave-1 arms did.
+
+**Verdict rows**: the same table applies; a cell that lands on row 6 again is dropped from the PR rather than revised a third time, and that outcome is written here before the arms run.
