@@ -148,6 +148,7 @@ def scan(jsonl: Path) -> dict:
                             "ordinal": ordinal,
                             "tool": block.get("name"),
                             "input": json.dumps(inp)[:600],
+                            "input_json": json.dumps(inp),
                         }
                     )
                 elif block.get("type") == "text":
@@ -169,12 +170,21 @@ def scan(jsonl: Path) -> dict:
     }
 
 
+PATH_FIELDS = ("file_path", "path", "command", "pattern", "notebook_path")
+
+
 def contamination(tool_uses: list[dict], staged_skill: Path | None) -> list[str]:
-    """Tool calls that reach outside the staged tree: the repository, any
-    SKILL.md other than the staged one, or any tests/ path."""
+    """Tool calls whose path-bearing fields reach outside the staged tree: the
+    repository, any SKILL.md other than the staged one, or any tests/ path.
+    A Write's `content` is prose the arm produced, not a path it read, so it
+    is not scanned -- a record that mentions "SKILL.md" is not contamination."""
     hits = []
     for tu in tool_uses:
-        text = tu["input"]
+        try:
+            inp = json.loads(tu["input_json"])
+        except (json.JSONDecodeError, KeyError):
+            continue
+        text = " ".join(str(inp.get(k, "")) for k in PATH_FIELDS if inp.get(k))
         if str(REPO) in text:
             hits.append(f"ordinal {tu['ordinal']}: repository path")
         if "SKILL.md" in text and (staged_skill is None or str(staged_skill) not in text):
@@ -182,6 +192,25 @@ def contamination(tool_uses: list[dict], staged_skill: Path | None) -> list[str]
         if "/tests/" in text:
             hits.append(f"ordinal {tu['ordinal']}: a tests/ path")
     return hits
+
+
+def rescan(base: Path) -> int:
+    """Recompute `contaminated` for an archived arm from its transcript and
+    manifest, recording the previous value so the change is visible."""
+    manifest_path = base.with_suffix(".manifest.json")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    info = scan(base.with_suffix(".jsonl"))
+    staged_skill = None
+    if manifest.get("skill"):
+        staged_skill = Path(manifest["staging_root"]) / "skills" / manifest["skill"]
+    hits = contamination(info["tool_uses"], staged_skill)
+    manifest.setdefault("rescans", []).append(
+        {"at_utc": datetime.now(UTC).isoformat(), "previous": manifest["contaminated"], "now": hits}
+    )
+    manifest["contaminated"] = hits
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    print(f"{base.name}: contaminated={hits} (was {manifest['rescans'][-1]['previous']})")
+    return 0
 
 
 def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
@@ -195,10 +224,17 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
     ap.add_argument("--model", default="sonnet")
     ap.add_argument("--timeout", type=int, default=1500)
     ap.add_argument("--tools", default=DEFAULT_TOOLS, help="the built-in tools the arm is given")
+    ap.add_argument(
+        "--rescan",
+        action="store_true",
+        help="do not run; recompute the contamination scan of an archived arm and rewrite it",
+    )
     args = ap.parse_args()
 
     args.out.mkdir(parents=True, exist_ok=True)
     base = args.out / args.name
+    if args.rescan:
+        return rescan(base)
     if base.with_suffix(".jsonl").exists():
         sys.exit(f"refusing to overwrite {base}.jsonl; pick a new --name")
 
@@ -294,7 +330,9 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
             str(p.relative_to(scratch)): sha256_bytes(p.read_bytes()) for p in written
         },
         "contaminated": hits,
-        "tool_uses": info["tool_uses"],
+        "tool_uses": [
+            {k: v for k, v in tu.items() if k != "input_json"} for tu in info["tool_uses"]
+        ],
         "usage": info["usage"],
         "result_text": info["result_text"],
     }

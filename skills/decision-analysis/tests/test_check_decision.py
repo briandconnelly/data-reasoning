@@ -892,12 +892,24 @@ def test_none_supported_lr_row_contributes_no_update():
 # sweep, or a forbidden record passes.
 
 
-def test_no_prior_with_robust_verdict_fails():
-    bad = replace_once(_no_prior_decide(), "- Verdict: prior-sensitive", "- Verdict: robust")
-    bad = replace_once(
-        bad, "- Recommended action: returned to owner", "- Recommended action: hold one week"
+def test_no_prior_with_robust_verdict_needs_no_crossover_in_class():
+    """Canary 2026-09-15: a sweep with no flip inside the swept class is
+    robust under Numeric Policy; the degraded mode defers to it."""
+    rec = replace_once(_no_prior_decide(), "- Verdict: prior-sensitive", "- Verdict: robust")
+    rec = replace_once(
+        rec, "- Recommended action: returned to owner", "- Recommended action: hold one week"
     )
-    assert any("must be 'prior-sensitive'" in f for f in check(bad))
+    # a named flip point inside the class contradicts robust
+    assert any("Crossover" in f for f in check(rec))
+    ok = replace_once(
+        rec, "- Crossover: flips at prior odds 0.025", "- Crossover: none within swept class"
+    )
+    ok = replace_once(
+        ok,
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.05–1.0 — provenance: sensitivity-only",
+    )
+    assert check(ok) == []
 
 
 def test_no_prior_with_loss_sensitive_verdict_fails():

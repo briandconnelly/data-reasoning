@@ -120,3 +120,26 @@ Rationale is process evidence; attribution rests on pre versus post.
 
 Codex reviewed the first draft of this document, the fixtures with their generators and validators, the harness, the checker change, and the changed sentences together, before any arm ran, and said not to run them yet.
 Its ten findings and their dispositions are in `2026-09-15-remediation-wave/design-review.md`; every blocking item was fixed and this document was rewritten before the canaries.
+
+## Amendment 1 — after the canaries, before any scored arm (2026-09-15)
+
+Five canary post arms ran (`canary-s9-post`, `canary-da-s1-post`, `canary-da-s8-post`, `canary-b10-post`, `canary-b10-nofile-post`).
+Each was scored on rationale only, per the canary rule; none enters the scored table.
+
+- **Rationale, every cell: the sentence under test was traversed.** S9 wrote a coverage matrix at the day-by-variant grain, a coverage baseline, completeness semantics, and a confound check on the estimation route; DA-S1 used the `none supported — see Robustness` sentinel, kept the 4.5 ratio, and swept a `sensitivity-only` prior class; DA-S8 wrote "per SKILL.md's rule for this combined case, the verdict slot is prior-sensitive and its Conditions state the loss crossover too"; B10 wrote its Frame-lite before reading billing, cited § Profile Route for taking no reservation, and headed its entity record "dated sequence, no cause assigned"; B10-nofile cited the degraded-mode rule and said its precommitment was only as strong as message order.
+  No fixture is entangled; no cell returns to step 2.
+- **Design defect found by the DA-S1 canary.** Its sweep found no crossover inside the swept prior class, so it returned `robust`, which § Numeric Policy licenses ("a `robust` verdict requires the same action to be preferred across the entire stated prior class") and which the degraded-mode sentence forbade ("the verdict is `prior-sensitive` with that crossover").
+  The two conflicted; the sentence was wrong.
+  § Degraded Modes now defers to § Numeric Policy on the swept class — `robust` when the action holds across it with belief-grade losses and Conditions naming the unsupported prior, otherwise `prior-sensitive` — and `check_decision.py` accepts either label with the sentinel (a `robust` record still owes `none within swept class` and belief-grade losses under the existing gates).
+  The worked example's odds were also corrected: a loss ratio of 3 flips at prior odds 1:3, not 3:1, and a sourced LR of 2 moves that flip to 1:6, outside the example's swept class, making that variant `robust`.
+  **DA-S1.5d is revised accordingly:** Verdict `robust` or `prior-sensitive` as § Numeric Policy decides on the swept class; under `robust`, Conditions names the swept class and says the prior is unsupported and Recommended action names the action; under `prior-sensitive`, Recommended action reads `returned to owner`.
+  DA-S1.5c is unchanged: the prior-odds crossover (≈0.022 at loss ratio 10) is reported either way.
+  The expected outcome for DA-S1 post is now `robust` (the crossover lies far below any plausible swept class); the pre arm is still expected to fail S1.5a–c.
+- **Checker strictness is the catalog's bar, not this wave's.** Both DA canaries failed `check_decision.py` on form — annotated sentinels and labels, `1:49 – 1:4` where the checker parses `0.02–0.25`, a nested Crossover list, `none` for `none supported` in a provenance cell — while their arithmetic and verdict logic were right.
+  DA-S1.1 and DA-S8.1 ("passes `check_decision.py`") are scored as written; a shared pre/post failure there lands on row 7 (pre-existing debt) and does not decide the sentence.
+- **Scoring clarification for B10.3.** The deliverable is the arm's final message.
+  The exploration-log template carries a Leads section, and a profile arm may fill it with unchased observations dispositioned `reported`; that is not "a leads table as the deliverable".
+  B10.3 fails when the final message is a leads table, or is the orientation record alone.
+- **B10.6a boundary is unchanged**, and the canary shows what it will catch: that arm read every data file, attempted a Write it did not have, and only then emitted Frame-lite.
+  Whether the scored post arm does the same decides B10.6a; the canary's result is not carried forward.
+- The contamination scan was corrected between the canaries: it had flagged a Write whose *content* mentioned "SKILL.md"; it now reads only path-bearing fields, and every canary manifest was rescanned with the previous value preserved under `rescans`.

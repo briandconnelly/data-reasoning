@@ -1,0 +1,129 @@
+{
+  "name": "canary-da-s8-post",
+  "started_utc": "2026-09-15T17:47:27.902175+00:00",
+  "duration_s": 192.3,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "e6a81ef1-977f-4fa9-a757-6a627792d8cf",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "43b5ab216a7318f5378931e389084e5b39a7261fb09ac76f58b0551b1033d854",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "c2ecfeba0d9e4d1d57491b2431fa48505eebd2abafdb7e4948cc5e85b8bcd0fb"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "fdb9d549f2a7702bac2baa5b4d3b557791c21fa5b4a3bc8e6c4a6d5b8c62500a",
+  "jsonl_sha256": "484128164eb2e47d3eff855c23e533adbb247eb26d71473198c3c8224671fbec",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn",
+  "files_written": [
+    "decision-record-ship-or-hold.md"
+  ],
+  "files_written_sha256": {
+    "decision-record-ship-or-hold.md": "3b5b9f917b6e776b28651e33cf66a9c0a08c9324ca33b4fa138e64ce4066457c"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn/skills/decision-analysis/references/ 2>/dev/null; ls /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn/\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-da-s8-post-ea0mj7zn/work/decision-record-ship-or-hold.md\", \"content\": \"# Decision Record: ship the 2026-09-12 release (pool change) or hold it past Friday's freeze\\n\\n## Decision frame\\n\\n- Route: decide \\u2014 per SKILL.md \\u00a7 Routing (\\\"the investigation came back UNRESOLVED \\u2014 act or wait\\\" trigger)\\n- Actions: Ship (release the connection-pool change on schedule) vs Hold (delay past Friday's freeze)\\n- Decision owner: release owner / team making the ship-or-hold call\\n- Reversibility: Ship is the harder-to-un"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 42039,
+    "cache_read_input_tokens": 771832,
+    "output_tokens": 17595,
+    "output_tokens_details": {
+      "thinking_tokens": 13062
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 42039,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1004,
+        "cache_read_input_tokens": 196150,
+        "cache_creation_input_tokens": 16148,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 16148
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.49984839999999997,
+    "duration_ms": 191545,
+    "num_turns": 6
+  },
+  "result_text": "## Ship or hold: **prior-sensitive \u2014 returned to you**\n\nI ran this as a full decision record (saved to `work/decision-record-ship-or-hold.md`). Short version:\n\n**The math.** Converting your \"1 in 50 to 1 in 5\" to odds gives a prior of 1:49\u20131:4. The ledger's evidence gives one usable likelihood ratio: the observed 57ms gap (T1), read against the 20-rollout reference class (T3) \u2014 9/10 real regressions showed a >40ms gap, 2/10 non-regressions did, so LR = 4.5. (T1 and T3 are combined into one item, not multiplied separately \u2014 T3 is the interpretation of T1's observation, not independent evidence.) T2, the one test that could have told real regression from exporter artifact apart, never ran \u2014 no raw logs, no likelihood ratio from it. So the update is thin: posterior odds land at **0.092\u20131.125** (roughly **8%\u201353%** probability of a real regression) \u2014 a wide range, because the prior you gave me is wide and the one piece of evidence isn't strong enough to narrow it much.\n\n**The threshold.** Your loss ratio (2\u201320\u00d7) sets a decision threshold of posterior odds 0.05\u20130.5, depending on where in that range the true multiple sits.\n\n**Where it crosses.** Plotting posterior against threshold across both stated ranges:\n- At the *low* end of your prior (near 1-in-50) and *low* end of the loss ratio (near 2\u00d7), **Ship** wins.\n- Almost everywhere else in the stated ranges \u2014 higher prior, or higher loss ratio, or both \u2014 **Hold** wins.\n- Concretely: at prior 1:49, the flip happens at L\u224810.9 (inside your 2\u201320 range). At prior 1:4, Hold wins the *entire* loss range (flip point is 0.89, below your floor). At L=2, the flip happens at prior odds\u22481:9 (inside your prior range). At L=20, Hold wins the *entire* prior range (flip point is 1:90, below your floor).\n\n**Verdict: `prior-sensitive`.** This isn't a case I can close for you \u2014 the record doesn't authorize shipping or holding either way. It comes down to two numbers your team hasn't pinned down: where you actually sit in that 50x-to-5x prior range, and where you actually sit in that 2x-to-20x loss range. If you lean toward the low end on *both*, ship is defensible. If you lean toward the high end on *either*, hold is the safer call \u2014 and given the team already can't agree on the loss number, that uncertainty alone is doing a lot of the work here.\n\n**One flag for the record:** the evidence you have (T1+T3) doesn't distinguish \"real regression\" from \"exporter artifact\" \u2014 both hypotheses predict the same metric-level gap, which is exactly why the ledger left T2 unresolved. If S3 (raw access logs) can be restored before Friday, that's the one pull that could actually move this instead of just having you pick a number on the prior or loss scale.",
+  "rescans": [
+    {
+      "at_utc": "2026-09-15T17:52:53.393642+00:00",
+      "previous": [
+        "ordinal 5: SKILL.md outside the staged skill"
+      ],
+      "now": []
+    }
+  ]
+}

@@ -280,7 +280,9 @@ def check(text: str) -> list[str]:
 
 
 # SKILL.md § Degraded Modes: with no supported prior, Prior odds and Posterior
-# odds read this sentinel and the sweep in Robustness carries the arithmetic;
+# odds read this sentinel, the sweep in Robustness carries the arithmetic, and
+# the verdict follows § Numeric Policy on the swept class (robust or
+# prior-sensitive);
 # an evidence item with no defensible ratio reads `none supported` in its LR
 # and provenance cells with the reason in its source cell, and contributes no
 # update.
@@ -492,10 +494,15 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         # instead, and is handled above), and the swept prior class is
         # sensitivity-only -- a belief-grade sweep would be a prior the
         # record says it does not have.
-        if verdict != "prior-sensitive":
+        # § Degraded Modes defers to § Numeric Policy on the swept class:
+        # robust when the action holds across it (the robust gates below
+        # then require belief-grade losses and a `none within swept class`
+        # crossover), otherwise prior-sensitive. Any other label is a record
+        # claiming a belief it says it does not have.
+        if verdict not in ("prior-sensitive", "robust"):
             failures.append(
                 f"with '- Prior odds' reading {NO_PRIOR!r} the verdict must be "
-                f"'prior-sensitive'; found {verdict!r}"
+                f"'prior-sensitive' or 'robust'; found {verdict!r}"
             )
         swept_text = field(robustness, "Prior class swept:") or ""
         if "sensitivity-only" not in _PROVENANCE_MENTION.findall(swept_text):

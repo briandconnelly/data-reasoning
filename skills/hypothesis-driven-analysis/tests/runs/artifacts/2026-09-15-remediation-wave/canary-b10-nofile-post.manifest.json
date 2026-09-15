@@ -1,0 +1,147 @@
+{
+  "name": "canary-b10-nofile-post",
+  "started_utc": "2026-09-15T17:47:32.650678+00:00",
+  "duration_s": 115.1,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "f6dfdce5-0a8d-4f85-b4f9-5b9ab83bb094",
+  "tools_requested": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "skill": "exploratory-data-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "exploratory-data-analysis/SKILL.md": "f1dd34719b9c202a8330db6586a12511043da6a8c6eb45ff0d280d3c5b7cf9e4",
+    "exploratory-data-analysis/agents/openai.yaml": "313e6976414b962e6030fc5f42fef7cf2381154efa52315f0cd9ef6af3164459",
+    "exploratory-data-analysis/decisions/001-shared-gate-authority.md": "e051b615b96e761c092e42a940921660ab7f9d8e4932a4ff5dd75ec7a71c3a91",
+    "exploratory-data-analysis/decisions/002-the-handoff-contract.md": "3d958108a19fa9629c637d331629e514e65ede5ab07774b7da4cb28d7f6e13fe",
+    "exploratory-data-analysis/decisions/003-entity-profiling-in-scope.md": "9e433e16828c0601db47d7b0c70d59ab8a8fd55b91fd63d0e375835c03f5a0a2",
+    "exploratory-data-analysis/decisions/004-speech-act-governs-entity-profiling-triggering.md": "95f1329c52921b827d4f1f816698757d4158143f82fcaac3b65712478bf09a39",
+    "exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md": "d977c2968ed315b6c7a50027d8de8ffb17746607ff79b1b729584dacda568c1b",
+    "exploratory-data-analysis/decisions/006-description-freeze-until-measured.md": "710db077bff7791661906fdea2185a61d82c779f654492fe84f388939e20c3d3",
+    "exploratory-data-analysis/decisions/007-measurement-claim-binding.md": "bdb43b732fcb79a03724e28b01d1e751fc3ef8fd82e9bf2baa158e87a399cc5a",
+    "exploratory-data-analysis/decisions/008-general-ancestry-rule-deferred.md": "b4bc6f414280a1b4d9d2c0be831f99b903190aed585b2d22ea738b09245a1c82",
+    "exploratory-data-analysis/decisions/README.md": "81e12d1b4c8024d1661cd34254eef47d5ce1aa3cd341ef92f92a70c1a0c37a35",
+    "exploratory-data-analysis/references/exploration-log-template.md": "f17a9e0b58a677a6fdb36c4b6143e106aa406922830729368671dd79ecbc7df5"
+  },
+  "fixture": "skills/exploratory-data-analysis/tests/fixtures/b10-entity",
+  "fixture_files_sha256": {
+    "b10-entity/README.md": "98c8a86a0a7cab5fff3feec86f46a3c5b07209f8c3723c344e7b31ae01172fe8",
+    "b10-entity/accounts.csv": "b9d87e0004f1fd11ec0674796966fdacd6cf333144d59efa7dca125a3c9f173a",
+    "b10-entity/billing.csv": "110bcaed192f8fa31da3391605c78c83c64d18ebe8d16bfc7dc1255042286b20",
+    "b10-entity/contract_status.csv": "e7dc74203cfa5a350bf7cdebc5da1fa4d4689129012ee2bec1333af5e7be34a9",
+    "b10-entity/plan_changes.csv": "bcb6ecb2e2c77e7e0a86d7325ad533f96fe6cd768258dc60d4b3104db9409987",
+    "b10-entity/tickets.csv": "e0ec4290cef9ebdfaf39c66d8336641aac02669db16f7235b2e4ca1469458541"
+  },
+  "prompt_sha256": "54c355295c506482581d0639d916ac7d9ae1153ea022aa32ba248d50fbb4ece4",
+  "jsonl_sha256": "5e962a7c33d25099212f8530551b03d03d7ce4db0a7792f386420bd43b026fdc",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv",
+  "files_written": [],
+  "files_written_sha256": {},
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/skills/exploratory-data-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/skills/exploratory-data-analysis/references/exploration-log-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Glob",
+      "input": "{\"pattern\": \"**/*\", \"path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity/README.md\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity/accounts.csv\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity/billing.csv\"}"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity/tickets.csv\"}"
+    },
+    {
+      "ordinal": 8,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity/contract_status.csv\"}"
+    },
+    {
+      "ordinal": 9,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/data/b10-entity/plan_changes.csv\"}"
+    },
+    {
+      "ordinal": 10,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-nofile-post-9svlxgfv/work/exploration-log.md\", \"content\": \"# Exploration: tell me about the Northgate Clinic account\\n\\n## Frame (Frame-lite, entity profile)\\n\\n- Goal: orientation only \\u2014 the entity's descriptive story across the framed window. No lead-seeking, no chasing.\\n- Scope: entity \\\"Northgate Clinic\\\". Identifier resolution (via accounts.csv) shows this entity spans two account_ids: ACC-1042 (Northgate Clinic, valid 2025-01-01..2026-03-31) and ACC-1077 (Northgate Health Partners, formerly Northgate Cli"
+    }
+  ],
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 307078,
+    "cache_read_input_tokens": 569631,
+    "output_tokens": 10642,
+    "output_tokens_details": {
+      "thinking_tokens": 4340
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 307078,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1932,
+        "cache_read_input_tokens": 189986,
+        "cache_creation_input_tokens": 7195,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 7195
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 1.4499622,
+    "duration_ms": 114434,
+    "num_turns": 11
+  },
+  "result_text": "File-writing tools aren't available in this session, so per the skill's degraded-mode rule I'm emitting the Frame and orientation record as part of this report rather than a separate log file \u2014 the precommitment is only as strong as this message order (Frame stated before the entity findings below).\n\n---\n\n## Frame-lite\n\n- **Goal:** orientation only \u2014 the entity's descriptive story across Jan\u2013Jun 2026. No lead-chasing.\n- **Scope:** entity \"Northgate Clinic.\" Resolving the identifier in `accounts.csv` shows this entity spans **two account IDs**: `ACC-1042` (Northgate Clinic, valid 2025-01-01 \u2192 2026-03-31) and `ACC-1077` (Northgate Health Partners, *formerly Northgate Clinic*, valid from 2026-04-01). Both are treated as one entity's history. Sources: `billing.csv`, `tickets.csv`, `contract_status.csv`, `plan_changes.csv`, `accounts.csv`.\n- **Effort budget:** one full read of each of the 6 files in the directory \u2014 met, all files are small (\u226440 rows).\n- **Stop rule:** stop after one full pass per source; no drill-downs.\n\n## Orientation notes\n\n- `billing.csv`: one row per account per billed month. `contract_status.csv` only covers Jan\u2013May for *every* account (no one has a June row) \u2014 a file-wide gap, not specific to this entity.\n- No duplicates or nulls observed in any file. `plan_changes.csv` is sparse by design (only accounts that changed plans appear).\n- Absence semantics: a missing billing row is read as \"no bill issued,\" but nothing in these files independently confirms *why* \u2014 see the June gap below.\n\n## Northgate Clinic \u2192 Northgate Health Partners: the record\n\n**Identity change:** The account renamed mid-window. `ACC-1042` \"Northgate Clinic\" ends 2026-03-31; `ACC-1077` \"Northgate Health Partners (formerly Northgate Clinic)\" begins 2026-04-01.\n\n**Month by month:**\n\n| Month | Status | Plan | Volume | Amount | Tickets |\n|---|---|---|---|---|---|\n| Jan | active | standard | 1,840 | $772.80 | 1 (feature-request) |\n| Feb | **paused** | \u2014 (no bill) | \u2014 | \u2014 | 0 |\n| Mar | active | enterprise-annual *(changed 03-01)* | 1,910 | $592.10 | 2 (feature-request, integration) |\n| Apr | active (as ACC-1077) | enterprise-annual | 1,120 | $347.20 | 2 (billing-question \u00d72) |\n| May | active | enterprise-annual | 1,085 | $336.35 | 1 (outage-report) |\n| Jun | *no billing row* | \u2014 | \u2014 | \u2014 | 0 |\n\n**Dated sequence (stated as sequence, not cause):**\n1. Feb 2026 \u2014 account paused; no bill issued.\n2. Mar 1, 2026 \u2014 plan changed from standard to enterprise-annual (per `plan_changes.csv`); account reactivated. The enterprise-annual rate here works out to ~$0.31/unit vs. ~$0.42/unit on the Jan standard bill \u2014 consistent with the per-unit rate ACC-1019 also gets on enterprise-annual.\n3. Apr 1, 2026 \u2014 account renamed to Northgate Health Partners under a new ID (ACC-1077).\n4. Billed volume dropped from 1,910 units (Mar) to ~1,100 units/month (Apr\u2013May) and has no recorded bill at all for June.\n\nI'm not attributing the volume drop to the plan change, the rename, or anything else \u2014 the records only establish the sequence, and settling \"why\" is adjudication work outside this profile.\n\n## Two things worth flagging\n\n1. **Data-quality lead:** ACC-1077 has no June 2026 billing row, while the other three ongoing accounts (Riverbend Dental, Summit Orthopedics, Pinecrest Family Practice) all do. Alternatives not distinguished by these files: export lag, a pause/churn not yet reflected here, or a genuine zero-usage month. Cheapest check: look at the billing system or an updated `contract_status.csv` covering June directly.\n2. **Lead for follow-up, not settled here:** billed volume roughly halved from March to April, coinciding with the plan change and rename, and hasn't recovered through May. If you want to know *why*, that's a job for hypothesis-driven analysis \u2014 this profile only establishes that the drop happened and when.",
+  "rescans": [
+    {
+      "at_utc": "2026-09-15T17:52:53.428593+00:00",
+      "previous": [],
+      "now": []
+    }
+  ]
+}
