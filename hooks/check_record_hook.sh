@@ -8,6 +8,27 @@ root="${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT:-}}"
 if command -v python3 >/dev/null 2>&1; then
   exec python3 "${root}/hooks/check_record_hook.py"
 fi
+# Print the first readable .md path on stdin (one per line, relative ones
+# resolved against $1) whose head carries a record title; print nothing else.
+first_record_path() {
+  while IFS= read -r p; do
+    [ -n "$p" ] || continue
+    case "$p" in
+      (*.md) ;;
+      (*) continue ;;
+    esac
+    case "$p" in
+      (/*) full="$p" ;;
+      (*) full="${1:-.}/$p" ;;
+    esac
+    [ -r "$full" ] || continue
+    if head -c 4096 "$full" | grep -q -E '^# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
+      printf '%s\n' "$full"
+      return 0
+    fi
+  done
+  return 0
+}
 payload=$(cat)
 file_path=$(printf '%s' "$payload" | sed -n 's/.*"file_path"[[:space:]]*:[[:space:]]*"\([^"\\]*\)".*/\1/p' | head -n 1)
 if [ -z "$file_path" ]; then
@@ -21,26 +42,15 @@ if [ -z "$file_path" ]; then
   fi
   cwd=$(printf '%s' "$payload" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"\\]*\)".*/\1/p' | head -n 1)
   paths=$(printf '%s' "$payload" | grep -o -E '\*\*\* (Add File|Update File|Move to): [^"\\]*' | sed 's/^\*\*\* [A-Za-z ]*: //')
-  # One path per line: a name with spaces must stay one candidate, so the
-  # loop reads lines rather than word-splitting a command substitution.
-  while IFS= read -r p; do
-    [ -n "$p" ] || continue
-    case "$p" in
-      *.md) ;;
-      *) continue ;;
-    esac
-    case "$p" in
-      /*) full="$p" ;;
-      *) full="${cwd:-.}/$p" ;;
-    esac
-    [ -r "$full" ] || continue
-    if head -c 4096 "$full" | grep -q -E '^# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
-      printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$full" >&2
-      exit 2
-    fi
-  done <<EOF_PATHS
-$paths
-EOF_PATHS
+  # One path per line, read through a pipe: a name with spaces must stay one
+  # candidate, and a here-document would need writable temporary storage,
+  # which a locked-down host may not have. The reader runs in a subshell, so
+  # the first record it finds comes back through the substitution.
+  hit=$(printf '%s\n' "$paths" | first_record_path "$cwd")
+  if [ -n "$hit" ]; then
+    printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$hit" >&2
+    exit 2
+  fi
   if printf '%s' "$payload" | grep -q -E '# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
     printf 'data-reasoning: a record written by apply_patch was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' >&2
     exit 2

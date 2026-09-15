@@ -588,9 +588,11 @@ def _slot_value(section: str, label: str) -> str | None:
 
 
 def _unfilled(value: str) -> bool:
-    """A slot still carrying template state: a placeholder, `...`, or a bare
-    `pending` marker."""
-    return value.strip() == "..." or _has_placeholder(value) or bool(PENDING.match(value.strip()))
+    """A slot or cell still carrying template state: empty, `...`, a
+    placeholder, or a bare `pending` marker -- read through any emphasis or
+    code markers around it, which are presentation only."""
+    v = _normalize(value)
+    return not v or v == "..." or _has_placeholder(v) or bool(PENDING.match(v))
 
 
 def _check_labels(section: str, heading: str, labels, final: bool, findings: list[str]) -> None:
@@ -637,21 +639,47 @@ def _nested_span(section: str, label: str) -> str | None:
     return "\n".join(span)
 
 
+# Header columns each nested table must carry, from the shipped templates.
+# Consequences has a blank corner cell and per-state columns named by the
+# record, so only its width is fixed.
+NESTED_TABLE_COLUMNS = {
+    "Consequences": [],
+    "Evidence": ["item", "lr", "provenance"],
+    "Assumption probes": ["assumption", "probe", "result"],
+    "Threat register": ["threat", "probe", "result"],
+}
+NESTED_TABLE_MIN_WIDTH = {"Consequences": 3}
+
+
 def _check_nested_table(
     section: str, heading: str, label: str, final: bool, findings: list[str]
 ) -> None:
-    """A `- label:` bullet with a table of at least one data row under it; in
-    final mode every cell of that table must be filled."""
+    """A `- label:` bullet with a table under it carrying the template's
+    columns and at least one data row as wide as its header; in final mode
+    every cell of that table must be filled."""
     span = _nested_span(section, label)
     if span is None:
         findings.append(f"{heading}: required '- {label}:' slot is missing")
         return
-    rows = _table_rows(span)[1:]
+    table = _table_rows(span)
+    if not table:
+        findings.append(f"{heading}: '- {label}:' has no table under it")
+        return
+    header, rows = table[0], table[1:]
+    keys = [_header_key(h) for h in header]
+    for col in NESTED_TABLE_COLUMNS.get(label, []):
+        if col not in keys:
+            findings.append(f"{heading}: '- {label}:' table lacks a {col!r} column")
+    width = max(len(header), NESTED_TABLE_MIN_WIDTH.get(label, 0))
     if not rows:
         findings.append(f"{heading}: '- {label}:' has no table rows under it")
         return
-    if final:
-        for i, row in enumerate(rows, 1):
+    for i, row in enumerate(rows, 1):
+        if len(row) < width:
+            findings.append(
+                f"{heading}: '- {label}:' row {i} has {len(row)} cells, header has {width}"
+            )
+        if final:
             for cell in row:
                 if _unfilled(cell):
                     findings.append(

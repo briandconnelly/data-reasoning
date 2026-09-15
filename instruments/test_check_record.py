@@ -1089,9 +1089,7 @@ def test_decision_without_consequences_table_is_caught():
     assert "Consequences" not in rec
     assert any("'- Consequences:' slot is missing" in f for f in cr.check(rec, final=True))
     rec2 = re.sub(r"(- Consequences:\n)\n(  \|.*\n)+", r"\1", GOOD_DECISION)
-    assert any(
-        "'- Consequences:' has no table rows under it" in f for f in cr.check(rec2, final=True)
-    )
+    assert any("'- Consequences:' has no table" in f for f in cr.check(rec2, final=True))
 
 
 def test_decision_without_evidence_table_is_caught():
@@ -1177,3 +1175,56 @@ def test_pending_necessary_prediction_is_caught_in_final_mode():
     assert any(
         "Hypotheses row 1: cell still unfilled: 'pending'" in f for f in cr.check(rec, final=True)
     )
+
+
+# Codex review pass 3: empty cells and `pending` in code spans passed --final;
+# a nested table of any shape satisfied the Evidence requirement.
+
+
+def test_final_mode_rejects_empty_and_formatted_pending_values():
+    assert cr._unfilled("")
+    assert cr._unfilled("`pending`")
+    assert cr._unfilled("**...**")
+    assert not cr._unfilled("`UNRESOLVED`")
+    rec = GOOD_LEDGER.replace("| H1 | causal | UNRESOLVED |", "| H1 | causal | |")
+    assert any("Conclusion: cell still unfilled: ''" in f for f in cr.check(rec, final=True))
+    rec = GOOD_LEDGER.replace("| CONSISTENT |", "| |")
+    assert any("Tests: cell still unfilled: ''" in f for f in cr.check(rec, final=True))
+    rec = GOOD_REVIEW.replace("| slopes within 0.2 |", "| |")
+    assert any(
+        "'- Assumption probes:' row 1 cell still unfilled: ''" in f
+        for f in cr.check(rec, final=True)
+    )
+    rec = GOOD_DECISION.replace(
+        "  | T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+        "  | T1 consistent | | | |",
+    )
+    assert any(
+        "'- Evidence:' row 1 cell still unfilled: ''" in f for f in cr.check(rec, final=True)
+    )
+    rec = GOOD_DECISION.replace(
+        "- Decision owner: the release manager", "- Decision owner: `pending`"
+    )
+    assert cr.check(rec) == []  # a formatted pending marker still means in progress
+    assert any(
+        "'Decision owner' is still unfilled: '`pending`'" in f for f in cr.check(rec, final=True)
+    )
+
+
+def test_nested_tables_need_their_template_columns():
+    rec = GOOD_DECISION.replace(
+        "  | item | LR | provenance | source, reference class, conditioning |",
+        "  | anything | whatever | arbitrary | other |",
+    )
+    findings = cr.check(rec, final=True)
+    assert "## Evidence and update: '- Evidence:' table lacks a 'item' column" in findings
+    assert "## Evidence and update: '- Evidence:' table lacks a 'lr' column" in findings
+    assert "## Evidence and update: '- Evidence:' table lacks a 'provenance' column" in findings
+    rec = GOOD_REVIEW.replace("  | threat | probe | result |", "  | a | b | c |")
+    assert any("'- Threat register:' table lacks a 'threat' column" in f for f in cr.check(rec))
+    rec = GOOD_DECISION.replace(
+        "  | ship | regression ships | on time |", "  | ship | regression ships |"
+    )
+    assert any("'- Consequences:' row 1 has 2 cells, header has 3" in f for f in cr.check(rec))
+    assert cr.check(GOOD_DECISION, final=True) == []
+    assert cr.check(GOOD_REVIEW, final=True) == []
