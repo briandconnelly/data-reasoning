@@ -279,21 +279,35 @@ def check(text: str) -> list[str]:
     return failures
 
 
+# SKILL.md § Degraded Modes: with no supported prior, Prior odds and Posterior
+# odds read this sentinel and the sweep in Robustness carries the arithmetic;
+# an evidence item with no defensible ratio reads `none supported` in its LR
+# and provenance cells with the reason in its source cell, and contributes no
+# update.
+NO_PRIOR = "none supported — see Robustness"
+NO_LR = "none supported"
+
+
 def _check_slot_provenance(
-    slots: tuple[tuple[str, str], ...], sentinel: str | None = None
+    slots: tuple[tuple[str, str], ...], sentinel: str | tuple[str, ...] | None = None
 ) -> list[str]:
     """Require exactly one provenance mention on each ``(label, value)`` slot.
 
-    ``sentinel`` (e.g. ``"none stated"``, ``"none needed"``) is a bare value
-    that is exempt from carrying a provenance class. ``None`` means every
-    slot in ``slots`` always requires exactly one provenance class.
+    ``sentinel`` (e.g. ``"none stated"``, ``"none needed"``, or a tuple of
+    such values) is a bare value that is exempt from carrying a provenance
+    class. ``None`` means every slot in ``slots`` always requires exactly one
+    provenance class.
     """
+    sentinels = (sentinel,) if isinstance(sentinel, str) else (sentinel or ())
     failures: list[str] = []
     for label, value in slots:
-        if sentinel is not None and _bare(value) == sentinel:
-            if value.strip() != sentinel:
+        # A sentinel may itself contain an em dash (NO_PRIOR does), so the
+        # whole stripped value is tried first and the bare value second.
+        hit = next((x for x in sentinels if value.strip() == x or _bare(value) == x), None)
+        if hit is not None:
+            if value.strip() != hit:
                 failures.append(
-                    f"slot '- {label}' sentinel {sentinel!r} must appear bare, "
+                    f"slot '- {label}' sentinel {hit!r} must appear bare, "
                     "with no trailing annotation"
                 )
             continue
@@ -321,8 +335,13 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     )
     failures.extend(
         _check_slot_provenance(
+            (("Prior odds:", field(sections["Evidence and update"], "Prior odds:") or ""),),
+            ("none needed", NO_PRIOR),
+        )
+    )
+    failures.extend(
+        _check_slot_provenance(
             (
-                ("Prior odds:", field(sections["Evidence and update"], "Prior odds:") or ""),
                 (
                     "Prior class swept:",
                     field(sections["Robustness"], "Prior class swept:") or "",
@@ -456,9 +475,22 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     robustness = sections["Robustness"]
     frame = sections["Decision frame"]
 
-    prior = parse_range(_bare(field(evidence, "Prior odds:") or ""))
-    if prior is None or prior[0] <= 0:
-        failures.append("Prior odds must parse as a positive number or ordered range")
+    prior_text = (field(evidence, "Prior odds:") or "").strip()
+    # SKILL.md § Degraded Modes: the sentinel must be bare (it carries its own
+    # em dash, so it is matched whole, then by its bare prefix), and Posterior
+    # odds must carry the same sentinel -- a number there would be an update
+    # the record says it cannot support.
+    no_prior = prior_text == NO_PRIOR or _bare(prior_text) == _bare(NO_PRIOR)
+    prior = None
+    if no_prior:
+        if prior_text != NO_PRIOR:
+            failures.append(
+                f"'- Prior odds' sentinel {NO_PRIOR!r} must appear bare, with no annotation"
+            )
+    else:
+        prior = parse_range(_bare(prior_text))
+        if prior is None or prior[0] <= 0:
+            failures.append("Prior odds must parse as a positive number or ordered range")
 
     lr_product: tuple[float, float] | None = (1.0, 1.0)
     data = _data_rows(_table_rows(evidence))
@@ -469,6 +501,19 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         if len(row) != _EVIDENCE_ROW_CELLS:
             failures.append(f"Evidence row has {len(row)} cells; the template requires exactly 4")
             lr_product = None
+            continue
+        if row[1].strip() == NO_LR:
+            # An item with no defensible ratio: no update from it, provenance
+            # cell carries the same sentinel, source cell carries the reason.
+            if row[2].strip() != NO_LR:
+                failures.append(
+                    f"Evidence row {row[0]!r} has LR {NO_LR!r}; its provenance cell must read "
+                    f"{NO_LR!r} too, found {row[2]!r}"
+                )
+            if not row[3].strip():
+                failures.append(
+                    f"Evidence row {row[0]!r} has LR {NO_LR!r} but no reason in its source cell"
+                )
             continue
         lr = parse_range(row[1])
         if lr is None or lr[0] <= 0:
@@ -484,10 +529,19 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                 "reference class, conditioning cell"
             )
 
-    posterior_value = _bare(field(evidence, "Posterior odds:") or "")
-    posterior = parse_range(posterior_value)
-    if posterior is None:
-        failures.append("Posterior odds must parse as a number or ordered range")
+    posterior_text = (field(evidence, "Posterior odds:") or "").strip()
+    posterior_value = _bare(posterior_text)
+    posterior = None
+    if no_prior:
+        if posterior_text != NO_PRIOR:
+            failures.append(
+                f"with '- Prior odds' reading {NO_PRIOR!r}, '- Posterior odds' must read the "
+                f"same sentinel bare; found {posterior_text!r}"
+            )
+    else:
+        posterior = parse_range(posterior_value)
+        if posterior is None:
+            failures.append("Posterior odds must parse as a number or ordered range")
 
     if prior and posterior and lr_product:
         low = prior[0] * lr_product[0]

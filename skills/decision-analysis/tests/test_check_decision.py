@@ -808,3 +808,81 @@ def test_sensitive_recommended_action_must_return_to_owner():
         "- Crossover: flips at loss ratio 12",
     )
     assert any("returned to owner" in msg for msg in check(bad))
+
+
+# SKILL.md § Degraded Modes (2026-09-15): no supported prior. Prior odds and
+# Posterior odds carry the sentinel, the sweep in Robustness carries the
+# arithmetic, and an item with no defensible ratio reads `none supported`.
+
+
+def _no_prior_decide() -> str:
+    text = replace_once(
+        VALID_DECIDE,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Prior odds: none supported — see Robustness",
+    )
+    text = replace_once(
+        text, "- Posterior odds: 0.75–5.0", "- Posterior odds: none supported — see Robustness"
+    )
+    text = replace_once(
+        text,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+    )
+    text = replace_once(
+        text, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.025"
+    )
+    text = replace_once(text, "- Verdict: robust", "- Verdict: prior-sensitive")
+    text = replace_once(
+        text, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    return text
+
+
+def test_no_supported_prior_record_passes():
+    assert check(_no_prior_decide()) == []
+
+
+def test_no_prior_sentinel_must_be_bare():
+    bad = replace_once(
+        _no_prior_decide(),
+        "- Prior odds: none supported — see Robustness",
+        "- Prior odds: none supported — see Robustness — provenance: sensitivity-only",
+    )
+    assert any("must appear bare" in f for f in check(bad))
+
+
+def test_no_prior_with_numeric_posterior_fails():
+    bad = replace_once(
+        _no_prior_decide(),
+        "- Posterior odds: none supported — see Robustness",
+        "- Posterior odds: 2.0",
+    )
+    assert any("must read the same sentinel" in f for f in check(bad))
+
+
+def test_no_prior_crossover_still_checked_against_threshold_and_lr():
+    bad = replace_once(
+        _no_prior_decide(),
+        "- Crossover: flips at prior odds 0.025",
+        "- Crossover: flips at prior odds 0.5",
+    )
+    assert check(bad) != []
+
+
+def test_none_supported_lr_row_contributes_no_update():
+    text = replace_once(
+        _no_prior_decide(),
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |\n"
+        "  | T2 not run | none supported | none supported | raw logs not acquired; no ratio defensible |",
+    )
+    assert check(text) == []
+    bad = replace_once(
+        text,
+        "| none supported | none supported | raw logs",
+        "| none supported | sensitivity-only | raw logs",
+    )
+    assert any("provenance cell must read" in f for f in check(bad))
+    bad = replace_once(text, "| raw logs not acquired; no ratio defensible |", "| |")
+    assert any("no reason in its source cell" in f for f in check(bad))

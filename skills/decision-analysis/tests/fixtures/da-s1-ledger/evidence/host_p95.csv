@@ -1,0 +1,13 @@
+host,arm,p95_ms
+api-canary-01,canary,465.3
+api-canary-02,canary,475.9
+api-canary-03,canary,470.5
+api-canary-04,canary,461.3
+api-canary-05,canary,478.7
+api-canary-06,canary,461.4
+api-ctl-01,control,409.3
+api-ctl-02,control,391.8
+api-ctl-03,control,426.9
+api-ctl-04,control,418.0
+api-ctl-05,control,403.4
+api-ctl-06,control,407.2
