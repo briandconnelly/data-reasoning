@@ -29,9 +29,12 @@ hooks = [
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
 rev = "v0.15.21"
+# Arms write Python into tests/runs/artifacts/*.scratch/; those files are
+# frozen evidence whose sha256 the arm's manifest records, so the ruff hooks
+# carry the same tests/runs exclude as the byte-mutating builtins above.
 hooks = [
-  { id = "ruff-check", args = ["--fix"] },
-  { id = "ruff-format" },
+  { id = "ruff-check", args = ["--fix"], exclude = '^(.*/)?tests/runs/.*$' },
+  { id = "ruff-format", exclude = '^(.*/)?tests/runs/.*$' },
 ]
 
 [[repos]]
