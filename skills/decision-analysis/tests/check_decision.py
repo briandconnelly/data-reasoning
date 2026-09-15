@@ -286,17 +286,6 @@ def check(text: str) -> list[str]:
     return failures
 
 
-# SKILL.md § Degraded Modes: with no supported prior, Prior odds and Posterior
-# odds read this sentinel, the sweep in Robustness carries the arithmetic, and
-# the verdict follows § Numeric Policy on the swept class (robust or
-# prior-sensitive);
-# an evidence item with no defensible ratio reads `none supported` in its LR
-# and provenance cells with the reason in its source cell, and contributes no
-# update.
-NO_PRIOR = "none supported — see Robustness"
-NO_LR = "none supported"
-
-
 def _check_slot_provenance(
     slots: tuple[tuple[str, str], ...], sentinel: str | tuple[str, ...] | None = None
 ) -> list[str]:
@@ -310,8 +299,8 @@ def _check_slot_provenance(
     sentinels = (sentinel,) if isinstance(sentinel, str) else (sentinel or ())
     failures: list[str] = []
     for label, value in slots:
-        # A sentinel may itself contain an em dash (NO_PRIOR does), so the
-        # whole stripped value is tried first and the bare value second.
+        # A sentinel may itself contain an em dash, so the whole stripped value
+        # is tried first and the bare value second.
         hit = next((x for x in sentinels if value.strip() == x or _bare(value) == x), None)
         if hit is not None:
             if value.strip() != hit:
@@ -345,7 +334,7 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     failures.extend(
         _check_slot_provenance(
             (("Prior odds:", field(sections["Evidence and update"], "Prior odds:") or ""),),
-            ("none needed", NO_PRIOR),
+            "none needed",
         )
     )
     failures.extend(
@@ -484,43 +473,9 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     robustness = sections["Robustness"]
     frame = sections["Decision frame"]
 
-    prior_text = (field(evidence, "Prior odds:") or "").strip()
-    # SKILL.md § Degraded Modes: the sentinel must be bare (it carries its own
-    # em dash, so it is matched whole, then by its bare prefix), and Posterior
-    # odds must carry the same sentinel -- a number there would be an update
-    # the record says it cannot support.
-    no_prior = prior_text == NO_PRIOR or _bare(prior_text) == _bare(NO_PRIOR)
-    prior = None
-    if no_prior:
-        if prior_text != NO_PRIOR:
-            failures.append(
-                f"'- Prior odds' sentinel {NO_PRIOR!r} must appear bare, with no annotation"
-            )
-        # The degraded mode couples the sentinel to its verdict and sweep:
-        # the verdict is prior-sensitive (dominated carries `none needed`
-        # instead, and is handled above), and the swept prior class is
-        # sensitivity-only -- a belief-grade sweep would be a prior the
-        # record says it does not have.
-        # § Degraded Modes defers to § Numeric Policy on the swept class:
-        # robust when the action holds across it (the robust gates below
-        # then require belief-grade losses and a `none within swept class`
-        # crossover), otherwise prior-sensitive. Any other label is a record
-        # claiming a belief it says it does not have.
-        if verdict not in ("prior-sensitive", "robust"):
-            failures.append(
-                f"with '- Prior odds' reading {NO_PRIOR!r} the verdict must be "
-                f"'prior-sensitive' or 'robust'; found {verdict!r}"
-            )
-        swept_text = field(robustness, "Prior class swept:") or ""
-        if "sensitivity-only" not in _PROVENANCE_MENTION.findall(swept_text):
-            failures.append(
-                f"with '- Prior odds' reading {NO_PRIOR!r}, '- Prior class swept' must carry "
-                f"provenance 'sensitivity-only'; found {swept_text!r}"
-            )
-    else:
-        prior = parse_range(_bare(prior_text))
-        if prior is None or prior[0] <= 0:
-            failures.append("Prior odds must parse as a positive number or ordered range")
+    prior = parse_range(_bare(field(evidence, "Prior odds:") or ""))
+    if prior is None or prior[0] <= 0:
+        failures.append("Prior odds must parse as a positive number or ordered range")
 
     lr_product: tuple[float, float] | None = (1.0, 1.0)
     data = _data_rows(_table_rows(evidence))
@@ -531,19 +486,6 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         if len(row) != _EVIDENCE_ROW_CELLS:
             failures.append(f"Evidence row has {len(row)} cells; the template requires exactly 4")
             lr_product = None
-            continue
-        if row[1].strip() == NO_LR:
-            # An item with no defensible ratio: no update from it, provenance
-            # cell carries the same sentinel, source cell carries the reason.
-            if row[2].strip() != NO_LR:
-                failures.append(
-                    f"Evidence row {row[0]!r} has LR {NO_LR!r}; its provenance cell must read "
-                    f"{NO_LR!r} too, found {row[2]!r}"
-                )
-            if not row[3].strip():
-                failures.append(
-                    f"Evidence row {row[0]!r} has LR {NO_LR!r} but no reason in its source cell"
-                )
             continue
         lr = parse_range(row[1])
         if lr is None or lr[0] <= 0:
@@ -559,19 +501,10 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                 "reference class, conditioning cell"
             )
 
-    posterior_text = (field(evidence, "Posterior odds:") or "").strip()
-    posterior_value = _bare(posterior_text)
-    posterior = None
-    if no_prior:
-        if posterior_text != NO_PRIOR:
-            failures.append(
-                f"with '- Prior odds' reading {NO_PRIOR!r}, '- Posterior odds' must read the "
-                f"same sentinel bare; found {posterior_text!r}"
-            )
-    else:
-        posterior = parse_range(posterior_value)
-        if posterior is None:
-            failures.append("Posterior odds must parse as a number or ordered range")
+    posterior_value = _bare(field(evidence, "Posterior odds:") or "")
+    posterior = parse_range(posterior_value)
+    if posterior is None:
+        failures.append("Posterior odds must parse as a number or ordered range")
 
     if prior and posterior and lr_product:
         low = prior[0] * lr_product[0]
@@ -610,10 +543,26 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             threshold = None
 
     if threshold and lr_product and swept and verdict in {"robust", "prior-sensitive"}:
-        cross_low = threshold[0] / lr_product[1]
-        cross_high = threshold[1] / lr_product[0]
+        # The prior-odds crossover interval: the action flips where posterior
+        # odds meet the decision threshold, so prior odds = threshold / LR.
+        # § Robustness sweeps the loss range too, and 1 / loss ratio is the
+        # threshold each swept loss implies, so the interval spans both the
+        # stated threshold and the swept losses. One interval serves the
+        # intersection gate and the stated-crossover check alike.
+        thr_lo, thr_hi = threshold
+        loss_swept = parse_range(_bare(field(robustness, "Loss range swept:") or ""))
+        if loss_swept and loss_swept[0] > 0:
+            thr_lo = min(thr_lo, 1 / loss_swept[1])
+            thr_hi = max(thr_hi, 1 / loss_swept[0])
+        cross_low = thr_lo / lr_product[1]
+        cross_high = thr_hi / lr_product[0]
         intersects = cross_low <= swept[1] * (1 + _REL_TOLERANCE) and cross_high >= swept[0] * (
             1 - _REL_TOLERANCE
+        )
+        numbers = [float(n) for n in re.findall(r"\d+(?:\.\d+)?", crossover_text)]
+        stated_in_interval = bool(numbers) and all(
+            cross_low * (1 - _REL_TOLERANCE) <= n <= cross_high * (1 + _REL_TOLERANCE)
+            for n in numbers
         )
         if verdict == "robust":
             if intersects:
@@ -621,51 +570,26 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                     f"robust verdict, but the computed prior-odds crossover "
                     f"[{cross_low:g}, {cross_high:g}] lies inside the swept prior class"
                 )
-            # SKILL.md § Robustness asks for the crossover statement and
-            # § Degraded Modes says to report where the action flips, so a
-            # robust record may name the flip point that lies outside the
-            # swept class -- checked against the computed interval -- or
-            # carry the sentinel. Prose around the number is still rejected
-            # by the slot rules; here only the number is judged.
-            # The flip point may be stated across the swept loss range, not
-            # only at the Decision threshold slot's odds: § Robustness sweeps
-            # both, so the accepted interval spans the thresholds the swept
-            # loss range implies (1 / loss ratio) as well as the stated one.
-            loss_swept = parse_range(_bare(field(robustness, "Loss range swept:") or ""))
-            thr_lo, thr_hi = threshold
-            if loss_swept and loss_swept[0] > 0:
-                thr_lo = min(thr_lo, 1 / loss_swept[1])
-                thr_hi = max(thr_hi, 1 / loss_swept[0])
-            flip_lo = thr_lo / lr_product[1]
-            flip_hi = thr_hi / lr_product[0]
-            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
-            names_flip = bool(numbers) and (
-                flip_lo * (1 - _REL_TOLERANCE)
-                <= float(numbers[0])
-                <= flip_hi * (1 + _REL_TOLERANCE)
-            )
-            if crossover_text != "none within swept class" and not names_flip:
+            # § Robustness asks for the crossover statement, so a robust record
+            # may name the flip point outside the swept class -- every number
+            # it states must lie in the computed interval -- or carry the
+            # sentinel.
+            if crossover_text != "none within swept class" and not stated_in_interval:
                 failures.append(
                     "a robust verdict requires Crossover 'none within swept class' or the "
-                    f"flip point outside the swept class (computed [{flip_lo:g}, "
-                    f"{flip_hi:g}]); found {crossover_text!r}"
+                    f"flip point outside the swept class (computed [{cross_low:g}, "
+                    f"{cross_high:g}]); found {crossover_text!r}"
                 )
-        else:
-            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
-            if not intersects:
-                failures.append(
-                    "prior-sensitive verdict, but the computed crossover "
-                    f"[{cross_low:g}, {cross_high:g}] does not intersect the swept prior class"
-                )
-            elif not numbers or not (
-                cross_low * (1 - _REL_TOLERANCE)
-                <= float(numbers[0])
-                <= cross_high * (1 + _REL_TOLERANCE)
-            ):
-                failures.append(
-                    f"prior-sensitive crossover {crossover_text!r} does not fall in the "
-                    f"computed interval [{cross_low:g}, {cross_high:g}]"
-                )
+        elif not intersects:
+            failures.append(
+                "prior-sensitive verdict, but the computed crossover "
+                f"[{cross_low:g}, {cross_high:g}] does not intersect the swept prior class"
+            )
+        elif not stated_in_interval:
+            failures.append(
+                f"prior-sensitive crossover {crossover_text!r} does not fall in the "
+                f"computed interval [{cross_low:g}, {cross_high:g}]"
+            )
     else:
         if verdict == "robust" and crossover_text != "none within swept class":
             failures.append(

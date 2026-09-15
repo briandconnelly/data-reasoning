@@ -86,25 +86,26 @@ It does not recommend or prescribe which route a receiving skill takes.
 
 ## Slot notes
 
-These notes are read once and never copied into a record; a record carries the label, the value, and — where the skeleton shows one — a single ` — provenance: <class>` suffix, and nothing else on the line.
+These notes are read once and never copied into a record.
+They describe how a value is written; what a value means, which values exist, and when each applies are `../SKILL.md`'s to state (§ Routing, § Numeric Policy, § The Decide Route, § The VoI Route).
+
+A decide-record line carries the label, the value, and — where the skeleton shows one — a single ` — provenance: <class>` suffix, and nothing else.
+Explanation goes in the Conditions slot, the Handoff block, or the report, not after the value; a value followed by a parenthesis, a dash, or a clause is a different value.
 
 Labels are copied exactly as the skeleton spells them, colon included.
 A relabelled slot (`Proposition (H1):`, `Consequences (units: …):`) is a missing slot to every checker.
 
-A value stands bare.
-Explanation goes in the Conditions slot, the Handoff block, or the report, not after the value; a value followed by a parenthesis, a dash, or a clause is a different value.
-
 Numeric slots — Loss ratio, Decision threshold, Prior odds, Posterior odds, Prior class swept, Loss range swept, and the LR cell — take a single number or a `<low>–<high>` range with low ≤ high, written as decimals: `0.02–0.2`, not `1:49 to 1:4`; `4.5`, not `4.5 (= 0.9/0.2)`.
 Odds and likelihood ratios are positive.
 
-Provenance is exactly one class from `../SKILL.md` § Numeric Policy, on the slots the skeleton marks and in the evidence table's provenance cell.
+Provenance is exactly one class from `../SKILL.md` § Numeric Policy on the decide slots the skeleton marks and in the evidence table's provenance cell.
 `derived` is not a class; a threshold derived from an elicited loss ratio carries the loss ratio's class.
 
 Sentinels replace the whole value and appear bare, with no suffix and no provenance.
-They are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover, under a `dominated` verdict); `none supported — see Robustness` (Prior odds and Posterior odds, under `../SKILL.md` § Degraded Modes); `none within swept class` (Crossover, under `robust`, when the record does not name the flip point that lies outside the class); `single item` (Independence); `returned to owner` (Recommended action, under a sensitive verdict); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+The decide record's sentinels are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover, under a `dominated` verdict); `none within swept class` (Crossover, under `robust`, when the record does not name the flip point that lies outside the class); `single item` (Independence); `returned to owner` (Recommended action, under a sensitive verdict); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+Which verdict each sentinel goes with, and what Recommended action names under each verdict, is `../SKILL.md` § The Decide Route's to say.
 
 The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
-An item with no defensible ratio reads `none supported` in both its LR and provenance cells with the reason in its source cell (`../SKILL.md` § Degraded Modes).
 
-Value sets: Route per `../SKILL.md` § Routing; Claim class, Verdict, and Recommended action per `../SKILL.md` § The Decide Route; the VoI slots per `../SKILL.md` § The VoI Route.
-A Recommended action names one of the two actions in the Actions slot's own words under `robust` and `dominated`.
+The VoI record's slots are not bare-value slots: `../SKILL.md` § The VoI Route says what each carries, including which VoI numbers carry a provenance class and where a missing input's explanation goes (the Value calculation slot, whose continuation paragraphs may follow the line).
+Those rules are not restated here.

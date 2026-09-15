@@ -37,7 +37,7 @@ Three pieces of evidence are owed and not started, named here so the gap is not 
 - Measured simplification experiments: the checkers below preserve wording and provenance, but nothing yet establishes whether each accumulated rule still earns its context cost.
 
 The skill wording this remediation changed was measured on 2026-09-15 on the cells that reach it, with a baseline arm, a pre-edit arm, and a post-edit arm per cell (`skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` § Results).
-Two sentences reached behavior — the estimation route's data-validity inheritance, and (after one revision and a second wave) the profile route's rule that a record names each change with its date; the decision-analysis degraded mode reached behavior on its own content once the record template stopped inviting annotations, with one shared Numeric Policy failure left as debt; two sentences did not change behavior against the pre-edit skill at n=1 and stay as clarifications carrying no measured claim.
+Two sentences reached behavior — the estimation route's data-validity inheritance, and (after one revision and a second wave) the profile route's rule that a record names each change with its date; two sentences did not change behavior against the pre-edit skill at n=1 and stay as clarifications carrying no measured claim; the decision-analysis degraded mode for a missing prior failed its preregistered condition and was withdrawn, so the review's finding 7 remains owed.
 The run records say which is which, with the owner's decision on each.
 
 The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.

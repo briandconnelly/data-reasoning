@@ -1228,3 +1228,21 @@ def test_nested_tables_need_their_template_columns():
     assert any("'- Consequences:' row 1 has 2 cells, header has 3" in f for f in cr.check(rec))
     assert cr.check(GOOD_DECISION, final=True) == []
     assert cr.check(GOOD_REVIEW, final=True) == []
+
+
+def test_evidence_table_needs_its_source_column():
+    """Final review 2026-09-15: a record could drop the whole source column."""
+    rec = GOOD_DECISION.replace(
+        "  | item | LR | provenance | source, reference class, conditioning |",
+        "  | item | LR | provenance |",
+    ).replace(
+        "  | --- | --- | --- | --- |\n  | T1 consistent", "  | --- | --- | --- |\n  | T1 consistent"
+    )
+    rec = rec.replace(
+        "  | T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+        "  | T1 consistent | 2 | estimated-from-data-in-hand |",
+    )
+    assert any(
+        "'- Evidence:' table lacks a 'source, reference class, conditioning' column" in f
+        for f in cr.check(rec, final=True)
+    )

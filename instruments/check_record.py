@@ -644,7 +644,7 @@ def _nested_span(section: str, label: str) -> str | None:
 # record, so only its width is fixed.
 NESTED_TABLE_COLUMNS = {
     "Consequences": [],
-    "Evidence": ["item", "lr", "provenance"],
+    "Evidence": ["item", "lr", "provenance", "source, reference class, conditioning"],
     "Assumption probes": ["assumption", "probe", "result"],
     "Threat register": ["threat", "probe", "result"],
 }

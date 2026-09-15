@@ -154,7 +154,7 @@ Row 2 fired once, after scoring: cross-model review found the decision checker s
 | --- | --- | --- | --- | --- | --- |
 | S9 | Estimation route inherits coverage and completeness obligations | pre fails S9.4b, post passes S9.4a–b | **4 — reaches behavior** | none | yes (S9.1) |
 | DA-S1 | No-supported-prior degraded mode | pre invents a `sensitivity-only` prior in Evidence and update; post uses the sentinel but annotates it (5a fails on form); 5b–5d both pass; 5e both fail on the checker | **6 on form, 5 on substance** | none | yes |
-| DA-S8 | Verdict precedence when both sensitivities fire | pre and post both `prior-sensitive` with the loss crossover in Conditions | **5 — not needed** | none | yes |
+| DA-S8 | Verdict precedence when both sensitivities fire | pre and post both `prior-sensitive` with the loss crossover in Conditions; post fails 8.2 by reading the prior as probabilities (corrected on final review; first scored PASS) | **3 — regression on 8.2** at wave 1; superseded by wave 2 | on 8.2 | yes |
 | B10 | Profile route: dated sequence recorded, attribution unresolved | 5a and 5c both pass; 5b both fail (neither names the volume fall as a change) | **5 on 5a/5c, 6 on 5b** | none | yes (B10.1, B10.3, B10.4) |
 | B10-nofile | Degraded mode names Frame-lite | 6b and 6c both pass; 6a both fail (frame emitted after every data read and a failed Write) | **5 on 6b/6c; 6a is shared debt** | none | — |
 
@@ -233,3 +233,14 @@ No arm was void or contaminated; row 2 fired once between the canary and the sco
 The wave-1 row for B10 is superseded by wave 2; the wave-1 rows for S9, DA-S8, and B10-nofile stand.
 
 Debts added by wave 2: a rounded user-elicited loss ("roughly ten") is extended into a `sensitivity-only` range and still called `robust` by three of four skill arms; the Crossover slot has no form for the two crossovers a `prior-sensitive` record must state.
+
+## Final disposition (2026-09-15, after the final cross-model review)
+
+The final review (`codex_review_changes` job `f505e41684c948e28b6e640cf8252d52`) adjudicated the open row question against the scorer: row 6 applies to DA-S1, because the degraded-mode sentence itself conditions `robust` on belief-grade losses and amendment 2 wrote that condition into 5e before the arm ran.
+Per amendment 2 the degraded-mode change is dropped from the PR: the § Degraded Modes bullet, the template sentinel and evidence-row form, and the checker branches for them.
+The measurement stands in the DA run record as what it showed.
+The review also corrected the wave-1 DA-S8 score (8.2 was a FAIL for the post arm, a row-3 regression at wave 1, superseded by wave 2), found the checker's expanded crossover acceptance used a narrower interval for its intersection gate than for its acceptance (fixed: one interval, every stated number checked), found the structural validator's Evidence schema omitted the source column (fixed with a test), and found the template's slot notes reached into VoI slots and paraphrased two normative rules (fixed: decide-scoped, pointers).
+
+What ships as measured: the S9 estimation-route sentence (row 4) and the revised B10 profile-route sentence (row 4).
+What ships as a clarification carrying no measured claim, by the owner's decision: the DA precedence paragraph and the Frame-lite naming (row 5).
+What is withdrawn: the DA degraded mode (row 6); the external review's finding 7 is recorded as owed.
