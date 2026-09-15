@@ -17,10 +17,13 @@ def test_hooks_json_shape():
     assert entry["matcher"] == "Write|Edit"
     hook = entry["hooks"][0]
     assert hook["type"] == "command"
-    assert "${CLAUDE_PLUGIN_ROOT}" in hook["command"]
+    # Claude Code exports CLAUDE_PLUGIN_ROOT, Codex exports PLUGIN_ROOT; the
+    # command must resolve under either host.
+    assert "${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT}}" in hook["command"]
     assert "check_record_hook.sh" in hook["command"]
 
 
-def test_plugin_manifest_declares_hooks():
-    manifest = json.loads((REPO / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
-    assert manifest["hooks"] == "./hooks/hooks.json"
+def test_plugin_manifests_declare_hooks():
+    for manifest_dir in (".claude-plugin", ".codex-plugin"):
+        manifest = json.loads((REPO / manifest_dir / "plugin.json").read_text(encoding="utf-8"))
+        assert manifest["hooks"] == "./hooks/hooks.json", manifest_dir

@@ -1,16 +1,17 @@
 name: prek
 
+# Pull requests only: on a push to main the same hooks run as the `checks` job
+# of release-branch.yml, where the publish job depends on them. Running them
+# here as well would be a second, unconnected green light.
 on:
   pull_request:
-  push:
-    branches: [main]
 
 permissions:
   contents: read
 
 concurrency:
   group: prek-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 jobs:
   prek:

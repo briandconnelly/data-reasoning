@@ -52,6 +52,9 @@ GOOD_LEDGER = """\
 ## Data Validity
 
 - Collection method: exporter
+- Coverage matrix: hour x route, 3.9k-4.4k rows per cell
+- Coverage baseline: deploy schedule
+- Source completeness semantics: S1 — event unrecorded; export manifest
 
 ## Tests
 
@@ -67,13 +70,35 @@ GOOD_LEDGER = """\
 ## Conclusion
 
 - Answer: unresolved
+- Best supported: H1, on T1
 - Per-hypothesis summary:
 
   | id | claim | status | basis |
   | --- | --- | --- | --- |
   | H1 | causal | UNRESOLVED | best supported; T1 consistent |
   | H2 | data-artifact | UNRESOLVED | not tested |
+
+- Limitations: T2 not run
 """
+
+
+DATA_VALIDITY = (
+    "## Data Validity\n\n- Collection method: exporter\n"
+    "- Coverage matrix: hour x route, 3.9k-4.4k rows per cell\n"
+    "- Coverage baseline: deploy schedule\n"
+    "- Source completeness semantics: S1 — event unrecorded; export manifest\n\n"
+)
+CONCLUSION_BODY = (
+    "- Answer: unresolved\n- Best supported: H1, on T1\n- Per-hypothesis summary:\n\n"
+    "  | id | claim | status | basis |\n  | --- | --- | --- | --- |\n"
+    "  | H1 | causal | UNRESOLVED | best supported; T1 consistent |\n"
+    "  | H2 | data-artifact | UNRESOLVED | not tested |\n\n- Limitations: T2 not run\n"
+)
+VOI_SLOTS = (
+    "- Route: voi\n- Pending decision: ship vs wait\n- Signal model: a 2-week holdout\n"
+    "- Value basis: expected loss avoided\n- Value calculation: 0.4 x 3 = 1.2\n"
+    "- Upper bound: 1.5\n- Cost: 1.0\n"
+)
 
 
 def test_good_ledger_passes():
@@ -82,7 +107,9 @@ def test_good_ledger_passes():
 
 
 def test_voi_upper_bound_only_verdict_is_accepted():
-    record = "# VoI Record: price unknown\n\n## VoI\n\n- Verdict: upper-bound-only\n"
+    record = (
+        "# VoI Record: price unknown\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: upper-bound-only\n"
+    )
     assert cr.check(record) == []
 
 
@@ -179,6 +206,9 @@ GOOD_REVIEW = """\
 
 ## Question
 
+- Causal question, restated as a counterfactual contrast: would depot throughput differ had the pilot not run
+- Estimand: ATT on weekly throughput
+- Assignment mechanism as stated: "the three largest depots were chosen" — ops memo
 - Route: review
 
 ## Design: pilot-vs-rest difference-in-differences
@@ -187,6 +217,8 @@ GOOD_REVIEW = """\
 
 ## Handoff
 
+- Facts: pre-trend probe run, slopes within 0.2
+- Assumptions: parallel trends absent the pilot
 - Dispositions: identified-if
 """
 
@@ -206,27 +238,46 @@ GOOD_DECISION = """\
 
 ## Decision frame
 
+- Route: decide
 - Actions: ship vs wait
+- Decision owner: the release manager
+- Reversibility: a shipped build can be rolled back in an hour
+- Deadline or forcing event: Friday release train
+- Loss ratio: 3 — provenance: user-elicited
+- Decision threshold (posterior odds): 3:1 — provenance: user-elicited
 
 ## Decision-state model
 
 - Proposition: p
+- Residual reading: not-p, including causes nobody named
+- Claim class: descriptive (estimand: p95 latency)
+- Identification basis: NONE
+- Identification conditions: none
+- Ledger mapping: none
 
 ## Evidence and update
 
 - Prior odds: 1:1 — provenance: sensitivity-only
+- Independence: single item
+- Posterior odds: 2:1
 
 ## Robustness
 
+- Prior class swept: 1:3 to 3:1
+- Loss range swept: 1 to 5
 - Crossover: none within swept class
 
 ## Verdict
 
 - Verdict: prior-sensitive — crossover at 3:1
+- Recommended action: returned to owner
+- Conditions: prior class 1:3 to 3:1; losses user-elicited
 
 ## Handoff
 
 - Open factual disputes: none
+- Identification gaps: none
+- VoI question: none
 """
 
 
@@ -384,7 +435,8 @@ def test_html_commented_structure_is_not_record_content():
     )
     findings = cr.check(hidden)
     assert any("required section missing: ## Verdict" in f for f in findings)
-    assert any("'- Verdict:' slot is missing" in f for f in findings)
+    assert any("required section missing: ## Decision frame" in f for f in findings)
+    assert not any("verdict 'robust'" in f for f in findings)
 
 
 def test_comment_stripping_preserves_line_count():
@@ -403,12 +455,16 @@ def test_unclosed_html_comment_hides_everything_after_it():
 
 
 def test_comment_opener_inside_a_fence_is_code_not_a_comment():
-    rec = "# VoI Record: x\n\n```\n<!--\n```\n\n## VoI\n\n- Verdict: worth-it\n"
+    rec = "# VoI Record: x\n\n```\n<!--\n```\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: worth-it\n"
     assert cr.check(rec) == []
 
 
 def test_fence_closer_with_info_string_does_not_close():
-    rec = "# VoI Record: x\n\n```\ntext\n```python\n\n## VoI\n\n- Verdict: worth-it\n"
+    rec = (
+        "# VoI Record: x\n\n```\ntext\n```python\n\n## VoI\n\n"
+        + VOI_SLOTS
+        + "- Verdict: worth-it\n"
+    )
     findings = cr.check(rec)
     assert any("unterminated code fence" in f for f in findings)
 
@@ -474,16 +530,16 @@ def test_lone_unterminated_fence_is_a_finding_not_a_pass():
 
 
 def test_trailing_whitespace_on_a_heading_is_still_the_heading():
-    assert cr.check("# VoI Record: x\n\n## VoI \n\n- Verdict: worth-it\n") == []
+    assert cr.check("# VoI Record: x\n\n## VoI \n\n" + VOI_SLOTS + "- Verdict: worth-it\n") == []
 
 
 def test_bold_verdict_label_is_still_the_slot():
-    assert cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict:** worth-it\n") == []
-    assert cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict**: worth-it\n") == []
+    assert cr.check("# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- **Verdict:** worth-it\n") == []
+    assert cr.check("# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- **Verdict**: worth-it\n") == []
 
 
 def test_bold_verdict_with_bad_value_is_still_caught():
-    findings = cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict:** optimal\n")
+    findings = cr.check("# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- **Verdict:** optimal\n")
     assert any("verdict 'optimal'" in f for f in findings)
 
 
@@ -495,8 +551,10 @@ def test_inline_code_pipe_in_method_cell_does_not_shift_outcome():
 
 
 REVIEW_SKELETON = (
-    "# Identification Review: q\n\n## Question\n\n- Route: {route}\n\n"
-    "## Handoff\n\n- Dispositions: {disp}\n"
+    "# Identification Review: q\n\n## Question\n\n"
+    "- Causal question, restated as a counterfactual contrast: c\n- Estimand: e\n"
+    "- Assignment mechanism as stated: UNSTATED\n- Route: {route}\n\n"
+    "## Handoff\n\n- Facts: f\n- Assumptions: a\n- Dispositions: {disp}\n"
 )
 
 
@@ -523,18 +581,13 @@ def test_empty_required_section_is_a_finding():
 
 
 def test_pending_prose_marks_a_plan_stage_record_in_progress():
-    plan = GOOD_LEDGER.replace(
-        "- Answer: unresolved\n- Per-hypothesis summary:\n\n  | id | claim | status | basis |\n  | --- | --- | --- | --- |\n  | H1 | causal | UNRESOLVED | best supported; T1 consistent |\n  | H2 | data-artifact | UNRESOLVED | not tested |\n",
-        "(pending — to be completed after Analysis)\n",
-    )
+    plan = GOOD_LEDGER.replace(CONCLUSION_BODY, "(pending — to be completed after Analysis)\n")
     assert "(pending" in plan
     assert cr.check(plan) == []
 
 
 def test_prose_beginning_with_pending_does_not_suppress_completeness():
-    ledger = GOOD_LEDGER.replace(
-        "## Data Validity\n\n- Collection method: exporter\n\n", ""
-    ).replace(
+    ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
         "- none\n", "Pending replication by the data team, we still report the finding below.\n"
     )
     assert "## Data Validity" not in ledger
@@ -548,10 +601,7 @@ def test_pending_record_still_reports_bad_vocab():
         "| T1 | H1 | step at 09:10 | window compare | SUPPORTED |",
     )
     plan = plan.replace(
-        "- Answer: unresolved\n- Per-hypothesis summary:\n\n"
-        "  | id | claim | status | basis |\n  | --- | --- | --- | --- |\n"
-        "  | H1 | causal | UNRESOLVED | best supported; T1 consistent |\n"
-        "  | H2 | data-artifact | UNRESOLVED | not tested |\n",
+        CONCLUSION_BODY,
         "(pending — to be completed after Analysis)\n",
     )
     # the section-level pending marker marks it in progress
@@ -571,7 +621,9 @@ def test_signature_with_one_required_heading_is_a_record():
 
 def test_invalid_utf8_is_unreadable_not_a_crash(tmp_path, capsys):
     f = tmp_path / "bad.md"
-    f.write_bytes(b"# VoI Record: x\n\n## VoI\n\n- Verdict: worth-it \xff\n")
+    f.write_bytes(
+        b"# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS.encode() + b"- Verdict: worth-it \xff\n"
+    )
     rc = cr.main([str(f)])
     assert rc == 2  # noqa: PLR2004 -- 2 is the validator's documented exit code
     assert capsys.readouterr().err.startswith("unreadable")
@@ -589,9 +641,7 @@ def test_unreadable_file_reports_with_the_prefix_the_hook_keys_on(tmp_path, caps
 # suppressed every completeness finding for the record.
 # --------------------------------------------------------------------------- #
 def test_prose_in_a_bullet_slot_beginning_with_pending_does_not_suppress():
-    ledger = GOOD_LEDGER.replace(
-        "## Data Validity\n\n- Collection method: exporter\n\n", ""
-    ).replace(
+    ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
         "- Answer: unresolved\n",
         "- Answer: Pending replication by another team, the result remains valid\n",
     )
@@ -606,7 +656,7 @@ def test_a_bullet_slot_that_says_only_pending_is_still_in_progress():
 
 
 def test_emphasized_label_without_a_colon_is_not_a_slot():
-    findings = cr.check("# VoI Record: x\n\n## VoI\n\n- **Verdict** worth-it\n")
+    findings = cr.check("# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- **Verdict** worth-it\n")
     assert findings, "a label with no colon delimiter must not satisfy the slot check"
 
 
@@ -620,9 +670,9 @@ def test_hyphenated_prose_beginning_with_pending_does_not_suppress():
     """`pending-state` is one hyphenated word, not the marker plus an
     annotation, so it must not suspend the completeness checks."""
     for value in ("pending-state evaluation is complete", "pending-data analysis found no gaps"):
-        ledger = GOOD_LEDGER.replace(
-            "## Data Validity\n\n- Collection method: exporter\n\n", ""
-        ).replace("- Answer: unresolved\n", f"- Answer: {value}\n")
+        ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
+            "- Answer: unresolved\n", f"- Answer: {value}\n"
+        )
         findings = cr.check(ledger)
         assert any("required section missing: ## Data Validity" in f for f in findings), value
 
@@ -638,9 +688,9 @@ def test_html_block_tags_are_not_template_placeholders():
     """An HTML tag outside the allowlist read as a placeholder marks the whole
     record in progress and suppresses every completeness finding."""
     for tag in ("<section>", "<blockquote>", "<h1>", "<figure>", "<aside>"):
-        ledger = GOOD_LEDGER.replace(
-            "## Data Validity\n\n- Collection method: exporter\n\n", ""
-        ).replace("- Answer: unresolved\n", f"- Answer: unresolved {tag} see above\n")
+        ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
+            "- Answer: unresolved\n", f"- Answer: unresolved {tag} see above\n"
+        )
         findings = cr.check(ledger)
         assert any("required section missing: ## Data Validity" in f for f in findings), tag
 
@@ -676,9 +726,9 @@ def test_escaped_backticks_do_not_hide_a_cell_separator():
 
 
 def test_selectedcontent_is_not_a_template_placeholder():
-    ledger = GOOD_LEDGER.replace(
-        "## Data Validity\n\n- Collection method: exporter\n\n", ""
-    ).replace("- Answer: unresolved\n", "- Answer: unresolved <selectedcontent> x\n")
+    ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
+        "- Answer: unresolved\n", "- Answer: unresolved <selectedcontent> x\n"
+    )
     findings = cr.check(ledger)
     assert any("required section missing: ## Data Validity" in f for f in findings), findings
 
@@ -704,7 +754,9 @@ def test_a_real_comment_after_inline_code_still_hides_the_rest():
 def test_unterminated_fence_finding_carries_no_procedural_instruction():
     """decisions/006: a hook message states structural facts and a pointer to
     the owning authority; the hook forwards these findings verbatim."""
-    findings = cr.check("# VoI Record: x\n\n## VoI\n\n- Verdict: worth-it\n\n```\nopen\n")
+    findings = cr.check(
+        "# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: worth-it\n\n```\nopen\n"
+    )
     fence = next(f for f in findings if "unterminated code fence" in f)
     assert "re-validate" not in fence, fence
     assert "close the fence" not in fence, fence
@@ -714,9 +766,9 @@ def test_uri_autolinks_without_a_double_slash_are_not_placeholders():
     """`<tel:...>` and `<urn:...>` are CommonMark autolinks, i.e. record
     content, so they must not mark the record in progress."""
     for link in ("<tel:+15551212>", "<urn:isbn:0451450523>", "<news:comp.lang.python>"):
-        ledger = GOOD_LEDGER.replace(
-            "## Data Validity\n\n- Collection method: exporter\n\n", ""
-        ).replace("- Answer: unresolved\n", f"- Answer: unresolved, see {link}\n")
+        ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
+            "- Answer: unresolved\n", f"- Answer: unresolved, see {link}\n"
+        )
         findings = cr.check(ledger)
         assert any("required section missing: ## Data Validity" in f for f in findings), link
 
@@ -750,9 +802,9 @@ def test_a_well_formed_unclosed_fence_still_hides_what_follows():
 def test_html_tags_with_boolean_attributes_are_not_placeholders():
     """`<details open>` is a real tag; a boolean attribute carries no `=`."""
     for tag in ("<details open>", "<td colspan>", "<input disabled>"):
-        ledger = GOOD_LEDGER.replace(
-            "## Data Validity\n\n- Collection method: exporter\n\n", ""
-        ).replace("- Answer: unresolved\n", f"- Answer: unresolved {tag}\n")
+        ledger = GOOD_LEDGER.replace(DATA_VALIDITY, "").replace(
+            "- Answer: unresolved\n", f"- Answer: unresolved {tag}\n"
+        )
         findings = cr.check(ledger)
         assert any("required section missing: ## Data Validity" in f for f in findings), tag
 
@@ -840,3 +892,118 @@ def test_unterminated_frontmatter_is_left_alone():
     assert cr.strip_frontmatter("---\ntitle: x\n# Investigation: y\n") == (
         "---\ntitle: x\n# Investigation: y\n"
     )
+
+
+# 2026-09-15 Codex review: four records missing most of their required
+# fields validated clean, because only headings and closed vocabularies were
+# checked. Each probe below is one of the review's reproductions.
+
+
+def test_decision_record_of_done_sections_is_incomplete():
+    rec = (
+        "# Decision Record: probe\n\n"
+        + "".join(
+            f"{h}\n\nDone.\n\n" for h in cr.REQUIRED_SECTIONS["decision"] if h != "## Verdict"
+        )
+        + "## Verdict\n\n- Verdict: robust\n"
+    )
+    findings = cr.check(rec)
+    assert any("'- Actions:' slot is missing" in f for f in findings)
+    assert any("'- Decision owner:' slot is missing" in f for f in findings)
+    assert any("'- Recommended action:' slot is missing" in f for f in findings)
+
+
+def test_voi_record_of_only_a_verdict_is_incomplete():
+    findings = cr.check("# VoI Record: probe\n\n## VoI\n\n- Verdict: worth-it\n")
+    assert any("'- Pending decision:' slot is missing" in f for f in findings)
+    assert any("'- Value calculation:' slot is missing" in f for f in findings)
+
+
+def test_review_of_question_and_handoff_only_is_incomplete():
+    rec = (
+        "# Identification Review: probe\n\n## Question\n\nDoes X cause Y?\n\n"
+        "## Handoff\n\n- Dispositions: identified-if\n"
+    )
+    findings = cr.check(rec)
+    assert any("'- Route:' slot is missing" in f for f in findings)
+    assert any("'- Facts:' slot is missing" in f for f in findings)
+
+
+def test_one_pending_slot_still_suspends_completeness_by_default():
+    """A plan-stage record is legitimately incomplete; the default mode keeps
+    the in-progress rule. --final is where completeness is demanded."""
+    rec = (
+        "# Decision Record: probe\n\n## Decision frame\n\n- Decision owner: pending\n\n"
+        "## Verdict\n\n- Verdict: robust\n"
+    )
+    assert cr.check(rec) == []
+    findings = cr.check(rec, final=True)
+    assert any("required section missing: ## Robustness" in f for f in findings)
+    assert any("'Decision owner' is still unfilled: 'pending'" in f for f in findings)
+
+
+def test_final_mode_flags_placeholders_and_ellipses():
+    rec = GOOD_DECISION.replace("- Proposition: p", "- Proposition: <the claim>").replace(
+        "- Crossover: none within swept class", "- Crossover: ..."
+    )
+    assert cr.check(rec) == []
+    findings = cr.check(rec, final=True)
+    assert any("'Proposition' is still unfilled" in f for f in findings)
+    assert any("'Crossover' is still unfilled" in f for f in findings)
+
+
+def test_final_mode_passes_a_complete_record():
+    for rec in (GOOD_LEDGER, GOOD_REVIEW, GOOD_DECISION):
+        assert cr.check(rec, final=True) == []
+
+
+def test_empty_slot_value_is_a_finding():
+    bad = GOOD_DECISION.replace("- Decision owner: the release manager", "- Decision owner:")
+    assert any("required slot 'Decision owner' is empty" in f for f in cr.check(bad))
+
+
+def test_exploration_frame_slots_are_required():
+    rec = (
+        "# Exploration: e\n\n## Frame\n\n- Scope: orders.csv\n\n"
+        "## Orientation record\n\n- Schema and grain: one row per order\n"
+    )
+    findings = cr.check(rec)
+    assert any("'- Effort budget:' slot is missing" in f for f in findings)
+    assert any("'- Absence semantics:' slot is missing" in f for f in findings)
+    assert not any("Confirmation reservation" in f for f in findings)  # profile route has none
+
+
+def test_ledger_data_validity_slots_are_required():
+    bad = GOOD_LEDGER.replace(
+        "- Source completeness semantics: S1 — event unrecorded; export manifest\n", ""
+    )
+    assert any("'- Source completeness semantics:' slot is missing" in f for f in cr.check(bad))
+
+
+def test_required_slots_exist_in_shipped_templates():
+    """Parity: every slot label this validator requires appears, as a
+    `- label:` bullet, in the shipped template of that record kind, so a
+    renamed template slot fails here rather than orphaning the check."""
+    blocks: dict[str, list[str]] = {}
+    for path in TEMPLATE_FILES:
+        for block in re.findall(r"```markdown\n(.*?)```", path.read_text(encoding="utf-8"), re.S):
+            kind = cr.detect(block)
+            if kind is not None:
+                blocks.setdefault(kind, []).append(block)
+    for kind, sections in cr.REQUIRED_SLOTS.items():
+        assert kind in blocks, kind
+        for heading, labels in sections.items():
+            for label in labels:
+                assert any(f"- {label}:" in cr._section(b, heading) for b in blocks[kind]), (
+                    kind,
+                    heading,
+                    label,
+                )
+
+
+def test_final_flag_on_the_cli(tmp_path, capsys):
+    f = tmp_path / "r.md"
+    f.write_text(GOOD_DECISION.replace("- Proposition: p", "- Proposition: <the claim>"))
+    assert cr.main([str(f)]) == 0
+    assert cr.main(["--final", str(f)]) == 1
+    assert "still unfilled" in capsys.readouterr().out

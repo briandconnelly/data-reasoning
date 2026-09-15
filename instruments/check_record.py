@@ -5,12 +5,18 @@
 Scope and limits are owned by
 skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md;
 this file enacts that scope and does not restate it. Operationally: it checks
-required sections, closed vocabularies, and non-empty required slots; it
-suspends completeness findings while a record still carries template
-placeholders (the skills mandate writing the template before filling it).
+required sections, closed vocabularies, and the presence and non-emptiness of
+each record kind's required slots; it suspends completeness findings while a
+record still carries template placeholders or `pending` slots (the skills
+mandate writing the template before filling it).
+
+`--final` is the completed-record mode: nothing suspends completeness, and a
+slot still holding a placeholder, `...`, or `pending` is a finding. The hook
+runs the default mode on every write because a write is not a delivery; a
+caller that knows the record is done runs `--final`.
 
 Exit codes: 0 clean, 1 findings (one per stdout line), 2 not a recognized
-record or unreadable.
+record, unreadable, or bad usage.
 """
 
 from __future__ import annotations
@@ -48,6 +54,79 @@ REQUIRED_SECTIONS = {
         "## Handoff",
     ],
     "voi": ["## VoI"],
+}
+
+# `- Label:` bullet slots a completed record of each kind must carry, keyed by
+# the section that owns them. Labels are the shipped templates' own; the unit
+# suite keeps them byte-identical to the templates so a renamed slot fails
+# there rather than silently orphaning a check. Only inline-valued slots are
+# listed: a label that heads a nested list (Consequences, Evidence,
+# Identifying assumptions) has no value on its own line to check.
+REQUIRED_SLOTS = {
+    "ledger": {
+        "## Problem": [
+            "Decision informed",
+            "Falsifiable question",
+            "Success criteria",
+            "Stop condition",
+            "Effort budget",
+        ],
+        "## Data Validity": [
+            "Collection method",
+            "Coverage matrix",
+            "Coverage baseline",
+            "Source completeness semantics",
+        ],
+        "## Conclusion": ["Answer", "Best supported", "Limitations"],
+    },
+    "exploration": {
+        "## Frame": ["Scope", "Effort budget", "Stop rule"],
+        "## Orientation record": ["Schema and grain", "Quality", "Coverage", "Absence semantics"],
+    },
+    "review": {
+        "## Question": [
+            "Causal question, restated as a counterfactual contrast",
+            "Estimand",
+            "Assignment mechanism as stated",
+            "Route",
+        ],
+        "## Handoff": ["Facts", "Assumptions", "Dispositions"],
+    },
+    "decision": {
+        "## Decision frame": [
+            "Route",
+            "Actions",
+            "Decision owner",
+            "Reversibility",
+            "Deadline or forcing event",
+            "Loss ratio",
+            "Decision threshold (posterior odds)",
+        ],
+        "## Decision-state model": [
+            "Proposition",
+            "Residual reading",
+            "Claim class",
+            "Identification basis",
+            "Identification conditions",
+            "Ledger mapping",
+        ],
+        "## Evidence and update": ["Prior odds", "Independence", "Posterior odds"],
+        "## Robustness": ["Prior class swept", "Loss range swept", "Crossover"],
+        "## Verdict": ["Verdict", "Recommended action", "Conditions"],
+        "## Handoff": ["Open factual disputes", "Identification gaps", "VoI question"],
+    },
+    "voi": {
+        "## VoI": [
+            "Route",
+            "Pending decision",
+            "Signal model",
+            "Value basis",
+            "Value calculation",
+            "Upper bound",
+            "Cost",
+            "Verdict",
+        ],
+    },
 }
 
 STATUSES = {"REFUTED", "UNRESOLVED"}
@@ -497,6 +576,38 @@ def _bullet_slot_values(body: str):
             yield stripped.split(":", 1)[1]
 
 
+def _slot_value(section: str, label: str) -> str | None:
+    """The value of the first `- label:` bullet in `section`, or None when
+    no such bullet exists. Emphasis around the label is ignored; the label
+    itself must match the template's byte for byte."""
+    for line in section.splitlines():
+        stripped = _unemphasize(line.strip())
+        if stripped.startswith("- " + label + ":"):
+            return stripped[len(label) + 3 :].strip()
+    return None
+
+
+def _unfilled(value: str) -> bool:
+    """A slot still carrying template state: a placeholder, `...`, or a bare
+    `pending` marker."""
+    return value.strip() == "..." or _has_placeholder(value) or bool(PENDING.match(value.strip()))
+
+
+def _check_slots(body: str, kind: str, final: bool, findings: list[str]) -> None:
+    for heading, labels in REQUIRED_SLOTS.get(kind, {}).items():
+        section = _section(body, heading)
+        if not section.strip():
+            continue  # the missing/empty-section finding already covers it
+        for label in labels:
+            value = _slot_value(section, label)
+            if value is None:
+                findings.append(f"{heading}: required '- {label}:' slot is missing")
+            elif not value:
+                findings.append(f"{heading}: required slot '{label}' is empty")
+            elif final and _unfilled(value):
+                findings.append(f"{heading}: required slot '{label}' is still unfilled: {value!r}")
+
+
 def _in_progress(body: str) -> bool:
     if any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body)):
         return True
@@ -523,7 +634,9 @@ def _check_claim(value: str, where: str, findings: list[str]) -> None:
     )
 
 
-def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pass per record kind
+def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pass per record kind
+    """Findings for one record. `final` is the completed-record mode: template
+    state no longer suspends completeness and is itself a finding."""
     text = strip_frontmatter(text)
     kind = detect(text)
     if kind is None:
@@ -535,7 +648,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
     # would fail correct work — treat the record as in-progress instead.
     # Vocabulary checks still run on whatever body remains (the pre-fence
     # part).
-    in_progress = unterminated_fence or _in_progress(body)
+    in_progress = unterminated_fence or (not final and _in_progress(body))
     if unterminated_fence:
         findings.append("unterminated code fence: completeness past it was not checked")
 
@@ -545,6 +658,7 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                 findings.append(f"required section missing: {heading}")
             elif not _section(body, heading).strip():
                 findings.append(f"required section empty: {heading}")
+        _check_slots(body, kind, final, findings)
 
     if kind == "ledger":
         # No id-grammar check on `id` cells (e.g. H1 vs H4 (retrospective)):
@@ -610,13 +724,6 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                         f"route {_normalize(value)!r} does not begin with a value from the "
                         f"closed set {sorted(ROUTES)}"
                     )
-        if not in_progress:
-            handoff = _section(body, "## Handoff")
-            if not any(
-                _unemphasize(line.strip()).startswith("- Dispositions:")
-                for line in handoff.splitlines()
-            ):
-                findings.append("Handoff: required '- Dispositions:' slot is missing")
 
     elif kind in ("decision", "voi"):
         allowed = DECIDE_VERDICTS if kind == "decision" else VOI_VERDICTS
@@ -633,25 +740,23 @@ def check(text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pas
                         f"verdict {_normalize(value)!r} does not begin with a value "
                         f"from the closed set {sorted(allowed)}"
                     )
-        if not in_progress and not any(
-            _unemphasize(line.strip()).startswith("- Verdict:") for line in section.splitlines()
-        ):
-            findings.append("Verdict: required '- Verdict:' slot is missing")
 
     return findings
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 1:
-        print("usage: check_record.py <record.md>", file=sys.stderr)
+    final = "--final" in argv
+    paths = [a for a in argv if a != "--final"]
+    if len(paths) != 1:
+        print("usage: check_record.py [--final] <record.md>", file=sys.stderr)
         return 2
     try:
-        text = Path(argv[0]).read_text(encoding="utf-8")
+        text = Path(paths[0]).read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as exc:
         print(f"unreadable: {exc}", file=sys.stderr)
         return 2
     try:
-        findings = check(text)
+        findings = check(text, final=final)
     except ValueError:
         return 2
     for f in findings:

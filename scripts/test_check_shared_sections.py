@@ -98,14 +98,8 @@ def test_update_is_targeted(tmp_path, capsys):
         "Cost never changes the route: a metered warehouse makes profiling costlier, "
         "not more inferential."
     )
-    old_provenance = (
-        "Minimize collection, redact secrets and personal data, and record provenance "
-        "for every source."
-    )
-    new_provenance = (
-        "Minimize collection, redact secrets and personal data, and record provenance "
-        "for each source."
-    )
+    old_provenance = "- Record provenance for every source."
+    new_provenance = "- Record provenance for each source."
     victim.write_text(
         victim.read_text(encoding="utf-8")
         .replace(old_cost, new_cost)

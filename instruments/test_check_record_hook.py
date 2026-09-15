@@ -23,8 +23,10 @@ hook_module = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(hook_module)
 
 
-def run_hook(payload: dict, plugin_root: str | None = None) -> subprocess.CompletedProcess:
-    env = {"CLAUDE_PLUGIN_ROOT": plugin_root if plugin_root is not None else str(REPO)}
+def run_hook(
+    payload: dict, plugin_root: str | None = None, root_var: str = "CLAUDE_PLUGIN_ROOT"
+) -> subprocess.CompletedProcess:
+    env = {root_var: plugin_root if plugin_root is not None else str(REPO)}
     return subprocess.run(
         [sys.executable, str(HOOK)],
         input=json.dumps(payload),
@@ -53,7 +55,12 @@ def test_non_record_markdown_is_silent(tmp_path):
 
 def test_clean_record_is_silent(tmp_path):
     f = tmp_path / "record.md"
-    f.write_text("# VoI Record: is the pull worth it?\n\n## VoI\n\n- Verdict: break-even-only\n")
+    f.write_text(
+        "# VoI Record: is the pull worth it?\n\n## VoI\n\n- Route: voi\n"
+        "- Pending decision: ship vs wait\n- Signal model: a 2-week holdout\n"
+        "- Value basis: expected loss avoided\n- Value calculation: 0.4 x 3 = 1.2\n"
+        "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: break-even-only\n"
+    )
     r = run_hook({"tool_input": {"file_path": str(f)}})
     assert r.returncode == 0
     assert not r.stderr
@@ -285,3 +292,99 @@ def test_shell_sniff_signatures_match_python_signatures():
     sh_signatures = {f"# {name}: " for name in match.group(1).split("|")}
 
     assert sh_signatures == set(hook_module.SIGNATURES)
+
+
+# 2026-09-15 Codex review: the hook read only `tool_input.file_path`, so on
+# Codex -- whose apply_patch payload carries the patch in `tool_input.command`
+# -- a record with findings exited 0 in silence.
+
+BAD_RECORD = "# Decision Record: ship or wait?\n\n## Verdict\n\n- Verdict: optimal\n"
+
+
+def codex_patch(*paths: str) -> str:
+    body = "".join(f"*** Add File: {p}\n+# Decision Record: x\n" for p in paths)
+    return f"*** Begin Patch\n{body}*** End Patch\n"
+
+
+def test_codex_apply_patch_payload_reports_findings(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(BAD_RECORD)
+    payload = {
+        "tool_name": "apply_patch",
+        "cwd": str(tmp_path),
+        "tool_input": {"command": codex_patch("record.md")},
+    }
+    r = run_hook(payload)
+    assert r.returncode == 2
+    assert "verdict" in r.stderr.lower()
+    assert str(f) in r.stderr
+
+
+def test_codex_update_file_path_is_resolved_against_cwd(tmp_path):
+    (tmp_path / "sub").mkdir()
+    f = tmp_path / "sub" / "record.md"
+    f.write_text(BAD_RECORD)
+    patch = "*** Begin Patch\n*** Update File: sub/record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_hook(
+        {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+    )
+    assert r.returncode == 2
+    assert str(f) in r.stderr
+
+
+def test_codex_patch_over_a_non_record_is_silent(tmp_path):
+    (tmp_path / "notes.md").write_text("# Notes\n")
+    r = run_hook(
+        {
+            "tool_name": "apply_patch",
+            "cwd": str(tmp_path),
+            "tool_input": {"command": codex_patch("notes.md")},
+        }
+    )
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_codex_patch_writing_two_records_reports_both(tmp_path):
+    for name in ("a.md", "b.md"):
+        (tmp_path / name).write_text(BAD_RECORD)
+    r = run_hook(
+        {
+            "tool_name": "apply_patch",
+            "cwd": str(tmp_path),
+            "tool_input": {"command": codex_patch("a.md", "b.md")},
+        }
+    )
+    assert r.returncode == 2
+    assert str(tmp_path / "a.md") in r.stderr
+    assert str(tmp_path / "b.md") in r.stderr
+
+
+def test_plugin_root_env_var_is_honored(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(BAD_RECORD)
+    r = run_hook({"tool_input": {"file_path": str(f)}}, root_var="PLUGIN_ROOT")
+    assert r.returncode == 2
+    assert "verdict" in r.stderr.lower()
+
+
+def test_shell_command_payload_is_not_covered(tmp_path):
+    """A record created by a shell command is outside both payload shapes;
+    the README says so. This test pins that it is silence, not a crash."""
+    f = tmp_path / "record.md"
+    f.write_text(BAD_RECORD)
+    r = run_hook({"tool_name": "Bash", "tool_input": {"command": f"cat > {f}"}})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_candidate_paths_shapes(tmp_path):
+    assert hook_module.candidate_paths({"tool_input": {"file_path": "/x/y.md"}}) == ["/x/y.md"]
+    patch = (
+        "*** Begin Patch\n*** Update File: a.md\n*** Move to: b.md\n"
+        "*** Delete File: c.md\n*** End Patch"
+    )
+    got = hook_module.candidate_paths({"cwd": str(tmp_path), "tool_input": {"command": patch}})
+    assert got == [str(tmp_path / "a.md"), str(tmp_path / "b.md")]
+    assert hook_module.candidate_paths({"tool_input": {"command": "echo hi"}}) == []
+    assert hook_module.candidate_paths({"tool_input": "garbage"}) == []
