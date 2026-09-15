@@ -213,6 +213,12 @@ The prompt must say nothing about whether production access is authorized — de
 
 ## Run bookkeeping
 
+### Owed measurements as of 2026-09-15 (external review remediation)
+
+Three agent-read passages changed in `SKILL.md`: § Profile Route now separates dated sequence (recorded) from attribution (left unresolved and handed off); § Degraded Modes names Frame-lite for a profile without file tools; § Data Rules is four bullets instead of one sentence, same obligations.
+Reachability, per `hypothesis-driven-analysis/tests/PROTOCOL.md` § What owes a rerun: the entity-profile behavior scenarios in § Behavior surface traverse the profile-route change; a no-file-tools arm of a profile scenario traverses the degraded-mode change; the data-rules split changes no obligation and owes nothing.
+Every behavior scenario in this file is unrun, so no result is invalidated; the changed sentences owe their arms with the suite's first run, and the profile-route assertion to add is that an entity record states dated changes without attributing them.
+
 Beyond per-assertion pass/fail, record for each behavior run: correctness of any descriptive facts, whether a lead was stated as a conclusion anywhere (the central failure), tool-call count, and approximate tokens — the skill's token premium is unmeasured until these runs exist.
 
 ## Seam scenario (E1) — the handoff fixture, and hypothesis-driven-analysis's S5 replacement

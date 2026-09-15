@@ -66,7 +66,8 @@ The write paths covered are exactly these: Claude Code's `Write` and `Edit` tool
 A record created by a shell command — a heredoc, a redirect, a script — is on neither path and is not validated; nothing in this plugin parses shell commands for file writes.
 Codex runs a plugin hook only after the user has reviewed and trusted its definition (`/hooks` in Codex), so a Codex install has no live validation until that trust is granted.
 The hook needs `python3` on the host's `PATH`.
-Without it, a record write is reported as not validated and every other write stays silent; a record whose path contains a double quote cannot be sniffed without Python and is skipped, and an `apply_patch` payload is reported as not validated whenever it carries a record title.
+Without it, a record write is reported as not validated and every other write stays silent; a record whose path contains a double quote cannot be sniffed without Python and is skipped.
+Without it, an `apply_patch` payload is handled by sniffing each `.md` file the patch names on disk and by scanning the patch text itself for a record title, so both a new record and a title-free edit to an existing one are reported as not validated, while a file the patch names that is not on disk is skipped.
 The hook runs the validator's default mode, in which a record still carrying template placeholders or `pending` slots is in progress and owes no completeness findings; `check_record.py --final <record>` is the completed-record mode, in which every required slot must be filled.
 No skill yet tells the agent to run `--final` before delivering a record: that pointer is agent-read prose and owes measured arms first, on the terms in the decision record above.
 

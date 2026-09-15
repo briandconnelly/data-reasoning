@@ -243,6 +243,13 @@ GOOD_DECISION = """\
 - Decision owner: the release manager
 - Reversibility: a shipped build can be rolled back in an hour
 - Deadline or forcing event: Friday release train
+- Consequences:
+
+  | | p true | p false |
+  | --- | --- | --- |
+  | ship | regression ships | on time |
+  | wait | caught | a week lost |
+
 - Loss ratio: 3 — provenance: user-elicited
 - Decision threshold (posterior odds): 3:1 — provenance: user-elicited
 
@@ -257,7 +264,13 @@ GOOD_DECISION = """\
 
 ## Evidence and update
 
-- Prior odds: 1:1 — provenance: sensitivity-only
+- Prior odds: 1:1 — provenance: user-elicited
+- Evidence:
+
+  | item | LR | provenance | source, reference class, conditioning |
+  | --- | --- | --- | --- |
+  | T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |
+
 - Independence: single item
 - Posterior odds: 2:1
 
@@ -318,16 +331,16 @@ def test_fenced_quoted_record_does_not_reject_a_valid_verdict():
     """Codex finding: a fenced excerpt quoting '- Verdict: optimal' inside
     Evidence rejected a decision record whose actual verdict is valid."""
     good = GOOD_DECISION.replace(
-        "- Prior odds: 1:1 — provenance: sensitivity-only",
-        "- Prior odds: 1:1 — provenance: sensitivity-only\n\n```\n- Verdict: optimal\n```",
+        "- Prior odds: 1:1 — provenance: user-elicited",
+        "- Prior odds: 1:1 — provenance: user-elicited\n\n```\n- Verdict: optimal\n```",
     )
     assert cr.check(good) == []
 
 
 def test_tilde_fenced_quote_is_ignored_too():
     good = GOOD_DECISION.replace(
-        "- Prior odds: 1:1 — provenance: sensitivity-only",
-        "- Prior odds: 1:1 — provenance: sensitivity-only\n\n~~~\n- Verdict: optimal\n~~~",
+        "- Prior odds: 1:1 — provenance: user-elicited",
+        "- Prior odds: 1:1 — provenance: user-elicited\n\n~~~\n- Verdict: optimal\n~~~",
     )
     assert cr.check(good) == []
 
@@ -554,15 +567,20 @@ REVIEW_SKELETON = (
     "# Identification Review: q\n\n## Question\n\n"
     "- Causal question, restated as a counterfactual contrast: c\n- Estimand: e\n"
     "- Assignment mechanism as stated: UNSTATED\n- Route: {route}\n\n"
+    "## Design: d\n\n- Disposition: {disp}\n\n"
     "## Handoff\n\n- Facts: f\n- Assumptions: a\n- Dispositions: {disp}\n"
+)
+BOUND_BLOCK = (
+    "## Bound\n\n- Assumption ledger: monotone selection\n- Bound logic: Lee bounds\n"
+    "- Computed endpoints: -0.4, 0.9\n\n"
 )
 
 
 def test_annotated_none_disposition_is_accepted():
-    assert (
-        cr.check(REVIEW_SKELETON.format(route="bound", disp="none — bound route assigns none"))
-        == []
+    rec = REVIEW_SKELETON.format(route="bound", disp="none — bound route assigns none").replace(
+        "## Handoff", BOUND_BLOCK + "## Handoff"
     )
+    assert cr.check(rec) == []
 
 
 def test_route_outside_closed_set_is_caught():
@@ -1007,3 +1025,71 @@ def test_final_flag_on_the_cli(tmp_path, capsys):
     assert cr.main([str(f)]) == 0
     assert cr.main(["--final", str(f)]) == 1
     assert "still unfilled" in capsys.readouterr().out
+
+
+# Codex review pass 1 (2026-09-15): final mode still accepted an identification
+# review with no Design block, a bound record with no Bound block, a decision
+# record with no Consequences or Evidence table, and a `<status>` placeholder
+# in a Conclusion cell.
+
+
+def test_review_route_without_a_design_block_is_caught():
+    rec = re.sub(r"## Design: .*?\n\n(?=## Handoff)", "", GOOD_REVIEW, flags=re.S)
+    assert "## Design" not in rec
+    findings = cr.check(rec, final=True)
+    assert any("no '## Design: <name>' block" in f for f in findings)
+
+
+def test_design_block_without_a_disposition_is_caught():
+    rec = GOOD_REVIEW.replace(
+        "- Disposition: identified-if — parallel pre-trends; probe attached", "- Notes: n"
+    )
+    assert any(
+        "## Design: pilot-vs-rest difference-in-differences: required '- Disposition:'" in f
+        for f in cr.check(rec)
+    )
+
+
+def test_bound_route_without_a_bound_block_is_caught():
+    rec = REVIEW_SKELETON.format(route="bound", disp="none")
+    findings = cr.check(rec, final=True)
+    assert any("required section missing: ## Bound" in f for f in findings)
+    assert cr.check(rec.replace("## Handoff", BOUND_BLOCK + "## Handoff"), final=True) == []
+
+
+def test_bound_block_missing_a_slot_is_caught():
+    rec = REVIEW_SKELETON.format(route="bound", disp="none").replace(
+        "## Handoff", BOUND_BLOCK.replace("- Bound logic: Lee bounds\n", "") + "## Handoff"
+    )
+    assert any("## Bound: required '- Bound logic:' slot is missing" in f for f in cr.check(rec))
+
+
+def test_decision_without_consequences_table_is_caught():
+    rec = re.sub(r"- Consequences:\n\n(  \|.*\n)+\n", "", GOOD_DECISION)
+    assert "Consequences" not in rec
+    assert any("'- Consequences:' slot is missing" in f for f in cr.check(rec, final=True))
+    rec2 = re.sub(r"(- Consequences:\n)\n(  \|.*\n)+", r"\1", GOOD_DECISION)
+    assert any(
+        "'- Consequences:' has no table rows under it" in f for f in cr.check(rec2, final=True)
+    )
+
+
+def test_decision_without_evidence_table_is_caught():
+    rec = re.sub(r"- Evidence:\n\n(  \|.*\n)+\n", "", GOOD_DECISION)
+    assert "- Evidence:" not in rec
+    assert any("'- Evidence:' slot is missing" in f for f in cr.check(rec, final=True))
+
+
+def test_final_mode_rejects_placeholder_table_cells():
+    rec = GOOD_LEDGER.replace("| H1 | causal | UNRESOLVED |", "| H1 | causal | <status> |")
+    assert cr.check(rec) == []  # default mode: a placeholder marks the record in progress
+    findings = cr.check(rec, final=True)
+    assert any("Conclusion: cell still unfilled: '<status>'" in f for f in findings)
+    rec = GOOD_LEDGER.replace("| CONSISTENT |", "| <outcome> |")
+    assert any("Tests: cell still unfilled" in f for f in cr.check(rec, final=True))
+    rec = GOOD_LEDGER.replace("step aligns with deploy window", "<prediction>")
+    assert any("Hypotheses row 1: cell still unfilled" in f for f in cr.check(rec, final=True))
+    rec = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: <value>"
+    )
+    assert any("Verdict: cell still unfilled" in f for f in cr.check(rec, final=True))

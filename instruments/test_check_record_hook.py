@@ -385,6 +385,70 @@ def test_candidate_paths_shapes(tmp_path):
         "*** Delete File: c.md\n*** End Patch"
     )
     got = hook_module.candidate_paths({"cwd": str(tmp_path), "tool_input": {"command": patch}})
-    assert got == [str(tmp_path / "a.md"), str(tmp_path / "b.md")]
+    assert got == [str(tmp_path / "b.md")]  # the move vacates a.md; c.md is deleted
     assert hook_module.candidate_paths({"tool_input": {"command": "echo hi"}}) == []
     assert hook_module.candidate_paths({"tool_input": "garbage"}) == []
+
+
+# Codex review pass 1: a rename validated the vacated source path and warned
+# that it could not be read; a title-free Update File patch on an existing
+# record slipped through the no-Python fallback in silence.
+
+
+def test_a_rename_validates_only_the_destination(tmp_path):
+    dest = tmp_path / "renamed.md"
+    dest.write_text(BAD_RECORD)
+    patch = (
+        "*** Begin Patch\n*** Update File: old.md\n*** Move to: renamed.md\n"
+        "@@\n-x\n+y\n*** End Patch\n"
+    )
+    r = run_hook(
+        {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+    )
+    assert r.returncode == 2
+    assert str(dest) in r.stderr
+    assert "could not be read" not in r.stderr
+
+
+def test_a_rename_of_a_non_record_is_silent(tmp_path):
+    (tmp_path / "README.md").write_text("# readme\n")
+    patch = "*** Begin Patch\n*** Update File: gone.md\n*** Move to: README.md\n*** End Patch\n"
+    r = run_hook(
+        {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+    )
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def codex_payload(tmp_path: Path, patch: str) -> dict:
+    return {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+
+
+def test_without_python_a_patch_adding_a_record_is_not_validated(tmp_path):
+    r = run_command_without_python(codex_payload(tmp_path, codex_patch("record.md")), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_without_python_a_title_free_edit_to_a_record_is_not_validated(tmp_path):
+    (tmp_path / "record.md").write_text(SIGNATURE_RECORD)
+    patch = "*** Begin Patch\n*** Update File: record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+    assert str(tmp_path / "record.md") in r.stderr
+
+
+def test_without_python_a_patch_to_a_non_record_is_silent(tmp_path):
+    (tmp_path / "notes.md").write_text("# Notes\n")
+    patch = "*** Begin Patch\n*** Update File: notes.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_a_patch_to_source_files_is_silent(tmp_path):
+    patch = "*** Begin Patch\n*** Update File: main.py\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr

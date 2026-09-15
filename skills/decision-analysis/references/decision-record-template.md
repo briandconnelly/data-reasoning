@@ -37,7 +37,7 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
 
 ## Evidence and update
 
-- Prior odds: <odds or range> — provenance: <class> — or `none needed` under a dominated verdict
+- Prior odds: <odds or range> — provenance: <class> — or `none needed` under a dominated verdict — or `none supported — see Robustness` per `../SKILL.md` § Degraded Modes (authority)
 - Evidence:
 
   | item | LR | provenance | source, reference class, conditioning |
@@ -45,7 +45,7 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
   | <evidence item> | <ratio or range> | <class> | <where the ratio comes from> |
 
 - Independence: <why the items above are conditionally independent given each state, or `single item`>
-- Posterior odds: <odds or range, recomputable from the lines above> — or `none needed` under a dominated verdict
+- Posterior odds: <odds or range, recomputable from the lines above> — or `none needed` under a dominated verdict — or `none supported — see Robustness` per `../SKILL.md` § Degraded Modes (authority)
 
 ## Robustness
 

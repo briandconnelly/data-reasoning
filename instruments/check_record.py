@@ -608,6 +608,73 @@ def _check_slots(body: str, kind: str, final: bool, findings: list[str]) -> None
                 findings.append(f"{heading}: required slot '{label}' is still unfilled: {value!r}")
 
 
+def _nested_table_rows(section: str, label: str) -> list[list[str]] | None:
+    """Data rows of the table nested under the `- label:` bullet in `section`,
+    or None when the bullet itself is absent. The nested span runs from the
+    bullet to the next top-level bullet or the section's end."""
+    lines = section.splitlines()
+    start = next(
+        (
+            i
+            for i, ln in enumerate(lines)
+            if _unemphasize(ln.strip()).startswith("- " + label + ":")
+        ),
+        None,
+    )
+    if start is None:
+        return None
+    span: list[str] = []
+    for ln in lines[start + 1 :]:
+        if ln.startswith("- "):
+            break
+        span.append(ln)
+    return _table_rows("\n".join(span))[1:]
+
+
+def _check_nested_tables(body: str, kind: str, findings: list[str]) -> None:
+    """Completed decision records carry a Consequences table and an Evidence
+    table; a `- Label:` line with nothing under it is the omission finding 2
+    of the 2026-09-15 review reproduced."""
+    if kind != "decision":
+        return
+    for heading, label in (
+        ("## Decision frame", "Consequences"),
+        ("## Evidence and update", "Evidence"),
+    ):
+        section = _section(body, heading)
+        if not section.strip():
+            continue
+        rows = _nested_table_rows(section, label)
+        if rows is None:
+            findings.append(f"{heading}: required '- {label}:' slot is missing")
+        elif not rows:
+            findings.append(f"{heading}: '- {label}:' has no table rows under it")
+
+
+def _check_review_route_blocks(body: str, findings: list[str]) -> None:
+    """A review or construct record owes at least one Design block ending in a
+    Disposition; a bound record owes the Bound block and its slots. The
+    route's own value is checked elsewhere; here an unrecognized route owes
+    nothing extra."""
+    route = _slot_value(_section(body, "## Question"), "Route")
+    token = _leading_token(route, ROUTES) if route else None
+    if token in ("review", "construct"):
+        designs = [h for h in re.findall(r"^## Design: .*$", body, re.M) if h.strip()]
+        if not designs:
+            findings.append(f"route {token!r}: no '## Design: <name>' block")
+        for h in designs:
+            if _slot_value(_section(body, h.rstrip()), "Disposition") is None:
+                findings.append(f"{h.rstrip()}: required '- Disposition:' slot is missing")
+    elif token == "bound":
+        bound = _section(body, "## Bound")
+        if not bound.strip():
+            findings.append("route 'bound': required section missing: ## Bound")
+        else:
+            for label in ("Assumption ledger", "Bound logic", "Computed endpoints"):
+                if _slot_value(bound, label) is None:
+                    findings.append(f"## Bound: required '- {label}:' slot is missing")
+
+
 def _in_progress(body: str) -> bool:
     if any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body)):
         return True
@@ -622,8 +689,18 @@ def _in_progress(body: str) -> bool:
     )
 
 
-def _check_claim(value: str, where: str, findings: list[str]) -> None:
-    if _is_placeholder(value):
+def _unfilled_cell(value: str, where: str, final: bool, findings: list[str]) -> bool:
+    """True when `value` is template state the vocabulary check must skip; in
+    final mode that state is itself a finding."""
+    if not _is_placeholder(value):
+        return False
+    if final:
+        findings.append(f"{where}: cell still unfilled: {value!r}")
+    return True
+
+
+def _check_claim(value: str, where: str, findings: list[str], final: bool = False) -> None:
+    if _unfilled_cell(value, where, final, findings):
         return
     v = _normalize(value)
     if v in ("causal", "data-artifact") or re.fullmatch(r"descriptive( \(estimand: .+\))?", v):
@@ -659,6 +736,9 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             elif not _section(body, heading).strip():
                 findings.append(f"required section empty: {heading}")
         _check_slots(body, kind, final, findings)
+        _check_nested_tables(body, kind, findings)
+        if kind == "review":
+            _check_review_route_blocks(body, findings)
 
     if kind == "ledger":
         # No id-grammar check on `id` cells (e.g. H1 vs H4 (retrospective)):
@@ -668,7 +748,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
         hyp_ok = in_progress or _require_column(hyp, "claim", "Hypotheses", findings)
         if hyp_ok:
             for v in _column(hyp, "claim"):
-                _check_claim(v, "Hypotheses", findings)
+                _check_claim(v, "Hypotheses", findings, final)
         if not in_progress:
             if len(hyp) < MIN_TABLE_ROWS:
                 findings.append("Hypotheses: table has no data rows")
@@ -676,10 +756,12 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
                 for i, v in enumerate(_column(hyp, "necessary prediction"), 1):
                     if not v.strip():
                         findings.append(f"Hypotheses row {i}: necessary prediction is empty")
+                    else:
+                        _unfilled_cell(v, f"Hypotheses row {i}", final, findings)
         tests = _table_rows(_section(body, "## Tests"))
         if in_progress or _require_column(tests, "outcome", "Tests", findings):
             for v in _column(tests, "outcome"):
-                if _is_placeholder(v):
+                if _unfilled_cell(v, "Tests", final, findings):
                     continue
                 if _leading_token(v, OUTCOMES) is None:
                     findings.append(
@@ -691,7 +773,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
         concl = _table_rows(_section(body, "## Conclusion"))
         if in_progress or _require_column(concl, "status", "Conclusion", findings):
             for v in _column(concl, "status"):
-                if _is_placeholder(v):
+                if _unfilled_cell(v, "Conclusion", final, findings):
                     continue
                 if _normalize(v) not in STATUSES:
                     findings.append(
@@ -700,7 +782,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
                     )
         if in_progress or _require_column(concl, "claim", "Conclusion", findings):
             for v in _column(concl, "claim"):
-                _check_claim(v, "Conclusion", findings)
+                _check_claim(v, "Conclusion", findings, final)
         if not in_progress and len(concl) < MIN_TABLE_ROWS:
             findings.append("Conclusion: per-hypothesis table has no data rows")
 
@@ -709,7 +791,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             stripped = _unemphasize(line.strip())
             if stripped.startswith(("- Disposition:", "- Dispositions:")):
                 value = stripped.split(":", 1)[1]
-                if _is_placeholder(value):
+                if _unfilled_cell(value, "Disposition", final, findings):
                     continue
                 if _leading_token(value, DISPOSITIONS | {"none"}) is None:
                     findings.append(
@@ -733,7 +815,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             stripped = _unemphasize(line.strip())
             if stripped.startswith("- Verdict:"):
                 value = stripped.split(":", 1)[1]
-                if _is_placeholder(value):
+                if _unfilled_cell(value, "Verdict", final, findings):
                     continue
                 if _leading_token(value, allowed) is None:
                     findings.append(

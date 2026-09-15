@@ -38,7 +38,7 @@ from pathlib import Path
 FRONTMATTER_SCAN_BYTES = 65536
 _FRONTMATTER = re.compile(rb"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
 
-PATCH_PATH = re.compile(r"^\*\*\* (?:Add File|Update File|Move to): (.+?)\s*$", re.M)
+PATCH_OP = re.compile(r"^\*\*\* (Add File|Update File|Move to|Delete File): (.+?)\s*$", re.M)
 
 SIGNATURES = (
     "# Investigation: ",
@@ -89,8 +89,10 @@ def looks_like_record(path: str) -> bool | None:
 
 
 def candidate_paths(payload: dict) -> list[str]:
-    """The files this tool call wrote, from whichever payload shape the host
-    sent. Relative paths in a patch are relative to the payload's `cwd`."""
+    """The files this tool call left on disk, from whichever payload shape the
+    host sent. Relative paths in a patch are relative to the payload's `cwd`.
+    An `Update File` followed by `Move to` leaves only the destination, so the
+    vacated source is not a candidate; a `Delete File` leaves nothing."""
     tool_input = payload.get("tool_input") or {}
     if not isinstance(tool_input, dict):
         return []
@@ -102,8 +104,12 @@ def candidate_paths(payload: dict) -> list[str]:
         return []
     base = Path(str(payload.get("cwd") or Path.cwd()))
     seen: list[str] = []
-    for raw in PATCH_PATH.findall(command):
+    for op, raw in PATCH_OP.findall(command):
         path = os.path.normpath(base / raw)
+        if op == "Delete File":
+            continue
+        if op == "Move to" and seen:
+            seen.pop()  # the Update File source this move vacates
         if path not in seen:
             seen.append(path)
     return seen

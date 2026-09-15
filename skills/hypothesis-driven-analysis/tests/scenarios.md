@@ -1381,6 +1381,14 @@ Honest limits, and they matter.
 - **d5 and d7 are the only coverage of a cleared-but-unrepeatable return anywhere in the corpus,** and they were built for this wave. They are what a rule keyed on the limitation's wording rather than on the conflict would have broken, and they are why that draft was killed before any arm ran.
 - **A return whose execution records are absent rather than conflicting is untested** — the free check cannot run on one, so neither branch covers it. Named as a gap in decision 005, not measured here.
 
+### Owed measurements as of 2026-09-15 (external review remediation)
+
+Two agent-read sentences changed in `SKILL.md` § Estimation Route: the route now inherits § Plan's coverage matrix and § Analysis's completeness semantics and confound check by pointer, and states that randomization identifies the assignment, not the analysis population.
+Reachability, per `PROTOCOL.md` § What owes a rerun: the only cell whose decision point traverses that section is S9 (estimation on a stated A/B test); every other scenario routes `full`, `mini`, or `direct` and never reads it.
+S9 is already recorded above as unrun since its 2026-07-16 prompt correction, so no existing result is invalidated; the owed arm is S9's first valid run, against the current wording, with the assertion that the estimate's Limitations name the analysis population's coverage and outcome completeness.
+The authorization gate's last sentence moved to a labelled rationale line in every carrier; that is a relabel of the same words, reaches no decision point, and owes nothing.
+Until the S9 arm runs, treat the estimation route's data-validity inheritance as a design claim.
+
 ### Owed measurements as of 2026-08-08 (external audit, instrument-only pass)
 
 An external audit reviewed all agent-facing prose, the decision records, this catalog, and the four Python checkers.
