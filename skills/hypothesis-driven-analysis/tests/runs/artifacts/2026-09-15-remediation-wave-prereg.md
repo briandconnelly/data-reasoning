@@ -242,8 +242,9 @@ The measurement stands in the DA run record as what it showed.
 The review also corrected the wave-1 DA-S8 score (8.2 was a FAIL for the post arm, a row-3 regression at wave 1, superseded by wave 2), found the checker's expanded crossover acceptance used a narrower interval for its intersection gate than for its acceptance (fixed: one interval, every stated number checked), found the structural validator's Evidence schema omitted the source column (fixed with a test), and found the template's slot notes reached into VoI slots and paraphrased two normative rules (fixed: decide-scoped, pointers).
 
 What ships as measured: the S9 estimation-route sentence (row 4) and the revised B10 profile-route sentence (row 4).
-What ships as a clarification carrying no measured claim, by the owner's decision: the Frame-lite naming (row 5); the DA precedence paragraph's disposition awaits wave 3 (amendment 4), after the re-review corrected its 8.4 scores.
-What is withdrawn: the DA degraded mode (row 6); the external review's finding 7 is recorded as owed.
+What ships as a clarification carrying no measured claim, by the owner's decision: the Frame-lite naming (row 5).
+Wave 3 (amendment 4) put DA-S8 on row 3 — the post arm fails 8.2 by reading the elicited prior as probabilities, as the wave-1 post arm did, while pre reads it as odds — so the DA precedence paragraph is withdrawn too; the external review's A2 is recorded as owed with finding 7.
+What is withdrawn: the DA degraded mode (row 6) and the DA precedence paragraph (row 3); the external review's finding 7 and A2 are recorded as owed.
 
 ## Amendment 4 — wave 3, written before any wave-3 arm ran (2026-09-15)
 

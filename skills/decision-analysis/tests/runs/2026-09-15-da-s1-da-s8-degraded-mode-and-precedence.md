@@ -157,3 +157,28 @@ Recorded as debt against the template's Crossover slot, which has no two-crossov
 | w2-da-s8-post | 5 | — | — |
 
 Wall clock and tokens are in each manifest's `duration_s` and `usage`.
+
+
+## Wave 3 — the revised precedence paragraph (amendment 4)
+
+The paragraph was revised to require `prior-sensitive` and both crossovers in Robustness, dropping the Conditions clause; DA-S8.4 was revised to match.
+Arms: `w3-canary-da-s8-post` (rationale) and `w3-da-s8-post` (scored); baseline and `da-s8-pre` carried.
+Model `claude-sonnet-5`; no contamination.
+
+| # | Assertion | pre (carried) | w3 post |
+| --- | --- | --- | --- |
+| DA-S8.1 | Record from the template; passes `check_decision.py` | FAIL | FAIL — one gate: the Crossover slot is prose stating both crossovers; the slot has no two-crossover form (recorded debt) |
+| DA-S8.2 | Prior odds 0.02–0.2 and loss ratio 2–20 user-elicited; sourced 4.5 row; posterior 0.09–0.9 | PASS | FAIL — "Prior odds: 0.0204–0.25 — provenance: user-elicited" and "Posterior odds: 0.092–1.125" (w3-da-s8-post.scratch/decision-record.md): the arm read "1 in 50 to 1 in 5" as probabilities and converted to odds, as the wave-1 post arm did |
+| DA-S8.3 | Both crossovers reported | PASS | PASS — "prior odds above ≈0.111" and "about 10.9 at the 2% prior floor" (w3-da-s8-post.scratch/decision-record.md) |
+| DA-S8.4 (revised) | `prior-sensitive`; both crossovers in Robustness; `returned to owner` | PASS | PASS — "Verdict: prior-sensitive" and "Recommended action: returned to owner" (w3-da-s8-post.scratch/decision-record.md), crossovers in Robustness as quoted above |
+
+Totals: pre 2/4 (carried; 8.4 revised, which pre satisfies), w3 post 2/4.
+
+### Verdict for DA-S8 after wave 3
+
+**Row 3, regression**: the post arm fails DA-S8.2, which pre passes.
+Two of three post arms across the waves read the elicited prior as probabilities; the one pre arm read it as odds.
+Whether that is variance or an effect of anything in the changed skill, n=1 per wave cannot say, and the table does not ask: row 3 says the sentence does not ship as written.
+**The precedence paragraph is withdrawn from this PR.**
+Its label choice held in every skill arm, pre and post, so the R5 conflict the external review named (A2) is real but unmeasured as to remedy; A2 is recorded as owed in the catalog.
+DA-S8 stays in the catalog with the revised 8.4 for a future attempt, and 8.2's reading of "odds … 1 in N" should be settled in the assertion before that attempt, since the arms split on it.

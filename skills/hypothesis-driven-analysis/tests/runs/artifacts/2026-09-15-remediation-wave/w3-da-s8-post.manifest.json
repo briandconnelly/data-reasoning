@@ -1,0 +1,120 @@
+{
+  "name": "w3-da-s8-post",
+  "started_utc": "2026-09-15T23:36:41.602658+00:00",
+  "duration_s": 193.7,
+  "exit_code": 0,
+  "claude_version": "2.1.273 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "5e627b25-d769-468c-bfbc-0736a0f59108",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "4855aa2d2ae4d6362b76206fc56ea848d77f5679ea67714d29cf055b1054e94c",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "c73f7974c831042f536a93e5e43bf980e7260b5497b160621a82b529404f205d"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "1e564aaf1c3cc4110856046a956528c7bff0f1737be9d90e428e5a3013df5d8c",
+  "jsonl_sha256": "d25920f80f437a9fff3fd0152cf17514f95c599e7d7b30eeeaaf6a38244ec636",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "33955b93c6870d1b58c4c118aaca41b4a449990ff0fb1234d1f1163c6253433a"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r/work && ls /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r/work\", \"description\": \"Ensure work directory exists\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-da-s8-post-xwahff7r/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release carrying the connection-pool change, given the UNRESOLVED p95-regression ledger\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship the release vs hold the release (one week)\\n- Decision owner: the team calling the ship/hold decision on the pool-change release (not further named by the user)\\n- Reversibility: shipping is reversible only by a post-hoc rollback/hotfix after users are exposed to whatever the re"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 42265,
+    "cache_read_input_tokens": 787521,
+    "output_tokens": 18135,
+    "output_tokens_details": {
+      "thinking_tokens": 14572
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 42265,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1035,
+        "cache_read_input_tokens": 210435,
+        "cache_creation_input_tokens": 2289,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2289
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.5092972,
+    "duration_ms": 193076,
+    "num_turns": 6
+  },
+  "result_text": "## Ship or hold: **prior-sensitive \u2014 returned to you as decision owner**\n\nThe evidence and the losses don't pin down a single answer across the ranges your team gave me; where you actually sit within those ranges decides it. Full record: `work/decision-record.md`.\n\n**What the ledger evidence does, in odds form:**\n- Your going-in odds (\"1 in 50 to 1 in 5\"): converted properly to odds (not literally 0.02\u20130.2), that's **0.0204\u20130.25**.\n- The ledger's evidence is really one item, not two: T1 found a 57 ms canary/control gap (over the 40 ms noise band); T3's reference class tells you how often that same gap appeared in 20 past rollouts split by post-mortem outcome \u2014 9/10 when the regression was real, 2/10 when it wasn't. That's a likelihood ratio of **4.5**, estimated from data in hand (T1 and T3 aren't independent facts to multiply \u2014 T3 *is* the calibration for T1's number).\n- Posterior odds: **0.092\u20131.125** (posterior probability of a real regression: roughly **8%\u201353%**, depending on where your true prior sits).\n- H2 (exporter artifact) is still untested \u2014 the raw-log check (T2) that would separate a real regression from an artifact never ran; S3 wasn't restored in time.\n\n**What the loss side does:**\n- Your stated loss ratio (missing a real regression vs. a needless week-hold): **2\u201320\u00d7**.\n- That converts to a decision threshold on posterior odds of **0.05\u20130.5** (odds above the threshold favor Hold; below it, Ship).\n\n**Where that leaves you:**\n- If your real-regression prior is above ~10% (i.e., closer to the \"1 in 5\" end), **Hold wins no matter what the loss ratio turns out to be**.\n- If your prior is below ~1.1%, Ship would win regardless of loss ratio \u2014 but that's under your stated floor of 2%, so it never actually applies here.\n- In between (roughly 2%\u201310% prior), it comes down to the loss ratio: Ship only wins if the team's disagreement resolves toward the low end (loss ratio under ~2\u201311\u00d7, depending on exactly where in that 2\u201310% band the prior sits); anything toward the high end of \"2\u201320\u00d7\" flips it to Hold.\n\n**Bottom line:** across the full range you gave me, Hold is preferred in most of the space, and Ship only survives in a narrow corner (low prior *and* low loss ratio). If your gut sits nearer \"1 in 50\" and the team leans toward \"2\u00d7, not 20\u00d7,\" Ship is defensible. Otherwise, Hold is the safer read of your own numbers \u2014 and this is a call for whoever owns the release, not something this analysis can close on its own.\n\n**Not addressed here, and worth knowing before you decide:** T2 \u2014 the one test that would actually tell real regression from exporter artifact \u2014 never ran because the raw logs weren't restored. That's the open factual question sitting underneath this whole spread; if it's resolvable before Friday, it's the fastest way to collapse the sensitivity above rather than debate the loss ratio further."
+}

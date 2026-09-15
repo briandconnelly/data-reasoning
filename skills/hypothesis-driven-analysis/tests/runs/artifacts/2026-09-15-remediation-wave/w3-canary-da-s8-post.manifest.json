@@ -1,0 +1,120 @@
+{
+  "name": "w3-canary-da-s8-post",
+  "started_utc": "2026-09-15T23:33:23.644149+00:00",
+  "duration_s": 168.6,
+  "exit_code": 0,
+  "claude_version": "2.1.273 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "20ad2f03-c023-4fb8-acd2-f8d63dad51aa",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "4855aa2d2ae4d6362b76206fc56ea848d77f5679ea67714d29cf055b1054e94c",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "c73f7974c831042f536a93e5e43bf980e7260b5497b160621a82b529404f205d"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "2500ccafb4cb11bfd0e04f74e0314e5a964ac22842f2e384c766d3ed44c29101",
+  "jsonl_sha256": "d24d9e78bc7de114d527c8e12937326f0e1d1030a5e8e2a3deb98ba6d965b360",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr",
+  "files_written": [
+    "decision-record-p95-regression.md"
+  ],
+  "files_written_sha256": {
+    "decision-record-p95-regression.md": "6d0d3af9bd92cdccf89d74e86ee28fd4fe0e7bd141db6644995eed61457ac434"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls -la \\\"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr/work\\\" 2>&1 || mkdir -p \\\"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr/work\\\"\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w3-canary-da-s8-post-uf32dqsr/work/decision-record-p95-regression.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release given the UNRESOLVED p95-regression investigation\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: Ship (release 2026-09-12 with the connection-pool change) vs Hold (delay past the Friday freeze)\\n- Decision owner: the release owner for the 2026-09-12 release\\n- Reversibility: Ship is not reversible for the exposure window \\u2014 any real regression is served to users before a rollback la"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 53486,
+    "cache_read_input_tokens": 688951,
+    "output_tokens": 15460,
+    "output_tokens_details": {
+      "thinking_tokens": 11620
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 53486,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1251,
+        "cache_read_input_tokens": 207605,
+        "cache_creation_input_tokens": 2369,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2369
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.5077362,
+    "duration_ms": 167987,
+    "num_turns": 6
+  },
+  "result_text": "## Ship or hold: prior-sensitive \u2014 no single answer holds across your team's stated ranges\n\nFull record: `work/decision-record-p95-regression.md`\n\n**What the ledger actually gives us.** The two UNRESOLVED rows aren't equally weighted evidence \u2014 H1 (real regression) and H2 (exporter artifact) both predict the same canary/control gap through the same metrics pipeline, so T1's CONSISTENT result (57 ms gap vs. the 40 ms noise band) doesn't by itself discriminate them. T2, the one test that could tell real latency from an artifact, is `NOT_TESTED` \u2014 S3 is still a pending restore. The one piece of evidence that *does* discriminate is T3's reference-class tabulation (S2): among 20 past rollouts, a >40 ms gap showed up in 9/10 real regressions vs. 2/10 non-regressions, giving a likelihood ratio of **4.5** for \"the gap we're seeing\" under real-regression vs. everything else (artifact or otherwise). That's the only update this ledger supports \u2014 treating T1 as separate evidence on top of it would double-count the same 40 ms-band observation.\n\n**The arithmetic.** Your prior (1-in-50 to 1-in-5) is odds 0.02\u20130.25. Applying the LR of 4.5 gives posterior odds of roughly **0.09 to 1.13** (H1 : not-H1). Your loss ratio (2\u201320\u00d7) sets a decision threshold of odds **0.5 (at 2\u00d7) down to 0.05 (at 20\u00d7)** \u2014 ship when posterior odds are below that threshold, hold when above.\n\n**Where that lands you.** Comparing posterior odds to the threshold across the full stated box:\n\n- **Ship survives only in one corner**: prior near the low end (p(H1) \u2272 0.10 \u2014 closer to 1-in-50\u20131-in-10 than 1-in-5) **and** loss ratio near the low end (\u2272 11\u00d7 \u2014 closer to 2\u201310\u00d7 than 10\u201320\u00d7), simultaneously.\n- **Everywhere else in your stated ranges, Hold wins** \u2014 including both extremes taken individually: if the loss ratio is anywhere near 20\u00d7, Hold wins regardless of where the prior sits in 0.02\u20130.2; if the prior is anywhere near 0.2 (1-in-5), Hold wins regardless of where the loss ratio sits in 2\u201320\u00d7.\n\n**Verdict: `prior-sensitive`.** This isn't a \"ship\" or \"hold\" call I can make for you \u2014 the two things your team disagrees on (how likely the regression is, and how much worse a miss is than a needless hold) are exactly the two things the answer turns on, and they pull in the same direction toward Hold across most of the space you gave me.\n\n**What would actually resolve this before Friday:** getting S3 (raw access logs) restored and running T2 is the only lever that changes the evidence itself rather than just re-litigating the prior/loss numbers \u2014 it's the test that could confirm or refute the artifact explanation directly. Short of that, the practical ask for your team is narrower than \"is it 1-in-50 or 1-in-5\": it's \"do we believe *both* that this is more likely a false alarm than a 1-in-10 shot, *and* that missing a real regression is less than ~11\u00d7 worse than a needless week's hold?\" If either side of that isn't confident, Hold is what the numbers you gave me point to.\n\n*Caveat:* the 4.5 likelihood ratio comes from a reference class of only 10 rollouts per stratum (S2) \u2014 a real number, but a noisy one; I haven't tried to further quantify that sampling uncertainty here, so treat the posterior-odds range as somewhat optimistic about its own precision."
+}
