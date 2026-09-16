@@ -1272,3 +1272,84 @@ def test_multiline_slot_with_no_continuation_is_still_empty():
         "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: worth-it\n"
     )
     assert any("required slot 'Signal model' is empty" in f for f in cr.check(rec))
+
+
+# PR #34 review: final mode checked placeholder state only in selected labels
+# and columns, so a caller asking for completed-record validation could get a
+# clean result without source provenance or a populated test method; and the
+# slot reader ended a value at the first nested bullet, reporting filled slots
+# empty in default mode, which every record write runs.
+
+
+def test_final_mode_rejects_a_required_section_left_pending():
+    rec = GOOD_LEDGER.replace(
+        "| id | Origin (file, query, system) | Acquired | Coverage notes |\n"
+        "| --- | --- | --- | --- |\n| S1 | logs.csv | 2026-08-18 | full day |",
+        "pending",
+    )
+    assert any(
+        "required section still unfilled: ## Sources" in f for f in cr.check(rec, final=True)
+    )
+    # Default mode keeps treating it as the sanctioned plan-stage state.
+    assert cr.check(rec) == []
+
+
+def test_final_mode_rejects_an_unfilled_required_table_cell():
+    rec = GOOD_LEDGER.replace("window compare", "<method>")
+    assert any(
+        "## Tests row 1: 'method' cell still unfilled: '<method>'" in f
+        for f in cr.check(rec, final=True)
+    )
+
+
+def test_a_row_narrower_than_its_header_is_reported_in_both_modes():
+    rec = GOOD_LEDGER.replace(
+        "| T1 | H1 | step at 09:10 | window compare | CONSISTENT | S1 rows 1-9 |\n"
+        "| T2 | H2 | coverage hole | coverage matrix | NOT_TESTED | pending |",
+        "| T1 |\n| T2 |",
+    )
+    for mode in (cr.check(rec), cr.check(rec, final=True)):
+        assert any("## Tests row 1: has 1 cells, header has 6" in f for f in mode)
+        assert any("## Tests row 2: has 1 cells, header has 6" in f for f in mode)
+
+
+def test_final_mode_keeps_pending_evidence_on_a_not_tested_row():
+    # GOOD_LEDGER's T2 is NOT_TESTED with `pending` evidence: the row's honest
+    # state, not template residue.
+    assert cr.check(GOOD_LEDGER, final=True) == []
+    rec = GOOD_LEDGER.replace(
+        "| T2 | H2 | coverage hole | coverage matrix | NOT_TESTED | pending |",
+        "| T2 | H2 | coverage hole | coverage matrix | CONSISTENT | pending |",
+    )
+    assert any(
+        "## Tests row 2: 'evidence' cell still unfilled: 'pending'" in f
+        for f in cr.check(rec, final=True)
+    )
+
+
+def test_a_slot_value_written_as_a_nested_list_is_not_empty():
+    rec = GOOD_LEDGER.replace(
+        "- Coverage matrix: hour x route, 3.9k-4.4k rows per cell",
+        "- Coverage matrix:\n  - hour x route: 3.9k-4.4k rows per cell\n"
+        "  - weekday x route: 2.1k-2.6k rows per cell",
+    )
+    assert cr.check(rec) == []
+    assert cr.check(rec, final=True) == []
+
+
+def test_a_nested_list_of_placeholders_is_still_unfilled_in_final_mode():
+    rec = GOOD_LEDGER.replace(
+        "- Coverage matrix: hour x route, 3.9k-4.4k rows per cell",
+        "- Coverage matrix:\n  - <cell>: <count>",
+    )
+    assert any(
+        "required slot 'Coverage matrix' is still unfilled" in f for f in cr.check(rec, final=True)
+    )
+
+
+def test_an_unindented_sibling_bullet_still_ends_a_slot_value():
+    rec = GOOD_LEDGER.replace(
+        "- Coverage matrix: hour x route, 3.9k-4.4k rows per cell",
+        "- Coverage matrix:",
+    )
+    assert any("required slot 'Coverage matrix' is empty" in f for f in cr.check(rec))

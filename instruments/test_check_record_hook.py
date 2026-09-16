@@ -225,10 +225,10 @@ def hook_command() -> str:
 
 def run_command_without_python(payload: dict, tmp_path: Path) -> subprocess.CompletedProcess:
     """Run the configured shell command with a PATH that has sh, sed, head, grep,
-    cat but no python3."""
+    awk, cat but no python3."""
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
-    for tool in ("sh", "sed", "head", "grep", "cat"):
+    for tool in ("sh", "sed", "head", "grep", "awk", "cat"):
         real = shutil.which(tool)
         assert real, tool
         (bin_dir / tool).symlink_to(real)
@@ -511,3 +511,58 @@ def test_without_python_a_mixed_patch_attributes_titles_per_file(tmp_path):
     r = run_command_without_python(codex_payload(two, patch), two)
     assert r.returncode == 2
     assert "not validated" in r.stderr
+
+
+# PR #34 review: the no-Python path sniffed every heading in the file's head,
+# so an ordinary document that quoted or embedded a record title was reported
+# as a record write -- contradicting "every other write stays silent" and
+# diverging from `looks_like_record`, which classifies the title line only.
+
+
+def test_without_python_a_document_quoting_a_record_title_is_silent(tmp_path):
+    f = tmp_path / "notes.md"
+    f.write_text(
+        "# Notes on record formats\n\n"
+        "The validator keys off a title line like:\n\n"
+        "# Decision Record: ship or hold\n\n"
+        "...which is why the sniff matters.\n"
+    )
+    assert hook_module.looks_like_record(str(f)) is False
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_a_record_behind_frontmatter_is_reported(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text("---\ntitle: x\n---\n\n" + SIGNATURE_RECORD)
+    assert hook_module.looks_like_record(str(f)) is True
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_without_python_unterminated_frontmatter_fails_closed(tmp_path):
+    f = tmp_path / "open.md"
+    f.write_text("---\ntitle: x\n\n# Notes\n")
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_shell_and_python_agree_on_the_title_sniff(tmp_path):
+    """The two paths must classify the same files the same way."""
+    cases = {
+        "record.md": SIGNATURE_RECORD,
+        "quotes-a-title.md": "# Notes\n\n# Decision Record: ship or hold\n",
+        "frontmatter-record.md": "---\na: b\n---\n\n# Investigation: why\n",
+        "plain.md": "# Meeting notes\n\nnothing here\n",
+        "blank-then-record.md": "\n\n# Exploration: shape of the table\n",
+    }
+    for i, (name, text) in enumerate(cases.items()):
+        case_dir = tmp_path / f"case{i}"
+        case_dir.mkdir()
+        f = case_dir / name
+        f.write_text(text)
+        shell = run_command_without_python({"tool_input": {"file_path": str(f)}}, case_dir)
+        assert shell.returncode == (2 if hook_module.looks_like_record(str(f)) else 0), name

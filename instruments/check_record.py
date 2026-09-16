@@ -580,8 +580,13 @@ def _slot_value(section: str, label: str) -> str | None:
     """The value of the first `- label:` bullet in `section`, or None when
     no such bullet exists. Emphasis around the label is ignored; the label
     itself must match the template's byte for byte. A value may continue on
-    the following non-bullet, non-heading, non-table lines (the VoI record's
-    prose slots do), so those are read when the label's own line is empty."""
+    the following lines -- a wrapped prose paragraph (the VoI record's prose
+    slots) or an indented sub-list (a coverage matrix written as one bullet
+    per cell) -- so those are read when the label's own line is empty.
+
+    Only an *unindented* bullet, heading, or table ends the value, the same
+    extent rule `_nested_span` uses: a nested bullet belongs to its parent
+    slot, and reading it as the next sibling reported filled slots empty."""
     lines = section.splitlines()
     for i, line in enumerate(lines):
         stripped = _unemphasize(line.strip())
@@ -597,7 +602,8 @@ def _slot_value(section: str, label: str) -> str | None:
                 if continuation:
                     break
                 continue
-            if t.startswith(("- ", "#", "|")):
+            indented = nxt[:1].isspace()
+            if not indented and t.startswith(("- ", "#", "|")):
                 break
             continuation.append(t)
         return " ".join(continuation)
@@ -722,6 +728,62 @@ def _check_nested_list(
                 findings.append(f"{heading}: '- {label}:' item still unfilled: {item!r}")
 
 
+def _toplevel_table(section: str) -> list[list[str]]:
+    """The section's own table rows -- the unindented ones. A table nested
+    under a `- Label:` bullet belongs to that slot and is checked by
+    `_check_nested_table`; reading it here would double-report it."""
+    return _table_rows("\n".join(ln for ln in section.splitlines() if not ln[:1].isspace()))
+
+
+def _section_unfilled(content: str) -> bool:
+    """A required section whose whole content is still template state: the
+    canonical `(pending -- ...)` marker, a bare `pending`, or an ellipsis.
+    Placeholder syntax *inside* an otherwise written section is left to the
+    cell and slot checks, which can say which cell is at fault."""
+    v = _normalize(content)
+    return bool(SECTION_PENDING.match(content) or PENDING.match(v) or v == "...")
+
+
+def _check_table_cells(body: str, kind: str, final: bool, findings: list[str]) -> None:
+    """Each required section's own table: every data row as wide as its
+    header, and -- in final mode -- every cell filled.
+
+    The width check runs in both modes because a short row is a structural
+    defect, not an unfinished one: `_column` skips the cells a short row is
+    missing, so an unchecked narrow row is exactly how an empty Method or
+    Outcome reaches a clean result. Fill state stays final-mode only, since a
+    write is not a delivery (decision 006).
+
+    Exception: a Tests row whose outcome is NOT_TESTED may carry `pending`
+    evidence. That is the row's honest state, not template residue."""
+    for heading in REQUIRED_SECTIONS.get(kind, []):
+        rows = _toplevel_table(_section(body, heading))
+        if len(rows) < MIN_TABLE_ROWS:
+            continue  # no table here, or the empty-table finding covers it
+        header, data = rows[0], rows[1:]
+        keys = [_header_key(h) for h in header]
+        outcome_idx = next((i for i, k in enumerate(keys) if k == "outcome"), None)
+        for n, row in enumerate(data, 1):
+            if len(row) < len(header):
+                findings.append(
+                    f"{heading} row {n}: has {len(row)} cells, header has {len(header)}"
+                )
+            if not final:
+                continue
+            not_tested = (
+                outcome_idx is not None
+                and outcome_idx < len(row)
+                and _leading_token(row[outcome_idx], OUTCOMES) == "NOT_TESTED"
+            )
+            for idx, cell in enumerate(row):
+                if not _unfilled(cell):
+                    continue
+                col = keys[idx] if idx < len(keys) else f"column {idx + 1}"
+                if not_tested and col == "evidence":
+                    continue
+                findings.append(f"{heading} row {n}: {col!r} cell still unfilled: {cell!r}")
+
+
 def _check_nested_tables(body: str, kind: str, final: bool, findings: list[str]) -> None:
     """Completed decision records carry a Consequences table and an Evidence
     table; a `- Label:` line with nothing under it is the omission finding 2
@@ -823,9 +885,16 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
         for heading in REQUIRED_SECTIONS[kind]:
             if ("\n" + heading + "\n") not in body:
                 findings.append(f"required section missing: {heading}")
-            elif not _section(body, heading).strip():
+                continue
+            content = _section(body, heading).strip()
+            if not content:
                 findings.append(f"required section empty: {heading}")
+            elif final and _section_unfilled(content):
+                # Final mode turns `_in_progress` off, so without this the
+                # sanctioned plan-stage marker reads as finished content.
+                findings.append(f"required section still unfilled: {heading}: {content!r}")
         _check_slots(body, kind, final, findings)
+        _check_table_cells(body, kind, final, findings)
         _check_nested_tables(body, kind, final, findings)
         if kind == "review":
             _check_review_route_blocks(body, final, findings)

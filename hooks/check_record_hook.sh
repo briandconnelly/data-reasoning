@@ -5,9 +5,34 @@
 # Claude Code sets CLAUDE_PLUGIN_ROOT; Codex sets PLUGIN_ROOT.
 # Failure semantics: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md
 root="${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT:-}}"
+# Mirrors FRONTMATTER_SCAN_BYTES in hooks/check_record_hook.py.
+FRONTMATTER_SCAN_BYTES=65536
 if command -v python3 >/dev/null 2>&1; then
   exec python3 "${root}/hooks/check_record_hook.py"
 fi
+# Print a file's document title: the first non-blank line after an optional
+# frontmatter block, which is the only line `looks_like_record` in the Python
+# hook classifies. Scanning every heading instead would call an ordinary
+# document that quotes or embeds `# Decision Record: ...` a record write, and
+# the two paths must agree. Exit 3 when frontmatter is still open at the end
+# of the budget: like the Python hook, an indeterminate title fails closed.
+record_title() {
+  head -c "$FRONTMATTER_SCAN_BYTES" "$1" | awk '
+    NR == 1 && $0 == "---" { fm = 1; next }
+    fm { if ($0 == "---") fm = 0; next }
+    /^[[:space:]]*$/ { next }
+    { print; exit }
+    END { if (fm) exit 3 }
+  '
+}
+
+# True when $1 is a record: its title carries a signature, or its title could
+# not be determined.
+has_record_title() {
+  title=$(record_title "$1") || return 0
+  printf '%s\n' "$title" | grep -q -E '^# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '
+}
+
 # Print the first readable .md path on stdin (one per line, relative ones
 # resolved against $1) whose head carries a record title; print nothing else.
 first_record_path() {
@@ -22,7 +47,7 @@ first_record_path() {
       (*) full="${1:-.}/$p" ;;
     esac
     [ -r "$full" ] || continue
-    if head -c 4096 "$full" | grep -q -E '^# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
+    if has_record_title "$full"; then
       printf '%s\n' "$full"
       return 0
     fi
@@ -72,7 +97,7 @@ case "$file_path" in
   *) exit 0 ;;
 esac
 [ -r "$file_path" ] || exit 0
-if head -c 4096 "$file_path" | grep -q -E '^# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
+if has_record_title "$file_path"; then
   printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$file_path" >&2
   exit 2
 fi

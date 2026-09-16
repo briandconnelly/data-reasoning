@@ -19,7 +19,13 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-QUOTE = re.compile(r"[“\"]([^”\"]{12,}?)[”\"]\s*\(([\w./-]+(?:\.md|\.jsonl|\.json|\.txt))\)")
+# A backslash-escaped inner quote belongs to the span, not to its end: without
+# `\\.` here, a citation carrying an escaped inner quote matched only the
+# suffix after the inner quote, and the material first half went unchecked.
+QUOTE = re.compile(
+    r"[“\"]((?:\\.|[^”\"\\]){12,}?)[”\"]\s*\(([\w./-]+(?:\.md|\.jsonl|\.json|\.txt))\)"
+)
+UNESCAPE = re.compile(r"\\(.)")
 
 
 def text_of(path: Path) -> str:
@@ -43,7 +49,7 @@ def main() -> int:
     for rec in sys.argv[1:]:
         for m in QUOTE.finditer(Path(rec).read_text(encoding="utf-8")):
             total += 1
-            quote = re.sub(r"\s+", " ", m.group(1))
+            quote = re.sub(r"\s+", " ", UNESCAPE.sub(r"\1", m.group(1)))
             target = HERE / m.group(2)
             if not target.exists():
                 print(f"{rec}: archive not found: {m.group(2)}")

@@ -61,11 +61,23 @@ def main() -> None:  # noqa: PLR0912, PLR0915 -- one linear pass per fixture pro
     entity_ids = [a["account_id"] for a in accounts if "Northgate" in a["account_name"]]
     if len(entity_ids) != ENTITY_IDS:
         fail(f"entity should resolve to two ids, found {entity_ids}")
-    if not any("formerly" in a["account_name"] for a in accounts):
-        fail("rename is not recorded in accounts.csv")
+    # On a resolved row, not on any account: an unrelated account carrying the
+    # word would otherwise stand in for the entity's own rename marker.
+    if not any("formerly" in a["account_name"] for a in accounts if a["account_id"] in entity_ids):
+        fail("rename is not recorded on either Northgate row in accounts.csv")
     others = [a["account_id"] for a in accounts if a["account_id"] not in entity_ids]
     if len(others) < MIN_OTHER_ACCOUNTS:
         fail("the entity must be a subset: need at least two other accounts")
+    # Property 1's "other accounts share every file": without this, stripping
+    # every non-Northgate row from tickets, contract_status or plan_changes
+    # would leave the entity as the whole table and B10's subset control gone.
+    for name, table in (
+        ("tickets.csv", tickets),
+        ("contract_status.csv", contract),
+        ("plan_changes.csv", changes),
+    ):
+        if not any(r["account_id"] in others for r in table):
+            fail(f"the entity must be a subset: {name} carries no other account")
 
     ent_bill = [b for b in billing if b["account_id"] in entity_ids]
     ent_tix = [t for t in tickets if t["account_id"] in entity_ids]
