@@ -68,13 +68,22 @@ Both hosts get a PostToolUse hook (`hooks/hooks.json`, declared in both plugin m
 What the validator may and may not check is owned by `skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`.
 The write paths covered are exactly these: Claude Code's `Write` and `Edit` tools, which name the file in `tool_input.file_path`, and Codex's `apply_patch`, whose `Write|Edit` matcher alias hands the hook the patch text in `tool_input.command`.
 A record created by a shell command — a heredoc, a redirect, a script — is on neither path and is not validated; nothing in this plugin parses shell commands for file writes.
-Codex runs a plugin hook only after the user has reviewed and trusted its definition (`/hooks` in Codex), so a Codex install has no live validation until that trust is granted.
+For Codex hook activation and verification, see [Verify a Codex install](#verify-a-codex-install).
 The hook needs `python3` on the host's `PATH`.
 Without it, a record write is reported as not validated and every other write stays silent; the shell fallback classifies a file by its title line alone, exactly as the Python hook does, and needs `sh`, `sed`, `head`, `grep`, `awk`, and `cat`.
 A record whose path contains a double quote cannot be sniffed without Python and is skipped.
 Without it, an `apply_patch` payload is handled by sniffing each `.md` file the patch names on disk and by scanning the patch text itself for a record title, so both a new record and a title-free edit to an existing one are reported as not validated, while a file the patch names that is not on disk is skipped.
 The hook runs the validator's default mode, in which a record still carrying template placeholders or `pending` slots is in progress and owes no completeness findings; `check_record.py --final <record>` is the completed-record mode, in which every required slot, every required section, and every cell of a required section's table must be filled -- except a Tests row left `NOT_TESTED`, whose evidence may stay `pending`.
 No skill yet tells the agent to run `--final` before delivering a record: that pointer is agent-read prose and owes measured arms first, on the terms in the decision record above.
+
+For a record written through the shell, or an explicit completed-record check, run the validator directly from the installed plugin directory:
+
+```bash
+python3 /absolute/path/to/data-reasoning/instruments/check_record.py /absolute/path/to/record.md
+python3 /absolute/path/to/data-reasoning/instruments/check_record.py --final /absolute/path/to/record.md
+```
+
+These commands provide structural validation, not a review of the analysis or evidence.
 
 ## Installation
 
@@ -102,6 +111,55 @@ codex plugin add data-reasoning@data-reasoning
 
 Adding the marketplace without `--ref release` clones the full evidence archive.
 Start a new Codex session after installation so the bundled skills are available.
+
+Continue with [Verify a Codex install](#verify-a-codex-install) before relying on automatic validation.
+
+### Verify a Codex install
+
+Codex runs a plugin hook only after the user has reviewed and trusted its definition: open `/hooks`, select the data-reasoning hook, and review/trust it.
+Repeat that review if Codex reports changed hook definitions after an update.
+
+Use the actual installed plugin root below, not a source checkout; a loaded skill's path is `<plugin-root>/skills/<skill-name>/SKILL.md`.
+The install checker needs Python 3.11 or newer and executes the installed hook command against a temporary invalid record, which it removes afterward.
+
+```bash
+python3 /absolute/path/to/data-reasoning/instruments/check_install.py
+```
+
+A pass checks the discoverable skill layout and direct hook execution only; it cannot establish that Codex trusts or invokes the hook.
+For the live test, ask Codex:
+
+> Use `apply_patch` to create a new temporary Markdown file in this workspace containing `# Decision Record: hook probe`, then `## Verdict`, then `- Verdict: optimal`, with blank lines between them.
+> Report whether the tool response automatically includes data-reasoning structural findings, then remove the temporary file.
+> Do not invoke the hook script manually for this test.
+
+The expected feedback includes the invalid `optimal` verdict and missing sections.
+A successful file write with no findings is not a successful hook test; check `/hooks` and retry in a new session.
+For writes outside the hook's coverage, see [Live record validation](#live-record-validation).
+
+### Recover an install containing test skills
+
+The advertised data-reasoning skills should be the four listed in [Skills](#skills).
+An extra `data-reasoning:s18-analytics` comes from a development fixture: a full source checkout was installed instead of the runtime release tree.
+The release builder excludes fixtures, and the install checker reports nested discoverable skills.
+For an older install without that checker, run the current source checkout's `instruments/check_install.py` with the installed plugin root as its argument.
+
+Reinstall from the `release` branch using the [Codex installation commands](#codex), then start a new session and repeat [verification](#verify-a-codex-install).
+If an existing non-default marketplace entry prevents registering the release source, remove that configured marketplace by its actual name with `codex plugin marketplace remove <marketplace-name>` before adding the release marketplace.
+For the default personal marketplace, remove the plugin with `codex plugin remove data-reasoning@data-reasoning`, then add it again from the release marketplace.
+Do not delete or edit individual cached fixture files: the source package determines what returns on the next install.
+
+For local development installs, build a runtime tree first and register that directory as the marketplace:
+
+```bash
+python3 scripts/build-release-tree.py /absolute/path/to/data-reasoning-runtime
+python3 /absolute/path/to/data-reasoning-runtime/instruments/check_install.py
+codex plugin marketplace add /absolute/path/to/data-reasoning-runtime
+codex plugin add data-reasoning@data-reasoning
+```
+
+Use a fresh output directory or one previously created by this builder.
+Resolve an existing marketplace registration as described above before registering a different source with the same name.
 
 ## Development
 
