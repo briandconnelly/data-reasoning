@@ -44,3 +44,20 @@ def test_missing_validator_is_not_a_pass(tmp_path):
     )
     assert result.returncode == 1
     assert "validator missing" in result.stdout
+
+
+def test_missing_manifest_hook_config_is_not_a_pass(tmp_path):
+    root = tmp_path / "release"
+    subprocess.run(
+        [sys.executable, str(REPO / "scripts/build-release-tree.py"), str(root)], check=True
+    )
+    manifest = root / ".codex-plugin/plugin.json"
+    manifest.write_text(manifest.read_text().replace("./hooks/hooks.json", "./hooks/missing.json"))
+    result = subprocess.run(
+        [sys.executable, str(root / "instruments/check_install.py")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 1
+    assert "missing.json" in result.stdout

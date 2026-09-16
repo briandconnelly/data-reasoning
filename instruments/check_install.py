@@ -33,7 +33,8 @@ def check_surface(root: Path) -> list[str]:
 
 
 def check_hook(root: Path) -> list[str]:
-    config = json.loads((root / "hooks/hooks.json").read_text())
+    manifest = json.loads((root / ".codex-plugin/plugin.json").read_text())
+    config = json.loads((root / manifest["hooks"]).read_text())
     command = config["hooks"]["PostToolUse"][0]["hooks"][0]["command"]
     env = {**os.environ, "PLUGIN_ROOT": str(root)}
     env.pop("CLAUDE_PLUGIN_ROOT", None)
