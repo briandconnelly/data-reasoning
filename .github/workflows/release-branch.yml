@@ -39,8 +39,11 @@ jobs:
       - name: Commit onto the release branch
         # `release` keeps its history: each publish is a commit on top of the
         # previous one, pushed without force, so the prior release stays
-        # addressable (`release~1`) and rollback is `git revert` or a push of
-        # that commit back to `release`. A first publish starts the branch.
+        # addressable (`release~1`). Rolling back therefore moves forward --
+        # `git revert`, or a new commit whose tree is the prior release
+        # (`git restore --source=release~1 -- .` then commit). Pushing that
+        # older commit itself is non-fast-forward, and nothing here force-
+        # pushes, so it would be rejected. A first publish starts the branch.
         run: |
           set -eu
           url="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
