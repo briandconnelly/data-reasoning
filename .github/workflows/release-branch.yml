@@ -12,19 +12,55 @@ permissions:
   contents: write
 
 jobs:
+  # The checks run here, in the same workflow as the publish, so the publish
+  # job can depend on them for the exact commit being published. A separate
+  # workflow's run would be a different job graph with no dependency edge,
+  # and a commit could reach `release` before -- or despite -- its checks.
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # check-citations verifies commit-pinned quotes with `git show`, so it
+          # needs history rather than the default shallow checkout.
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - name: Install prek
+        run: uv tool install prek==0.3.11
+      - name: Run prek hooks
+        run: prek run --all-files
+
   publish:
+    needs: checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/build-release-tree.py "$RUNNER_TEMP/release"
-      - name: Push to release branch
+      - name: Commit onto the release branch
+        # `release` keeps its history: each publish is a commit on top of the
+        # previous one, pushed without force, so the prior release stays
+        # addressable (`release~1`) and rollback is `git revert` or a push of
+        # that commit back to `release`. A first publish starts the branch.
         run: |
           set -eu
-          cd "$RUNNER_TEMP/release"
+          url="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          if git clone -q --branch release --single-branch "$url" "$RUNNER_TEMP/release-repo" 2>/dev/null; then
+            cd "$RUNNER_TEMP/release-repo"
+            git rm -rq --quiet . 2>/dev/null || true
+            find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          else
+            mkdir -p "$RUNNER_TEMP/release-repo"
+            cd "$RUNNER_TEMP/release-repo"
+            git init -q -b release
+          fi
+          cp -R "$RUNNER_TEMP/release/." .
           rm -f .data-reasoning-release
-          git init -q -b release
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
+          if git diff --cached --quiet; then
+            echo "release tree unchanged for $GITHUB_SHA; nothing to publish"
+            exit 0
+          fi
           git commit -q -m "chore(release): runtime tree for $GITHUB_SHA"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" release
+          git push "$url" release

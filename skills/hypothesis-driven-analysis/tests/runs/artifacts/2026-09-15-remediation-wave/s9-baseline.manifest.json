@@ -1,0 +1,99 @@
+{
+  "name": "s9-baseline",
+  "started_utc": "2026-09-15T17:53:41.511597+00:00",
+  "duration_s": 40.5,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "1c8698ea-19c3-44a4-aaca-b57a10acfac4",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s9-ab/signups.csv",
+  "fixture_files_sha256": {
+    "signups.csv": "f754c63cd9476b7da553a523a5b1c1c843357a11e90565aa3d5ee09e69a777a1"
+  },
+  "prompt_sha256": "05255de4e5e6b329099eb54fecc376b2ffb61b8d0e02c82cf353aff213af0366",
+  "jsonl_sha256": "a2c58d76513e6a9469bf44d80fdaae704dff9939ba7e3c4ab88dc232db907331",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u",
+  "files_written": [
+    "analysis_output.txt",
+    "analyze.py"
+  ],
+  "files_written_sha256": {
+    "analysis_output.txt": "e13d5aa47c2672c2976b517a4f0c3d8e9d9569ebbfdd557f01f207ccbb057339",
+    "analyze.py": "ee5ddc182ee679073f7938ae08305811608907919a1fbf46e9d46d523aeb2559"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"wc -l /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/data/signups.csv && head -20 /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/data/signups.csv\", \"description\": \"Check row count and preview signups.csv\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cat /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/data/signups.csv\", \"description\": \"View full signups.csv contents\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/work\\ncat << 'EOF' > /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/work/analyze.py\\nimport csv, math\\nfrom collections import defaultdict\\n\\npath = \\\"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/data/signups.csv\\\"\\n\\nrows = []\\nwith open(path) as f:\\n    r = csv.DictReader(f)\\n    for row in r:\\n        rows.append({\\n            \\\"date\\\": row[\\\"date\\\"],\\n            \\\"variant\\\": row[\\\"variant\\\"],\\n            \\\"visits\\\": int(row[\\\"visits\\\"]),"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 16650,
+    "cache_read_input_tokens": 555301,
+    "output_tokens": 3595,
+    "output_tokens_details": {
+      "thinking_tokens": 503
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16650,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 820,
+        "cache_read_input_tokens": 184166,
+        "cache_creation_input_tokens": 2956,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2956
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.2148242,
+    "duration_ms": 39795,
+    "num_turns": 4
+  },
+  "result_text": "## Result: Yes \u2014 B beat A, by about 0.63 percentage points (a ~15% relative lift)\n\n**Overall (14 days, all visitors pooled):**\n\n| Variant | Visits | Signups | Conversion rate |\n|---|---|---|---|\n| A | 14,089 | 583 | 4.14% |\n| B | 13,961 | 666 | 4.77% |\n\n- **Absolute lift:** B \u2212 A = +0.63 percentage points\n- **Relative lift:** +15.3% over A's baseline\n- **95% CI on the absolute difference:** [0.15, 1.12] percentage points \u2014 entirely above zero\n- **Two-proportion z-test:** z = 2.57, p = 0.010 (significant at the standard 0.05 threshold)\n\n**Robustness check (day-level, since randomization was per-visitor but data is daily):**\n- Treating each of the 14 days as one paired observation, B beat A on 9 of 14 days, with a mean daily edge of +0.63 pp (matches the pooled estimate) and a paired t-test of t = 2.42 (critical value \u2248 2.16 at df=13), also significant.\n- No meaningful time trend in the daily B\u2212A gap (slope \u2248 \u22120.03 pp/day), so there's no sign of a novelty effect fading or a fatigue effect growing during the two weeks.\n- Traffic was well balanced between arms (13,961 vs 14,089 visits, ~1% difference), so there's no obvious allocation issue confounding the result.\n\n**Bottom line:** Both the pooled test and the day-level paired test agree \u2014 B's conversion rate is reliably higher than A's, by roughly 0.6 percentage points in absolute terms, a ~15% relative improvement in signup rate.\n\nWorking files (raw script and full output) are saved in `/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-s9-baseline-rmcm0e2u/work/` (`analyze.py`, `analysis_output.txt`)."
+}

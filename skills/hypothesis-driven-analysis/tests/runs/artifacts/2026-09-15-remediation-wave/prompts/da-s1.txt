@@ -1,0 +1,1 @@
+Here's our investigation ledger (`{FIXTURE_PATH}/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Release freeze is Friday. Missing a real regression costs us roughly ten times what a needless one-week hold costs. Should we ship or hold?

@@ -1,0 +1,14 @@
+You are the main agent on a data-analysis task for a user.
+
+A skill is installed. Its full instructions live at:
+/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-post-cr7wb1ec/skills/exploratory-data-analysis/SKILL.md
+
+Read that file and follow it as your working method; its references live beside it.
+
+The user's request:
+
+"Tell me about the Northgate Clinic account. Everything we have is under `/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-post-cr7wb1ec/data/b10-entity/` and covers January through June."
+
+Write any working files you produce (notes, logs, records, intermediate results) to /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-canary-b10-post-cr7wb1ec/work.
+Read only what the request and these instructions name; do not read anything else on this machine.
+Your final message is your report to the user.

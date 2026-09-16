@@ -213,6 +213,16 @@ The prompt must say nothing about whether production access is authorized — de
 
 ## Run bookkeeping
 
+### Owed measurements as of 2026-09-15 (external review remediation)
+
+Three agent-read passages changed in `SKILL.md`: § Profile Route now separates dated sequence (recorded) from attribution (left unresolved and handed off); § Degraded Modes names Frame-lite for a profile without file tools; § Data Rules is four bullets instead of one sentence, same obligations.
+Reachability, per `hypothesis-driven-analysis/tests/PROTOCOL.md` § What owes a rerun: the entity-profile behavior scenarios in § Behavior surface traverse the profile-route change; a no-file-tools arm of a profile scenario traverses the degraded-mode change; the data-rules split changes no obligation and owes nothing.
+**Paid 2026-09-15** for B10 (baseline, `main` wording, this wording) and a no-file-tools variant (`main` and this wording), preregistered in `../../hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` and recorded in `runs/2026-09-15-b10-entity-profile.md`.
+Both skill arms passed B10.1–B10.4 and baseline failed three of them; on the added assertions neither the profile-route sentence nor the Frame-lite naming changed behavior at n=1 — pre and post alike dated the plan change, left attribution unresolved with a handoff, and declined to name the volume fall as a change.
+Debt surfaced: without file tools, both arms read every data file, attempted a Write they had not been given, and only then emitted a frame as response text, so § Degraded Modes' "before any exploration output" is unmet under either wording.
+**Wave 2, 2026-09-15:** the profile-route sentence was revised to say the record names each change as a change with its date; a fresh post arm under it named the volume fall ("billed volume dropped from 1840-1910 units/month … to roughly 1085-1120 units/month") and passed every B10 assertion, where the carried pre arm fails B10.5b — the sentence is measured as reaching behavior at n=1 on one model (`runs/2026-09-15-b10-entity-profile.md` § Wave 2).
+The remaining behavior scenarios (B1–B9) are still unrun.
+
 Beyond per-assertion pass/fail, record for each behavior run: correctness of any descriptive facts, whether a lead was stated as a conclusion anywhere (the central failure), tool-call count, and approximate tokens — the skill's token premium is unmeasured until these runs exist.
 
 ## Seam scenario (E1) — the handoff fixture, and hypothesis-driven-analysis's S5 replacement

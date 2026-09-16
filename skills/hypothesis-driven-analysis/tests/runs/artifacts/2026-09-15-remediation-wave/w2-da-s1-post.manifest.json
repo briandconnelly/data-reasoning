@@ -1,0 +1,125 @@
+{
+  "name": "w2-da-s1-post",
+  "started_utc": "2026-09-15T23:03:34.970750+00:00",
+  "duration_s": 215.8,
+  "exit_code": 0,
+  "claude_version": "2.1.273 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "a5ecd7dc-45bf-44fe-a03c-75a8b6575324",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "60d68e531caa5d024274ea84f686acf1c4f53c2ff3930cc7a6f69ba6d12ce260",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "e5bef07db76ba6da74a897c12af7216055536890fc6aae8003e8cde49b6963cf"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "fab80698906bfff4d13651eccab1be06479fd7e2b472adc8bc2ffe226b36fa65",
+  "jsonl_sha256": "f32cf34fc17e5ee1ae024d188a16c564a48cbbc158a188bf5cc5c80933dbef16",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e",
+  "files_written": [
+    "decision-record-ship-or-hold.md"
+  ],
+  "files_written_sha256": {
+    "decision-record-ship-or-hold.md": "1e312a9e04119a87e91f264ddd0dd75e150ab796839c1ce56db18074dd410430"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/skills/decision-analysis/references/ 2>&1; ls /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/work 2>&1\", \"description\": \"List skill references and work directory\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/work\", \"description\": \"Ensure work directory exists\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s1-post-tuh7t87e/work/decision-record-ship-or-hold.md\", \"content\": \"# Decision Record: ship the release carrying the connection-pool change, or hold for one week, given the UNRESOLVED p95-regression ledger\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship vs hold\\n- Decision owner: release owner (user)\\n- Reversibility: shipping a real regression reaches all users before it can be rolled back and forces a reactive hotfix under incident conditions; holding one week is fully reversible \\u2014 the same release ships "
+    }
+  ],
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 42710,
+    "cache_read_input_tokens": 984109,
+    "output_tokens": 17686,
+    "output_tokens_details": {
+      "thinking_tokens": 13886
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 42710,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 917,
+        "cache_read_input_tokens": 210822,
+        "cache_creation_input_tokens": 2397,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2397
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.5458518,
+    "duration_ms": 215161,
+    "num_turns": 7
+  },
+  "result_text": "## Ship or hold: **hold**, and the recommendation is robust\n\nFull record: `work/decision-record-ship-or-hold.md`\n\n**Why the ledger's two UNRESOLVED rows don't leave you stuck:** `UNRESOLVED` itself carries no likelihood information, but two of the ledger's tests do carry usable signal once unpacked:\n\n- **T1** (57 ms gap, exceeds the 40 ms noise band) rules out pure noise, but doesn't discriminate H1 (real regression) from H2 (exporter artifact) \u2014 both predict the same pipeline-measured gap. I scored it `none supported` rather than inventing a number from it.\n- **T3** (reference-class rollouts: gap seen in 9/10 real regressions vs 2/10 non-regressions) *does* license a likelihood ratio of **4.5**, despite the ledger's own caveat that the stratified sample carries no base rate \u2014 that caveat blocks using it as a prior, not as a within-stratum frequency ratio.\n- **T2**, the one test that would have separated H1 from H2 directly, never ran (raw logs not restored in time).\n\nWith no supported prior (nothing in the ledger gives a real-regression base rate), I swept prior odds 0.25\u20134 (skeptical to favorable) and swept your loss ratio 5\u201315 around your stated \"~10x\" \u2014 applying T3's LR of 4.5 to every combination. **Hold wins everywhere in that entire sweep**, comfortably: even at the most skeptical prior (1:4) and the most ship-favorable loss end (5x), hold's expected loss is still ~5x lower than ship's. The actual crossover \u2014 where ship would become preferred \u2014 sits at a prior probability of roughly 1.5\u20134.3%, well outside the swept range; you'd have to believe there's less than a ~1-in-25 chance the regression is real, before even weighing T3, to justify shipping.\n\n**Verdict: `robust` \u2014 hold**, conditional on: (a) your \"roughly 10x\" loss ratio being in the right ballpark (holds from 5x to 15x), and (b) no one holding a prior below ~2-4% that this is a real regression, which would require dismissing the already-observed above-noise gap almost entirely.\n\n**One thing worth doing before Friday, not instead of this recommendation:** the pending restore of the raw access logs (S3) is the one pull that could resolve H1 vs. H2 outright. Given how one-sided this verdict already is, it's not decision-critical \u2014 but if the restore can land before the freeze at low cost, it turns an evidence-bounded recommendation into a settled fact.\n\n**Boundary note:** this analysis only weighs the evidence already in the ledger \u2014 it doesn't authorize the hold itself; that action is yours to take."
+}

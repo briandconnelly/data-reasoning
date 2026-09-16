@@ -4,18 +4,18 @@ This template records a decision analysis's content.
 `../SKILL.md` governs what that content means.
 Every closed-vocabulary slot below — route, verdict, provenance — names only the slot: which value applies, what values exist, and what each value means are `../SKILL.md`'s to state, not this template's.
 Fill one record per decision; use the Decide blocks for the decide route and the VoI block alone for the voi route.
-Numeric slots take a single number or a `<low>–<high>` range with low ≤ high; odds and likelihood ratios are positive.
+The skeletons show the exact label and the bare shape of each value; everything else a slot needs to know is in § Slot notes below, outside the record, so that none of it is copied into one.
 
 ```markdown
 # Decision Record: <one-line decision>
 
 ## Decision frame
 
-- Route: decide — value set per `../SKILL.md` § Routing (authority)
+- Route: decide
 - Actions: <action A> vs <action B>
 - Decision owner: <who decides and acts>
 - Reversibility: <what undoing each action costs>
-- Deadline or forcing event: <when the decision happens by default, or `none`>
+- Deadline or forcing event: <date or event, or none>
 - Consequences:
 
   | | <proposition> true | <proposition> false |
@@ -23,47 +23,47 @@ Numeric slots take a single number or a `<low>–<high>` range with low ≤ high
   | <action A> | <outcome> | <outcome> |
   | <action B> | <outcome> | <outcome> |
 
-- Loss ratio: <cost of wrongly choosing A over B, as a multiple> — provenance: <class>
-- Decision threshold (posterior odds): <odds at which the preferred action flips> — provenance: <class> — or `none stated`
+- Loss ratio: <multiple> — provenance: <class>
+- Decision threshold (posterior odds): <odds> — provenance: <class>
 
 ## Decision-state model
 
 - Proposition: <the binary proposition the decision turns on>
-- Residual reading: <what "false" includes — explicitly covering explanations nobody named>
-- Claim class: <value> — value set per `../SKILL.md` § The Decide Route (authority)
-- Identification basis: <pointer to the design or review licensing a causal posterior, or `NONE`>
-- Identification conditions: <the identifying assumptions restated as explicit conditions, when the basis is an identified-if review — or `none`>
-- Ledger mapping: <which UNRESOLVED rows fold into which state and what the residual absorbs, or `none`>
+- Residual reading: <what "false" includes, covering explanations nobody named>
+- Claim class: <value>
+- Identification basis: <design or review licensing a causal posterior, or NONE>
+- Identification conditions: <identifying assumptions as explicit conditions, or none>
+- Ledger mapping: <which UNRESOLVED rows fold into which state and what the residual absorbs, or none>
 
 ## Evidence and update
 
-- Prior odds: <odds or range> — provenance: <class> — or `none needed` under a dominated verdict
+- Prior odds: <odds or range> — provenance: <class>
 - Evidence:
 
   | item | LR | provenance | source, reference class, conditioning |
   | --- | --- | --- | --- |
   | <evidence item> | <ratio or range> | <class> | <where the ratio comes from> |
 
-- Independence: <why the items above are conditionally independent given each state, or `single item`>
-- Posterior odds: <odds or range, recomputable from the lines above> — or `none needed` under a dominated verdict
+- Independence: <single item, or why the items are conditionally independent given each state>
+- Posterior odds: <odds or range>
 
 ## Robustness
 
-- Prior class swept: <the range of prior odds considered> — provenance: <class> — or `none needed` under a dominated verdict
-- Loss range swept: <the range of loss ratios considered> — provenance: <class>
-- Crossover: <the prior or loss ratio at which the preferred action flips, or `none within swept class`> — or `none needed` under a dominated verdict
+- Prior class swept: <low>–<high> — provenance: <class>
+- Loss range swept: <low>–<high> — provenance: <class>
+- Crossover: <the prior odds or loss ratio at which the preferred action flips, or none within swept class>
 
 ## Verdict
 
-- Verdict: <value> — value set and semantics per `../SKILL.md` § The Decide Route (authority)
-- Recommended action: <one of the two actions, exactly as written in Actions — or `returned to owner` under a sensitive verdict, per `../SKILL.md` § The Decide Route (authority)>
+- Verdict: <value>
+- Recommended action: <action A or action B exactly as written in Actions, or returned to owner>
 - Conditions: <the prior class, loss provenance, and assumptions the verdict is conditional on>
 
 ## Handoff
 
-- Open factual disputes: <what would change the verdict and needs adjudication, or `none`>
-- Identification gaps: <causal propositions lacking a licensing design or review, or `none`>
-- VoI question: <the collect-more option worth pricing, or `none`>
+- Open factual disputes: <what would change the verdict and needs adjudication, or none>
+- Identification gaps: <causal propositions lacking a licensing design or review, or none>
+- VoI question: <the collect-more option worth pricing, or none>
 
 This block states facts, crossovers, and open questions only.
 It does not recommend or prescribe which route a receiving skill takes.
@@ -74,12 +74,38 @@ It does not recommend or prescribe which route a receiving skill takes.
 
 ## VoI
 
-- Route: voi — value set per `../SKILL.md` § Routing (authority)
-- Pending decision: <value per `../SKILL.md` § The VoI Route (authority)>
-- Signal model: <value per `../SKILL.md` § The VoI Route (authority)>
-- Value basis: <value> — value set and semantics per `../SKILL.md` § The VoI Route (authority)
-- Value calculation: <value per `../SKILL.md` § The VoI Route (authority); continuation paragraphs may follow>
-- Upper bound: <value per `../SKILL.md` § The VoI Route (authority)>
-- Cost: <value per `../SKILL.md` § The VoI Route (authority)>
-- Verdict: <value> — value set and semantics per `../SKILL.md` § The VoI Route (authority)
+- Route: voi
+- Pending decision: <value>
+- Signal model: <value>
+- Value basis: <value>
+- Value calculation: <value>
+- Upper bound: <value>
+- Cost: <value>
+- Verdict: <value>
 ```
+
+## Slot notes
+
+These notes are read once and never copied into a record.
+They describe how a value is written; what a value means, which values exist, and when each applies are `../SKILL.md`'s to state (§ Routing, § Numeric Policy, § The Decide Route, § The VoI Route).
+
+A decide-record line carries the label, the value, and — where the skeleton shows one — a single ` — provenance: <class>` suffix, and nothing else.
+Explanation goes in the Conditions slot, the Handoff block, or the report, not after the value; a value followed by a parenthesis, a dash, or a clause is a different value.
+
+Labels are copied exactly as the skeleton spells them, colon included.
+A relabelled slot (`Proposition (H1):`, `Consequences (units: …):`) is a missing slot to every checker.
+
+Numeric slots — Loss ratio, Decision threshold, Prior odds, Posterior odds, Prior class swept, Loss range swept, and the LR cell — take a single number or a `<low>–<high>` range with low ≤ high, written as decimals: `0.02–0.2`, not `1:49 to 1:4`; `4.5`, not `4.5 (= 0.9/0.2)`.
+Odds and likelihood ratios are positive.
+
+Provenance is exactly one class from `../SKILL.md` § Numeric Policy on the decide slots the skeleton marks and in the evidence table's provenance cell.
+`derived` is not a class; a threshold derived from an elicited loss ratio carries the loss ratio's class.
+
+Sentinels replace the whole value and appear bare, with no suffix and no provenance.
+The decide record's sentinels, by slot, are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` (Recommended action); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's to say; a stated Crossover is a bare number or ordered range, optionally introduced by `flips at prior odds`.
+
+The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
+
+The VoI record's slots are not bare-value slots: `../SKILL.md` § The VoI Route says what each carries, including which VoI numbers carry a provenance class and where a missing input's explanation goes (the Value calculation slot, whose continuation paragraphs may follow the line).
+Those rules are not restated here.

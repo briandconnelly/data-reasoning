@@ -808,3 +808,103 @@ def test_sensitive_recommended_action_must_return_to_owner():
         "- Crossover: flips at loss ratio 12",
     )
     assert any("returned to owner" in msg for msg in check(bad))
+
+
+# Remediation wave 2026-09-15, row 2: three archived records carried `\|`
+# inside an evidence source cell and parsed as six-cell rows.
+
+
+def test_escaped_pipe_inside_an_evidence_cell_is_content():
+    text = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | P(gap \\| real)=9/10, "
+        "P(gap \\| not)=2/10 |",
+    )
+    assert check(text) == []
+
+
+def test_unescaped_extra_pipe_is_still_an_extra_cell():
+    text = replace_once(
+        VALID_DECIDE,
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "  | repro on staging | 3–5 | estimated-from-data-in-hand | P(gap | real) | extra |",
+    )
+    assert any("cells; the template requires exactly 4" in f for f in check(text))
+
+
+# Wave-2 canary 2026-09-15: a robust record named the flip point outside the
+# swept class, which § Robustness asks for; the checker demanded the sentinel.
+
+
+def test_robust_may_name_the_flip_point_outside_the_swept_class():
+    # VALID_DECIDE: threshold 0.1, LR 3-5 -> flip interval [0.02, 0.0333]; swept 0.25-1.0
+    ok = replace_once(
+        VALID_DECIDE,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.025",
+    )
+    assert check(ok) == []
+
+
+def test_robust_with_a_flip_point_not_matching_the_arithmetic_fails():
+    bad = replace_once(
+        VALID_DECIDE, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.5"
+    )
+    assert any("robust verdict requires Crossover" in f for f in check(bad))
+
+
+def test_robust_flip_point_may_span_the_swept_loss_range():
+    # loss range 5-20 implies thresholds 0.05-0.2; with LR 3-5 the flip spans [0.01, 0.0667]
+    ok = replace_once(
+        VALID_DECIDE,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.06",
+    )
+    assert check(ok) == []
+
+
+# Final review 2026-09-15: the accepted crossover interval and the intersection
+# gate must be the same interval, and every stated number must lie in it.
+
+
+def test_robust_with_swept_losses_that_pull_the_flip_into_the_class_fails():
+    # losses 5-20 imply thresholds 0.05-0.2; with LR 3-5 the flip spans [0.01, 0.0667],
+    # which overlaps a swept prior class of 0.05-1.0 -- not robust.
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.05–1.0 — provenance: sensitivity-only",
+    )
+    bad = replace_once(
+        bad, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.06"
+    )
+    assert any("lies inside the swept prior class" in f for f in check(bad))
+
+
+def test_every_number_in_a_stated_crossover_must_be_in_the_interval():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.06–999",
+    )
+    assert any("robust verdict requires Crossover" in f for f in check(bad))
+
+
+# Re-review 2026-09-15: digit fragments were accepted wherever they appeared.
+
+
+def test_crossover_grammar_rejects_signs_reversed_ranges_and_prose():
+    for value in ("-0.025", "0.06–0.02", "none known at 0.025", "roughly 0.025 or so"):
+        bad = replace_once(
+            VALID_DECIDE, "- Crossover: none within swept class", f"- Crossover: {value}"
+        )
+        assert any("robust verdict requires Crossover" in f for f in check(bad)), value
+
+
+def test_crossover_grammar_accepts_the_stated_forms():
+    for value in ("0.025", "prior odds 0.025", "flips at prior odds 0.02–0.03"):
+        ok = replace_once(
+            VALID_DECIDE, "- Crossover: none within swept class", f"- Crossover: {value}"
+        )
+        assert check(ok) == [], value

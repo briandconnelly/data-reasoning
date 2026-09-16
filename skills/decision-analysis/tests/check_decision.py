@@ -204,13 +204,37 @@ def _close(a: float, b: float) -> bool:
     return abs(a - b) <= _REL_TOLERANCE * max(abs(a), abs(b), 1e-12)
 
 
+# A cell boundary is an unescaped pipe; `\|` inside a cell (a conditional
+# probability such as P(gap | real)) is content, not a column. Found by the
+# 2026-09-15 remediation wave: three archived records parsed as six-cell
+# evidence rows because of it (row 2 of that wave's preregistration).
+_CELL_SPLIT = re.compile(r"(?<!\\)\|")
+
+
+# A stated crossover is a bare number or ordered range, optionally introduced
+# by one of these phrases and nothing else: "flips at prior odds 0.025",
+# "prior odds 0.02-0.03", "0.025". Signs, reversed ranges, and prose around
+# the number are not a crossover statement.
+_CROSSOVER_PREFIX = re.compile(r"^(?:flips at\s+)?(?:prior odds\s+)?", re.I)
+
+
+def _crossover_value(text: str) -> tuple[float, float] | None:
+    body = _CROSSOVER_PREFIX.sub("", text.strip(), count=1)
+    if not body or body[0] in "-+":
+        return None
+    parsed = parse_range(body)
+    if parsed is None or parsed[0] <= 0:
+        return None
+    return parsed
+
+
 def _table_rows(section_text: str) -> list[list[str]]:
     """All pipe-table rows in a section, as cell lists (outer pipes stripped)."""
     rows = []
     for line in section_text.splitlines():
         stripped = line.strip()
         if stripped.startswith("|") and stripped.endswith("|"):
-            rows.append([c.strip() for c in stripped[1:-1].split("|")])
+            rows.append([c.strip().replace("\\|", "|") for c in _CELL_SPLIT.split(stripped[1:-1])])
     return rows
 
 
@@ -280,20 +304,25 @@ def check(text: str) -> list[str]:
 
 
 def _check_slot_provenance(
-    slots: tuple[tuple[str, str], ...], sentinel: str | None = None
+    slots: tuple[tuple[str, str], ...], sentinel: str | tuple[str, ...] | None = None
 ) -> list[str]:
     """Require exactly one provenance mention on each ``(label, value)`` slot.
 
-    ``sentinel`` (e.g. ``"none stated"``, ``"none needed"``) is a bare value
-    that is exempt from carrying a provenance class. ``None`` means every
-    slot in ``slots`` always requires exactly one provenance class.
+    ``sentinel`` (e.g. ``"none stated"``, ``"none needed"``, or a tuple of
+    such values) is a bare value that is exempt from carrying a provenance
+    class. ``None`` means every slot in ``slots`` always requires exactly one
+    provenance class.
     """
+    sentinels = (sentinel,) if isinstance(sentinel, str) else (sentinel or ())
     failures: list[str] = []
     for label, value in slots:
-        if sentinel is not None and _bare(value) == sentinel:
-            if value.strip() != sentinel:
+        # A sentinel may itself contain an em dash, so the whole stripped value
+        # is tried first and the bare value second.
+        hit = next((x for x in sentinels if value.strip() == x or _bare(value) == x), None)
+        if hit is not None:
+            if value.strip() != hit:
                 failures.append(
-                    f"slot '- {label}' sentinel {sentinel!r} must appear bare, "
+                    f"slot '- {label}' sentinel {hit!r} must appear bare, "
                     "with no trailing annotation"
                 )
             continue
@@ -321,8 +350,13 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     )
     failures.extend(
         _check_slot_provenance(
+            (("Prior odds:", field(sections["Evidence and update"], "Prior odds:") or ""),),
+            "none needed",
+        )
+    )
+    failures.extend(
+        _check_slot_provenance(
             (
-                ("Prior odds:", field(sections["Evidence and update"], "Prior odds:") or ""),
                 (
                     "Prior class swept:",
                     field(sections["Robustness"], "Prior class swept:") or "",
@@ -526,10 +560,26 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             threshold = None
 
     if threshold and lr_product and swept and verdict in {"robust", "prior-sensitive"}:
-        cross_low = threshold[0] / lr_product[1]
-        cross_high = threshold[1] / lr_product[0]
+        # The prior-odds crossover interval: the action flips where posterior
+        # odds meet the decision threshold, so prior odds = threshold / LR.
+        # § Robustness sweeps the loss range too, and 1 / loss ratio is the
+        # threshold each swept loss implies, so the interval spans both the
+        # stated threshold and the swept losses. One interval serves the
+        # intersection gate and the stated-crossover check alike.
+        thr_lo, thr_hi = threshold
+        loss_swept = parse_range(_bare(field(robustness, "Loss range swept:") or ""))
+        if loss_swept and loss_swept[0] > 0:
+            thr_lo = min(thr_lo, 1 / loss_swept[1])
+            thr_hi = max(thr_hi, 1 / loss_swept[0])
+        cross_low = thr_lo / lr_product[1]
+        cross_high = thr_hi / lr_product[0]
         intersects = cross_low <= swept[1] * (1 + _REL_TOLERANCE) and cross_high >= swept[0] * (
             1 - _REL_TOLERANCE
+        )
+        stated = _crossover_value(crossover_text)
+        stated_in_interval = stated is not None and (
+            cross_low * (1 - _REL_TOLERANCE) <= stated[0]
+            and stated[1] <= cross_high * (1 + _REL_TOLERANCE)
         )
         if verdict == "robust":
             if intersects:
@@ -537,27 +587,26 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                     f"robust verdict, but the computed prior-odds crossover "
                     f"[{cross_low:g}, {cross_high:g}] lies inside the swept prior class"
                 )
-            if crossover_text != "none within swept class":
+            # § Robustness asks for the crossover statement, so a robust record
+            # may name the flip point outside the swept class -- every number
+            # it states must lie in the computed interval -- or carry the
+            # sentinel.
+            if crossover_text != "none within swept class" and not stated_in_interval:
                 failures.append(
-                    "a robust verdict requires Crossover 'none within swept class'; "
-                    f"found {crossover_text!r}"
+                    "a robust verdict requires Crossover 'none within swept class' or the "
+                    f"flip point outside the swept class (computed [{cross_low:g}, "
+                    f"{cross_high:g}]); found {crossover_text!r}"
                 )
-        else:
-            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
-            if not intersects:
-                failures.append(
-                    "prior-sensitive verdict, but the computed crossover "
-                    f"[{cross_low:g}, {cross_high:g}] does not intersect the swept prior class"
-                )
-            elif not numbers or not (
-                cross_low * (1 - _REL_TOLERANCE)
-                <= float(numbers[0])
-                <= cross_high * (1 + _REL_TOLERANCE)
-            ):
-                failures.append(
-                    f"prior-sensitive crossover {crossover_text!r} does not fall in the "
-                    f"computed interval [{cross_low:g}, {cross_high:g}]"
-                )
+        elif not intersects:
+            failures.append(
+                "prior-sensitive verdict, but the computed crossover "
+                f"[{cross_low:g}, {cross_high:g}] does not intersect the swept prior class"
+            )
+        elif not stated_in_interval:
+            failures.append(
+                f"prior-sensitive crossover {crossover_text!r} does not fall in the "
+                f"computed interval [{cross_low:g}, {cross_high:g}]"
+            )
     else:
         if verdict == "robust" and crossover_text != "none within swept class":
             failures.append(

@@ -1,0 +1,9 @@
+You are the main agent on a data-analysis task for a user.
+
+The user's request:
+
+"Tell me about the Northgate Clinic account. Everything we have is under `/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-baseline-1keaaj4o/data/b10-entity/` and covers January through June."
+
+Write any working files you produce (notes, logs, records, intermediate results) to /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-b10-baseline-1keaaj4o/work.
+Read only what the request and these instructions name; do not read anything else on this machine.
+Your final message is your report to the user.

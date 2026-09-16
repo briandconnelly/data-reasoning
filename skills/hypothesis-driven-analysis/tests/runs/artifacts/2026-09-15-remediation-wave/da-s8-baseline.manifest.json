@@ -1,0 +1,104 @@
+{
+  "name": "da-s8-baseline",
+  "started_utc": "2026-09-15T17:53:48.811360+00:00",
+  "duration_s": 116.0,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "d17f0d1c-18ca-4c4c-9341-144fc32fc6f8",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "413e8f40396200c54327c463b4b48e8081e965926e9eca1d43edf399d97ecbbe",
+  "jsonl_sha256": "9b762a3a9841e13ef92c559da10625aeaa73426074b76c8ae85499aa6f943568",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-baseline-cgtr6bg4",
+  "files_written": [
+    "ship-hold-analysis.md"
+  ],
+  "files_written_sha256": {
+    "ship-hold-analysis.md": "6b4ac0c6d6f36ebef246009667a3cf6d0c5ddb34cab72e065103646d4ddc1be3"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-baseline-cgtr6bg4/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls -la /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-baseline-cgtr6bg4/work 2>&1 || echo \\\"MISSING\\\"\", \"description\": \"Check work directory exists\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"python3 << 'EOF'\\ndef posterior(p0, LR):\\n    odds0 = p0/(1-p0)\\n    odds1 = odds0*LR\\n    return odds1/(1+odds1)\\n\\nLR = 9/2  # 0.9/0.2 from T3 reference class\\n\\nfor p0 in [0.02, 0.05, 0.10, 0.15, 0.20]:\\n    p1 = posterior(p0, LR)\\n    k_star = (1-p0)/(4.5*p0)  # cost ratio above which HOLD beats SHIP\\n    print(f\\\"p0={p0:.3f}  p1(posterior)={p1:.4f}  k*_threshold={k_star:.3f}\\\")\\n\\nprint()\\nimport math\\np0_geo = math.sqrt(0.02*0.20)\\nk_geo = math.sqrt(2*20)\\np1_geo = posterior(p0_geo, LR)\\np_star_geo = 1/(1+k_geo)\\nprint(f\\\"geo-mean p0={p0_geo:.4f} -> posterior p1={p1_geo:.4f}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-da-s8-baseline-cgtr6bg4/work/ship-hold-analysis.md\", \"content\": \"# Ship/hold decision analysis \\u2014 checkout p95 regression (2026-09-12 release)\\n\\nSource: `data/da-s1-ledger/ledger.md`. Both hypotheses (H1: real regression, H2: exporter\\nartifact) ended UNRESOLVED \\u2014 T2, the test that would discriminate them, could not run\\n(S3 raw access logs not restored in time). Decision must be made from T1 + T3 alone.\\n\\n## Inputs\\n\\n- Prior P(real regression), p0: team range 1/50 to 1/5 \\u2192 [0.02, 0.20]\\n- Cost ratio k = C(mis"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 131955,
+    "cache_read_input_tokens": 575883,
+    "output_tokens": 11188,
+    "output_tokens_details": {
+      "thinking_tokens": 7849
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 131955,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 887,
+        "cache_read_input_tokens": 194663,
+        "cache_creation_input_tokens": 1536,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1536
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.7561676,
+    "duration_ms": 115319,
+    "num_turns": 5
+  },
+  "result_text": "## Recommendation: Hold\n\n**Why the ledger alone can't answer this**: both hypotheses are UNRESOLVED because T2 \u2014 the one test that would tell you whether the 57ms gap is a real regression (H1) or an exporter artifact (H2) \u2014 never ran (raw logs pending restore). Everything below is a substitute for that missing test, not a replacement for running it if you still can.\n\n**What the existing evidence is worth**: T3's reference class (20 past rollouts, quota-sampled 10/10 by outcome) can't tell you a base rate, but it *can* tell you a likelihood ratio \u2014 that's exactly what quota/case-control sampling preserves even though it distorts prevalence. In past rollouts, a >40ms gap showed up in 9/10 real regressions vs. 2/10 non-regressions: **LR = 4.5** in favor of \"real\" whenever the gap is observed (as it was here, at 57ms).\n\nUpdating your stated prior (1/50 to 1/5) by that LR:\n\n| Your prior | Posterior P(real regression) |\n|---|---|\n| 1/50 (0.02) | 8.4% |\n| 1/5 (0.20) | 52.9% |\n| geometric-mean prior (0.063) | 23.3% |\n\n**Where the cost disagreement matters**: ship if the posterior is below `1/(1+k)`, where k is the miss-cost/hold-cost ratio. That threshold works out to:\n\n| Prior | Cost ratio k needed to justify holding |\n|---|---|\n| 0.02 | k > 10.9 |\n| 0.10 | k > 2.0 |\n| 0.20 | k > 0.9 (always, given your range) |\n\nYour team's k range (2\u201320) sits above these thresholds for almost the whole prior range \u2014 only the corner where the prior is near 1/50 *and* the cost ratio is near 2 favors shipping. Checked against the full stated ranges as a grid, **~73% of the plausible prior \u00d7 cost-ratio combinations favor holding**, and both natural \"middle of the range\" estimates (geometric-mean prior with geometric-mean cost ratio \u2192 posterior 23% vs. a 14% ship threshold) land on hold too.\n\n**Bottom line**: the decision isn't airtight \u2014 genuine edge cases in your stated ranges would justify shipping \u2014 but holding is the better bet under most of the uncertainty you described, not a coin flip. If there's any way to expedite the S3 log restore before Friday, that's worth more than this whole calculation: it's the one test that turns this from a probabilistic call into a settled one.\n\nFull workings (formulas, grid calc) saved to `work/ship-hold-analysis.md`."
+}

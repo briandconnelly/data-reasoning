@@ -1,0 +1,120 @@
+{
+  "name": "w2-da-s8-post",
+  "started_utc": "2026-09-15T23:03:37.747887+00:00",
+  "duration_s": 216.4,
+  "exit_code": 0,
+  "claude_version": "2.1.273 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "d9b89772-bc17-4e4c-bde8-a83749ae2803",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "60d68e531caa5d024274ea84f686acf1c4f53c2ff3930cc7a6f69ba6d12ce260",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "c0bf6dd6ec03f89b37448cc636b5924171f1f15ad9f855132a207dfe889c3805",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "e615c3bd21d23482fe392bf049760f636de7d8d73bcbffdde9afc95f65d5696d",
+    "decision-analysis/references/decision-record-template.md": "e5bef07db76ba6da74a897c12af7216055536890fc6aae8003e8cde49b6963cf"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "e05b20383a34f7a9eb558c064a2f9fd8da270a25bb00a4236bc49ba95e056f92",
+  "jsonl_sha256": "34054105c8f17686164d32d6961672cfa7b7f76f94bcfc9069074e700f1ac8ad",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s8-post-ua9_r28i",
+  "files_written": [
+    "decision-record-p95-regression.md"
+  ],
+  "files_written_sha256": {
+    "decision-record-p95-regression.md": "f50a8b015a637d709ceb4a6292f53e49d50bf894460aad759e538e6ea9e04159"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s8-post-ua9_r28i/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s8-post-ua9_r28i/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s8-post-ua9_r28i/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s8-post-ua9_r28i/work\", \"description\": \"Ensure work directory exists\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-w2-da-s8-post-ua9_r28i/work/decision-record-p95-regression.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release given the UNRESOLVED checkout p95 regression investigation\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: Ship the 2026-09-12 release vs Hold the release past Friday's freeze\\n- Decision owner: release/investigation team\\n- Reversibility: shipping exposes users to any real regression before it can be rolled back, and served latency already experienced cannot be undone; holding is reversible at"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 43840,
+    "cache_read_input_tokens": 788296,
+    "output_tokens": 19134,
+    "output_tokens_details": {
+      "thinking_tokens": 15316
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 43840,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1292,
+        "cache_read_input_tokens": 212111,
+        "cache_creation_input_tokens": 2183,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2183
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.5257422,
+    "duration_ms": 215811,
+    "num_turns": 6
+  },
+  "result_text": "## Ship or hold: **returned to you \u2014 the answer depends on where your prior and your loss disagreement actually land**\n\nFull record: `work/decision-record-p95-regression.md`\n\n**What the ledger actually supports.** The two UNRESOLVED rows don't carry likelihood information by themselves (an `UNRESOLVED` status token never does). What's usable:\n- **T1** (57 ms gap, crosses your 40 ms noise band) \u2014 by itself doesn't discriminate H1 (real regression) from H2 (exporter artifact), because both predict the same gap in the same pipeline. The ledger says this explicitly.\n- **T3** (reference class: 9/10 settled-real rollouts showed the gap vs. 2/10 settled-not) *does* supply a valid likelihood ratio for \"gap crosses 40 ms\" \u2014 the quota-drawn sampling breaks the base rate, not these within-stratum conditionals. Combining T1's observation with T3's calibration gives **LR = 4.5**, estimated-from-data-in-hand.\n- **T2**, the one test that would directly separate a real regression from an exporter artifact, never ran (raw logs not restored). No LR from it.\n\n**The math.** Using your stated ranges \u2014 prior odds 0.02\u20130.2 (your \"1 in 50 to 1 in 5\"), loss ratio 2\u201320 (your \"2x to 20x\") \u2014 posterior odds land at **0.09\u20130.9**, against a decision threshold of **0.05\u20130.5** (threshold = 1/loss ratio).\n\n**Where it flips:**\n- At your *most skeptical* prior (1-in-50) and *lowest* loss ratio (2x): **Ship** wins comfortably.\n- At your *least skeptical* prior (1-in-5): **Hold** wins across your *entire* loss range (2x\u201320x) \u2014 even at loss=2, hold is favored.\n- At loss ratio 2x, the flip is around prior \u22481-in-10 \u2014 inside your stated prior range.\n- At loss ratio 20x, the flip is around prior \u22481-in-90 \u2014 below your stated prior floor, meaning Hold wins throughout at that loss.\n\n**Verdict: `prior-sensitive`.** The action flips inside both the prior range and the loss range you gave \u2014 not just at their edges. This isn't a case where the evidence is strong enough to swamp your uncertainty; the 4.5 LR only proxies the H1/H2 split (it's a base-rate signal, not the discriminating test), so it doesn't move the needle far enough to make one action robust across your stated ranges.\n\n**What would actually resolve this before Friday:**\n1. **Narrow the prior.** If your honest belief is closer to 1-in-20 or lower, Ship clears the threshold for most of the loss range. If it's closer to 1-in-5, Hold wins regardless of which loss number the team picks.\n2. **Narrow the loss disagreement.** The 2x-vs-20x gap is doing as much work as the prior uncertainty. Worth forcing that conversation before Friday rather than defaulting to a number.\n3. **T2 is the real fix**, not more prior-wrangling \u2014 restoring S3 and running the raw-log check would directly test H1 vs. H2 instead of leaning on a reference-class proxy. If that restore can complete before the freeze, it's the highest-value single action available; I haven't priced it (no signal model for what the raw logs would show), but it's flagged in the record's Handoff as the VoI question worth pricing if you want that next.\n\nShort version: **I can't hand you a single number that survives your own stated uncertainty \u2014 the honest answer is that you and the team need to settle where your actual belief sits (nearer 1-in-50 or nearer 1-in-5) and which loss multiple you're really working with, because the recommendation flips depending on which end of both ranges you're actually at.**"
+}

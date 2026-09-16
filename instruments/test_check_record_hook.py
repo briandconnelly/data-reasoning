@@ -23,8 +23,10 @@ hook_module = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(hook_module)
 
 
-def run_hook(payload: dict, plugin_root: str | None = None) -> subprocess.CompletedProcess:
-    env = {"CLAUDE_PLUGIN_ROOT": plugin_root if plugin_root is not None else str(REPO)}
+def run_hook(
+    payload: dict, plugin_root: str | None = None, root_var: str = "CLAUDE_PLUGIN_ROOT"
+) -> subprocess.CompletedProcess:
+    env = {root_var: plugin_root if plugin_root is not None else str(REPO)}
     return subprocess.run(
         [sys.executable, str(HOOK)],
         input=json.dumps(payload),
@@ -53,7 +55,12 @@ def test_non_record_markdown_is_silent(tmp_path):
 
 def test_clean_record_is_silent(tmp_path):
     f = tmp_path / "record.md"
-    f.write_text("# VoI Record: is the pull worth it?\n\n## VoI\n\n- Verdict: break-even-only\n")
+    f.write_text(
+        "# VoI Record: is the pull worth it?\n\n## VoI\n\n- Route: voi\n"
+        "- Pending decision: ship vs wait\n- Signal model: a 2-week holdout\n"
+        "- Value basis: expected loss avoided\n- Value calculation: 0.4 x 3 = 1.2\n"
+        "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: break-even-only\n"
+    )
     r = run_hook({"tool_input": {"file_path": str(f)}})
     assert r.returncode == 0
     assert not r.stderr
@@ -218,10 +225,10 @@ def hook_command() -> str:
 
 def run_command_without_python(payload: dict, tmp_path: Path) -> subprocess.CompletedProcess:
     """Run the configured shell command with a PATH that has sh, sed, head, grep,
-    cat but no python3."""
+    awk, cat but no python3."""
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
-    for tool in ("sh", "sed", "head", "grep", "cat"):
+    for tool in ("sh", "sed", "head", "grep", "awk", "cat"):
         real = shutil.which(tool)
         assert real, tool
         (bin_dir / tool).symlink_to(real)
@@ -285,3 +292,277 @@ def test_shell_sniff_signatures_match_python_signatures():
     sh_signatures = {f"# {name}: " for name in match.group(1).split("|")}
 
     assert sh_signatures == set(hook_module.SIGNATURES)
+
+
+# 2026-09-15 Codex review: the hook read only `tool_input.file_path`, so on
+# Codex -- whose apply_patch payload carries the patch in `tool_input.command`
+# -- a record with findings exited 0 in silence.
+
+BAD_RECORD = "# Decision Record: ship or wait?\n\n## Verdict\n\n- Verdict: optimal\n"
+
+
+def codex_patch(*paths: str) -> str:
+    body = "".join(f"*** Add File: {p}\n+# Decision Record: x\n" for p in paths)
+    return f"*** Begin Patch\n{body}*** End Patch\n"
+
+
+def test_codex_apply_patch_payload_reports_findings(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(BAD_RECORD)
+    payload = {
+        "tool_name": "apply_patch",
+        "cwd": str(tmp_path),
+        "tool_input": {"command": codex_patch("record.md")},
+    }
+    r = run_hook(payload)
+    assert r.returncode == 2
+    assert "verdict" in r.stderr.lower()
+    assert str(f) in r.stderr
+
+
+def test_codex_update_file_path_is_resolved_against_cwd(tmp_path):
+    (tmp_path / "sub").mkdir()
+    f = tmp_path / "sub" / "record.md"
+    f.write_text(BAD_RECORD)
+    patch = "*** Begin Patch\n*** Update File: sub/record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_hook(
+        {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+    )
+    assert r.returncode == 2
+    assert str(f) in r.stderr
+
+
+def test_codex_patch_over_a_non_record_is_silent(tmp_path):
+    (tmp_path / "notes.md").write_text("# Notes\n")
+    r = run_hook(
+        {
+            "tool_name": "apply_patch",
+            "cwd": str(tmp_path),
+            "tool_input": {"command": codex_patch("notes.md")},
+        }
+    )
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_codex_patch_writing_two_records_reports_both(tmp_path):
+    for name in ("a.md", "b.md"):
+        (tmp_path / name).write_text(BAD_RECORD)
+    r = run_hook(
+        {
+            "tool_name": "apply_patch",
+            "cwd": str(tmp_path),
+            "tool_input": {"command": codex_patch("a.md", "b.md")},
+        }
+    )
+    assert r.returncode == 2
+    assert str(tmp_path / "a.md") in r.stderr
+    assert str(tmp_path / "b.md") in r.stderr
+
+
+def test_plugin_root_env_var_is_honored(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(BAD_RECORD)
+    r = run_hook({"tool_input": {"file_path": str(f)}}, root_var="PLUGIN_ROOT")
+    assert r.returncode == 2
+    assert "verdict" in r.stderr.lower()
+
+
+def test_shell_command_payload_is_not_covered(tmp_path):
+    """A record created by a shell command is outside both payload shapes;
+    the README says so. This test pins that it is silence, not a crash."""
+    f = tmp_path / "record.md"
+    f.write_text(BAD_RECORD)
+    r = run_hook({"tool_name": "Bash", "tool_input": {"command": f"cat > {f}"}})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_candidate_paths_shapes(tmp_path):
+    assert hook_module.candidate_paths({"tool_input": {"file_path": "/x/y.md"}}) == ["/x/y.md"]
+    patch = (
+        "*** Begin Patch\n*** Update File: a.md\n*** Move to: b.md\n"
+        "*** Delete File: c.md\n*** End Patch"
+    )
+    got = hook_module.candidate_paths({"cwd": str(tmp_path), "tool_input": {"command": patch}})
+    assert got == [str(tmp_path / "b.md")]  # the move vacates a.md; c.md is deleted
+    assert hook_module.candidate_paths({"tool_input": {"command": "echo hi"}}) == []
+    assert hook_module.candidate_paths({"tool_input": "garbage"}) == []
+
+
+# Codex review pass 1: a rename validated the vacated source path and warned
+# that it could not be read; a title-free Update File patch on an existing
+# record slipped through the no-Python fallback in silence.
+
+
+def test_a_rename_validates_only_the_destination(tmp_path):
+    dest = tmp_path / "renamed.md"
+    dest.write_text(BAD_RECORD)
+    patch = (
+        "*** Begin Patch\n*** Update File: old.md\n*** Move to: renamed.md\n"
+        "@@\n-x\n+y\n*** End Patch\n"
+    )
+    r = run_hook(
+        {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+    )
+    assert r.returncode == 2
+    assert str(dest) in r.stderr
+    assert "could not be read" not in r.stderr
+
+
+def test_a_rename_of_a_non_record_is_silent(tmp_path):
+    (tmp_path / "README.md").write_text("# readme\n")
+    patch = "*** Begin Patch\n*** Update File: gone.md\n*** Move to: README.md\n*** End Patch\n"
+    r = run_hook(
+        {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+    )
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def codex_payload(tmp_path: Path, patch: str) -> dict:
+    return {"tool_name": "apply_patch", "cwd": str(tmp_path), "tool_input": {"command": patch}}
+
+
+def test_without_python_a_patch_adding_a_record_is_not_validated(tmp_path):
+    r = run_command_without_python(codex_payload(tmp_path, codex_patch("record.md")), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_without_python_a_title_free_edit_to_a_record_is_not_validated(tmp_path):
+    (tmp_path / "record.md").write_text(SIGNATURE_RECORD)
+    patch = "*** Begin Patch\n*** Update File: record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+    assert str(tmp_path / "record.md") in r.stderr
+
+
+def test_without_python_a_patch_to_a_non_record_is_silent(tmp_path):
+    (tmp_path / "notes.md").write_text("# Notes\n")
+    patch = "*** Begin Patch\n*** Update File: notes.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_a_patch_to_source_files_is_silent(tmp_path):
+    patch = "*** Begin Patch\n*** Update File: main.py\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_a_spaced_filename_is_one_candidate(tmp_path):
+    (tmp_path / "decision record.md").write_text(SIGNATURE_RECORD)
+    patch = "*** Begin Patch\n*** Update File: decision record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 2
+    assert str(tmp_path / "decision record.md") in r.stderr
+
+
+def test_a_spaced_filename_reaches_the_python_hook(tmp_path):
+    f = tmp_path / "decision record.md"
+    f.write_text(BAD_RECORD)
+    patch = "*** Begin Patch\n*** Update File: decision record.md\n@@\n-x\n+y\n*** End Patch\n"
+    r = run_hook(codex_payload(tmp_path, patch))
+    assert r.returncode == 2
+    assert str(f) in r.stderr
+
+
+def test_without_python_a_title_string_in_source_code_is_silent(tmp_path):
+    """Re-review 2026-09-15: the fallback scanned the whole payload for a
+    title and flagged a Python file that quoted one."""
+    patch = (
+        "*** Begin Patch\n*** Add File: example.py\n"
+        '+signature = "# Decision Record: example"\n*** End Patch\n'
+    )
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_an_added_title_line_in_a_markdown_patch_is_not_validated(tmp_path):
+    r = run_command_without_python(codex_payload(tmp_path, codex_patch("record.md")), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_without_python_a_mixed_patch_attributes_titles_per_file(tmp_path):
+    """Re-review 2026-09-15: a README edit plus a Python file quoting a record
+    title was reported as a record write; the title belongs to the .py file."""
+    one, two = tmp_path / "one", tmp_path / "two"
+    one.mkdir()
+    two.mkdir()
+    (one / "README.md").write_text("# Readme\n")
+    patch = (
+        "*** Begin Patch\n*** Update File: README.md\n@@\n-a\n+b\n"
+        "*** Add File: example.py\n+# Decision Record: this is a Python comment\n*** End Patch\n"
+    )
+    r = run_command_without_python(codex_payload(one, patch), one)
+    assert r.returncode == 0
+    assert not r.stderr
+    # the same title added to a Markdown file in the same patch is a record
+    patch = (
+        "*** Begin Patch\n*** Add File: example.py\n+x = 1\n"
+        "*** Add File: record.md\n+# Decision Record: ship?\n*** End Patch\n"
+    )
+    r = run_command_without_python(codex_payload(two, patch), two)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+# PR #34 review: the no-Python path sniffed every heading in the file's head,
+# so an ordinary document that quoted or embedded a record title was reported
+# as a record write -- contradicting "every other write stays silent" and
+# diverging from `looks_like_record`, which classifies the title line only.
+
+
+def test_without_python_a_document_quoting_a_record_title_is_silent(tmp_path):
+    f = tmp_path / "notes.md"
+    f.write_text(
+        "# Notes on record formats\n\n"
+        "The validator keys off a title line like:\n\n"
+        "# Decision Record: ship or hold\n\n"
+        "...which is why the sniff matters.\n"
+    )
+    assert hook_module.looks_like_record(str(f)) is False
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_without_python_a_record_behind_frontmatter_is_reported(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text("---\ntitle: x\n---\n\n" + SIGNATURE_RECORD)
+    assert hook_module.looks_like_record(str(f)) is True
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_without_python_unterminated_frontmatter_fails_closed(tmp_path):
+    f = tmp_path / "open.md"
+    f.write_text("---\ntitle: x\n\n# Notes\n")
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+def test_shell_and_python_agree_on_the_title_sniff(tmp_path):
+    """The two paths must classify the same files the same way."""
+    cases = {
+        "record.md": SIGNATURE_RECORD,
+        "quotes-a-title.md": "# Notes\n\n# Decision Record: ship or hold\n",
+        "frontmatter-record.md": "---\na: b\n---\n\n# Investigation: why\n",
+        "plain.md": "# Meeting notes\n\nnothing here\n",
+        "blank-then-record.md": "\n\n# Exploration: shape of the table\n",
+    }
+    for i, (name, text) in enumerate(cases.items()):
+        case_dir = tmp_path / f"case{i}"
+        case_dir.mkdir()
+        f = case_dir / name
+        f.write_text(text)
+        shell = run_command_without_python({"tool_input": {"file_path": str(f)}}, case_dir)
+        assert shell.returncode == (2 if hook_module.looks_like_record(str(f)) else 0), name

@@ -1,0 +1,71 @@
+{
+  "name": "inventory-nofile",
+  "started_utc": "2026-09-15T17:43:55.991304+00:00",
+  "duration_s": 9.4,
+  "exit_code": 0,
+  "claude_version": "2.1.272 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "80952a52-916a-4c66-9090-4ba0c619a88c",
+  "tools_requested": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s9-ab",
+  "fixture_files_sha256": {
+    "s9-ab/signups.csv": "f754c63cd9476b7da553a523a5b1c1c843357a11e90565aa3d5ee09e69a777a1"
+  },
+  "prompt_sha256": "2973fcbabad3229dc6adb3e035433dd3902f46e6b17d786310396b17c77a056b",
+  "jsonl_sha256": "cd14ade3d5ef60e14e47530110ab81885de945c66b4e579e705685797466cadb",
+  "staging_root": "/var/folders/q1/yy47kpf51gb44d8wg1ywz4p80000gq/T/arm-inventory-nofile-zlqcg65g",
+  "files_written": [],
+  "files_written_sha256": {},
+  "contaminated": [],
+  "tool_uses": [],
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 5765,
+    "cache_read_input_tokens": 6271,
+    "output_tokens": 687,
+    "output_tokens_details": {
+      "thinking_tokens": 548
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5765,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 687,
+        "cache_read_input_tokens": 6271,
+        "cache_creation_input_tokens": 5765,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 5765
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.0323452,
+    "duration_ms": 8367,
+    "num_turns": 1
+  },
+  "result_text": "**1. Tools available to me by name:**\n- Glob\n- Grep\n- Read\n\n**2. Instruction or memory files whose contents were loaded into context:**\nNone. No CLAUDE.md, AGENTS.md, or memory file contents were included in this conversation's context \u2014 only system-prompt text describing how the memory system works in general, with no specific memory file contents loaded.\n\n**3. Skills available to me by name:**\nNone."
+}

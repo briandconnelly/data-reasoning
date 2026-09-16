@@ -17,6 +17,21 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 - The SKILL.md description's routing behavior: unmeasured.
 - The two HDA seam sentences: recorded as HDA's own debt in `skills/hypothesis-driven-analysis/tests/scenarios.md` § Owed measurements.
 - The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
+- The 2026-09-15 wording: § Verdict's precedence rule when both sensitivities fire (`prior-sensitive`, loss crossover in Conditions), and § Degraded Modes' no-defensible-prior procedure with its worked example: unmeasured.
+  Reachability: DA-S1 (an `UNRESOLVED` ledger with one sourced LR and no elicited prior) traverses the degraded mode's no-supported-prior branch and must keep that LR in the sweep; a scenario whose sweep flips on both axes traverses the precedence rule.
+  **Paid 2026-09-15** for DA-S1 and DA-S8 (three arms each: baseline, `main` wording, this wording), preregistered in `../../hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` and recorded in `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md`.
+  The degraded mode changed the record's content (the post arm used the `none supported — see Robustness` sentinel where the pre arm put an invented `sensitivity-only` prior in Evidence and update) but the sentinel was annotated, not bare; on the precedence paragraph every skill arm chose `prior-sensitive`, and only the wave-1 post arm stated the loss crossover in Conditions as the paragraph then required (this summary first said the pre arm did; the run record's corrected table is the authority).
+  Neither arm's record passed `check_decision.py`; most failures were form, one was substantive (a `sensitivity-only` loss sweep under a `robust` verdict), and one was the checker's (escaped pipes); see the debts below.
+- Debt surfaced 2026-09-15: every decision record in that wave, under either wording, failed `check_decision.py` on annotated slots, `1:49`-style odds, relabelled slots, and six-cell evidence rows, with correct arithmetic underneath.
+  The template's slot text invites the annotations the checker forbids; the two need reconciling before DA-S1.1's "passes `check_decision.py`" can be a fair bar.
+  **Reconciled 2026-09-15 (wave 2):** the template's skeletons now show bare values and exact labels with the guidance in § Slot notes; under it the DA-S1 and DA-S8 post arms wrote bare sentinels, decimal odds, exact labels, and four-cell rows, and each failed `check_decision.py` on exactly one gate (`runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 2).
+- Debt surfaced 2026-09-15 (wave 2): given a rounded loss ("roughly ten"), three of four skill arms swept a range around it, labelled the sweep `sensitivity-only`, and still called the verdict `robust`, which § Numeric Policy caps at `loss-sensitive`; the one arm that read "roughly ten" as `8–12 — user-elicited` passed both checkers.
+  A worked example or slot note for a rounded elicited loss is a wording change owing its own arm.
+- **Withdrawn 2026-09-15:** the § Verdict precedence paragraph for a double flip landed on row 3 at wave 3 (the post arm read the elicited prior as probabilities and failed DA-S8.2, which the pre arm passes) and was dropped per the preregistration; the external review's A2 — one verdict slot, two applicable sensitivity labels — is owed.
+  Every skill arm, pre and post, chose `prior-sensitive` in that case, so the remedy may be a clarification whose measurement needs an assertion that settles how "odds … 1 in N" is read.
+- **Withdrawn 2026-09-15:** the no-defensible-prior degraded mode measured in DA-S1 landed on the preregistration's row 6 (its own condition that `robust` needs belief-grade losses was not met by any skill arm) and was dropped from the branch per that preregistration's amendment 2; the external review's finding 7 — a record form for missing quantitative evidence — is owed.
+  A future attempt owes a `loss-sensitive` path for a no-prior record with `sensitivity-only` losses, which the withdrawn checker branch lacked, and its own preregistered arms.
+- Debt surfaced 2026-09-15 (wave 2): a `prior-sensitive` record must state two crossovers and the template's Crossover slot has one line; the DA-S8 post arm wrote both as prose and the checker read the wrong number.
 
 ## Scenarios
 
@@ -83,3 +98,18 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 
 - [ ] voi route taken although no price is stated; the deliverable includes the maximum justifiable price.
 - [ ] The survey is not executed, and no authorization is inferred from the verdict.
+
+
+### DA-S8 — both sensitivities fire (precedence)
+
+**Prompt:** "Here's our investigation ledger (`tests/fixtures/da-s1-ledger/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Going in, we'd put the odds that it's a real regression somewhere between 1 in 50 and 1 in 5. Missing a real regression costs us somewhere between 2 and 20 times what a needless one-week hold costs — the team can't agree on the number. Release freeze is Friday. Should we ship or hold?"
+**Fixture:** `da-s1-ledger` — DA-S1's ledger; its reference class supplies one sourced LR (4.5).
+**Expected:** decide route; with prior odds 0.02–0.2 and LR 4.5 the posterior spans 0.09–0.9, and with a loss ratio of 2–20 the threshold spans 0.05–0.5, so the preferred action flips inside the prior class and inside the loss range at once.
+Added 2026-09-15 for the § Verdict precedence rule (both sensitivities fire → `prior-sensitive`, loss crossover in Conditions); DA-S3 cannot measure it, because a record with no supported inputs reaches a sensitive verdict through the degraded mode and the loss rule without touching the precedence paragraph.
+
+- [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
+- [ ] Prior odds and loss ratio carry the user-elicited ranges; the LR 4.5 row names `reference_class.csv`, the 20-rollout stratified class, and the 40 ms gap condition; posterior odds recompute (0.09–0.9).
+- [ ] Robustness reports both crossovers: the prior odds at which the action flips for a given loss ratio, and the loss ratio at which it flips for a given prior.
+- [ ] Verdict is `prior-sensitive`, not `loss-sensitive`; Robustness states both the prior and the loss crossover; Recommended action reads `returned to owner`.
+  (Revised 2026-09-15 with § Verdict: the first form also required the loss crossover in Conditions, which one of two post arms and the pre arm did not do; see `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 3.)
+- [ ] Baseline expectation: picks a point estimate from each range and recommends unconditionally.

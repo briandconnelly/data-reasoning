@@ -56,6 +56,14 @@ That is true of `hooks/hooks.json` and false of the hook's output: every finding
 The obligation it owes is the one `decisions/001` scopes: a measured arm for any cell whose decision point a hook message can reach.
 No such arm has run.)*
 
+*(Extended 2026-09-15: an external review reproduced four records that validated clean while missing most of their required fields — a decision record with `Done.` under every heading, a VoI record of one verdict line, an identification review of a question and a handoff — because the validator checked headings and closed vocabularies but, outside the ledger's tables, no slots.
+This record's scope already named "the canonical Problem fields present and filled", so the omission was a gap inside the declared scope, not a widening of it.
+`check_record.py` now carries a required-slot table per record kind, labels taken byte-for-byte from the shipped templates and held there by a parity test; a completed record missing or blanking one is a finding.
+The same review found that one `pending` slot suspends every completeness finding across the record, with no mode in which completeness is demanded.
+The suspension stays, because the skills mandate writing the template before filling it and the hook runs on every write; `--final` is the new completed-record mode, in which template state no longer suspends and is itself a finding.
+Nothing points the agent at `--final` yet: that sentence is agent-read prose and owes an arm under decisions/001 before it ships, on exactly the terms this record already set for the deferred SKILL.md pointer.
+The hook also now reads Codex's `apply_patch` payload; README § Live record validation names the write paths covered and the one — shell commands — that is not.)*
+
 ## Rules this record adds (2026-08-22)
 
 - Treat the hook's effect on record-writing behavior as unmeasured until an arm under `decisions/001` has run.

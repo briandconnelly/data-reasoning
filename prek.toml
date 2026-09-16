@@ -29,9 +29,12 @@ hooks = [
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
 rev = "v0.15.21"
+# Arms write Python into tests/runs/artifacts/*.scratch/; those files are
+# frozen evidence whose sha256 the arm's manifest records, so the ruff hooks
+# carry the same tests/runs exclude as the byte-mutating builtins above.
 hooks = [
-  { id = "ruff-check", args = ["--fix"] },
-  { id = "ruff-format" },
+  { id = "ruff-check", args = ["--fix"], exclude = '^(.*/)?tests/runs/.*$' },
+  { id = "ruff-format", exclude = '^(.*/)?tests/runs/.*$' },
 ]
 
 [[repos]]
@@ -96,6 +99,11 @@ hooks = [
   # Each validator regenerates into a tempdir and byte-compares (and, for CS3
   # and CS5, reimplements a "generator computes and records" numeric check --
   # pre-trend slope, Lee bounds -- independently rather than importing it).
+  # Added with the fixtures themselves in #34: without these two, validate_b10.py
+  # and validate_da_s1.py never ran in CI, and a fixture could lose the property
+  # its cell depends on without any check going red.
+  { id = "validate-b10-fixture", name = "exploratory-data-analysis: b10-entity fixture keeps every property it sets", language = "python", language_version = "python3", entry = "python skills/exploratory-data-analysis/tests/fixtures/validate_b10.py skills/exploratory-data-analysis/tests/fixtures/b10-entity", files = "^skills/exploratory-data-analysis/tests/fixtures/(generate_b10\\.py|validate_b10\\.py|b10-entity/)", pass_filenames = false },
+  { id = "validate-da-s1-fixture", name = "decision-analysis: da-s1-ledger fixture keeps every property it sets", language = "python", language_version = "python3", entry = "python skills/decision-analysis/tests/fixtures/validate_da_s1.py skills/decision-analysis/tests/fixtures/da-s1-ledger", files = "^skills/decision-analysis/tests/fixtures/(generate_da_s1\\.py|validate_da_s1\\.py|da-s1-ledger/)", pass_filenames = false },
   { id = "validate-cs3-fixture", name = "causal-identification-review: cs3-rollout fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs3.py skills/causal-identification-review/tests/fixtures/cs3-rollout", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs3\\.py|cs3-rollout-ground-truth\\.md|cs3-rollout/)", pass_filenames = false },
   { id = "validate-cs4-fixture", name = "causal-identification-review: cs4-facts fixture keeps every fact it states", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs4.py skills/causal-identification-review/tests/fixtures/cs4-facts", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs4\\.py|cs4-facts/)", pass_filenames = false },
   { id = "validate-cs5-fixture", name = "causal-identification-review: cs5-bounds fixture keeps every trap it sets", language = "python", language_version = "python3", entry = "python skills/causal-identification-review/tests/fixtures/validate_cs5.py skills/causal-identification-review/tests/fixtures/cs5-bounds", files = "^skills/causal-identification-review/tests/fixtures/(generate\\.py|validate_cs5\\.py|cs5-bounds-ground-truth\\.md|cs5-bounds/)", pass_filenames = false },
