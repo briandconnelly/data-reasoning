@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 # hooks/check_record_hook.py
-"""PostToolUse hook: structurally validate any record file the agent writes.
+"""PostToolUse hook: structurally validate a record file the agent writes.
 
-Runs instruments/check_record.py on the written file and feeds findings back
+Runs instruments/check_record.py on each written file and feeds findings back
 via exit 2 + stderr (PostToolUse cannot block — the file is already written;
 after-the-fact feedback is the design).
+
+Two hosts, two payload shapes. Claude Code's Write and Edit tools name the
+file in `tool_input.file_path`. Codex routes file edits through `apply_patch`
+and hands the hook the patch text in `tool_input.command`, so the paths are
+read off its `*** Add File:` / `*** Update File:` / `*** Move to:` lines and
+resolved against the payload's `cwd`. A record created by a shell command is
+covered by neither shape and is not validated; README § Live record validation
+says so.
 
 Whether this hook's output is agent-read prose, and what it therefore owes,
 is settled by the decision record named below; this file does not restate it.
@@ -29,6 +37,8 @@ from pathlib import Path
 
 FRONTMATTER_SCAN_BYTES = 65536
 _FRONTMATTER = re.compile(rb"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
+
+PATCH_OP = re.compile(r"^\*\*\* (Add File|Update File|Move to|Delete File): (.+?)\s*$", re.M)
 
 SIGNATURES = (
     "# Investigation: ",
@@ -78,6 +88,38 @@ def looks_like_record(path: str) -> bool | None:
     return first.startswith(SIGNATURES)
 
 
+def candidate_paths(payload: dict) -> list[str]:
+    """The files this tool call left on disk, from whichever payload shape the
+    host sent. Relative paths in a patch are relative to the payload's `cwd`.
+    An `Update File` followed by `Move to` leaves only the destination, so the
+    vacated source is not a candidate; a `Delete File` leaves nothing."""
+    tool_input = payload.get("tool_input") or {}
+    if not isinstance(tool_input, dict):
+        return []
+    file_path = tool_input.get("file_path")
+    if file_path:
+        return [str(file_path)]
+    command = tool_input.get("command")
+    if not isinstance(command, str) or not command.lstrip().startswith("*** Begin Patch"):
+        return []
+    base = Path(str(payload.get("cwd") or Path.cwd()))
+    seen: list[str] = []
+    for op, raw in PATCH_OP.findall(command):
+        path = os.path.normpath(base / raw)
+        if op == "Delete File":
+            continue
+        if op == "Move to" and seen:
+            seen.pop()  # the Update File source this move vacates
+        if path not in seen:
+            seen.append(path)
+    return seen
+
+
+def plugin_root() -> str | None:
+    """Claude Code sets CLAUDE_PLUGIN_ROOT; Codex sets PLUGIN_ROOT."""
+    return os.environ.get("CLAUDE_PLUGIN_ROOT") or os.environ.get("PLUGIN_ROOT")
+
+
 def unavailable(file_path: str, why: str) -> int:
     print(
         f"data-reasoning: the record at {file_path} was not validated ({why}).\n"
@@ -87,28 +129,23 @@ def unavailable(file_path: str, why: str) -> int:
     return 2
 
 
-def main() -> int:  # noqa: PLR0911
-    try:
-        payload = json.load(sys.stdin)
-    except (json.JSONDecodeError, UnicodeDecodeError):
+def check_one(file_path: str) -> int:  # noqa: PLR0911
+    if not file_path.endswith(".md"):
         return 0
-    file_path = (payload.get("tool_input") or {}).get("file_path")
-    if not file_path or not str(file_path).endswith(".md"):
-        return 0
-    sniff = looks_like_record(str(file_path))
+    sniff = looks_like_record(file_path)
     if sniff is None:
         return unavailable(file_path, "the file could not be read")
     if not sniff:
         return 0
-    plugin_root = os.environ.get("CLAUDE_PLUGIN_ROOT")
-    if not plugin_root:
-        return unavailable(file_path, "CLAUDE_PLUGIN_ROOT is unset")
-    validator = Path(plugin_root) / "instruments" / "check_record.py"
+    root = plugin_root()
+    if not root:
+        return unavailable(file_path, "CLAUDE_PLUGIN_ROOT and PLUGIN_ROOT are unset")
+    validator = Path(root) / "instruments" / "check_record.py"
     if not validator.is_file():
         return unavailable(file_path, "validator missing from the plugin install")
     try:
         result = subprocess.run(
-            [sys.executable, str(validator), str(file_path)],
+            [sys.executable, str(validator), file_path],
             capture_output=True,
             text=True,
             timeout=30,
@@ -136,6 +173,18 @@ def main() -> int:  # noqa: PLR0911
             return unavailable(file_path, "validator could not read the file")
         return 0
     return unavailable(file_path, f"validator exited {result.returncode}")
+
+
+def main() -> int:
+    try:
+        payload = json.load(sys.stdin)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return 0
+    if not isinstance(payload, dict):
+        return 0
+    # One patch can write several files; every record among them is reported,
+    # and one finding anywhere is the hook's exit code.
+    return max((check_one(path) for path in candidate_paths(payload)), default=0)
 
 
 if __name__ == "__main__":

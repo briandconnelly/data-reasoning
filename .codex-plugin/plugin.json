@@ -36,5 +36,6 @@
       "Review whether this design identifies the effect, and on what assumptions.",
       "Decide whether to act, wait, or collect more data given this evidence."
     ]
-  }
+  },
+  "hooks": "./hooks/hooks.json"
 }

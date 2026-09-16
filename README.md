@@ -27,8 +27,21 @@ Treat the routing between them, and the handoff itself, as unverified.
 `decision-analysis`'s original scenarios remain unrun (`skills/decision-analysis/tests/scenarios.md`); focused VoI wording checks are recorded in `skills/decision-analysis/tests/runs/2026-09-04-voi-pricing.md`, with no observed behavioral lift over the old wording for the archived input snapshots.
 Treat its routing and its premium as unmeasured.
 
+Three pieces of evidence are owed and not started, named here so the gap is not mistaken for an oversight (external review, 2026-09-15):
+
+- An end-to-end integration suite for the shipped four-skill workflow, on both hosts: a direct answer that loads no skill, exploration handing a lead to adjudication, adjudication handing a dead end to identification review, and an `UNRESOLVED` ledger entering a decision record.
+  Every arm run so far exercises one skill in isolation; none shows an agent choosing the right skill, keeping the evidence boundary across a handoff, or finishing the user's task.
+- A frozen representative suite kept alongside the adversarial catalogs.
+  The catalogs' rule that a baseline already passing means the scenario is too easy finds failures; it cannot estimate practical benefit, because ordinary tasks a baseline already handles still pay the skill's context and ceremony.
+  The representative suite keeps such tasks, and scores accuracy, unnecessary ceremony, latency, and total context cost.
+- Measured simplification experiments: the checkers below preserve wording and provenance, but nothing yet establishes whether each accumulated rule still earns its context cost.
+
+The skill wording this remediation changed was measured on 2026-09-15 on the cells that reach it, with a baseline arm, a pre-edit arm, and a post-edit arm per cell (`skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` § Results).
+Two sentences reached behavior — the estimation route's data-validity inheritance, and (after one revision and a second wave) the profile route's rule that a record names each change with its date; the exploration degraded mode's Frame-lite naming did not change behavior at n=1 and stays as a clarification carrying no measured claim; the decision-analysis degraded mode for a missing prior and its verdict-precedence paragraph each failed a preregistered condition and were withdrawn, so the review's finding 7 and A2 remain owed.
+The run records say which is which, with the owner's decision on each.
+
 The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.
-As of 2026-08-18 (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,315 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 2,765 plus a 690-word template; `causal-identification-review` is 2,416 plus 492; `exploratory-data-analysis` is 2,415 plus 843.
+As of 2026-09-15, after the remediation's final state (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,419 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 3,227 plus an 897-word template (the template grew by its slot notes); `causal-identification-review` is 2,440 plus 492; `exploratory-data-analysis` is 2,540 plus 843.
 Co-loading two skills — the designed handoff case — pays the verbatim authorization gate (~350 words) and a near-duplicate costly-collection section once per skill loaded.
 Reducing that duplication means extracting the shared contract, which edits `hypothesis-driven-analysis` and is deferred on the terms in `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` § Consequences.
 
@@ -51,11 +64,17 @@ Codex has no equivalent, so a Codex install gets the four skills and no style.
 
 ## Live record validation
 
-Claude Code installs also get a PostToolUse hook (`hooks/hooks.json`) that runs `instruments/check_record.py` on any record file the agent writes and feeds structural findings back to the agent.
+Both hosts get a PostToolUse hook (`hooks/hooks.json`, declared in both plugin manifests) that runs `instruments/check_record.py` on a record file the agent writes through the host's file tools and feeds structural findings back to the agent.
 What the validator may and may not check is owned by `skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`.
-Codex has no hook mechanism, so a Codex install gets the validator file and no live enforcement.
+The write paths covered are exactly these: Claude Code's `Write` and `Edit` tools, which name the file in `tool_input.file_path`, and Codex's `apply_patch`, whose `Write|Edit` matcher alias hands the hook the patch text in `tool_input.command`.
+A record created by a shell command — a heredoc, a redirect, a script — is on neither path and is not validated; nothing in this plugin parses shell commands for file writes.
+Codex runs a plugin hook only after the user has reviewed and trusted its definition (`/hooks` in Codex), so a Codex install has no live validation until that trust is granted.
 The hook needs `python3` on the host's `PATH`.
-Without it, a record write is reported as not validated and every other write stays silent; a record whose path contains a double quote cannot be sniffed without Python and is skipped.
+Without it, a record write is reported as not validated and every other write stays silent; the shell fallback classifies a file by its title line alone, exactly as the Python hook does, and needs `sh`, `sed`, `head`, `grep`, `awk`, and `cat`.
+A record whose path contains a double quote cannot be sniffed without Python and is skipped.
+Without it, an `apply_patch` payload is handled by sniffing each `.md` file the patch names on disk and by scanning the patch text itself for a record title, so both a new record and a title-free edit to an existing one are reported as not validated, while a file the patch names that is not on disk is skipped.
+The hook runs the validator's default mode, in which a record still carrying template placeholders or `pending` slots is in progress and owes no completeness findings; `check_record.py --final <record>` is the completed-record mode, in which every required slot, every required section, and every cell of a required section's table must be filled -- except a Tests row left `NOT_TESTED`, whose evidence may stay `pending`.
+No skill yet tells the agent to run `--final` before delivering a record: that pointer is agent-read prose and owes measured arms first, on the terms in the decision record above.
 
 ## Installation
 
