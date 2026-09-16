@@ -26,6 +26,7 @@ ALLOW = [
     "hooks/check_record_hook.py",
     "hooks/check_record_hook.sh",
     "instruments/check_record.py",
+    "instruments/check_install.py",
     "output-styles/data-answer.md",
 ]
 # Every per-skill subtree an install needs. `agents/` carries each skill's
