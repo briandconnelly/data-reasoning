@@ -1,6 +1,7 @@
 """The tests-claimed checker must catch an unrun test and must be able to fail."""
 
 import importlib.util
+import re
 import sys
 import tomllib
 from pathlib import Path, PurePosixPath
@@ -126,6 +127,7 @@ def test_the_real_s3_bug_hold_out_is_read_from_its_conftest():
         'collect_ignore_glob = ["*_wip.py"]\n',
         'collect_ignore = []\ncollect_ignore += ["x"]\n',
         'collect_ignore = []\ncollect_ignore.append("x")\n',
+        'collect_ignore = ["test_a.py"]\ncollect_ignore = []\n',
         'if True:\n    collect_ignore = ["x"]\n',
         "def pytest_ignore_collect(collection_path, config):\n    return True\n",
         "def broken(:\n",
@@ -147,6 +149,7 @@ def test_a_conftest_it_cannot_read_exactly_is_an_error_not_a_pass(tmp_path, caps
         ({"entry": "python -m pytest -q"}, "names no path"),
         ({"pass_filenames": "true"}, "pass_filenames"),
         ({"pass_filenames": 'false, types = ["python"]'}, "types"),
+        ({"pass_filenames": 'false, args = ["--ignore=pkg/tests/test_a.py"]'}, "`args`"),
         ({"entry": "pytest -q pkg/tests"}, "python -m pytest"),
         ({"entry": "python -m pytest -q ../pkg/tests"}, "repo-relative"),
         ({"entry": "python scripts/other.py"}, "no pytest hook"),
@@ -181,3 +184,27 @@ def test_a_symlinked_test_file_is_an_error_not_a_pass(tmp_path, capsys):
     (repo / "pkg" / "tests" / "test_a.py").symlink_to(repo / "real.py")
     assert ctc.run(repo, files=["pkg/tests/test_a.py"]) == UNREADABLE
     assert "symlinked" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("key", ["files", "exclude"])
+def test_a_top_level_prek_filter_is_an_error_not_a_pass(tmp_path, capsys, key):
+    repo = make_repo(tmp_path)
+    config = repo / "prek.toml"
+    config.write_text(
+        f"{key} = '^pkg/tests/test_a\\.py$'\n" + config.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    assert ctc.run(repo, files=["pkg/tests/test_a.py"]) == UNREADABLE
+    assert f"top-level `{key}`" in capsys.readouterr().err
+
+
+def test_the_real_checker_hook_watches_every_input_the_checker_reads():
+    with (REPO / "prek.toml").open("rb") as fh:
+        local = next(r for r in tomllib.load(fh)["repos"] if r["repo"] == "local")
+    hook = next(h for h in local["hooks"] if h["id"] == "check-tests-claimed")
+    watched = re.compile(hook["files"])
+    inputs = ["prek.toml", "scripts/check-tests-claimed.py", "a/conftest.py", "conftest.py"]
+    inputs += ["a/test_x.py", "x_test.py", *ctc.PYTEST_CONFIG_FILES]
+    inputs += [f"a/{name}" for name in ctc.PYTEST_CONFIG_FILES]
+    assert [path for path in inputs if not watched.search(path)] == []
+    assert not watched.search("scripts/build-release-tree.py")

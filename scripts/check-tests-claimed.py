@@ -123,6 +123,13 @@ def pytest_paths(hook_id: str, entry: str) -> tuple[str, ...] | None:
 
 
 def pytest_hooks(config: dict) -> list[PytestHook]:
+    # prek applies top-level files/exclude before any hook's own filters.
+    for key in ("files", "exclude"):
+        if key in config:
+            raise Unreadable(
+                f"prek.toml: a top-level `{key}` narrows every hook's trigger, and this "
+                f"checker models only hook-level `files` and `exclude`"
+            )
     hooks = []
     for repo in config.get("repos", []):
         if repo.get("repo") != "local":
@@ -131,6 +138,11 @@ def pytest_hooks(config: dict) -> list[PytestHook]:
             paths = pytest_paths(hook["id"], hook.get("entry", ""))
             if paths is None:
                 continue
+            if hook.get("args"):
+                raise Unreadable(
+                    f"hook {hook['id']}: `args` are appended to the entry unread; put "
+                    f"pytest's arguments in `entry`, where this checker parses them"
+                )
             if hook.get("pass_filenames", True):
                 raise Unreadable(
                     f"hook {hook['id']}: pass_filenames is not false, so the staged "
@@ -180,6 +192,8 @@ def collect_ignore(conftest: Path) -> list[str]:
                 raise Unreadable(f"{conftest}: collect_ignore is not a literal") from exc
             if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
                 raise Unreadable(f"{conftest}: collect_ignore is not a list of strings")
+            if plain_targets:
+                raise Unreadable(f"{conftest}: collect_ignore is assigned more than once")
             ignored.extend(value)
             plain_targets.add(id(target))
     # Any other mention -- collect_ignore_glob, `+=`, `.append(...)`, an
