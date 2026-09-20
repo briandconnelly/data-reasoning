@@ -1,0 +1,161 @@
+{
+  "name": "s22c-baseline",
+  "started_utc": "2026-09-20T21:05:38.312015+00:00",
+  "duration_s": 22.0,
+  "exit_code": 0,
+  "claude_version": "2.1.278 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "55512b12-fda7-4848-be91-865b9bd31edc",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Claude_Docs__batch",
+    "mcp__claude_ai_Claude_Docs__create",
+    "mcp__claude_ai_Claude_Docs__delete",
+    "mcp__claude_ai_Claude_Docs__export",
+    "mcp__claude_ai_Claude_Docs__guide",
+    "mcp__claude_ai_Claude_Docs__query",
+    "mcp__claude_ai_Claude_Docs__read",
+    "mcp__claude_ai_Claude_Docs__update",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s22-cheap-route-validity/a-fanout",
+  "fixture_files_sha256": {
+    "a-fanout/accounts.csv": "f4d767dee1c28bdd099cf896187673eb94791a2e409fcf01d7c58a0a82c192f3",
+    "a-fanout/orders.csv": "67ed39790aa322915bc271c5578038dc46c4fe0c3cf5d84be0cc6d568fe8985b"
+  },
+  "prompt_sha256": "5a0130213a732fd771a3cb216cac8851d6bc5590dadb25e2f72d5b0ac99d372f",
+  "jsonl_sha256": "ea3e04870847ace4d88d17d7538f884d091df736574c32e57c471f12d44f3c25",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-baseline-4dd89a5s",
+  "files_written": [
+    "result.txt"
+  ],
+  "files_written_sha256": {
+    "result.txt": "a00df3c2106321dabc32de0519b09310171ae14396651e8df2db03ab93c5c722"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-baseline-4dd89a5s/data/a-fanout; wc -l *.csv; head -5 orders.csv accounts.csv\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-baseline-4dd89a5s/data/a-fanout; python3 - <<'E'\\nimport pandas as pd\\na=pd.read_csv('accounts.csv');o=pd.read_csv('orders.csv')\\nprint(a.account_id.nunique(),len(a));d=a[a.account_id.duplicated(keep=False)].sort_values(['account_id','valid_from']);print(d.to_string())\\nprint(o.order_id.duplicated().sum(),o.isna().sum().to_dict(),o.order_date.min(),o.order_date.max(),o.amount_usd.describe())\\nprint(set(o.account_id)-set(a.account_id))\\nE\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-baseline-4dd89a5s/data/a-fanout; python3 - <<'E'\\nimport csv,collections\\na=list(csv.DictReader(open('accounts.csv')));o=list(csv.DictReader(open('orders.csv')))\\nc=collections.Counter(r['account_id'] for r in a);print(len(c),len(a))\\nfor r in sorted(a,key=lambda r:(r['account_id'],r['valid_from'])):\\n    if c[r['account_id']]>1:print(r)\\nprint(len(o),len({r['order_id'] for r in o}),min(r['order_date'] for r in o),max(r['order_date'] for r in o))\\nprint({r['account_id'] for r in o}-set(c))\\nprint(collections.Counter(r['s"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-baseline-4dd89a5s/data/a-fanout; mkdir -p ../../work; python3 - <<'E' | tee ../../work/result.txt\\nimport csv,collections\\na=list(csv.DictReader(open('accounts.csv')));o=list(csv.DictReader(open('orders.csv')))\\nseg={}\\nfor r in a: \\n    assert seg.setdefault(r['account_id'],r['segment'])==r['segment']\\nq=[r for r in o if '2026-04-01'<=r['order_date']<='2026-06-30']\\nt=collections.defaultdict(float)\\nfor r in q:t[seg[r['account_id']]]+=float(r['amount_usd'])\\nprint(len(q),dict(t))\\nent=[r for r in q if seg[r['account_id'"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 7185,
+    "cache_read_input_tokens": 240442,
+    "output_tokens": 1853,
+    "output_tokens_details": {
+      "thinking_tokens": 75
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7185,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 478,
+        "cache_read_input_tokens": 50943,
+        "cache_creation_input_tokens": 580,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 580
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.09537840000000002,
+    "duration_ms": 20122,
+    "num_turns": 5
+  },
+  "result_text": "**Enterprise revenue for 2026 Q2 (April 1 \u2013 June 30) was $925,797.78.** That comes from 199 orders.\n\nFor comparison, the other segments in Q2 were Mid-Market at $542,840.57 and SMB at $223,120.39.\n\n**A plain join would have overstated Enterprise revenue.** `accounts.csv` has 70 rows but only 60 distinct accounts, because 10 accounts appear more than once. The extra rows are region or owner changes, each with a new `valid_from` date. Joining orders straight onto that file duplicates those accounts' orders and gives about $1,227,245, roughly $301K too high.\n\n**Segment never changes for any account.** Every account has the same segment on all of its rows, so I mapped each account to one segment and then summed. Segment doesn't depend on the `valid_from` date. If you wanted revenue by region or owner as of the order date, the versioned rows would matter, but that wasn't the question.\n\n**The order data looked clean.** There are 2,077 orders with unique IDs and no missing or non-positive amounts. Every order's account exists in the accounts file. Dates run from 2026-01-01 to 2026-06-30, so Q2 is fully covered.\n\nI saved the output in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-baseline-4dd89a5s/work/result.txt`."
+}

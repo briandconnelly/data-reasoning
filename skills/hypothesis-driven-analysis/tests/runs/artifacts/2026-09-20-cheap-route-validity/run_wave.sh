@@ -9,6 +9,7 @@ W=$T/runs/artifacts/2026-09-20-cheap-route-validity
 case $cell in
   s22a|s22c) fixture=$T/fixtures/s22-cheap-route-validity/a-fanout ;;
   s22b) fixture=$T/fixtures/s22-cheap-route-validity/b-truncated ;;
+  s22d) fixture=$T/fixtures/s22-cheap-route-validity/c-hole ;;
   s11) fixture=$T/fixtures/s11-mini ;;
   s13) fixture=$T/fixtures/s13-conjunctive ;;
   s2) fixture=$T/fixtures/s1-conversion/orders.csv ;;

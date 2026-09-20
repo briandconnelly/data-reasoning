@@ -144,3 +144,34 @@ Each was scored on rationale only; none enters the scored table.
   No fixture is entangled; no cell returns to step 2.
 - **Scoring clarification for S22c.1**, prompted by the canary's shape: its report is the figure followed by short labelled paragraphs on the join, segment consistency, other checks, and limitations. That is the answer saying what the check found, which the subsection asks `direct` to do. S22c.1 fails on a record or ledger file (a working script is not one), a hypothesis table, PPDAC section headings, or a coverage matrix or section headed as a data-validity record; labelled paragraphs reporting checks do not fail it. The same reading applies to S2 and S14.
 - The attribution check holds: `git diff --stat main -- skills/hypothesis-driven-analysis ':!skills/hypothesis-driven-analysis/tests'` shows `SKILL.md` (+15 −1) and `references/ledger-template.md` (+1) and nothing else, at commit `6ec2dd6`.
+
+## Amendment 2 — after the first scored batch, before any S22d arm (2026-09-20)
+
+The 21 scored arms ran; every arm resolved to `claude-sonnet-5`, exited 0, and passed the contamination scan.
+On a first read, before the run record is written, all nine S22a–c arms — the three no-skill baselines included — pass every added assertion: each found the repeated account rows, and each declined to call the claim false on the export that stops on 11 June.
+That is row 5 on all three cells, and it is also the catalog's own rule firing: "A baseline run that already satisfies every assertion means the scenario is too easy; tighten it."
+Both planted faults are ones a routine profile exposes — a row count against a distinct-key count, a minimum and maximum date.
+
+This amendment adds **one** harder packet and one cell, written before any arm reads it.
+It is the single tightening round: whatever S22d shows is reported, and no further packet is added in this wave, because building packets until one separates the arms and then scoring that one is selection, not measurement.
+The rows 5 already reached stand and are not reopened by this.
+
+**Packet `c-hole`** (`fixtures/generate_s22.py`, validated by `validate_s22.py` with four new known-positive tests): `orders.csv` carries a `region` column and has orders on every day of 2026 Q2, but EMEA has no rows from 2026-06-03 through 2026-06-16; AMER and APAC are present throughout.
+The first and last dates are whole, no day is empty, and every region's quarter total looks healthy; only the day-by-region view — § Plan's coverage matrix "at the grain your analysis actually uses" crossed with a segment, which is what `mini` now inherits — shows the hole.
+This is the shape the catalog records the skill missing on S1 three times.
+The rows present sum to **$972,510.46**.
+Completeness semantics are `UNKNOWN`: nothing says whether EMEA sold nothing for fourteen days or its rows did not reach the export.
+The crossing requirement is $27,489.54 over the 14 absent EMEA days, $1,963.54 a day, against an EMEA slowest covered day of $2,624.71 — within what the covered rows show at the same grain, so the correct outcome is `NON_DISCRIMINATING`.
+
+**Cell S22d** (mini): baseline, pre, post, after one `canary-s22d-post` scored on rationale.
+Prompt: `prompts/s22d.txt`, which is S22b's with `region` added to the column list.
+
+- **S22d.1** (eligibility) — adjudicates the one claim with no hypothesis table.
+- **S22d.2** — the report or record says EMEA has no orders for a run of days in June (any statement locating the hole by region and date passes; "daily revenue dipped in early June" without the region does not).
+- **S22d.3** — the verdict is neither FALSE nor TRUE: `NON_DISCRIMINATING` or the same in words. A post arm whose verdict is FALSE stated as conditional on the absent EMEA rows being absent sales fails: the crossing requirement lies within what EMEA's covered days show, which is the rule's `NON_DISCRIMINATING` branch.
+- **S22d.4** — the $972,510 figure is labelled as the total of the recorded rows; given as "Q2 revenue" without that label it fails.
+
+Expected: baseline and pre sum the file, see a whole quarter of dates, and answer FALSE at $972,510 (fail d.2–d.4); post builds the day-by-region view, finds the hole, and records `NON_DISCRIMINATING`.
+At-risk: every arm finds it (row 5 again, and the finding is that this model profiles by segment unprompted); or no arm finds it (row 7 if the post arm never builds the crossed view the text points it at — then the pointer does not reach behavior on the hard case, which is the catalog's standing debt on the coverage-matrix rule restated for `mini`).
+Entanglement: one table, so no join; one non-causal claim, so `mini`; local file; the quarter is named. The hole's dates fall inside June so month totals also differ (June reads low), which an arm may notice without the crossed view — d.2 requires the region, so a month-level remark alone does not pass.
+Verdict rows and wave-level rules are unchanged; S22d is a fourth component ("segment-shaped coverage hole on `mini`") under the per-component shipping rule.

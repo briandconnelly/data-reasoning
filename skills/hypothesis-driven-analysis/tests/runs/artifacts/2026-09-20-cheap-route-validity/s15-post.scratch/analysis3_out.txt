@@ -1,0 +1,7 @@
+200 209
+assist median if 10 absent all fastest / all slowest: 5.375 5.5 closed-only 5.441666666666666
+manual bound 7.266666666666667 7.266666666666667
+worst-case headline diff range -1.7666666666666666 -1.8916666666666666
+sev1 assist absent share 0.35714285714285715
+imputed mean minutes m 90.0 a 96.2
+marginal median diff CI, mix held at design counts (-2.033333333333334, -1.6749999999999998)

@@ -23,7 +23,13 @@ and nothing else does, and the ways that stops being true are quiet:
     - the rows' total drifts over $1M (the claim becomes TRUE on its face), or
       so far under it that the absent days would need more than the covered
       days ever show, and FALSE becomes the defensible answer.
-  The packet's correct outcome rests on two completions both being compatible
+  c-hole
+    - the hole closes, or widens to the whole file (a day with no orders at all
+      is visible in a per-day count, and the packet exists to need the crossed
+      day-by-region view);
+    - the rows' total crosses $1M, or the gap per absent day grows past what
+      EMEA's slowest covered day shows, and FALSE becomes defensible.
+  The packets' correct outcomes rest on two completions both being compatible
   with the file -- nothing more was sold, or the absent days ran like the
   covered ones -- not on the cut proving the export incomplete: a source's own
   missingness pattern cannot establish its completeness either way.
@@ -53,6 +59,7 @@ H1 = (date(2026, 1, 1), date(2026, 6, 30))
 FANOUT_TRUE_USD = 925_797.78
 FANOUT_INFLATED_USD = 1_227_245.07
 TRUNCATED_PARTIAL_USD = 862_691.37
+HOLE_PARTIAL_USD = 972_510.46
 
 FANOUT_TRUE_CEILING = 960_000.0
 FANOUT_INFLATED_FLOOR = 1_040_000.0
@@ -62,6 +69,9 @@ EXPORT_ROW_CAP = 10_000
 LAST_EXPORT_DAY = date(2026, 6, 11)
 MIN_VERSIONED_ENTERPRISE = 3
 PLAIN_DUPLICATE = 2
+HOLE_REGION = "EMEA"
+HOLE = (date(2026, 6, 3), date(2026, 6, 16))
+HOLE_PARTIAL_CEILING = 985_000.0
 
 
 def _rows(path: Path) -> list[dict[str, str]]:
@@ -178,8 +188,47 @@ def check_truncated(root: Path) -> list[str]:
     return errors
 
 
+def check_hole(root: Path) -> list[str]:
+    errors: list[str] = []
+    rows = _rows(root / "orders.csv")
+    by_day: dict[date, float] = defaultdict(float)
+    by_cell: dict[tuple[date, str], float] = defaultdict(float)
+    for r in rows:
+        day = date.fromisoformat(r["order_ts"][:10])
+        by_day[day] += float(r["amount_usd"])
+        by_cell[(day, r["region"])] += float(r["amount_usd"])
+    regions = {region for _, region in by_cell}
+    empty_days = [d for d in _days(*Q2) if d not in by_day]
+    if empty_days:
+        errors.append(f"c-hole: days with no orders at all: {empty_days[:3]}")
+    absent = sorted((d, g) for d in _days(*Q2) for g in regions if (d, g) not in by_cell)
+    expected = [(d, HOLE_REGION) for d in _days(*HOLE)]
+    if absent != expected:
+        errors.append(f"c-hole: absent day-by-region cells are not the planted hole: {absent[:3]}")
+
+    partial = sum(by_day.values())
+    if round(partial, 2) != HOLE_PARTIAL_USD:
+        errors.append(f"c-hole: partial total {partial:.2f} != {HOLE_PARTIAL_USD}")
+    if not partial < HOLE_PARTIAL_CEILING:
+        errors.append(f"c-hole: partial total {partial:.2f} is not clearly below $1M")
+    covered = [v for (_, g), v in by_cell.items() if g == HOLE_REGION]
+    needed = (CLAIM_USD - partial) / len(expected)
+    # One compatible completion, not a lower bound: the absent cells at the
+    # region's slowest covered day. It must clear the gap for FALSE to be unsafe.
+    if not covered or not min(covered) > needed * 1.2:
+        errors.append(
+            f"c-hole: the hole needs {needed:.2f} a day, not clearly under the slowest "
+            "covered day; FALSE would be defensible"
+        )
+    return errors
+
+
 def validate(root: Path) -> list[str]:
-    return [*check_fanout(root / "a-fanout"), *check_truncated(root / "b-truncated")]
+    return [
+        *check_fanout(root / "a-fanout"),
+        *check_truncated(root / "b-truncated"),
+        *check_hole(root / "c-hole"),
+    ]
 
 
 def main() -> int:

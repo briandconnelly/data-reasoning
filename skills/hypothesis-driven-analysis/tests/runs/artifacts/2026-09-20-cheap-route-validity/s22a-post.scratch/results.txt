@@ -1,0 +1,6 @@
+accounts with >1 segment: []
+Q2 orders 1050 total 1691758.74
+correct Enterprise Q2: orders 199 sum 925797.78
+naive join Enterprise Q2: rows 260 sum 1227245.07
+as-of join Enterprise Q2: 199 925797.78
+{'2026-04': 300965.50999999995, '2026-05': 301056.39999999997, '2026-06': 323775.87}

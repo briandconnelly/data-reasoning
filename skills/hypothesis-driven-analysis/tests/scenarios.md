@@ -696,6 +696,10 @@ Exists because S11, S13, S2, and S14 each read one clean source, so none of them
 > Someone says our revenue exceeded $1M last quarter (2026 Q2, April through June). Is that true?
 > Data: `tests/fixtures/s22-cheap-route-validity/b-truncated/orders.csv` (order_id, order_ts, customer_id, amount_usd), an export of Q2 orders from the orders database.
 
+**Prompt S22d (mini, segment-shaped hole):**
+
+> S22b's prompt, with `region` in the column list and the file at `tests/fixtures/s22-cheap-route-validity/c-hole/orders.csv`.
+
 **Prompt S22c (direct, duplicating join):**
 
 > What was our Enterprise-segment revenue last quarter (2026 Q2, April through June)?
@@ -711,6 +715,9 @@ Fixture (`s22-cheap-route-validity`, built by `fixtures/generate_s22.py`, every 
   The rows present sum to **$862,691.37**, below the claim, and cover 72 of the quarter's 91 days; nothing says what an absent record means, and a source's own missingness pattern cannot establish its completeness, so completeness semantics are `UNKNOWN`.
   Two completions fit the file — nothing more was sold, or the absent days ran like the covered ones, which passes $1M even at the slowest covered day — so **the correct outcome is `NON_DISCRIMINATING`** (or the same in words), with the observed total labelled partial.
   FALSE reads an absent record as an absent sale, and TRUE rests on a projection the export cannot verify.
+- `c-hole` (added after the first batch, when every arm including the baselines passed S22a–c): orders on every day of Q2, but EMEA has no rows from 2026-06-03 through 2026-06-16.
+  No day is empty and every region's quarter total looks healthy; only the day-by-region view shows the hole.
+  The rows present sum to **$972,510.46**; closing the gap needs $1,963.54 a day over the 14 absent EMEA days against a slowest covered EMEA day of $2,624.71, so **the correct outcome is `NON_DISCRIMINATING`**.
 
 **Assertions:**
 
@@ -722,6 +729,10 @@ Fixture (`s22-cheap-route-validity`, built by `fixtures/generate_s22.py`, every 
 - [ ] S22b.3 — the verdict is neither FALSE nor TRUE: `NON_DISCRIMINATING` or the same in words.
 - [ ] S22b.4 — the $862,691 figure is labelled as the total of the recorded rows, or of the part of the quarter they cover; given as "Q2 revenue" without that label it fails.
 - [ ] S22b.5 — completeness is stated as unknown, unverified, or apparently incomplete; never as settled complete.
+- [ ] S22d.1 — adjudicates the one claim with no hypothesis table.
+- [ ] S22d.2 — says EMEA has no orders for a run of days in June.
+- [ ] S22d.3 — the verdict is neither FALSE nor TRUE.
+- [ ] S22d.4 — the $972,510 figure is labelled as the total of the recorded rows.
 - [ ] S22c.1 — routes **direct**: no ledger file, no hypothesis table, no PPDAC section headings, no standalone data-validity or coverage section.
 - [ ] S22c.2 — the Enterprise Q2 revenue given is within $1,000 of $925,797.78.
 - [ ] S22c.3 — says the account table repeats accounts, or that a plain join would overstate the figure.

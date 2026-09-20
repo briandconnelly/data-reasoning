@@ -1,0 +1,44 @@
+neg ttc 0
+== marginal (closed only)
+manual 209 med ttc 7.27 mean 7.14 | med min 87.0 mean min 90.2
+assist 200 med ttc 5.44 mean 7.53 | med min 69.0 mean min 90.9
+marg diff med ttc -1.8250000000000002 (-2.2, 1.708333333333334)
+marg diff mean min 0.650119617224874 (-11.16674641148326, 12.509808612440196) total hrs manual/assist per incident 1.5037480063795854 1.5145833333333334
+== by severity
+sev1 n m/a 28 9 med ttc m 18.33 a 27.65 diff 9.32 CI (7.69, 11.97) | mean min m 240.0 a 312.2 diff 72.3 CI (61.8, 82.4) | handoffs m 5.93 a 0.44 | reopen m 0.000 a 1.000
+sev2 n m/a 84 40 med ttc m 8.54 a 12.33 diff 3.79 CI (3.02, 4.28) | mean min m 99.2 a 137.3 diff 38.1 CI (34.4, 41.8) | handoffs m 3.01 a 3.95 | reopen m 0.000 a 0.000
+sev3 n m/a 97 151 med ttc m 2.78 a 5.03 diff 2.25 CI (1.93, 2.52) | mean min m 39.2 a 65.4 diff 26.2 CI (24.6, 27.7) | handoffs m 0.54 a 1.52 | reopen m 0.000 a 0.000
+== severity mix (all opened)
+manual {'sev2': 84, 'sev1': 28, 'sev3': 98}
+assist {'sev1': 14, 'sev3': 154, 'sev2': 42}
+== T3 standardization (pooled mix over all opened incidents), median-by-stratum weighted, and mean ttc
+std med-of-strata diff 3.4191666666666656  std mean diff 3.4572428072743993  marginal mean diff 0.39053269537480073
+CI std med (3.102499999999999, 3.730833333333333) CI std mean (3.258184693680163, 3.6737869959465854)
+== by group (marginal and within severity)
+identity manual 104 med ttc 7.21 mean min 90.2
+identity assist 98 med ttc 5.41 mean min 89.2
+storage manual 105 med ttc 7.40 mean min 90.2
+storage assist 102 med ttc 5.50 mean min 92.5
+== T4 censoring bound
+manual closed-only 7.266666666666667 absent=still open (7.266666666666667, 210)
+assist closed-only 5.441666666666666 absent=still open (5.5, 210)
+missing counts by sev/wf Counter({('assist', 'sev1'): 5, ('assist', 'sev3'): 3, ('assist', 'sev2'): 2, ('manual', 'sev3'): 1})
+missing share by wf x sev {('manual', 'sev1'): (0, 28), ('manual', 'sev2'): (0, 84), ('manual', 'sev3'): (1, 98), ('assist', 'sev1'): (5, 14), ('assist', 'sev2'): (2, 42), ('assist', 'sev3'): (3, 154)}
+== daily series: median ttc, mean min per day
+2026-06-01 30 med ttc 7.31 mean min 91 sev3 share 0.47
+2026-06-02 30 med ttc 7.19 mean min 87 sev3 share 0.47
+2026-06-03 30 med ttc 7.38 mean min 91 sev3 share 0.47
+2026-06-04 30 med ttc 7.19 mean min 88 sev3 share 0.47
+2026-06-05 29 med ttc 7.40 mean min 94 sev3 share 0.47
+2026-06-06 30 med ttc 7.22 mean min 90 sev3 share 0.47
+2026-06-07 30 med ttc 7.24 mean min 90 sev3 share 0.47
+2026-06-08 27 med ttc 5.60 mean min 83 sev3 share 0.73
+2026-06-09 30 med ttc 5.39 mean min 95 sev3 share 0.73
+2026-06-10 29 med ttc 5.62 mean min 88 sev3 share 0.73
+2026-06-11 29 med ttc 5.25 mean min 90 sev3 share 0.73
+2026-06-12 29 med ttc 5.57 mean min 95 sev3 share 0.73
+2026-06-13 29 med ttc 5.20 mean min 96 sev3 share 0.73
+2026-06-14 27 med ttc 4.90 mean min 88 sev3 share 0.73
+== staffing
+pre active 11.5 sched hrs/day/group 91.57142857142857 interrupt 20.714285714285715
+post active 13.5 sched hrs/day/group 108.85714285714286 interrupt 66.71428571428571

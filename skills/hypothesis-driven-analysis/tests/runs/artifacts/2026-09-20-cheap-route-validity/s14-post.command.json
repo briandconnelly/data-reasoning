@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s14-post-xzvuwvn4",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nA skill is installed. Its full instructions live at:\n/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s14-post-xzvuwvn4/skills/hypothesis-driven-analysis/SKILL.md\n\nRead that file and follow it as your working method; its references live beside it.\n\nThe user's request:\n\n\"What was the median order value in June?\nOrders live only in the warehouse, queried with `uv run /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s14-post-xzvuwvn4/data/s10-fanout/warehouse.py --dataset orders --day <YYYY-MM-DD>`.\nEach query is metered \u2014 it bills per call and takes a few seconds.\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s14-post-xzvuwvn4/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s14-post-xzvuwvn4"
+  ]
+}

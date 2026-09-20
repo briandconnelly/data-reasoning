@@ -39,6 +39,17 @@ turns, and nothing else:
                 FALSE reads an absent record as an absent sale; TRUE rests on
                 a projection.
 
+  c-hole/       `orders.csv` covers every day of 2026 Q2 and carries a `region`
+                column, but EMEA has no rows at all from 2026-06-03 through
+                2026-06-16; AMER and APAC are present throughout, so every day
+                has orders and the file's first and last dates look whole.
+                GROUND TRUTH: the rows present sum below $1M. Nothing says what
+                the absent EMEA rows mean, so completeness is UNKNOWN; the gap
+                to $1M spread over the 14 absent EMEA days is less than EMEA's
+                slowest covered day, so the correct outcome is
+                `NON_DISCRIMINATING`. Only a day-by-region view shows the hole:
+                per-day and per-region totals each look healthy.
+
 Independently seeded, and kept out of `generate.py`, so neither this fixture
 nor the ones that share that file's RNG stream can shift the other.
 
@@ -59,6 +70,7 @@ OUT = HERE / "s22-cheap-route-validity"
 
 SEED_FANOUT = 20260920
 SEED_TRUNCATED = 20260921
+SEED_HOLE = 20260922
 
 SEGMENTS = (("Enterprise", 24), ("Mid-Market", 20), ("SMB", 16))
 REGIONS = ("AMER", "EMEA", "APAC")
@@ -75,6 +87,11 @@ H1_START = date(2026, 1, 1)
 H1_END = date(2026, 6, 30)
 
 EXPORT_ROW_CAP = 10_000
+
+HOLE_REGION = "EMEA"
+HOLE_TYPICAL_USD = 71.6
+HOLE_DAYS = (date(2026, 6, 3), date(2026, 6, 16))
+REGION_ORDERS_PER_DAY = {"AMER": (54, 70), "EMEA": (38, 52), "APAC": (26, 38)}
 Q2_START = datetime(2026, 4, 1)
 
 
@@ -169,9 +186,44 @@ def build_truncated(outdir: Path) -> None:
     _write(outdir / "orders.csv", ["order_id", "order_ts", "customer_id", "amount_usd"], rows)
 
 
+def build_hole(outdir: Path) -> None:
+    rng = random.Random(SEED_HOLE)
+    rows: list[list] = []
+    day = date(2026, 4, 1)
+    while day <= H1_END:
+        todays: list[tuple[int, str, float]] = []
+        for region, (lo, hi) in REGION_ORDERS_PER_DAY.items():
+            n_orders = rng.randint(lo, hi)
+            for _ in range(n_orders):
+                minute = rng.randrange(0, 24 * 60)
+                amount = round(HOLE_TYPICAL_USD * rng.lognormvariate(0.0, 0.5), 2)
+                # Draw first, drop after: the hole removes rows and shifts nothing else.
+                if region == HOLE_REGION and HOLE_DAYS[0] <= day <= HOLE_DAYS[1]:
+                    continue
+                todays.append((minute, region, amount))
+        for minute, region, amount in sorted(todays):
+            stamp = datetime(day.year, day.month, day.day) + timedelta(minutes=minute)
+            rows.append(
+                [
+                    f"O{700000 + len(rows) + 1}",
+                    stamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    region,
+                    f"C{rng.randrange(1, 5200):05d}",
+                    f"{amount:.2f}",
+                ]
+            )
+        day += timedelta(days=1)
+    _write(
+        outdir / "orders.csv",
+        ["order_id", "order_ts", "region", "customer_id", "amount_usd"],
+        rows,
+    )
+
+
 def main() -> None:
     build_fanout(OUT / "a-fanout")
     build_truncated(OUT / "b-truncated")
+    build_hole(OUT / "c-hole")
 
 
 if __name__ == "__main__":

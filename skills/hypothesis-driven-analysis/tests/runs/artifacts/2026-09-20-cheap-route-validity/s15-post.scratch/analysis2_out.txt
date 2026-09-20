@@ -1,0 +1,33 @@
+== reopen/handoffs marginal
+manual reopen 0.0 209 handoffs mean 2.25
+assist reopen 9.0 200 handoffs mean 1.96
+reopens by wf x sev Counter({('assist', 'sev1'): 9})
+== sev1 assist closed
+INC0248 storage 26.883333333333333 303.0 0.0 1.0
+INC0259 identity 28.566666666666666 330.0 0.0 1.0
+INC0280 storage 31.983333333333334 311.0 1.0 1.0
+INC0320 storage 27.65 326.0 1.0 1.0
+INC0349 identity 26.666666666666668 329.0 0.0 1.0
+INC0356 storage 27.216666666666665 289.0 0.0 1.0
+INC0363 identity 26.116666666666667 316.0 1.0 1.0
+INC0374 storage 28.383333333333333 311.0 1.0 1.0
+INC0395 identity 30.366666666666667 295.0 0.0 1.0
+sev1 manual ttc range 14.066666666666666 21.233333333333334
+== ttc distribution assist sev3 vs manual sev3 quantiles
+manual sev1 [14.6, 15.48, 18.27, 19.67, 20.18] [215.0, 231.0, 240.0, 253.0, 255.0]
+manual sev2 [7.27, 7.52, 8.5, 9.25, 9.7] [87.0, 90.0, 99.0, 108.0, 112.0]
+manual sev3 [2.1, 2.3, 2.78, 3.37, 3.72] [31.0, 34.0, 39.0, 45.0, 49.0]
+assist sev1 [26.12, 26.88, 27.65, 28.57, 30.37] [289.0, 303.0, 311.0, 326.0, 329.0]
+assist sev2 [10.7, 11.37, 12.32, 12.87, 13.57] [122.0, 129.0, 139.0, 146.0, 149.0]
+assist sev3 [4.27, 4.63, 5.03, 5.58, 5.82] [57.0, 60.0, 65.0, 71.0, 73.0]
+== bounds: marginal mean min & ttc with 11 absent incidents (impute range)
+manual closed-only mean ttc 7.14 mean min 90.2
+assist closed-only mean ttc 7.53 mean min 90.9
+mean ttc absent=open at extract: manual 9.07 assist 20.25
+median share of assist closed-only ttc that is > 2*stratum manual median?
+standardized mean minutes m 77.3 a 111.6 diff 34.3
+assist week actual resp hrs (closed) 302.9166666666667 counterfactual w/ manual per-sev rates 200.85035387007036 diff (neg=saved) 102.06631279659632
+raw total hrs manual week closed 314.28333333333336
+headline median diff*210 incidents 383.25
+Counter({('assist', 'storage', 'sev3'): 77, ('assist', 'identity', 'sev3'): 77, ('manual', 'identity', 'sev3'): 49, ('manual', 'storage', 'sev3'): 49, ('manual', 'identity', 'sev2'): 42, ('manual', 'storage', 'sev2'): 42, ('assist', 'storage', 'sev2'): 21, ('assist', 'identity', 'sev2'): 21, ('manual', 'storage', 'sev1'): 14, ('manual', 'identity', 'sev1'): 14, ('assist', 'identity', 'sev1'): 7, ('assist', 'storage', 'sev1'): 7})
+intake by severity by wf Counter({('manual', 'monitor', 'sev2'): 30, ('manual', 'partner', 'sev2'): 27, ('manual', 'customer', 'sev2'): 27, ('manual', 'partner', 'sev1'): 16, ('assist', 'customer', 'sev2'): 16, ('assist', 'monitor', 'sev2'): 15, ('assist', 'partner', 'sev2'): 11, ('assist', 'monitor', 'sev1'): 8, ('manual', 'customer', 'sev1'): 6, ('manual', 'monitor', 'sev1'): 6, ('assist', 'partner', 'sev1'): 4, ('assist', 'customer', 'sev1'): 2})

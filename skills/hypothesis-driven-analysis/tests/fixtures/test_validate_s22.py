@@ -78,6 +78,15 @@ def _scale(factor: float) -> Callable[[Rows], Rows]:
     ]
 
 
+def _fill_hole(rows: Rows) -> Rows:
+    donor = next(r for r in rows if r["region"] == "EMEA")
+    return [*rows, {**donor, "order_id": "O799999", "order_ts": "2026-06-09T12:00:00Z"}]
+
+
+def _widen_hole(rows: Rows) -> Rows:
+    return [r for r in rows if not r["order_ts"].startswith("2026-06-09")]
+
+
 # (probe, packet file, mutation, a phrase the validator's message must carry)
 MUTATIONS = [
     ("history deduplicated", "a-fanout/accounts.csv", _dedupe_accounts, "duplicate keys"),
@@ -98,6 +107,10 @@ MUTATIONS = [
     ),
     ("partial total over $1M", "b-truncated/orders.csv", _scale(1.2), "not clearly below"),
     ("gap too wide to close", "b-truncated/orders.csv", _scale(0.8), "FALSE would be defensible"),
+    ("hole partly filled", "c-hole/orders.csv", _fill_hole, "not the planted hole"),
+    ("hole widened to a whole day", "c-hole/orders.csv", _widen_hole, "no orders at all"),
+    ("hole total over $1M", "c-hole/orders.csv", _scale(1.05), "c-hole: partial total"),
+    ("hole too wide to close", "c-hole/orders.csv", _scale(0.95), "c-hole: the hole needs"),
 ]
 
 

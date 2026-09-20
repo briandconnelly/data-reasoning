@@ -1,0 +1,15 @@
+You are the main agent on a data-analysis task for a user.
+
+A skill is installed. Its full instructions live at:
+/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-post-s31fzrmt/skills/hypothesis-driven-analysis/SKILL.md
+
+Read that file and follow it as your working method; its references live beside it.
+
+The user's request:
+
+"What was our Enterprise-segment revenue last quarter (2026 Q2, April through June)?
+Data: /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-post-s31fzrmt/data/a-fanout/orders.csv (order_id, order_date, account_id, amount_usd) is the complete order ledger for the first half of 2026, and /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-post-s31fzrmt/data/a-fanout/accounts.csv (account_id, account_name, segment, region, account_owner, valid_from) says which segment each account belongs to."
+
+Write any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22c-post-s31fzrmt/work.
+Read only what the request and these instructions name; do not read anything else on this machine.
+Your final message is your report to the user.

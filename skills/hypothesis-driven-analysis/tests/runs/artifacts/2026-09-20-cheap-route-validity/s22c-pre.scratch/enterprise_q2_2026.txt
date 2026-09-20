@@ -1,0 +1,7 @@
+Q2 orders 1050 total 1691758.74
+Enterprise 925797.78 199
+Mid-Market 542840.57 345
+SMB 223120.39 506
+sum of segments 1691758.74
+naive fanout join Enterprise 1227245.07
+{'2026-04': Decimal('300965.51'), '2026-05': Decimal('301056.40'), '2026-06': Decimal('323775.87')}

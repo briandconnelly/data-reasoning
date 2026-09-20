@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s9-post-4556h_zd",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nA skill is installed. Its full instructions live at:\n/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s9-post-4556h_zd/skills/hypothesis-driven-analysis/SKILL.md\n\nRead that file and follow it as your working method; its references live beside it.\n\nThe user's request:\n\n\"We ran variants A and B of the signup page for two weeks, randomly assigning each visitor to one of them; `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s9-post-4556h_zd/data/signups.csv` has variant, visits, and signups per day.\nIs B better than A, and by how much?\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s9-post-4556h_zd/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s9-post-4556h_zd"
+  ]
+}
