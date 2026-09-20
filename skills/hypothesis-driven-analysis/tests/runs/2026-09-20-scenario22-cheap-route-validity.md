@@ -14,7 +14,8 @@ Issue #38's textual finding holds: on `main`, nothing on `mini` or `direct` asks
 Its behavioral prediction did not reproduce.
 On four cells that each plant one fault on which the answer turns — a duplicating join on `mini` and on `direct`, an export that stops on 11 June, and a region-shaped hole inside a whole quarter — all twelve scored arms found the fault and none settled the claim on the wrong rows: the four no-skill baselines, the four arms on `main`'s wording, and the four arms on the draft wording.
 Every new cell lands on row 5, which under the rules written before any arm ran means no wording ships as measured.
-The regression wave is partial — S15 was not fully scored — so the wave is not closed and the complete wave-level rule did not fire; declining is the conservative direction, and nothing in this record may be reused to support shipping later without finishing S15.
+When this record first shipped the regression wave was partial — S15 had been machine-checked on C1 only — so the decline was the conservative reading of an unclosed wave.
+S15 has since been scored in full (issue #43, § Regression cells): it lands on row 10, every cell now ends on a terminal row, and the wave-level rule written in advance fires as the decline already read — S22a–c all on row 5, so nothing ships as measured.
 The draft wording is declined (`../../decisions/008-cheap-route-data-validity.md`); the fixture, the catalog entry, and this record ship.
 
 ## Scored table — new cells
@@ -75,7 +76,7 @@ The step-7 review was asked to adjudicate the reading without tilting either way
 | S2 (direct) | S2.1–2 pass; median 76.36 over 1–14 June, coverage gap stated in the answer; no file written | S2.1 passes, same figure and the same coverage statement; **S2.2 fails on the amendment-1 reading**: the arm wrote `notes.md`, a record headed "(route: direct)" with the line "Completeness semantics for absent days: UNKNOWN (no export contract/sentinel)." (s2-post.scratch/notes.md) | **3 — regression**, with a confound named below |
 | S14 (direct) | S14.1–4 pass; collection plan written in the same command as, and ahead of, the first metered query; 30 queries, no re-pull | the same, and it reuses the 06-01 orientation call as that day's data | **10** |
 | S9 (estimation) | S9.1–3, S9.4a–b pass | S9.1–3, S9.4a–b pass — "S1: UNKNOWN — no export contract or independent count" (s9-post.scratch/estimation_record.md) | **10** |
-| S15 (full) | `score_ledger.py` C1 passes (5 rows, 0 `REFUTED`) | C1 passes (5 rows, 2 `REFUTED`, none causal); the ledger applies the new § Plan sentence — "reconcile 420 = 409 matched + 11 unmatched." (s15-post.scratch/ledger.md) | **not fully scored** — see below |
+| S15 (full) | 6/10: fails 6, 8, 9, and 7 or 10 by scorer; C1 passes (5 rows, 0 `REFUTED`), C2 has nothing to check | 9/10: fails 9 only; C1 passes (5 rows, 2 `REFUTED`, none causal) and C2 passes against the recovered Plan-time ledger; the ledger applies the new § Plan sentence — "reconcile 420 = 409 matched + 11 unmatched." (s15-post.scratch/ledger.md) | **10 — no regression**; assertion 9 is a row 9 shared failure |
 
 The S2 row is a regression by the letter of the clarification this wave wrote for itself, and it is reported as one.
 The confound: the harness frame tells every arm to "Write any working files you produce (notes, logs, records, intermediate results)" to scratch, the S22c pre arm also wrote a results file on `direct`, and S2's answer to the user is the same in both arms.
@@ -83,9 +84,11 @@ What differs is that the post arm's notes carry the full route's completeness vo
 The observable line drawn here, and applied to S22c as well: raw calculation output an arm saves (`result.txt`, `enterprise_q2_2026.txt`, `notes.txt` on the S22c arms) is a working artifact; a structured analysis note naming its route and carrying completeness-semantics vocabulary is a record.
 At n=1 it is one draw; it points the same way as the rows 5.
 
-S15 was run and only machine-checked: C2–C4 need a recovered Plan-time ledger and the catalog's prose assertions need a full read of two 19k-token arms, and that scoring was not done once the rows 5 made the join rule's shipping moot.
-Both transcripts are archived, so the scoring can be completed if the join rule is ever proposed again.
-Nothing here claims S15 shows no regression.
+S15 shipped in this record machine-checked on C1 only, and was scored in full afterwards under issue #43: `artifacts/2026-09-20-cheap-route-validity/s15-scoring/scoring.md` holds the recovered Plan-time ledgers, every instrument's output, the per-assertion table with quotes, and the two places where its two scorers (this session and Codex, working separately) differ.
+Post passes every catalog assertion pre passes on either scorer's reading, so the cell is row 10; both arms hold the `handoffs` aggregation reversal in their outputs and surface it in neither memo, the debt the Tenth wave already measured, so assertion 9 is row 9.
+Pre's failures on 6 and 8 (and 7 or 10) are pre-only and claimed as nothing at n=1.
+On the join sentence the cell reads as S22a and S22c do: the reconciliation post's ledger names was run, in part, before the plan was written, and the pre arm ran the same counts unasked, so the sentence changed the ledger's text and not the arm's behavior.
+This closes the wave; it does not reopen the decline, and a join rule proposed again is a new wording that owes its own arms.
 
 ## Correctness and cost
 
