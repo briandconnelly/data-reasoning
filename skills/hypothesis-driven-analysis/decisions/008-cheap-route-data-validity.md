@@ -10,7 +10,7 @@ Should the two cheap routes inherit those obligations, and should a join check e
 
 ## What was decided
 
-**The gap on the page is real, and no wording was added to close it**, because measurement showed behavior does not fall into it.
+**The gap on the page is real, and no wording was added to close it**, because the arms that were measured did not fall into it.
 A draft was written, reviewed twice, and measured; it is archived as a patch beside the run record and is not in the skill.
 
 ## Positions
@@ -21,13 +21,14 @@ This was the draft: a § Routing subsection pointing `mini` and `direct` at § P
 *Keep `direct` out: its ceremony is "None; answer and stop".* Rejected at design time by both the author and the cross-model reviewer — a wrong figure is as wrong on `direct` as anywhere, and a check that writes no record is compatible with no ceremony.
 The measurement then gave this position its only support: the one regression the wave recorded is a `direct` arm carrying the full route's completeness vocabulary into a notes file on a bounded descriptive query.
 
-*Measure first, and let the result decide.* Adopted, per the Iron Law, and this time the declining outcome was preregistered: the wave's rules said before any arm ran that if every new cell showed no incremental behavior, nothing ships as measured.
+*Measure first, and let the result decide.* Adopted, per the Iron Law, and this time the declining outcome was written down in advance: the wave's rules said before any arm ran that if every new cell showed no incremental behavior, nothing ships as measured.
+The regression half of the wave was left partial — S15 was machine-checked and not fully scored — so the decline is the conservative reading of an unclosed wave, not the firing of its complete rule.
 
 ## What settled it
 
 Scenario 22: four cells, each planting one fault on which the answer turns and closing every other, run as no-skill baseline, `main`'s wording, and the draft wording.
 All twelve scored arms found the planted fault and none settled the claim on the wrong rows, the four baselines included.
-When the first three cells came back that way, the catalog's own rule — a baseline that passes everything means the scenario is too easy — was applied once, with a harder packet preregistered before any arm read it: a region-shaped hole inside an otherwise whole quarter, the shape the catalog records the skill missing on S1 three times.
+When the first three cells came back that way, the catalog's own rule — a baseline that passes everything means the scenario is too easy — was applied once, with a harder packet specified after those results were read and before any arm read it: a region-shaped hole inside an otherwise whole quarter, the shape the catalog records the skill missing on S1 three times.
 All three arms found that too.
 
 The arms on `main`'s wording did not stumble into it.
@@ -52,7 +53,7 @@ With no wording shipped the disagreement decides nothing today; it is the first 
 ## Reopening condition
 
 Any of: a scored arm on `mini` or `direct`, on any model the suite runs, that settles a claim or reports a figure on the wrong rows with the fault discoverable from the data it was given; a fixture whose fault a no-skill baseline misses and which the draft's pointer demonstrably reaches; or a decision to score the Outcome cell's single label, preregistered as such.
-Scenario 22's twelve scored cells stand as the regression check for that reopening.
+Scenario 22's twelve scored arms, across four cells, stand as the regression check for that reopening.
 The draft to start from, and the two review passes it survived, are in `tests/runs/artifacts/2026-09-20-cheap-route-validity/` (`draft-wording.patch`, `design-review.md`).
 
 ## Where the rule lives

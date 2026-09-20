@@ -37,7 +37,27 @@ It confirmed first-pass finding 1 resolved and finding 2 substantially resolved,
 | 2.6 | should-fix | The wave rule called the whole subsection measured if any one cell reached behavior. | **Accepted.** Shipping claims are per component: S22a, S22b, S22c each measure one. |
 | 2.7 | should-fix | S22b.4's "so does `UNKNOWN`" let a bare full-quarter figure pass. | **Accepted.** S22b.4 now scores the label on the figure alone; completeness wording moved to S22b.5. |
 
+## Step 7 — review of the commit
+
+Same reviewer, job `9959fd4ea04a4fc8a78098d7c415ec7c` (reasoning effort high), on the four commits through `526c4cb`, with the archive open to it.
+It was told the measurement had reversed the plan — every new cell on row 5, the wording reverted — and asked to attack the run record.
+No blocking finding and no scoring error: it recounted 28 manifests, all `claude-sonnet-5`, exit 0, uncontaminated, and reproduced the cost ratios.
+
+| # | Rank | Finding | Disposition |
+| --- | --- | --- | --- |
+| 7.1 | adjudication | S22d.3 for `s22d-pre` and `s22d-baseline`: both pass. The assertion scores the claim-level verdict, not the first token of the Outcome cell; the pre arm scopes `CONTRADICTED` to "as exported" and concludes it cannot settle the claim. S22d stays on row 5. A future assertion may score the Outcome label, but this one did not. | Recorded in the run record. |
+| 7.2 | adjudication | S2 row 3 is right by amendment 1's reading, weak at n=1: `s2-pre` wrote no file, `s2-post` wrote a route-headed note carrying completeness vocabulary. The harness instruction is a disclosed confound, not a reason to rescore. | Stands. The record/working-artifact line is now stated in the run record. |
+| 7.3 | should-fix | S15 "not fully scored" leaves the wave partial under the all-cells gate, and the prose implied the complete rule had fired. | **Accepted.** Run record and decision 008 now say the decline is the conservative reading of an unclosed wave. |
+| 7.4 | should-fix | The run record described the post snapshot by the patch, which is the post-revert archive, not what the arms staged. | **Accepted.** Run-time and committed states are now separated. |
+| 7.5 | should-fix | Decision 008 line 13 overgeneralized an n=1 result. | **Accepted.** |
+| 7.6 | should-fix | S22c.1 was abbreviated to "table" where the assertion says hypothesis table; the record/working-file boundary was unstated. | **Accepted.** |
+| 7.7 | note | Amendment 2 is adaptive; decision 008 called S22d "preregistered" without the qualifier. | **Accepted.** |
+| 7.8 | note | The run record pointed here for an adjudication this file did not yet contain. | **Accepted**; this section is it. |
+| 7.9 | note | Decision 008 called twelve arms twelve cells. | **Accepted.** |
+
+It also held that declining is right on this evidence, and that the § Plan join check should not ship as an unmeasured clarification: it is a new normative obligation, showed no incremental behavior on S22a or S22c, and its S15 regression cell is unfinished.
+
 ## Attribution check
 
 Recorded before the canaries: the staged post skill differs from `main` only in the edits under test.
-See the run record for the `git diff --stat` output at canary time and at scoring time.
+At canary time (`6ec2dd6`) `git diff --stat main` over the skill directory outside `tests/` showed `SKILL.md` (+15 −1) and `references/ledger-template.md` (+1) and nothing else (prereg amendment 1); every post manifest's `skill_files_sha256` fixes what was staged.

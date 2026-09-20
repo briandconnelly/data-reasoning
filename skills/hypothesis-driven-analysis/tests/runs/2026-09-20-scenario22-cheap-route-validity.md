@@ -4,7 +4,8 @@ Preregistration: `artifacts/2026-09-20-cheap-route-validity-prereg.md` (cells, a
 Design review: `artifacts/2026-09-20-cheap-route-validity/design-review.md` (two Codex passes before any arm).
 Harness: `../run_arm.py` through `artifacts/2026-09-20-cheap-route-validity/run_wave.sh`; every arm's prompt, command, transcript, manifest, and written files are under `artifacts/2026-09-20-cheap-route-validity/`.
 Model: `claude-sonnet-5` on all 28 arms (manifest `model`); Claude Code 2.1.278; every arm exited 0 with an empty `contaminated` list, so no arm is void.
-Skill under test: pre = `main` at `f4c5093`; post = the working tree at `6ec2dd6`, which differs from `main` inside the skill directory only by `artifacts/2026-09-20-cheap-route-validity/draft-wording.patch` (`SKILL.md` +15 −1, `references/ledger-template.md` +1).
+Skill under test: pre = `main` at `f4c5093`; post = the working tree at `6ec2dd6`, whose staged `SKILL.md` (+15 −1) and `references/ledger-template.md` (+1) carried the draft wording and were the only skill files differing from `main` (each manifest's `skill_files_sha256` is the proof).
+That is the run-time state; the branch as committed has both files reverted to `main`, with their diff archived as `artifacts/2026-09-20-cheap-route-validity/draft-wording.patch`.
 Scorer: the dispatching session (Fable); every quote below was grepped against the named archive file with `artifacts/2026-09-20-cheap-route-validity/verify_quotes.py`.
 
 ## Result in one paragraph
@@ -12,7 +13,8 @@ Scorer: the dispatching session (Fable); every quote below was grepped against t
 Issue #38's textual finding holds: on `main`, nothing on `mini` or `direct` asks whether the rows are the right rows.
 Its behavioral prediction did not reproduce.
 On four cells that each plant one fault on which the answer turns — a duplicating join on `mini` and on `direct`, an export that stops on 11 June, and a region-shaped hole inside a whole quarter — all twelve scored arms found the fault and none settled the claim on the wrong rows: the four no-skill baselines, the four arms on `main`'s wording, and the four arms on the draft wording.
-Every cell lands on row 5, and by the wave-level rule written before any arm ran, no wording ships as measured.
+Every new cell lands on row 5, which under the rules written before any arm ran means no wording ships as measured.
+The regression wave is partial — S15 was not fully scored — so the wave is not closed and the complete wave-level rule did not fire; declining is the conservative direction, and nothing in this record may be reused to support shipping later without finishing S15.
 The draft wording is declined (`../../decisions/008-cheap-route-data-validity.md`); the fixture, the catalog entry, and this record ship.
 
 ## Scored table — new cells
@@ -28,7 +30,7 @@ The draft wording is declined (`../../decisions/008-cheap-route-data-validity.md
 | S22b.3 | Verdict neither FALSE nor TRUE | PASS — "the claim is plausible but unproven." (s22b-baseline.manifest.json) | PASS — "Outcome: NON_DISCRIMINATING on the file alone" (s22b-pre.scratch/ledger.md) | PASS — "Outcome: NON_DISCRIMINATING on the file as given." (s22b-post.scratch/ledger.md) |
 | S22b.4 | $862,691 labelled as the recorded rows' total | PASS — "**Total in file**" (s22b-baseline.manifest.json) | PASS — "**Total in file**" (s22b-pre.manifest.json) | PASS — "the 10,000 rows sum to **$862,691.37**" (s22b-post.manifest.json) |
 | S22b.5 | Completeness not asserted as settled | PASS | PASS — "I can't confirm that from the file." (s22b-pre.manifest.json) | PASS — "nothing in the file confirms it." (s22b-post.manifest.json) |
-| S22c.1 | `direct`: no ledger, table, PPDAC headings, or validity record | PASS | PASS | PASS |
+| S22c.1 | `direct`: no ledger, hypothesis table, PPDAC headings, or validity record | PASS | PASS | PASS |
 | S22c.2 | $925,797.78 ± $1,000 | PASS | PASS | PASS |
 | S22c.3 | Says a plain join overstates | PASS — "**A plain join would have overstated Enterprise revenue.**" (s22c-baseline.manifest.json) | PASS — "A naive join on `account_id` would have counted orders on the duplicated accounts more than once" (s22c-pre.manifest.json) | PASS — "A plain join repeats their orders." (s22c-post.manifest.json) |
 | S22d.1 | One claim, no hypothesis table | PASS | PASS | PASS |
@@ -50,6 +52,7 @@ Totals: every arm passes every assertion on every new cell.
 Row 5 means what it said before any arm ran: no incremental behavior observed on this cell and arm, and the text carries no measured behavioral claim there.
 The wave-level rule for this case was also written in advance: nothing ships as measured, and the text is the owner's call.
 By the catalog's own standard the scenario is still too easy — every baseline passes — after the one tightening round amendment 2 allowed itself.
+S22d is adaptive evidence: it was specified after S22a–c's results were read and before any S22d arm ran, which prevents choosing among packets but is not the same as belonging to the original preregistration.
 
 ## The one scoring call that was not mechanical
 
@@ -60,7 +63,8 @@ The same shape shows on S11: pre records "Outcome: CONTRADICTED for the covered 
 So the draft's disposition sentence appears to tidy what goes in the Outcome cell on `mini` when coverage is unresolved: one label, with its condition, instead of two labels and a hedge.
 That is an observation at n=1 on two cells, made after the arms returned, against no preregistered assertion, and it is claimed as nothing.
 It is recorded because it is the most specific thing a future wave could preregister: score the Outcome cell's single label, not the report's verdict.
-If S22d.3 were rescored on the Outcome cell alone, S22d would land on row 6 for that component; the preregistered assertion says "verdict", the final review was asked to adjudicate the reading, and its answer is in the design-review file.
+If S22d.3 were rescored on the Outcome cell alone, S22d would land on row 6 for that component; the preregistered assertion says "verdict".
+The step-7 review was asked to adjudicate the reading without tilting either way and held that both arms pass: the assertion scores the claim-level verdict, the pre arm scopes `CONTRADICTED` to "as exported" and then withdraws it, and S22d stays on row 5 (`artifacts/2026-09-20-cheap-route-validity/design-review.md` § Step 7).
 
 ## Regression cells
 
@@ -76,6 +80,7 @@ If S22d.3 were rescored on the Outcome cell alone, S22d would land on row 6 for 
 The S2 row is a regression by the letter of the clarification this wave wrote for itself, and it is reported as one.
 The confound: the harness frame tells every arm to "Write any working files you produce (notes, logs, records, intermediate results)" to scratch, the S22c pre arm also wrote a results file on `direct`, and S2's answer to the user is the same in both arms.
 What differs is that the post arm's notes carry the full route's completeness vocabulary on a bounded descriptive query, which is the ceremony creep the `direct` guardrail exists to catch.
+The observable line drawn here, and applied to S22c as well: raw calculation output an arm saves (`result.txt`, `enterprise_q2_2026.txt`, `notes.txt` on the S22c arms) is a working artifact; a structured analysis note naming its route and carrying completeness-semantics vocabulary is a record.
 At n=1 it is one draw; it points the same way as the rows 5.
 
 S15 was run and only machine-checked: C2–C4 need a recovered Plan-time ledger and the catalog's prose assertions need a full read of two 19k-token arms, and that scoring was not done once the rows 5 made the join rule's shipping moot.
