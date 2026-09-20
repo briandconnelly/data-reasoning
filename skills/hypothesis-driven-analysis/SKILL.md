@@ -90,6 +90,17 @@ The mini route records a one-paragraph ledger.
 Templates for all record forms are in [references/ledger-template.md](references/ledger-template.md).
 The gates and the data rules below bind every evidence-bearing route; only the ledger ceremony varies by route.
 
+### `mini` and `direct` still owe the right rows
+
+`mini` and `direct` inherit the data-validity obligations the full route states, at the grain of the one quantity they compute: the coverage matrix, its baseline, and the join check in § Plan, and completeness semantics in § Analysis.
+`mini` records what those checks found on its ledger's `Data validity` line.
+When a validity condition stays unresolved, state what the unresolved part would have to contain for the quantity to cross the claim's threshold.
+On `mini`, when that much lies within what the covered rows themselves show at the same grain, the outcome is `NON_DISCRIMINATING`.
+When it lies far outside anything they show, the outcome may stand, but only as conditional on the named assumption that the unresolved part resembles the covered rows, with the crossing requirement stated beside the verdict — covered rows do not bound absent ones.
+On `direct`, a figure with an unresolved validity condition is reported as partial or unverified, and the answer states the condition.
+
+*Rationale, not a rule:* a claim can be settled on a duplicating join, an export that ends early, or the wrong population with every other obligation here satisfied, and nothing about that failure needs a rival hypothesis — so the safeguard cannot live only in `full`.
+
 ## Gates
 
 <!-- shared: authorization-gate -->
@@ -170,6 +181,9 @@ A schema audit is not this check — nulls, duplicates, and type drift cannot de
 Build a coverage matrix at the grain your analysis actually uses: every time bucket you compare, crossed with every segment that appears in a denominator, a contrast, or a hypothesis, plus the population rate of each field you rely on at that same crossed grain.
 Separate totals do not substitute. A per-week total and a per-device total can both look healthy while a device-shaped hole on two days sits invisibly between them — that is the shape real instrumentation failures take.
 Compare the matrix against an expected schedule or an independent denominator; where neither exists, record coverage as unverifiable rather than clean.
+A join is inside this check.
+Before a measure is computed across a join, state the cardinality the join should have at the measure's grain, and test the key for uniqueness on every side expected to hold one row per key.
+Reconcile across the join which fact rows were dropped, kept, and repeated, and for an additive measure its total as well: a join can drop rows and repeat others at once, so an unchanged row count clears nothing.
 Promote a data-artifact hypothesis into the table only when you can state a concrete failure mechanism, not as a ritual entry.
 Rank tests cheapest-adequate-first, and prefer tests that discriminate between explanations over tests that merely confirm one.
 Write the investigation ledger to a file from [references/ledger-template.md](references/ledger-template.md) before executing the plan; a ledger that first appears in the final report was not preregistered.
@@ -327,7 +341,7 @@ Report the answer first, then the per-hypothesis evidence summary, then limitati
 Define the knowledge goal or the decision the estimate informs.
 State the estimand, the population it describes, the uncertainty method, and the practical threshold that would change the decision.
 No competing hypotheses are required.
-The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix and its baseline in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
+The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix, its baseline, and the join check in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
 Stated randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias a randomized comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded against those obligations.
 
 ## Non-Goals

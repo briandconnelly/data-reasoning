@@ -681,6 +681,53 @@ Arms run on per-arm packet copies outside the repo, so they may run concurrently
 All eighteen answered correctly, so the wording change the scenario was built to validate was **declined** — see [decisions/005-status-under-an-unverified-return.md](../decisions/005-status-under-an-unverified-return.md).
 The eighteen scored cells stand as the regression check named in that record's reopening condition.
 
+## Scenario 22: The cheap routes on the wrong rows
+
+Baseline/treatment comparison on `mini` (S22a, S22b) and `direct` (S22c), from issue #38.
+Exists because S11, S13, S2, and S14 each read one clean source, so none of them can show a claim settled, or a figure reported, on the wrong rows; every packet here plants one fault on which the answer turns and closes every other.
+
+**Prompt S22a (mini, duplicating join):**
+
+> Someone says our Enterprise-segment revenue exceeded $1M last quarter (2026 Q2, April through June). Is that true?
+> Data: `tests/fixtures/s22-cheap-route-validity/a-fanout/orders.csv` (order_id, order_date, account_id, amount_usd) is the complete order ledger for the first half of 2026, and `tests/fixtures/s22-cheap-route-validity/a-fanout/accounts.csv` (account_id, account_name, segment, region, account_owner, valid_from) says which segment each account belongs to.
+
+**Prompt S22b (mini, export that ends early):**
+
+> Someone says our revenue exceeded $1M last quarter (2026 Q2, April through June). Is that true?
+> Data: `tests/fixtures/s22-cheap-route-validity/b-truncated/orders.csv` (order_id, order_ts, customer_id, amount_usd), an export of Q2 orders from the orders database.
+
+**Prompt S22c (direct, duplicating join):**
+
+> What was our Enterprise-segment revenue last quarter (2026 Q2, April through June)?
+> Data: as S22a.
+
+Fixture (`s22-cheap-route-validity`, built by `fixtures/generate_s22.py`, every property below enforced by `fixtures/validate_s22.py` with known-positive tests in `fixtures/test_validate_s22.py`):
+
+- `a-fanout`: `accounts.csv` is a version-history table — six Enterprise accounts carry two or three rows per `account_id` — so a plain join on `account_id` repeats their orders.
+  Enterprise Q2 revenue is **$925,797.78, so the claim is FALSE**; the plain join reads **$1,227,245.07** and answers TRUE.
+  `segment` is constant across an account's versions and every first version predates the ledger, so distinct ids, the latest version, and an as-of join all reach the same total: the verdict does not turn on a convention the prompt leaves unstated.
+  The prompt states the ledger is complete and the fixture has orders on every day of H1, so the join is the only live fault.
+- `b-truncated`: exactly 10,000 rows in timestamp order, orders on every day from 2026-04-01, stopping at 09:55 on 2026-06-11.
+  The rows present sum to **$862,691.37**, below the claim, and cover 72 of the quarter's 91 days; nothing says what an absent record means, and a source's own missingness pattern cannot establish its completeness, so completeness semantics are `UNKNOWN`.
+  Two completions fit the file — nothing more was sold, or the absent days ran like the covered ones, which passes $1M even at the slowest covered day — so **the correct outcome is `NON_DISCRIMINATING`** (or the same in words), with the observed total labelled partial.
+  FALSE reads an absent record as an absent sale, and TRUE rests on a projection the export cannot verify.
+
+**Assertions:**
+
+- [ ] S22a.1 / S22b.1 — adjudicates the one claim with no hypothesis table (the `mini` route).
+- [ ] S22a.2 — says `accounts.csv` holds more than one row for some `account_id`, or that the join repeats orders.
+- [ ] S22a.3 — the verdict on the claim is FALSE.
+- [ ] S22a.4 — the Enterprise Q2 revenue given is within $1,000 of $925,797.78.
+- [ ] S22b.2 — says the rows stop on 2026-06-11, or that they do not cover the whole quarter.
+- [ ] S22b.3 — the verdict is neither FALSE nor TRUE: `NON_DISCRIMINATING` or the same in words.
+- [ ] S22b.4 — the $862,691 figure is labelled as the total of the recorded rows, or of the part of the quarter they cover; given as "Q2 revenue" without that label it fails.
+- [ ] S22b.5 — completeness is stated as unknown, unverified, or apparently incomplete; never as settled complete.
+- [ ] S22c.1 — routes **direct**: no ledger file, no hypothesis table, no PPDAC section headings, no standalone data-validity or coverage section.
+- [ ] S22c.2 — the Enterprise Q2 revenue given is within $1,000 of $925,797.78.
+- [ ] S22c.3 — says the account table repeats accounts, or that a plain join would overstate the figure.
+
+**Status:** fixture built and preregistered in `tests/runs/artifacts/2026-09-20-cheap-route-validity-prereg.md`; results in the Seventeenth wave below.
+
 ## Results
 
 First-wave runs 2026-07-16 on Sonnet general-purpose subagents against `tests/fixtures/`; later waves date their runs in their own headings and tables (the Fifth wave used Opus 4.8, the Sixth wave Sonnet).

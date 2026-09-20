@@ -99,6 +99,7 @@ One paragraph, inline in the conversation or scratch space:
 Claim: <the single stated claim>.
 Prediction: <what I expect to observe if it holds / if it fails>.
 Probe(s): <the bounded read-only probes that settle it — as many as it takes; a probe count is a budget, not a hypothesis>.
+Data validity: <what the inherited checks found at the grain the claim uses — see SKILL.md § Routing, "`mini` and `direct` still owe the right rows" — or the condition left unresolved>.
 Stop condition: <what makes the claim settled, or settles that this data cannot settle it>.
 Outcome: <CONSISTENT / CONTRADICTED / NON_DISCRIMINATING, with evidence pointer>.
 Answer: <conclusion, with any limitation>.

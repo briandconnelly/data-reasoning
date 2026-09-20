@@ -1,0 +1,2 @@
+Someone claims our checkout p95 latency exceeded 500ms yesterday (2026-07-15) — but only on mobile, only during the evening peak, and only for returning users.
+Data: {FIXTURE_PATH}/checkout_latency.csv (timestamp, request_id, latency_ms, device, user_type).

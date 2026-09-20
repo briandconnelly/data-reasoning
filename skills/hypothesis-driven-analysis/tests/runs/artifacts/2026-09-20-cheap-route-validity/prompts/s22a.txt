@@ -1,0 +1,2 @@
+Someone says our Enterprise-segment revenue exceeded $1M last quarter (2026 Q2, April through June). Is that true?
+Data: {FIXTURE_PATH}/orders.csv (order_id, order_date, account_id, amount_usd) is the complete order ledger for the first half of 2026, and {FIXTURE_PATH}/accounts.csv (account_id, account_name, segment, region, account_owner, valid_from) says which segment each account belongs to.
