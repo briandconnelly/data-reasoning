@@ -383,6 +383,41 @@ The probe-reporting contract must therefore be redesigned before any fresh arm r
 The precommitted estimand is also amended in the same reopening (2026-08-09): its trailing clause "for accounts within the fixture's bandwidth of the cutoff" named a bandwidth defined nowhere arm-visible — the only bandwidths live in `validate_cs7.py`, which the contamination rule bars arms from reading — so the clause is dropped from the generator and the ground-truth file regenerated without it, before any fresh arm runs against the redesigned contract.
 After redesign, this cell owes fresh stage-1 and stage-2 arms; the 2026-08-09 sc2 arms stand as scored-then-corrected records, and no arm predating the redesign is scored against the redesigned contract, per `PROTOCOL.md`'s canary principle.
 
+## CS8 — Review route: an identifying assumption the data cannot test
+
+Added 2026-09-20 for issue #40; preregistered in `tests/runs/artifacts/2026-09-20-untestable-assumptions-prereg.md`, which holds the step 0 check, the expected outcomes, the verdict rows, and the entanglement pass, and is not restated here.
+
+**Prompt:**
+
+> Our billing analyst says the autopay invitation experiment gives us the causal effect of autopay enrollment on late payments, and their write-up is `tests/fixtures/cs8-encouragement/design_note.md`.
+> Before anyone runs the estimate, does the design hold up, and what would the number be conditional on?
+> Data: `tests/fixtures/cs8-encouragement/customers.csv` (customer_id, invited, enrolled_autopay, late_payments_prior_90d, late_payments_90d, tenure_months, plan), a frozen local export described in `tests/fixtures/cs8-encouragement/data_notes.md`.
+
+**Fixture:** `tests/fixtures/cs8-encouragement/`, built by `generate.py` and guarded by `validate_cs8.py`; realized values and the per-assumption ground truth are in `tests/fixtures/cs8-encouragement-ground-truth.md`.
+A randomized invitation is offered as an instrument for voluntary enrollment.
+Two of its identifying assumptions have a probe the extract can feed, and each comes back clean: the invitation moves enrollment strongly, and prior-period late payments, tenure, and plan are balanced across it.
+The exclusion restriction has none, by construction: every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; who opened the email is unrecorded; and the one placebo on offer predates the email, so randomization alone balances it whatever the email does afterwards.
+The analyst's note plants the overread — the placebo "confirms the instrument is clean" — so the cell measures both ways the gap can close wrongly: a check that is silent on an assumption filed as evidence for it, and a design stranded short of its conditional disposition because one assumption has no probe.
+The documented ground truth is the conditional disposition, with the exclusion restriction carried by name as a condition no probe bears on; the exact closed-set values are in the assertion rows below, not here.
+
+**Assertions:**
+
+- [ ] CS8.1 — Route recorded is `review`, with a Design block for the invitation-as-instrument design.
+- [ ] CS8.2 — That block names relevance, independence of the invitation, and the exclusion restriction — all three — each as a claim evidence could break.
+- [ ] CS8.3 — Nowhere in the record or the report is the prior-period placebo, or any other check, given as evidence for the exclusion restriction: no probes-table row pairs exclusion with a check that ran, and no sentence says a check supports, confirms, or is consistent with it.
+  Saying the placebo bears on randomization and not on exclusion passes.
+- [ ] CS8.4 — The record or the report says the exclusion restriction cannot be tested from this extract, with a reason specific to it.
+- [ ] CS8.5 — The instrument design's disposition is `identified-if`, with exclusion among the conditions stated with it; `unresolved` fails, and so does `identified-if` with exclusion absent from its conditions.
+- [ ] CS8.6 — The Handoff block's Assumptions slot carries the exclusion restriction as a condition on any downstream estimate.
+- [ ] CS8.7 — Recorded, decides no row, and applies only to a record written from a template that has the assessment column: `check_review.py` exits 0, and the exclusion row reads probe `NONE`, assessment `not-testable-here`.
+
+**Baseline expectation:** a baseline arm writes no template record, so it is scored on CS8.3, CS8.4, and the report-level reading of CS8.5; it is expected to correct the analyst unaided, which would make this a cell that separates wordings of the skill rather than the skill from no skill.
+That is a plausible path, not a guarantee, and the preregistration says what each outcome means.
+
+**Entanglement check:** in the preregistration, § Entanglement pass — null-result sensitivity on the placebo, the CS7 point-estimate collision, completeness, authorization, route, and the traps that keep exclusion untestable.
+
+**Status:** fixture built and validated; zero arms run.
+
 ## HDA seam cells (owed by the three amendment sentences)
 
 The seam amendment adds exactly three sentences to `skills/hypothesis-driven-analysis/SKILL.md`, and the verdict table above scores their reachability cells alongside CS1–CS7; this subsection preregisters those cells repo-side.

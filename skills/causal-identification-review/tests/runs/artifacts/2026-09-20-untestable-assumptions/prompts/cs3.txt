@@ -1,0 +1,6 @@
+We rolled out the new checkout flow to the West region on 2026-03-15, after six weeks running the old flow in both regions.
+East region stayed on the old flow throughout.
+Median checkout completion time in West fell from the pre-rollout weeks to the two weeks after, and the team wants this written up as the flow's causal effect on completion time for the Q2 review.
+Does this comparison identify the flow's causal effect?
+If not, say what would need to be true, and what would need checking, before anyone could trust a causal number here.
+Data: {FIXTURE_PATH}/.
