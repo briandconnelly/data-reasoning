@@ -1,0 +1,165 @@
+{
+  "name": "s22d-baseline",
+  "started_utc": "2026-09-20T21:15:16.196609+00:00",
+  "duration_s": 36.9,
+  "exit_code": 0,
+  "claude_version": "2.1.278 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "a679a2f8-7911-4121-9d0a-967e8611c1c9",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Claude_Docs__batch",
+    "mcp__claude_ai_Claude_Docs__create",
+    "mcp__claude_ai_Claude_Docs__delete",
+    "mcp__claude_ai_Claude_Docs__export",
+    "mcp__claude_ai_Claude_Docs__guide",
+    "mcp__claude_ai_Claude_Docs__query",
+    "mcp__claude_ai_Claude_Docs__read",
+    "mcp__claude_ai_Claude_Docs__update",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s22-cheap-route-validity/c-hole",
+  "fixture_files_sha256": {
+    "c-hole/orders.csv": "676cf0e6d68012fe612d0c2d4f05168f76b4dc74f8d4d8e3af2530c5da932730"
+  },
+  "prompt_sha256": "5aeed627e7636b490f3cc1628c88fe77256fcee18113e544dc22132cb54fcf69",
+  "jsonl_sha256": "de605d8bf25897ffa918500041300f45105d51e59236fcdcce2d38ffe8c1e502",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-baseline-b5vt7zu_",
+  "files_written": [
+    "notes.md"
+  ],
+  "files_written_sha256": {
+    "notes.md": "f6de668af05ddd1b0a29dc3a6d1164ea3343e2959bba99804d851ad50a02e127"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-baseline-b5vt7zu_/data/c-hole; wc -l orders.csv; head -5 orders.csv; ls -la\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-baseline-b5vt7zu_/; python3 - <<'E'\\nimport pandas as pd\\nd=pd.read_csv('data/c-hole/orders.csv')\\nprint(d.dtypes); print(d.describe(include='all').T)\\nprint(d.isna().sum())\\nprint('dup ids',d.order_id.duplicated().sum(),'full dup',d.duplicated().sum())\\nd['ts']=pd.to_datetime(d.order_ts,errors='coerce',utc=True)\\nprint('bad ts',d.ts.isna().sum(),d.ts.min(),d.ts.max())\\nprint(d.region.value_counts(dropna=False))\\nprint((d.amount_usd<=0).sum(), d.amount_usd.nsmallest(5).tolist(), d.amount_usd.nlargest(8).tolist())\\nprint("
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-baseline-b5vt7zu_/; python3 - <<'E'\\nimport csv,collections as C\\nrows=list(csv.DictReader(open('data/c-hole/orders.csv')))\\nprint(len(rows))\\nids=C.Counter(r['order_id'] for r in rows)\\nprint('dup ids',sum(v-1 for v in ids.values() if v>1))\\nfull=C.Counter(tuple(r.values()) for r in rows); print('full dup',sum(v-1 for v in full.values() if v>1))\\nbad=[];amts=[]\\nfor r in rows:\\n    try: amts.append(float(r['amount_usd']))\\n    except: bad.append(r)\\nprint('bad amt',len(bad),bad[:5])\\nprint('empty',{k:sum(1 for r in rows"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-baseline-b5vt7zu_/; python3 - <<'E'\\nimport csv,collections as C\\nrows=list(csv.DictReader(open('data/c-hole/orders.csv')))\\nd=C.Counter(r['order_ts'][:10] for r in rows)\\ns=sum(float(r['amount_usd']) for r in rows if r['order_ts'][:10]>='2026-06-01')\\nfor k in sorted(d):\\n    if k>='2026-05-25': print(k,d[k])\\n# order id sequence gaps\\nids=sorted(int(r['order_id'][1:]) for r in rows); print(ids[0],ids[-1],len(ids))\\nh=C.Counter(r['order_ts'][:10]+' '+r['order_ts'][11:13] for r in rows if r['order_ts'][:10] in('2026-06-1"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-baseline-b5vt7zu_/; python3 - <<'E'\\nimport csv,collections as C\\nrows=list(csv.DictReader(open('data/c-hole/orders.csv')))\\ndef per(a,b):\\n    r=[x for x in rows if a<=x['order_ts'][:10]<=b]; n=len({x['order_ts'][:10] for x in r})\\n    c=C.Counter(x['region'] for x in r); return {k:round(v/n,1) for k,v in c.items()}, round(sum(float(x['amount_usd']) for x in r)/len(r),2)\\nfor a,b in[('2026-05-01','2026-06-02'),('2026-06-03','2026-06-16'),('2026-06-17','2026-06-30')]: print(a,per(a,b))\\nR=C.defaultdict(float)\\nfor x in r"
+    }
+  ],
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 8338,
+    "cache_read_input_tokens": 291030,
+    "output_tokens": 3305,
+    "output_tokens_details": {
+      "thinking_tokens": 305
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8338,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 905,
+        "cache_read_input_tokens": 51826,
+        "cache_creation_input_tokens": 850,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 850
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.124632,
+    "duration_ms": 35010,
+    "num_turns": 6
+  },
+  "result_text": "**Not on this export: it totals $972,510.46, about $27.5K short of $1M. But the export looks incomplete, and if the missing data is real orders, the true figure could be over $1M.**\n\n**What the data shows** (11,971 orders, 2026-04-01 to 2026-06-30):\n\n| Month | Orders | Revenue |\n|---|---|---|\n| April | 4,146 | $337,536 |\n| May | 4,354 | $350,915 |\n| June | 3,471 | $284,060 |\n| **Q2** | **11,971** | **$972,510** |\n\nThe file has no duplicate order IDs, no blanks, no zero or negative amounts and no unparseable timestamps. The order IDs run contiguously from O700001 to O711971.\n\n**The problem is that EMEA has no orders from June 3 through June 16.**\n- Order volume drops from about 140 a day to about 90 a day over exactly those 14 days, then recovers on June 17.\n- The whole drop is EMEA. It normally runs about 45 orders a day and has zero in that window. AMER and APAC are steady, and average order value is unchanged.\n\nThat pattern looks like a data or pipeline gap, such as a regional feed outage or a partial export. It doesn't look like a real sales dip. The contiguous order IDs don't rule this out. It could mean the IDs were assigned at export time, or that the orders were never recorded.\n\n**Rough estimate of the gap.** 14 days \u00d7 about 45 EMEA orders \u00d7 about $81 per order comes to roughly $50K. That would put Q2 at about $1.02M, above the $1M threshold. This is an extrapolation, not a measured number.\n\n**Answer for now.** \"Revenue exceeded $1M\" isn't supported by this file: it shows $972.5K. I'd hold off on calling the claim false until someone confirms with the orders database owner whether EMEA orders for June 3\u201316 exist and were left out of the export. If they do, re-pull the data and the claim probably holds. If they don't, then EMEA had a real outage and the claim is false.\n\nI also can't tell whether the \"revenue\" being quoted is the same as summed order amounts. Refunds, cancellations or a different currency basis could change the figure.\n\nNotes are in `work/notes.md`."
+}

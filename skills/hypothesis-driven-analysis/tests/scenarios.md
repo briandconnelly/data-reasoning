@@ -737,7 +737,9 @@ Fixture (`s22-cheap-route-validity`, built by `fixtures/generate_s22.py`, every 
 - [ ] S22c.2 — the Enterprise Q2 revenue given is within $1,000 of $925,797.78.
 - [ ] S22c.3 — says the account table repeats accounts, or that a plain join would overstate the figure.
 
-**Status:** fixture built and preregistered in `tests/runs/artifacts/2026-09-20-cheap-route-validity-prereg.md`; results in the Seventeenth wave below.
+**Status:** fixture built (`s22-cheap-route-validity`, three packets) and preregistered; 16 arms run and scored 2026-09-20 (Seventeenth wave), twelve of them scored cells and four canaries.
+Every scored arm, the four no-skill baselines included, found the planted fault, so the wording change the scenario was built to validate was **declined** — see [decisions/008-cheap-route-data-validity.md](../decisions/008-cheap-route-data-validity.md).
+By this file's own rule the scenario is still too easy: a packet that a no-skill baseline fails is what would reopen it.
 
 ## Results
 
@@ -1438,6 +1440,23 @@ Honest limits, and they matter.
 - **One model, one fixture family, one world.** Every packet is the same causal H2 over the same two days.
 - **d5 and d7 are the only coverage of a cleared-but-unrepeatable return anywhere in the corpus,** and they were built for this wave. They are what a rule keyed on the limitation's wording rather than on the conflict would have broken, and they are why that draft was killed before any arm ran.
 - **A return whose execution records are absent rather than conflicting is untested** — the free check cannot run on one, so neither branch covers it. Named as a gap in decision 005, not measured here.
+
+### Seventeenth wave, 2026-09-20 — S22, data validity on `mini` and `direct` (issue #38), measured before and after a draft wording
+
+Preregistered in `tests/runs/artifacts/2026-09-20-cheap-route-validity-prereg.md`, reviewed twice by Codex before any arm (`tests/runs/artifacts/2026-09-20-cheap-route-validity/design-review.md`), recorded in `tests/runs/2026-09-20-scenario22-cheap-route-validity.md`.
+28 arms under `tests/run_arm.py`, all `claude-sonnet-5`, none void: four canaries, twelve scored S22 arms (baseline, `main`'s wording, draft wording on each of S22a–d), and pre/post regression arms on S11, S13, S2, S14, S9, and S15.
+
+| Cell | Fault planted | baseline | pre | post | Row |
+| --- | --- | --- | --- | --- | --- |
+| S22a (mini) | duplicating join | 4/4 | 4/4 | 4/4 | 5 — not needed |
+| S22b (mini) | export stops on 11 June | 5/5 | 5/5 | 5/5 | 5 — not needed |
+| S22c (direct) | duplicating join | 3/3 | 3/3 | 3/3 | 5 — not needed |
+| S22d (mini) | EMEA absent 3–16 June | 4/4 | 4/4 | 4/4 | 5 — not needed |
+
+No wording shipped; the draft is archived as `draft-wording.patch` beside the arms.
+Regression cells: S11, S13, S14, and S9 show no regression; S2's post arm wrote a notes file carrying the full route's completeness vocabulary on a `direct` query, scored as a regression with the harness-frame confound named in the run record; S15 was machine-checked on C1 only and is not claimed either way.
+Cost on the S22 cells: the skill at `main` spends 32–74% more output tokens than no skill for the same answer, and the draft a further 3–20%.
+n=1 per arm, one model: the wave shows that this model profiles keys, date ranges, and day-by-region coverage unprompted on small local files, not that the cheap routes are safe on the wrong rows in general.
 
 ### Owed measurements as of 2026-09-15 (external review remediation)
 

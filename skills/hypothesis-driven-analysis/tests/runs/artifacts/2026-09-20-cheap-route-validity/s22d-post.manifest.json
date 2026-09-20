@@ -1,0 +1,130 @@
+{
+  "name": "s22d-post",
+  "started_utc": "2026-09-20T21:15:16.199148+00:00",
+  "duration_s": 68.1,
+  "exit_code": 0,
+  "claude_version": "2.1.278 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "818379eb-fe51-4778-8f8c-39dfdeadf677",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "876503ae0239cc6ca44cc5a2d91f193a5c9f8bec4c98e601db1c5c26fa5c1911",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "f2506897ebe70e7e38276503e5049a515854404343e088e324501e88ea866afd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "4d326b1446790e70a4eff15b31e252ae1f4983e7e6584b298f8f25e20bb9e52a",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "f62901dadf00580a98aaa41214dd86920e0453b09eb1e7c08ecefac22fe674f5",
+    "hypothesis-driven-analysis/decisions/README.md": "6f4f8731f1f0685f4498ef8a7adb2b90c2285f084acfc1abd84ef525cfd27d05",
+    "hypothesis-driven-analysis/references/ledger-template.md": "74ffb39d24d51682637012c2d4a992fad0558730068cd5d6a52a14324c506ec8",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s22-cheap-route-validity/c-hole",
+  "fixture_files_sha256": {
+    "c-hole/orders.csv": "676cf0e6d68012fe612d0c2d4f05168f76b4dc74f8d4d8e3af2530c5da932730"
+  },
+  "prompt_sha256": "12150cf7b152b938ce03c3c222f2384c5349ac44bd69f02cfb07dfa11f9e68e9",
+  "jsonl_sha256": "ff9f9d0be85193316d0fb927055931c36cf292f3277141448dff677ba1c50b99",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu",
+  "files_written": [
+    "ledger.md"
+  ],
+  "files_written_sha256": {
+    "ledger.md": "ede58df23188cadafa6432647101fcb8ed36fdbe5a0ec27a82e74193afcb2780"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/data/c-hole; ls -la; wc -l orders.csv; head -5 orders.csv; tail -3 orders.csv; ls ../../skills/hypothesis-driven-analysis/references\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/skills/hypothesis-driven-analysis/references; grep -n -i -B2 -A25 \\\"mini\\\" ledger-template.md | head -90\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"W=/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/work; mkdir -p $W; cat > $W/ledger.md <<'EOF'\\n# Mini ledger (preregistered before totals computed)\\nClaim: Revenue (sum amount_usd) for 2026 Q2 (2026-04-01..2026-06-30 UTC) exceeded $1,000,000.\\nPrediction: If true, sum of amount_usd over valid, unique Q2 orders > 1,000,000. If false, <= 1,000,000.\\nProbes: (1) schema/nulls/dupe order_id/negative or zero amounts/out-of-window ts; (2) day x region coverage matrix vs expected schedule (every day of Q2 present, per region); (3) sum, with sensitivity to dupes/r"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/data/c-hole\\npython3 - <<'EOF'\\nimport csv,collections,datetime as dt,statistics as st\\nrows=list(csv.DictReader(open('orders.csv')))\\nprint(len(rows), rows[0].keys())\\nbad=[r for r in rows if any(v in ('',None) for v in r.values())]; print(\\\"blank\\\",len(bad))\\nids=[r['order_id'] for r in rows]; print(\\\"uniq ids\\\",len(set(ids)))\\nfull=collections.Counter(tuple(r.values()) for r in rows); print(\\\"exact dupes\\\",sum(v-1 for v in full.values()))\\namt=[float(r['amount_usd']) for r in rows]\\nprint(\\\"sum\\\",sum(amt"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/data/c-hole\\npython3 - <<'EOF'\\nimport csv,collections,datetime as dt,statistics as st,random\\nrows=list(csv.DictReader(open('orders.csv')))\\nE=collections.defaultdict(lambda:[0,0.0]); O=collections.defaultdict(lambda:[0,0.0])\\nfor r in rows:\\n    d=dt.datetime.strptime(r['order_ts'][:10],'%Y-%m-%d').date(); a=float(r['amount_usd'])\\n    (E if r['region']=='EMEA' else O)[d][0]+=1; (E if r['region']=='EMEA' else O)[d][1]+=a\\nalld=[dt.date(2026,4,1)+dt.timedelta(i) for i in range(91)]\\ngap=[d for d in alld if"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Bash",
+      "input": "{\"command\": \"W=/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/work; cat >> $W/ledger.md <<'EOF'\\n\\n## Results (2026-09-20)\\nProbes run on orders.csv (11,971 rows, single source, provenance: user-supplied Q2 export of orders DB; no export contract/row-count manifest supplied).\\n- Schema: no blanks, no dup order_id, no nonpositive amounts, all ts within 2026-04-01..06-30 UTC. Sum amount_usd = $972,510.46 (Apr 337,536 / May 350,915 / Jun 284,060).\\n- order_id contiguous O700001..O711971, 0 gaps (but ids could be assigned/renumbered at export; does not prove no rows were l"
+    }
+  ],
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 28349,
+    "cache_read_input_tokens": 439350,
+    "output_tokens": 5854,
+    "output_tokens_details": {
+      "thinking_tokens": 516
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28349,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 903,
+        "cache_read_input_tokens": 68850,
+        "cache_creation_input_tokens": 1089,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1089
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.259838,
+    "duration_ms": 67340,
+    "num_turns": 8
+  },
+  "result_text": "**The data can't settle it yet.** The export sums to $972,510.46, which is $27,489.54 short of $1M. But EMEA has no orders at all for 14 days, and refilling that gap would likely push the total over $1M.\n\n**What I found** (11,971 orders, 2026-04-01 to 06-30):\n- **Clean rows:** there are no duplicate order IDs, blanks, non-positive amounts or out-of-window timestamps.\n- **Monthly revenue:** April was $337.5k, May $350.9k and June $284.1k. June is the low month.\n- **Coverage hole:** EMEA has zero orders on every day from 2026-06-03 to 06-16. AMER and APAC look normal over the same days ($7.4k/day in the gap versus $7.6k/day otherwise), so this isn't a company-wide dip.\n- **Size of the hole:** EMEA normally brings in about $3.6k/day (about 45 orders/day, roughly 32% of revenue). Fourteen days is therefore about $50.8k, with a bootstrap 95% range of $47.6k\u2013$54.2k.\n- **The gap matters:** covering the $27.5k shortfall takes only about 54% of a typical EMEA fortnight. If those orders exist and are simply missing from the export, Q2 lands around $1.02\u20131.03M.\n\n**Why I can't call it either way:** the order IDs run contiguously from O700001 to O711971 with no gaps. That is mild evidence nothing was dropped after IDs were assigned, but IDs could have been assigned or renumbered at export, so it doesn't prove nothing is missing. I have no export manifest, row count or second source to tell these readings apart:\n1. EMEA really had no orders (an outage, a paused region, and so on).\n2. EMEA orders happened but weren't recorded.\n3. The export is incomplete.\n\nIf reading 1 holds, revenue was under $1M. If 2 or 3 holds, it probably exceeded $1M. I'm treating the outcome as non-discriminating, and the direction depends on that unknown.\n\n**What would settle it:** ask whoever owns the orders database whether EMEA orders exist for June 3\u201316, or what happened to EMEA then. Re-pulling that window, or getting the database's Q2 row count and total, would answer it. I haven't run any query against the source database, and I'm not treating access to it as authorized.\n\n\"Revenue\" here means the sum of `amount_usd` with no refund or tax adjustment, because the file has no fields for either.\n\nLedger: `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s22d-post-jw5z76yu/work/ledger.md`"
+}
