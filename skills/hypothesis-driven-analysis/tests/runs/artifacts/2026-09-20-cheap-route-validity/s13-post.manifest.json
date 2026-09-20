@@ -1,0 +1,188 @@
+{
+  "name": "s13-post",
+  "started_utc": "2026-09-20T21:06:22.552985+00:00",
+  "duration_s": 79.4,
+  "exit_code": 0,
+  "claude_version": "2.1.278 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "37b0a0fd-1a66-4de5-a5dd-7e3caff4a74c",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Claude_Docs__batch",
+    "mcp__claude_ai_Claude_Docs__create",
+    "mcp__claude_ai_Claude_Docs__delete",
+    "mcp__claude_ai_Claude_Docs__export",
+    "mcp__claude_ai_Claude_Docs__guide",
+    "mcp__claude_ai_Claude_Docs__query",
+    "mcp__claude_ai_Claude_Docs__read",
+    "mcp__claude_ai_Claude_Docs__update",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "876503ae0239cc6ca44cc5a2d91f193a5c9f8bec4c98e601db1c5c26fa5c1911",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "f2506897ebe70e7e38276503e5049a515854404343e088e324501e88ea866afd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "4d326b1446790e70a4eff15b31e252ae1f4983e7e6584b298f8f25e20bb9e52a",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "f62901dadf00580a98aaa41214dd86920e0453b09eb1e7c08ecefac22fe674f5",
+    "hypothesis-driven-analysis/decisions/README.md": "6f4f8731f1f0685f4498ef8a7adb2b90c2285f084acfc1abd84ef525cfd27d05",
+    "hypothesis-driven-analysis/references/ledger-template.md": "74ffb39d24d51682637012c2d4a992fad0558730068cd5d6a52a14324c506ec8",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s13-conjunctive",
+  "fixture_files_sha256": {
+    "s13-conjunctive/checkout_latency.csv": "4a8003ac57e17f2c77ce34652114772b80d6b522965028ba966457dc26b9c79d"
+  },
+  "prompt_sha256": "d49f6c8b2868f23fffb25346f0bcd936ab212513f6b4ae3138536c5da5bee2dc",
+  "jsonl_sha256": "a5a8a7d7fc0dcbb804c4b29f3393aa798f4037c5c5d64e6c5c32f8fc64f9049c",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as",
+  "files_written": [
+    "ledger.md"
+  ],
+  "files_written_sha256": {
+    "ledger.md": "6f8d8cb499144481a746ac825a4dd2ab493e9e07ec92c2eca8770f56b5ed2488"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as/skills/hypothesis-driven-analysis/references/ledger-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as; wc -l data/s13-conjunctive/checkout_latency.csv; head -5 data/s13-conjunctive/checkout_latency.csv; ls data/s13-conjunctive work\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as; python3 - <<'E'\\nimport pandas as pd\\nd=pd.read_csv('data/s13-conjunctive/checkout_latency.csv',parse_dates=['timestamp'])\\nprint(d.shape, d.request_id.is_unique, d.isna().sum().to_dict())\\nprint(d.timestamp.min(),d.timestamp.max(), d.timestamp.dt.date.value_counts().to_dict())\\nprint(d.device.value_counts().to_dict(), d.user_type.value_counts().to_dict())\\nd['h']=d.timestamp.dt.hour\\nprint(pd.crosstab(d.h,[d.device,d.user_type]))\\nprint(d.timestamp.diff().value_counts().head())\\nprint(d.latency_ms.describe"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as; python3 - <<'E'\\nimport csv,collections as C\\nr=list(csv.DictReader(open('data/s13-conjunctive/checkout_latency.csv')))\\nprint(len(r), len({x['request_id'] for x in r}))\\nprint(C.Counter(x['timestamp'][:10] for x in r))\\nprint(C.Counter(x['device'] for x in r),C.Counter(x['user_type'] for x in r))\\nprint(sum(1 for x in r if '' in x.values()))\\nts=[x['timestamp'] for x in r]; print(ts==sorted(ts), ts[0],ts[-1])\\nh=C.defaultdict(C.Counter)\\nfor x in r: h[int(x['timestamp'][11:13])][(x['device'][0]+x['user_typ"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as/work; cat > ledger.md <<'E'\\n# Mini ledger \\u2014 \\\"checkout p95 > 500ms on 2026-07-15, only mobile, only evening peak, only returning users\\\"\\n\\nRoute: mini (one stated non-causal claim, no rival explanations asked for). Headless: no consultation pause; assumptions stated.\\n\\nClaim: on 2026-07-15, p95 latency_ms of checkout requests exceeded 500ms in the cell mobile \\u00d7 returning \\u00d7 evening peak, and did not exceed 500ms when any one of the three conditions is relaxed (\\\"only\\\").\\n\\nAssumptions (fixe"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-post-s5gf_2as/work; python3 - <<'E'\\nimport csv\\nr=list(csv.DictReader(open('../data/s13-conjunctive/checkout_latency.csv')))\\nv=sorted(float(x['latency_ms']) for x in r); n=len(v); k=(n-1)*.95; i=int(k)\\nprint('whole day n',n,'p95',v[i]+(k-i)*(v[i+1]-v[i]),'n>500',sum(x>500 for x in v))\\nfor dev in('mobile','desktop'):\\n  for ut in('returning','new'):\\n    w=sorted(float(x['latency_ms']) for x in r if x['device']==dev and x['user_type']==ut and 18<=int(x['timestamp'][11:13])<22)\\n    k=(len(w)-1)*.95;i=int(k);print(dev,u"
+    }
+  ],
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 33407,
+    "cache_read_input_tokens": 441811,
+    "output_tokens": 7130,
+    "output_tokens_details": {
+      "thinking_tokens": 1701
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 33407,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 922,
+        "cache_read_input_tokens": 75482,
+        "cache_creation_input_tokens": 2263,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2263
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.2933182,
+    "duration_ms": 77660,
+    "num_turns": 8
+  },
+  "result_text": "**The claim doesn't hold as stated. Latency did exceed 500ms on mobile in the evening, but the slow group was new users, not returning users.**\n\n**Ledger.** I treated this as one non-causal claim (mini route). The ledger, written before any latency-by-segment numbers were read, is at `work/ledger.md`.\n\n**Results.** I read \"evening peak\" as 18:00\u201322:00 in the timestamps as given (UTC). Traffic is flat by hour, so the window couldn't be taken from the data. The intervals are 95% distribution-free confidence intervals on p95.\n\n| Slice (evening, 18\u201322h) | n | p95 | 95% CI for p95 |\n| --- | --- | --- | --- |\n| Mobile, returning (the claim) | 71 | 439ms | 404ms to at least 598ms |\n| Mobile, **new** | 63 | **804ms** | 575ms to at least 804ms |\n| Desktop, returning | 65 | 375ms | 304ms to at least 487ms |\n| Mobile, returning, off-peak | 382 | 350ms | 330ms to 405ms |\n\n- **The claimed group:** p95 is 439ms and only 1 of 71 requests is over 500ms. With 71 requests the interval can't rule out a p95 above 500, so I call this non-discriminating. The data leans against the claim but doesn't refute it.\n- **\"Only returning\" fails:** new mobile users in the evening have a p95 of 804ms, and 9 of their 63 requests are over 500ms. Their interval sits entirely above 500ms. That holds for the 17\u201321h window too (p95 824ms). For 19\u201323h the point estimate is 698ms, but the interval reaches down to 491ms, so it's inconclusive.\n- **The other exclusions hold:** desktop-returning-evening and mobile-returning-off-peak show no evidence of exceeding 500ms.\n- **Whole day:** overall p95 was 453ms, with 40 of 1,400 requests over 500ms.\n\n**Limits**\n- **New-user finding is exploratory.** I found it while testing \"only returning\". It is worth a follow-up, not yet a conclusion.\n- **Evening definition:** the answer depends on my 18\u201322h choice and on UTC being the right timezone. If your evening peak is defined differently, please send it and I'll rerun.\n- **Completeness is unverifiable.** The file has exactly one row per minute and ends at 23:19, so it looks like a sample or partial export, not full traffic. Without an export contract or an independent request count, I can't say these p95s match the true population. That is why the source is marked UNKNOWN in the ledger.\n- **Small cells.** With 60\u201370 rows per slice, the upper end of every p95 interval is unbounded."
+}

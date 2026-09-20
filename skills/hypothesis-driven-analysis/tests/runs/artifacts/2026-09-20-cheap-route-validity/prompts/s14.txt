@@ -1,0 +1,3 @@
+What was the median order value in June?
+Orders live only in the warehouse, queried with `uv run {FIXTURE_PATH}/warehouse.py --dataset orders --day <YYYY-MM-DD>`.
+Each query is metered — it bills per call and takes a few seconds.

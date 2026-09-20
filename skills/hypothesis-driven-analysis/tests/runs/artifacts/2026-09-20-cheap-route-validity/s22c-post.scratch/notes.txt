@@ -1,0 +1,9 @@
+accounts with >1 distinct segment: []
+orders before account first valid_from: 0
+Q2 orders 1050 total 1691758.74
+correct Enterprise Q2: orders 199 rev 925797.78
+naive fanned-out: 1227245.07 rows 260
+04 300965.51
+05 301056.4
+06 323775.87
+by segment Q2: {'Enterprise': 925797.78, 'Mid-Market': 542840.57, 'SMB': 223120.39}

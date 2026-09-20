@@ -1,0 +1,197 @@
+{
+  "name": "s13-pre",
+  "started_utc": "2026-09-20T21:06:18.409123+00:00",
+  "duration_s": 69.6,
+  "exit_code": 0,
+  "claude_version": "2.1.278 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5",
+  "session_id": "f87ee11f-62e1-45d2-b65a-df90034e4bed",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Claude_Docs__batch",
+    "mcp__claude_ai_Claude_Docs__create",
+    "mcp__claude_ai_Claude_Docs__delete",
+    "mcp__claude_ai_Claude_Docs__export",
+    "mcp__claude_ai_Claude_Docs__guide",
+    "mcp__claude_ai_Claude_Docs__query",
+    "mcp__claude_ai_Claude_Docs__read",
+    "mcp__claude_ai_Claude_Docs__update",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "main",
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "84ca3da79a643e116a17a9714694326cc2bf1a25e3d29f2711ce0213f3bc8cfc",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "f2506897ebe70e7e38276503e5049a515854404343e088e324501e88ea866afd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "4d326b1446790e70a4eff15b31e252ae1f4983e7e6584b298f8f25e20bb9e52a",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "f62901dadf00580a98aaa41214dd86920e0453b09eb1e7c08ecefac22fe674f5",
+    "hypothesis-driven-analysis/decisions/README.md": "6f4f8731f1f0685f4498ef8a7adb2b90c2285f084acfc1abd84ef525cfd27d05",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s13-conjunctive",
+  "fixture_files_sha256": {
+    "s13-conjunctive/checkout_latency.csv": "4a8003ac57e17f2c77ce34652114772b80d6b522965028ba966457dc26b9c79d"
+  },
+  "prompt_sha256": "7291974d90e60950a291412c35b8ae88d99266fee060294ec9f303b3999d51bb",
+  "jsonl_sha256": "57e0abcd9789e1dba46c2cd966176c6fa56628692ffec4a55fac05adecb98783",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s",
+  "files_written": [
+    "ledger.md",
+    "probe_a.txt",
+    "probe_b.txt"
+  ],
+  "files_written_sha256": {
+    "ledger.md": "758fa6e03fb66b3fb693ff87e04a06a5209257a6187d7eaf674317dc5aba434e",
+    "probe_a.txt": "ecf7f65e6f4082544dd4e823016638c634ddd26741361d4c46de1a14e548cb96",
+    "probe_b.txt": "e9982d833eb918ea5ad7cfee3d1b2db41d1618c350f52c2482c0a5b70b6ad845"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; grep -n -i -A25 \\\"mini\\\" skills/hypothesis-driven-analysis/references/ledger-template.md | head -80; head -5 data/s13-conjunctive/checkout_latency.csv; wc -l data/s13-conjunctive/checkout_latency.csv; ls work\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; python3 - <<'E'\\nimport pandas as pd\\nd=pd.read_csv('data/s13-conjunctive/checkout_latency.csv',parse_dates=['timestamp'])\\nprint(d.shape, d.isna().sum().to_dict(), d.request_id.duplicated().sum())\\nprint(d.timestamp.min(), d.timestamp.max())\\nprint(d.device.value_counts().to_dict(), d.user_type.value_counts().to_dict())\\nd['h']=d.timestamp.dt.hour\\nprint(d.groupby('h').size().to_dict())\\nprint(pd.crosstab(d.h,[d.device,d.user_type]))\\nE\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; python3 - <<'E'\\nimport csv,collections as C\\nr=list(csv.DictReader(open('data/s13-conjunctive/checkout_latency.csv')))\\nprint(len(r), len({x['request_id'] for x in r}), sum(1 for x in r if any(v=='' for v in x.values())))\\nts=sorted(x['timestamp'] for x in r); print(ts[0],ts[-1])\\nprint(C.Counter(x['device'] for x in r), C.Counter(x['user_type'] for x in r))\\nct=C.Counter((x['timestamp'][11:13],x['device'],x['user_type']) for x in r)\\nfor h in range(24):\\n    hh='%02d'%h\\n    print(hh,sum(v for k,v in ct.it"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; mkdir -p work; cat > work/ledger.md <<'E'\\n# Mini-route ledger \\u2014 checkout p95 claim (written BEFORE any latency-by-segment read)\\n\\nRoute: mini. One stated claim, no rival explanation asked to be told apart, non-causal. Not full: nothing causal is asked.\\n\\nClaim: On 2026-07-15, checkout p95 latency_ms exceeded 500 ms, and did so only for mobile x evening-peak x returning requests\\n(i.e. the exceedance is confined to that conjunction; every other slice is <=500).\\n\\nOrientation (counts/coverage only, no"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; python3 - <<'E' | tee work/probe_a.txt\\nimport csv,random\\nr=list(csv.DictReader(open('data/s13-conjunctive/checkout_latency.csv')))\\nfor x in r: x['l']=float(x['latency_ms']); x['m']=int(x['timestamp'][11:13])*60+int(x['timestamp'][14:16])\\ndef p95(v):\\n    v=sorted(v);k=0.95*(len(v)-1);i=int(k);return v[i]+(v[min(i+1,len(v)-1)]-v[i])*(k-i)\\nrandom.seed(0)\\ndef ci(v,B=10000):\\n    b=sorted(p95(random.choices(v,k=len(v))) for _ in range(B));return b[int(.025*B)],b[int(.975*B)]\\ndef show(name,v):\\n    lo,hi=c"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; python3 - <<'E' | tee work/probe_b.txt\\nimport csv,random\\nr=list(csv.DictReader(open('data/s13-conjunctive/checkout_latency.csv')))\\ndef p95(v):\\n    v=sorted(v);k=0.95*(len(v)-1);i=int(k);return v[i]+(v[min(i+1,len(v)-1)]-v[i])*(k-i)\\nrandom.seed(0)\\ndef show(n,v):\\n    b=sorted(p95(random.choices(v,k=len(v))) for _ in range(10000));print(f\\\"{n:35s} n={len(v)} p95={p95(v):.0f} CI=({b[250]:.0f},{b[9750]:.0f}) n>500={sum(a>500 for a in v)}\\\")\\ng=lambda d,u,a,b:[float(x['latency_ms']) for x in r if x['device'"
+    },
+    {
+      "ordinal": 8,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s; cat >> work/ledger.md <<'E'\\n\\n## Outcome (probes in work/probe_a.txt, work/probe_b.txt)\\nP1 CONTRADICTED, discriminating: mobile&returning&18-21 UTC p95 = 438.6 ms, 95% bootstrap CI (397, 468), n=71; 500 lies outside the CI. Robust to windows 17-21, 19-23, 17-24, 20-24 (p95 408-434, CI upper bounds <=468). Only 1 of 71 requests >500 (598 ms).\\nP2 (\\\"only\\\") also fails independently: mobile&NEW&evening p95 = 804 ms, CI (510, 867), n=63 (9 >500) \\u2014 exceedance sits in the new-user slice. Whole-day p95 453 "
+    }
+  ],
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 24536,
+    "cache_read_input_tokens": 544625,
+    "output_tokens": 5955,
+    "output_tokens_details": {
+      "thinking_tokens": 959
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24536,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 797,
+        "cache_read_input_tokens": 68325,
+        "cache_creation_input_tokens": 549,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 549
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "total_cost_usd": 0.26665500000000003,
+    "duration_ms": 67870,
+    "num_turns": 9
+  },
+  "result_text": "**The claim doesn't hold.** For mobile, returning users in the evening peak on 2026-07-15, p95 checkout latency was about 439 ms, below 500 ms.\n\nI treated this as one claim to check, with no rival explanations to sort out.\n\n**The claimed segment**\n- **Result:** 71 requests, p95 = 438.6 ms, 95% bootstrap interval 397\u2013468 ms. 500 ms is outside that interval, so the check is conclusive.\n- **Tail:** only 1 of the 71 requests exceeded 500 ms (598 ms).\n- **Robustness:** the result holds for other evening windows (17\u201321, 19\u201323, 17\u201324, 20\u201324 UTC). p95 ranged from 408 to 434 ms, and every upper bound stayed at or below 468 ms.\n\n**The \"only\" part also fails.** The slow slice is mobile, new users, in the evening:\n- **Evening, mobile, new users:** p95 = 804 ms (interval 510\u2013867 ms), with 9 of 63 requests over 500 ms.\n- **Whole day:** p95 = 453 ms (interval 433\u2013472 ms), so there was no overall exceedance.\n- **All evening traffic:** p95 = 497 ms, with a wide interval of 468\u2013633 ms.\n\nThe mobile, new-user finding came from looking at the data after the claim was tested, so treat it as a lead rather than a finding. Mobile new users are also slow outside the evening (p95 = 552 ms, interval 479\u2013626 ms), so this may be general slowness for that group rather than an evening effect. I can't separate the two from this data.\n\n**Limits**\n- \"Evening peak\" wasn't defined and the timestamps are UTC, so I assumed 18:00\u201321:59 UTC and checked the alternative windows above.\n- Traffic is flat at one request per minute, so the data shows no peak of its own.\n- The file ends at 23:19, so the last 40 minutes of the day are missing. I can't tell whether that is an export gap.\n- Each segment's p95 rests on only a few slow requests, so the intervals are wide.\n\nThe ledger is in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s13-pre-amvg147s/work/ledger.md`, with probe outputs in `probe_a.txt` and `probe_b.txt` in the same folder."
+}

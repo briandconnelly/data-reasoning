@@ -1,0 +1,15 @@
+You are the main agent on a data-analysis task for a user.
+
+A skill is installed. Its full instructions live at:
+/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-_vkga3k4/skills/hypothesis-driven-analysis/SKILL.md
+
+Read that file and follow it as your working method; its references live beside it.
+
+The user's request:
+
+"Someone claims our checkout p95 latency exceeded 500ms yesterday (2026-07-15). Is that claim true?
+Data: /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-_vkga3k4/data/s11-mini/checkout_latency.csv (timestamp, request_id, latency_ms)."
+
+Write any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-_vkga3k4/work.
+Read only what the request and these instructions name; do not read anything else on this machine.
+Your final message is your report to the user.

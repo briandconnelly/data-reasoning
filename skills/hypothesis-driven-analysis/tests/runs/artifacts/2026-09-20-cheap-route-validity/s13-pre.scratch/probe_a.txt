@@ -1,0 +1,16 @@
+ALL                                           n=1400 p95=  453.2 CI95=(433,472) max=897 n>500=40
+CELL mobile&ret&18-21                         n=  71 p95=  438.6 CI95=(397,468) max=598 n>500=1
+mobile&ret&off-evening                        n= 382 p95=  349.8 CI95=(330,393) max=520 n>500=1
+mobile&new&evening                            n=  63 p95=  804.1 CI95=(510,867) max=897 n>500=9
+desktop&ret&evening                           n=  65 p95=  374.8 CI95=(294,445) max=487 n>500=0
+desktop&new&evening                           n=  41 p95=  496.3 CI95=(472,651) max=651 n>500=2
+mobile&ret (all day)                          n= 453 p95=  389.9 CI95=(348,417) max=598 n>500=2
+evening all                                   n= 240 p95=  497.0 CI95=(468,633) max=897 n>500=12
+window sensitivity, mobile&ret:
+ 17-21                                        n=  75 p95=  433.8 CI95=(354,468) max=598 n>500=1
+ 19-23                                        n=  72 p95=  430.7 CI95=(380,442) max=598 n>500=1
+ 17-24                                        n= 115 p95=  430.0 CI95=(378,462) max=598 n>500=1
+ 18-22                                        n=  71 p95=  438.6 CI95=(400,468) max=598 n>500=1
+ 20-24                                        n=  58 p95=  407.9 CI95=(321,435) max=442 n>500=0
+contrast cell-rest p95 -14.9 CI -57 33
+cell values top 10: [389.0, 404.2, 425.3, 428.7, 433.2, 435.1, 442.1, 462.4, 467.7, 597.9]
