@@ -1454,7 +1454,7 @@ Preregistered in `tests/runs/artifacts/2026-09-20-cheap-route-validity-prereg.md
 | S22d (mini) | EMEA absent 3–16 June | 4/4 | 4/4 | 4/4 | 5 — not needed |
 
 No wording shipped; the draft is archived as `draft-wording.patch` beside the arms.
-Regression cells: S11, S13, S14, and S9 show no regression; S2's post arm wrote a notes file carrying the full route's completeness vocabulary on a `direct` query, scored as a regression with the harness-frame confound named in the run record; S15 was machine-checked on C1 only and is not claimed either way.
+Regression cells: S11, S13, S14, and S9 show no regression; S2's post arm wrote a notes file carrying the full route's completeness vocabulary on a `direct` query, scored as a regression with the harness-frame confound named in the run record; S15 shipped machine-checked on C1 only and was scored in full afterwards (issue #43, `tests/runs/artifacts/2026-09-20-cheap-route-validity/s15-scoring/scoring.md`): row 9, a shared failure on the `handoffs` assertion and no regression, which closes the wave.
 Cost on the S22 cells: the skill at `main` spends 32–74% more output tokens than no skill for the same answer, and the draft a further 3–20%.
 n=1 per arm, one model: the wave shows that this model profiles keys, date ranges, and day-by-region coverage unprompted on small local files, not that the cheap routes are safe on the wrong rows in general.
 
