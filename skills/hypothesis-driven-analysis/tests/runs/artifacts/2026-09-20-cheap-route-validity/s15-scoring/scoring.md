@@ -29,7 +29,7 @@ Known positive before trusting the C2 pass: the post plan with H4 relabelled `ca
 | `check_prereg.py --ledger-pattern 'ledger\.md' --data-pattern 's15-assist-rollout\|\.csv'` on `extract_evidence.py manifest` output | exit 2, UNVERIFIABLE: no Write/Edit matches; Bash candidates named at ordinals 8, 13, 14, 15 | exit 1: `PREREG_WRITE: ordinal 8`, five earlier touches listed for classification |
 | `compare_prereg.py --plan … --final …` | exit 1: 9 reworded Tests cells, none covered by a dated amendment | exit 1: 3 reworded Tests cells |
 
-Two instrument limits showed, and neither is patched here.
+Two instrument limits showed, and neither is patched here; the first is filed as issue #47.
 C3a passed the pre ledger although its Conclusion says "H2 makes Assist look better than it should on means, not on the median." (s15-pre.scratch/ledger.md) with S2 declared `UNKNOWN` — an unconditional direction claim the syntactic check does not recognise.
 C4 passed H3 on the presence of the atom alone; Codex reads "adequacy: 0 (deterministic prediction under this estimand)" (s15-post.scratch/ledger.md) as not earned, since a true composition mechanism can produce a larger reversed standardized difference, which is exactly what the arm's own Amendment 2 concedes.
 
@@ -93,6 +93,6 @@ Codex reviewed commit `1ee5c28` (`codex-step7-review.md`); its independent scori
 | Finding | Disposition |
 | --- | --- |
 | S15 is row 9, not row 10: "The first row that applies governs", and both arms fail assertion 9 | **Accepted.** The first version of this file, and Codex's own independent scoring, called the cell row 10 with assertion 9 set aside as row 9; the table has no per-assertion rows. Corrected here and in the three files that carry the row. Nothing downstream moves: row 9 is terminal and is not row 3. |
-| Pre assertion 10 must fail for both scorers, making Fable's pre total 5/10 | **Declined, disagreement kept.** The contract is ambiguous in the way the table row now quotes, and a manual score is what one of its two sentences asks for. The totals stand at 6/10 for each scorer: the review's 5/10 presumes its own reading of 10. The ambiguity is filed as an instrument issue, not settled here. |
+| Pre assertion 10 must fail for both scorers, making Fable's pre total 5/10 | **Declined, disagreement kept.** The contract is ambiguous in the way the table row now quotes, and a manual score is what one of its two sentences asks for. The totals stand at 6/10 for each scorer: the review's 5/10 presumes its own reading of 10. The ambiguity is filed as issue #46, not settled here. |
 | The S15 result was restated in four files | **Accepted.** This file is the home; the others now carry the row and a pointer. |
 | Is Codex's raw scoring durably retrievable? | **Accepted.** Archived beside this file. |
