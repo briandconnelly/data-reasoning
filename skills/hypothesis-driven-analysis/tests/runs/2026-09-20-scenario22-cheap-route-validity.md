@@ -87,7 +87,7 @@ At n=1 it is one draw; it points the same way as the rows 5.
 S15 shipped in this record machine-checked on C1 only, and was scored in full afterwards under issue #43: `artifacts/2026-09-20-cheap-route-validity/s15-scoring/scoring.md` holds the recovered Plan-time ledgers, every instrument's output, the per-assertion table with quotes, and the two places where its two scorers (this session and Codex, working separately) differ.
 Both arms fail the same catalog assertion and post fails none that pre passes, so the cell is row 9; the assertions, the quotes, and the scorers' differences are in that file and are not repeated here.
 On the join sentence the cell reads as S22a and S22c do: the reconciliation post's ledger names was run, in part, before the plan was written, and the pre arm ran the same counts unasked, so the sentence changed the ledger's text and not the arm's behavior.
-This closes the wave; it does not reopen the decline, and a join rule proposed again is a new wording that owes its own arms.
+This closes the wave and does not reopen the decline; what a join rule proposed again would owe is `../PROTOCOL.md`'s to say (§ What owes a rerun), not this record's.
 
 ## Correctness and cost
 

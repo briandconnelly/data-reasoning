@@ -23,7 +23,7 @@ The measurement then gave this position its only support: the one regression the
 
 *Measure first, and let the result decide.* Adopted, per the Iron Law, and this time the declining outcome was written down in advance: the wave's rules said before any arm ran that if every new cell showed no incremental behavior, nothing ships as measured.
 When the draft was declined the regression half of the wave was partial — S15 was machine-checked and not fully scored — so the decline was the conservative reading of an unclosed wave, not the firing of its complete rule.
-S15 was scored afterwards and shows no regression, which closes the wave with the same outcome; the run record is where that is stated.
+S15 was scored afterwards and shows no regression, which closes the wave with the same outcome; the result's home is `tests/runs/artifacts/2026-09-20-cheap-route-validity/s15-scoring/scoring.md`.
 
 ## What settled it
 
