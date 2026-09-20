@@ -134,3 +134,13 @@ Codex reviewed the first draft of this document, the fixture with its generator 
 Its eight findings and their dispositions are in `2026-09-20-cheap-route-validity/design-review.md`; every blocking item was fixed and this document was rewritten.
 A second pass on the rewrite raised seven more, also recorded there: six were taken, and one — that the unresolved-completeness rule must make S11 `NON_DISCRIMINATING` as well — was taken in part and is recorded as an open disagreement for the owner.
 A third pass was not run: the remaining edits apply the reviewer's own suggested text or tighten assertions, PROTOCOL asks that review rounds be batched rather than serialized, and step 7's review of the commit reads whatever these edits got wrong.
+
+## Amendment 1 — after the canaries, before any scored arm (2026-09-20)
+
+Three canary post arms ran (`canary-s22a-post`, `canary-s22b-post`, `canary-s22c-post`), each `claude-sonnet-5`, exit 0, no contamination hit.
+Each was scored on rationale only; none enters the scored table.
+
+- **Rationale, every cell: the changed text was traversed.** S22a's ledger fills the template's new `Data validity` line, names the history table, and reconciles across the join ("all 1,050 orders, none dropped or repeated"), which is § Plan's new sentence. S22b's ledger declares "Source completeness semantics: S1: UNKNOWN", writes a line headed "Crossing requirement", compares it with the covered days' range, and records `NON_DISCRIMINATING` — by the subsection's route, not by an interval on order amounts, which was the entanglement risk named above. S22c narrates "A naive join would repeat those orders" before computing, and writes no ledger.
+  No fixture is entangled; no cell returns to step 2.
+- **Scoring clarification for S22c.1**, prompted by the canary's shape: its report is the figure followed by short labelled paragraphs on the join, segment consistency, other checks, and limitations. That is the answer saying what the check found, which the subsection asks `direct` to do. S22c.1 fails on a record or ledger file (a working script is not one), a hypothesis table, PPDAC section headings, or a coverage matrix or section headed as a data-validity record; labelled paragraphs reporting checks do not fail it. The same reading applies to S2 and S14.
+- The attribution check holds: `git diff --stat main -- skills/hypothesis-driven-analysis ':!skills/hypothesis-driven-analysis/tests'` shows `SKILL.md` (+15 −1) and `references/ledger-template.md` (+1) and nothing else, at commit `6ec2dd6`.
