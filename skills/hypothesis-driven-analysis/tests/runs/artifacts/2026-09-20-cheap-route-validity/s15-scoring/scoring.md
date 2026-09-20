@@ -53,16 +53,20 @@ No call before ordinal 8 relates workflow to time to close, responder minutes, h
 | 7 | No attributable hours as an identified effect | **scorers differ** — Fable FAIL, borderline: "**The credible attributable saving is zero, and the point estimate is negative.**" (s15-pre.manifest.json) under a headline reading "Assist did not cause faster recovery in this data" (s15-pre.manifest.json); Codex PASS, reading "zero" as "nothing bookable" given the memo's causal disclaimer | PASS — the memo says its recommendation is not a finding of harm: "the design can't establish that either." (s15-post.manifest.json) |
 | 8 | Stop rule after every promised stratum, or a recorded deviation | **FAIL**, on Codex's finding, verified — the plan's T5 promises "sev1 contrast, bounds for missing, top-decile share" (s15-scoring/s15-pre.plan-ledger.md); no script computes a top-decile share, the final T5 cell drops it, and Amendments records nothing about it | PASS — all three severities, both groups, the daily series, and overall handoffs are in the outputs |
 | 9 | Interprets the `handoffs` aggregation reversal | **FAIL** — the ordinal-9 output holds marginal 2.25 → 1.96 with sev2 3.01 → 3.95 and sev3 0.54 → 1.52; the memo reads sev1 only | **FAIL** — "handoffs mean 2.25" (s15-post.scratch/analysis2_out.txt) against 1.96, strata in `analysis_out.txt`; the ledger says "CONSISTENT (minutes); handoffs mixed" (s15-post.scratch/ledger.md) and the memo reads sev1 only |
-| 10 | Plan-time ledger written before the first analysis query | **scorers differ** — Fable PASS on manual scoring, which `check_prereg.py`'s own contract prescribes for a Bash-written ledger ("verify from the events stream and score manually") and which the content check and the classification above both clear; Codex FAIL under the assertion's "machine-established" letter, while agreeing the preregistration is real | PASS |
+| 10 | Plan-time ledger written before the first analysis query | **scorers differ**, because the instrument's contract says two things — its fail-closed note sends a Bash-written ledger to be "verified from the events stream and scored manually", and its exit-code list says of exit 2 "the preregistration assertion fails". Fable PASS on the first: the manual check finds a complete plan at ordinal 8 and only orientation before it. Codex FAIL on the second, in both its scoring and its step-7 review, while agreeing the preregistration is real. The assertion's own failing case, "a run with no mid-run ledger write", is not this arm | PASS |
 
 Pre: 6/10 on either scorer's reading (Fable fails 6, 7, 8, 9; Codex fails 6, 8, 9, 10).
 Post: 9/10 on both.
 
 ## Verdict
 
-**Row 10 — no regression**: post passes every catalog assertion pre passes, under either scorer's reading of 7 and 10.
-Assertion 9 is a **row 9** shared catalog failure, the same debt the Tenth wave measured at 0/6: the reversal is held in both arms' outputs and surfaced by neither.
-Post-only passes on 6 and 8 (and 7 or 10, by scorer) are unattributed differences at n=1 and are claimed as nothing, as row 10 says.
+**Row 9 — shared catalog failure**, on assertion 9: the first row that applies governs, and both arms fail the same catalog assertion.
+It is the debt the Tenth wave measured at 0/6 — the `handoffs` reversal is held in both arms' outputs and surfaced by neither — recorded in the catalog, not attributed to the change, and not blocking it.
+Row 3 does not apply under either scorer's reading of 7 and 10: post fails no assertion that pre passes.
+Post-only passes on 6 and 8 (and 7 or 10, by scorer) are unattributed differences at n=1 and are claimed as nothing.
+Row 9 is terminal, so with this cell scored every cell of the wave ends on a terminal row.
+
+This file is the home of the S15 result; the run record, the catalog's Seventeenth-wave entry, and decision 008 point here and carry only the row.
 
 ## What the join sentence did on this cell
 
@@ -81,3 +85,14 @@ No current assertion's letter scores plan-versus-final immutability, as the Tent
   T2 method is an elaboration inside the preregistered alternative.
   The pre arm also met the same T3 wording trap as post — a sign reversal its "smaller in magnitude" prediction did not anticipate — and recorded `CONSISTENT` with an undated post-hoc note, where post recorded `CONTRADICTED`, kept the prediction, and dated the amendment.
 - post, cosmetic: T1 "95%" (already committed in the plan's prose), T3 "pooled mix, bootstrap" (already in the H3 row), T4 "absent".
+
+## Step-7 review
+
+Codex reviewed commit `1ee5c28` (`codex-step7-review.md`); its independent scoring is archived verbatim as `codex-independent-scoring.md`, since the amicus job record expires.
+
+| Finding | Disposition |
+| --- | --- |
+| S15 is row 9, not row 10: "The first row that applies governs", and both arms fail assertion 9 | **Accepted.** The first version of this file, and Codex's own independent scoring, called the cell row 10 with assertion 9 set aside as row 9; the table has no per-assertion rows. Corrected here and in the three files that carry the row. Nothing downstream moves: row 9 is terminal and is not row 3. |
+| Pre assertion 10 must fail for both scorers, making Fable's pre total 5/10 | **Declined, disagreement kept.** The contract is ambiguous in the way the table row now quotes, and a manual score is what one of its two sentences asks for. The totals stand at 6/10 for each scorer: the review's 5/10 presumes its own reading of 10. The ambiguity is filed as an instrument issue, not settled here. |
+| The S15 result was restated in four files | **Accepted.** This file is the home; the others now carry the row and a pointer. |
+| Is Codex's raw scoring durably retrievable? | **Accepted.** Archived beside this file. |
