@@ -39,6 +39,7 @@ TEST_NAME = re.compile(r"^(test_.*|.*_test)\.py$")
 
 PYTEST_CONFIG_FILES = (
     "pytest.ini",
+    ".pytest.ini",
     "pytest.toml",
     ".pytest.toml",
     "pyproject.toml",
@@ -98,7 +99,10 @@ class PytestHook:
 
 def pytest_paths(hook_id: str, entry: str) -> tuple[str, ...] | None:
     """The path arguments of a pytest entry, or None when it is not one."""
-    tokens = shlex.split(entry)
+    try:
+        tokens = shlex.split(entry)
+    except ValueError as exc:
+        raise Unreadable(f"hook {hook_id}: entry is not parseable: {exc}") from exc
     if "pytest" not in tokens:
         return None
     if tokens[:3] != ["python", "-m", "pytest"]:

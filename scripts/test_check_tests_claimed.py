@@ -151,6 +151,7 @@ def test_a_conftest_it_cannot_read_exactly_is_an_error_not_a_pass(tmp_path, caps
         ({"pass_filenames": 'false, types = ["python"]'}, "types"),
         ({"pass_filenames": 'false, args = ["--ignore=pkg/tests/test_a.py"]'}, "`args`"),
         ({"entry": "pytest -q pkg/tests"}, "python -m pytest"),
+        ({"entry": "python -m pytest 'pkg/tests"}, "not parseable"),
         ({"entry": "python -m pytest -q ../pkg/tests"}, "repo-relative"),
         ({"entry": "python scripts/other.py"}, "no pytest hook"),
     ],
@@ -166,7 +167,9 @@ def test_no_test_files_is_an_error_not_a_pass(tmp_path, capsys):
     assert "verifies nothing" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("config", ["pytest.ini", ".pytest.toml", "pkg/tests/pyproject.toml"])
+@pytest.mark.parametrize(
+    "config", ["pytest.ini", ".pytest.ini", ".pytest.toml", "pkg/tests/pyproject.toml"]
+)
 def test_a_pytest_config_file_is_an_error_not_a_pass(tmp_path, capsys, config):
     assert ctc.run(make_repo(tmp_path), files=[config, "pkg/tests/test_a.py"]) == UNREADABLE
     assert config in capsys.readouterr().err
