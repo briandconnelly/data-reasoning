@@ -51,8 +51,20 @@ This was the third and last budgeted call, so its findings were applied without 
 
 The reviewer also confirmed, tracing CS3 and CS6b through the revised text, that neither documented ground truth moves: a contradicted assessment takes precedence whatever the selection-into-exposure row says.
 
+## Pass 3 — on commit `9c2a366`, before any arm (a fourth call, approved by the owner)
+
+Verdict: no-go for the canary.
+
+| # | Finding | Class | Verified how | Disposition |
+| --- | --- | --- | --- | --- |
+| 3.1 | By-arm enrollment still leaves exclusion an observable implication: the arms' outcome distributions can differ by no more than the share whose enrollment the invitation moves, and monotonicity implies the sign of the first stage. So the single untestable ground truth is wrong again, and CS8.4, CS8.5, and CS8.8 would fail a correct arm | blocking | The session computed the same bound while the pass ran: total-variation distance 0.0790 against a first stage of 0.3040, the figure the generator now records | Taken, and not by a fourth fixture. Three designs in a row left the assumption some weak implication, which is the finding: strict untestability almost never survives the presence of outcome data. The wording no longer depends on it — an implication the review can name owes its probe, however weak, and a bound only a large violation would break is a probe assessed with that blind spot named. The ground truth allows two sound records; validator trap 7 keeps the bound clean and was seen to fire on a planted direct effect. The reviewer argued in pass 2 that reading the untestable value as "the review found nothing" lets ignorance pass; the session's answer is that the value's row owes the checks considered and why each is silent, which is what a reader contests, and that a skill cannot demand a partial-identification literature of its reader — it can demand that silence not be filed as evidence |
+| 3.2 | CS8.6 and CS8.7 required only exclusion downstream, so an arm could name monotonicity and drop it | blocking | Read against the ground truth, which conditions on both | Taken: both assertions require exclusion and, for an effect among compliers, monotonicity or its named alternative |
+| 3.3 | On `main`, a sophisticated arm can satisfy the every-assumption-a-probe sentence with the weak bound and reach the conditional disposition, so the cell may no longer separate the wordings | blocking as part of 3.1 | Reasoned from `main`'s text; no arm has run | Accepted as a reachable row, not designed away. It also narrows issue #40's textual claim: the sentence is escapable by an arm that knows a bound, and the live failures are the two the archive and the issue name — a silent check filed as support, and a design stranded for want of a probe |
+
+The reviewer found no further checker-shape conflict, and confirmed the disposition is unique and the design constructible.
+
 ## What no cross-model pass has read
 
-The fixture redesign in 2.1, the assertions as they stand after it (CS8.4, CS8.5, CS8.8), and the checker changes in 2.3 and 2.4.
-PROTOCOL step 3 asks for the design review before any arm; two passes ran and each ended no-go, so by the protocol's own reading no arm should run until a pass reads the redesign and says go.
+The pass-3 dispositions: the `SKILL.md` sentence on weak probes, the two-record ground truth with the total-variation bound, validator trap 7, and CS8.3 through CS8.8 as they now stand.
+PROTOCOL step 3 asks for the design review before any arm; three passes ran and each ended no-go, so no arm should run until a pass reads the wave as it stands and says go.
 No arm has run.

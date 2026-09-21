@@ -30,13 +30,18 @@ Every number below is computed from the generated data.
 
 - Relevance: probed by the first stage from `enrollment_by_arm.csv`, not contradicted.
 - Independence: randomization is stated and quoted, and balance on prior late payments, tenure, and plan came back clean: not contradicted.
-- Exclusion: not testable from this extract.
+- Exclusion: one weak bound, and nothing else.
+  If the invitation reaches late payments only through enrollment, the two arms' outcome distributions can differ only among customers whose enrollment it moves, so their total-variation distance cannot exceed that share.
+  The distance is 0.0790 against a first-stage difference of 0.3040, so the bound holds, and with that much slack it could be broken only by a direct effect of the email on a large share of customers.
   Enrollment exists only as counts by arm, so the joint distribution of invitation, enrollment, and outcome -- which the instrument's inequality restrictions need -- cannot be formed.
   Every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment.
   Whether a customer opened the email is unrecorded.
   The prior-period placebo is balanced by randomization alone whatever the email does after it is sent, so it is silent on exclusion.
-  A customer-level enrollment field, or a randomized arm sent an email with no enrollment content, would make it testable.
-- Monotonicity: not testable from this extract: defiers are unobservable, and without customer-level enrollment the inequality restrictions that could expose a large share of them cannot be formed.
+  A customer-level enrollment field, or a randomized arm sent an email with no enrollment content, would make it testable in earnest.
+  Two records are therefore sound: not contradicted by that bound, with its blind spot named; or not testable here, with the placebo named as a check considered and the reason it is silent.
+  A review is not required to know the bound; it is required not to mistake the placebo, the balance checks, or the first stage for a probe of exclusion.
+- Monotonicity: defiers are unobservable, and without customer-level enrollment the inequality restrictions that could expose a large share of them cannot be formed.
+  Its only observable implication is the sign of the first stage, which is positive; the same two records are sound.
 
 ## Documented ground-truth disposition
 

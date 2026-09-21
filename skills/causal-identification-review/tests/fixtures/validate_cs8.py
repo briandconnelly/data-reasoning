@@ -356,6 +356,34 @@ def _trap_6_overread_planted(directory: Path) -> list[str]:
     return []
 
 
+OUTCOME_TV_SLACK = 0.5
+"""Trap 7 (the one bound exclusion implies stays clean): the total-variation
+distance between the arms' late_payments_90d distributions must stay below
+this fraction of the first-stage difference, so an arm that computes the
+bound finds it holding with room, never flipped by sampling noise."""
+
+
+def _trap_7_outcome_tv_bound(directory: Path, rows: list[dict]) -> list[str]:
+    arms = {z: [r["late_payments_90d"] for r in rows if r["invited"] == z] for z in (0, 1)}
+    support = set(arms[0]) | set(arms[1])
+    tv = 0.5 * sum(
+        abs(arms[1].count(y) / len(arms[1]) - arms[0].count(y) / len(arms[0])) for y in support
+    )
+    with (directory / "enrollment_by_arm.csv").open(encoding="utf-8") as handle:
+        counts = {r["invited"]: r for r in csv.DictReader(handle)}
+    rate = {
+        z: int(counts[z]["enrolled_by_2026_03_16"]) / int(counts[z]["customers"])
+        for z in ("0", "1")
+    }
+    first_stage = rate["1"] - rate["0"]
+    if tv >= OUTCOME_TV_SLACK * first_stage:
+        return [
+            f"trap 7: outcome total-variation distance {tv:.4f} is at or beyond "
+            f"{OUTCOME_TV_SLACK} of the first-stage difference {first_stage:.4f}"
+        ]
+    return []
+
+
 def check(directory: Path) -> list[str]:
     rows = load(directory)
     return [
@@ -365,6 +393,7 @@ def check(directory: Path) -> list[str]:
         *_trap_4_reduced_form(rows),
         *_trap_5_exclusion_untestable(directory),
         *_trap_6_overread_planted(directory),
+        *_trap_7_outcome_tv_bound(directory, rows),
     ]
 
 

@@ -874,6 +874,17 @@ def _two_group_contrast(treated: list[float], control: list[float]) -> dict:
     }
 
 
+def cs8_outcome_tv(rows: list[dict]) -> float:
+    """Total-variation distance between the two arms' `late_payments_90d`
+    distributions -- bounded by the complier share if exclusion and
+    monotonicity hold, the one observable implication the extract leaves them."""
+    arms = {z: [r["late_payments_90d"] for r in rows if r["invited"] == z] for z in (0, 1)}
+    support = set(arms[0]) | set(arms[1])
+    return 0.5 * sum(
+        abs(arms[1].count(y) / len(arms[1]) - arms[0].count(y) / len(arms[0])) for y in support
+    )
+
+
 def cs8_stats(rows: list[dict]) -> dict[str, dict]:
     """Every realized number `cs8-encouragement-ground-truth.md` records.
 
@@ -929,6 +940,7 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
     first, prior, tenure = stats["first_stage"], stats["prior"], stats["tenure"]
     itt = stats["itt"]
     wald = itt["diff"] / first["diff"]
+    outcome_tv = cs8_outcome_tv(rows)
     plan_lines = "".join(
         f"- `plan` share `{plan}`: invited {stats[f'plan_{plan}']['treated']:.4f}, "
         f"not invited {stats[f'plan_{plan}']['control']:.4f}, "
@@ -977,7 +989,13 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
         "contradicted.\n"
         "- Independence: randomization is stated and quoted, and balance on prior late "
         "payments, tenure, and plan came back clean: not contradicted.\n"
-        "- Exclusion: not testable from this extract.\n"
+        "- Exclusion: one weak bound, and nothing else.\n"
+        "  If the invitation reaches late payments only through enrollment, the two arms' "
+        "outcome distributions can differ only among customers whose enrollment it moves, so "
+        "their total-variation distance cannot exceed that share.\n"
+        f"  The distance is {outcome_tv:.4f} against a first-stage difference of "
+        f"{first['diff']:.4f}, so the bound holds, and with that much slack it could be "
+        "broken only by a direct effect of the email on a large share of customers.\n"
         "  Enrollment exists only as counts by arm, so the joint distribution of invitation, "
         "enrollment, and outcome -- which the instrument's inequality restrictions need -- "
         "cannot be formed.\n"
@@ -987,10 +1005,16 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
         "  The prior-period placebo is balanced by randomization alone whatever the email "
         "does after it is sent, so it is silent on exclusion.\n"
         "  A customer-level enrollment field, or a randomized arm sent an email with no "
-        "enrollment content, would make it testable.\n"
-        "- Monotonicity: not testable from this extract: defiers are unobservable, and "
-        "without customer-level enrollment the inequality restrictions that could expose a "
-        "large share of them cannot be formed.\n"
+        "enrollment content, would make it testable in earnest.\n"
+        "  Two records are therefore sound: not contradicted by that bound, with its blind "
+        "spot named; or not testable here, with the placebo named as a check considered and "
+        "the reason it is silent.\n"
+        "  A review is not required to know the bound; it is required not to mistake the "
+        "placebo, the balance checks, or the first stage for a probe of exclusion.\n"
+        "- Monotonicity: defiers are unobservable, and without customer-level enrollment the "
+        "inequality restrictions that could expose a large share of them cannot be formed.\n"
+        "  Its only observable implication is the sign of the first stage, which is positive; "
+        "the same two records are sound.\n"
         "\n"
         "## Documented ground-truth disposition\n"
         "\n"
