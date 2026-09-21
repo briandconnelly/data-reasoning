@@ -1,5 +1,10 @@
 # Preregistration: 2026-09-20 untestable-assumptions wave (issue #40)
 
+**Closed without arms, 2026-09-20.**
+Four design-review passes ended no-go, and the fourth showed that the wave as designed could not separate the wordings; the owner took the reviewer's recommendation to ship the wording as an unmeasured clarification (`../../../decisions/007-assessments-ship-unmeasured.md`).
+This document stands as the record of what was preregistered and why it did not run, and as the starting point for a wave with the endpoint that decision names.
+No arm ran, so no row of the verdict table was reached and nothing below is evidence.
+
 Written before any arm ran, and revised four times before any arm ran, on the four passes of the cross-model design review recorded in `2026-09-20-untestable-assumptions/design-review.md`; the first draft is commit `b0ec13b`.
 This is the `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` step 1 artifact for every cell below; the step 0 check, the step 2 entanglement pass, the step 3 review pointer, and the step 4 canary rule are recorded here too, so the scored runs can point at one document.
 Harness, isolation, archive layout, and the per-cell verdict rows are those of `skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity-prereg.md` (§ Arms, § Per-cell verdict table), reused by pointer and not restated; this wave's archive is `2026-09-20-untestable-assumptions/`, its prompts are under `prompts/` there, and `run_wave.sh` there runs one arm.
@@ -108,7 +113,7 @@ The baseline is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of C
 - A CS8 row 7 revises the text once and remeasures CS8; a second row 7 drops it.
 - The checker's assessment gates are coupled to the template: they ship only with it, because a record written from `main`'s template cannot satisfy them under the favorable disposition.
 - No arm runs until a design-review pass has read the wave as it stands and said go; all four passes so far ended no-go (`2026-09-20-untestable-assumptions/design-review.md`).
-- The wording does not merge until the owner has settled the open disagreement over `hypothesis-driven-analysis/SKILL.md` lines 45 and 319 recorded there (finding 2.5).
+- The wording does not merge until the owner has settled the open disagreement over `hypothesis-driven-analysis/SKILL.md` lines 45 and 319 recorded there (finding 2.5). Settled 2026-09-20: the lines stay, and issue #49 tracks making them pointers.
 - Whatever ships, CS4 and CS7 stage 1 stay owed against it, and the catalog says so.
 - Baseline results are recorded as "skill needed on this cell: yes/no" and decide nothing about the text.
 

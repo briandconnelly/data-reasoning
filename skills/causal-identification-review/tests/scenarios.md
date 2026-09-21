@@ -419,6 +419,8 @@ That is a plausible path, not a guarantee, and the preregistration says what eac
 **Entanglement check:** in the preregistration, § Entanglement pass — null-result sensitivity on the placebo, the CS7 point-estimate collision, completeness, authorization, route, and the traps that keep exclusion untestable.
 
 **Status:** fixture built and validated; zero arms run.
+The preregistered wave was closed without arms on 2026-09-20 (`decisions/007-assessments-ship-unmeasured.md`): four design-review passes showed that a knowledgeable arm on the earlier wording can pass every assertion, so one arm per role could not separate the wordings.
+CS8 ships as a regression scenario; the endpoint a future wave should preregister is in that decision's reopening condition.
 
 ## HDA seam cells (owed by the three amendment sentences)
 
@@ -473,6 +475,12 @@ The scoping authority is the same as the cost line's: no cell's decision point t
 `skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
 No hook watches that pairing; a future change to this skill's disposition semantics must re-check those two HDA lines by hand.
 Re-flagged by the 2026-08-09 final cross-model review; the ruling stands — the wording is measured, pointer-izing it owes arms, and the change batches with the next HDA wording wave.
+
+**Per-assumption assessments shipped unmeasured (2026-09-20, issue #40).**
+`SKILL.md` § Per-route procedure and the record template changed without arms, by the owner's decision recorded in `decisions/007-assessments-ship-unmeasured.md`; nothing here or there claims the wording reaches behavior.
+Every cell whose decision point traverses the edited text owes arms against it: CS3 and CS6b, which can run as they stand; CS8, with the endpoint that decision names; and CS4 and CS7 stage 1, whose own redesigns come first.
+The template's probes table gained two columns and the threat register's cells changed, so records from wave 1 no longer satisfy `check_review.py` — expected, and not a finding against those arms.
+The drift watch above was re-checked by hand for this change, and the reviewer's position that the two HDA lines should become pointers is recorded in `tests/runs/artifacts/2026-09-20-untestable-assumptions/design-review.md`, finding 2.5, with the owner's ruling to leave them and track the change as issue #49.
 
 ## What this repository cannot re-score (recorded 2026-08-22)
 

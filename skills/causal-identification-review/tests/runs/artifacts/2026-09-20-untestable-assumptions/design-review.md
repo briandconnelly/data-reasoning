@@ -87,8 +87,17 @@ Ship the clarification unmeasured, at the owner's call, after the blockers are f
 Or, if behavior is to be measured, preregister the primary endpoint as the two errors the issue names — a silent diagnostic credited to exclusion, or the stranded disposition chosen only because no exclusion probe was known — and run repeated independent pre and post arms, not one of each.
 The session agrees with the diagnosis and leaves the choice to the owner: the second route is a larger spend than the wave preregistered here, and the prereg's row 5 already says an unmeasured clarification is the owner's call.
 
+## The owner's rulings, 2026-09-20
+
+On the wave: the reviewer's first route.
+The wording ships as an unmeasured clarification and CS8 as a regression scenario, with no arm run (`../../../decisions/007-assessments-ship-unmeasured.md`).
+
+On finding 2.5: `hypothesis-driven-analysis/SKILL.md` lines 45 and 319 stay as they are and the change merges.
+The phrase is read as still true — every probe the review named was run, and an assumption with none is carried as a condition — and pointer-izing both lines is filed for the next HDA wording wave, where the seam arms can batch (issue #49).
+The reviewer's contrary position stands recorded above; it was not argued away.
+
 ## What no cross-model pass has read
 
 The pass-4 dispositions above.
-PROTOCOL step 3 asks for the design review before any arm; four passes ran and each ended no-go, so no arm should run until a pass reads the wave as it stands and says go, or the owner takes the reviewer's first route and no arm runs at all.
+PROTOCOL step 3 asks for the design review before any arm; four passes ran and each ended no-go, and the owner then took the reviewer's first route, so none will run under this preregistration.
 No arm has run.
