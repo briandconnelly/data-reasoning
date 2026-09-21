@@ -674,8 +674,8 @@ CS8_RATE_MEAN = {"always": 0.5, "complier": 1.0, "never": 1.3}
 CS8_RATE_SHAPE = 4.0
 """Each customer's 90-day late-payment rate is gamma-distributed around a
 mean that depends on compliance type. Always-takers run well below
-never-takers (self-selection into autopay), so the naive enrolled-vs-not
-contrast overstates autopay's benefit relative to the Wald ratio."""
+never-takers (self-selection into autopay), so enrollment is genuinely
+confounded and only the invitation contrast is usable."""
 
 CS8_AUTOPAY_MULTIPLIER = 0.45
 """Enrollment multiplies a customer's post-period rate by this factor. It is
@@ -691,12 +691,19 @@ compliance type, and of the lateness rate -- pure balance covariates."""
 CS8_FIELDS = (
     "customer_id",
     "invited",
-    "enrolled_autopay",
     "late_payments_prior_90d",
     "late_payments_90d",
     "tenure_months",
     "plan",
 )
+"""`customers.csv` carries no enrollment column. The latent types still drive
+enrollment and the outcome, but enrollment ships only as counts by arm
+(`enrollment_by_arm.csv`): with a customer-level field the joint distribution
+of invitation, enrollment, and outcome is observable, and the instrument's
+inequality restrictions become a real, if weak, test of exclusion and
+monotonicity -- which this fixture exists to withhold."""
+
+CS8_ENROLLMENT_FIELDS = ("invited", "customers", "enrolled_by_2026_03_16")
 
 CS8_ESTIMAND = (
     "the average effect of autopay enrollment on 90-day late-payment count "
@@ -728,9 +735,10 @@ CS8_DESIGN_NOTE = (
     "to use.\n"
     "> You can turn autopay off again from the same page at any time.\n"
     "\n"
-    "Enrollment was voluntary, so we do not compare enrolled and unenrolled customers "
-    "directly.\n"
-    "Instead we use the invitation as an instrument for enrollment.\n"
+    "Enrollment was voluntary and cannot be linked to payment history at the customer level, "
+    "so we use the invitation as an instrument for enrollment: the estimate is the "
+    "difference in late payments by invitation divided by the difference in enrollment "
+    "rates by invitation.\n"
     "As a placebo check we regressed late payments in the 90 days before the invitation on "
     f"the invitation flag and found no effect, which {CS8_OVERREAD}, so the IV estimate is "
     "the causal effect of autopay.\n"
@@ -743,9 +751,13 @@ CS8_DATA_NOTES = (
     "no missing rows, and every field is populated.\n"
     "Every customer in the extract was eligible for autopay throughout the window.\n"
     "Customers could enroll in autopay with or without an invitation.\n"
-    "`enrolled_autopay` is enrollment status as of 2026-03-16, when the enrollment window "
-    "closed: no customer enrolled in or left autopay between 2026-03-16 and the end of the "
-    "outcome window.\n"
+    "Enrollment is held in the billing system.\n"
+    "This extract carries it only as counts by invitation arm in `enrollment_by_arm.csv`, "
+    "as of 2026-03-16, when the enrollment window closed.\n"
+    "Enrollment was fixed on 2026-03-16: no customer enrolled in or left autopay between "
+    "2026-03-16 and the end of the outcome window.\n"
+    "Privacy rules bar linking a customer's enrollment status to their payment history, so "
+    "no customer-level enrollment field exists in this extract or can be requested for it.\n"
     "`late_payments_prior_90d` counts late payments in the 90 days before 2026-03-02, and "
     "`late_payments_90d` counts them in the 90 days after 2026-03-16.\n"
     "No record exists of who opened the email.\n"
@@ -784,7 +796,8 @@ def _cs8_rows(rng: random.Random) -> list[dict]:
         rate = rng.gammavariate(CS8_RATE_SHAPE, CS8_RATE_MEAN[kind] / CS8_RATE_SHAPE)
         prior = _poisson(rng, rate)
         # No `invited` term here: the invitation reaches the outcome through
-        # enrollment alone.
+        # enrollment alone. `enrolled_autopay` stays on the in-memory row for
+        # the by-arm counts; build_cs8 never writes it per customer.
         post = _poisson(rng, rate * CS8_AUTOPAY_MULTIPLIER if enrolled else rate)
 
         tenure = rng.randint(CS8_TENURE_MIN, CS8_TENURE_MAX)
@@ -811,6 +824,37 @@ def _mean_var(values: list[float]) -> tuple[float, float]:
     return mean, sum((v - mean) ** 2 for v in values) / (n - 1)
 
 
+def _two_proportion_contrast(hits_t: int, n_t: int, hits_c: int, n_c: int) -> dict:
+    """Difference in proportions (treated minus control) from counts alone,
+    with its binomial standard error, z, and 95% interval."""
+    p_t, p_c = hits_t / n_t, hits_c / n_c
+    diff = p_t - p_c
+    se = math.sqrt(p_t * (1 - p_t) / n_t + p_c * (1 - p_c) / n_c)
+    return {
+        "treated": p_t,
+        "control": p_c,
+        "diff": diff,
+        "se": se,
+        "z": diff / se,
+        "lo": diff - 1.96 * se,
+        "hi": diff + 1.96 * se,
+    }
+
+
+def cs8_enrollment_by_arm(rows: list[dict]) -> list[dict]:
+    """The only form in which enrollment ships: one row per invitation arm."""
+    return [
+        {
+            "invited": arm,
+            "customers": sum(1 for r in rows if r["invited"] == arm),
+            "enrolled_by_2026_03_16": sum(
+                r["enrolled_autopay"] for r in rows if r["invited"] == arm
+            ),
+        }
+        for arm in (0, 1)
+    ]
+
+
 def _two_group_contrast(treated: list[float], control: list[float]) -> dict:
     """Difference in means (treated minus control) with its unpooled standard
     error, z, 95% interval, and standardized difference (pooled-SD scale)."""
@@ -830,39 +874,6 @@ def _two_group_contrast(treated: list[float], control: list[float]) -> dict:
     }
 
 
-CS8_INEQUALITY_MASS_FLOOR = 0.01
-"""Outcome values holding less than this share of customers are left out of
-the inequality check: a tail cell of one or two customers flips sign on noise."""
-
-
-def cs8_instrument_inequality_min(rows: list[dict]) -> float:
-    """Smallest difference among the instrument's inequality restrictions.
-
-    For each outcome value y: P(y, D=1 | Z=1) - P(y, D=1 | Z=0) and
-    P(y, D=0 | Z=0) - P(y, D=0 | Z=1), each non-negative when independence,
-    exclusion, and monotonicity hold.
-    """
-    n = {z: sum(1 for r in rows if r["invited"] == z) for z in (0, 1)}
-    diffs = []
-    for y in sorted({r["late_payments_90d"] for r in rows}):
-        if (
-            sum(1 for r in rows if r["late_payments_90d"] == y) / len(rows)
-            < CS8_INEQUALITY_MASS_FLOOR
-        ):
-            continue
-
-        def joint(z: int, d: int, y: int = y) -> float:
-            hits = sum(
-                1
-                for r in rows
-                if r["invited"] == z and r["enrolled_autopay"] == d and r["late_payments_90d"] == y
-            )
-            return hits / n[z]
-
-        diffs += [joint(1, 1) - joint(0, 1), joint(0, 0) - joint(1, 0)]
-    return min(diffs)
-
-
 def cs8_stats(rows: list[dict]) -> dict[str, dict]:
     """Every realized number `cs8-encouragement-ground-truth.md` records.
 
@@ -871,21 +882,22 @@ def cs8_stats(rows: list[dict]) -> dict[str, dict]:
     """
     invited = [r for r in rows if r["invited"] == 1]
     control = [r for r in rows if r["invited"] == 0]
-    enrolled = [r for r in rows if r["enrolled_autopay"] == 1]
-    unenrolled = [r for r in rows if r["enrolled_autopay"] == 0]
+    arm_not, arm_invited = cs8_enrollment_by_arm(rows)
 
     def by_invited(value) -> dict:
         return _two_group_contrast([value(r) for r in invited], [value(r) for r in control])
 
     stats = {
-        "first_stage": by_invited(lambda r: r["enrolled_autopay"]),
+        # From the by-arm counts, the way an arm has to compute it.
+        "first_stage": _two_proportion_contrast(
+            arm_invited["enrolled_by_2026_03_16"],
+            arm_invited["customers"],
+            arm_not["enrolled_by_2026_03_16"],
+            arm_not["customers"],
+        ),
         "prior": by_invited(lambda r: r["late_payments_prior_90d"]),
         "tenure": by_invited(lambda r: r["tenure_months"]),
         "itt": by_invited(lambda r: r["late_payments_90d"]),
-        "naive": _two_group_contrast(
-            [r["late_payments_90d"] for r in enrolled],
-            [r["late_payments_90d"] for r in unenrolled],
-        ),
     }
     for plan in CS8_PLANS:
         stats[f"plan_{plan}"] = by_invited(lambda r, plan=plan: 1 if r["plan"] == plan else 0)
@@ -898,17 +910,24 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
 
     outdir.mkdir(parents=True, exist_ok=True)
     with (outdir / "customers.csv").open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=CS8_FIELDS, lineterminator="\n")
+        # extrasaction="ignore" drops the in-memory `enrolled_autopay` key.
+        writer = csv.DictWriter(
+            handle, fieldnames=CS8_FIELDS, lineterminator="\n", extrasaction="ignore"
+        )
         writer.writeheader()
         writer.writerows(rows)
+
+    with (outdir / "enrollment_by_arm.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=CS8_ENROLLMENT_FIELDS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(cs8_enrollment_by_arm(rows))
 
     (outdir / "design_note.md").write_text(CS8_DESIGN_NOTE, encoding="utf-8")
     (outdir / "data_notes.md").write_text(CS8_DATA_NOTES, encoding="utf-8")
 
     stats = cs8_stats(rows)
     first, prior, tenure = stats["first_stage"], stats["prior"], stats["tenure"]
-    itt, naive = stats["itt"], stats["naive"]
-    inequality_min = cs8_instrument_inequality_min(rows)
+    itt = stats["itt"]
     wald = itt["diff"] / first["diff"]
     plan_lines = "".join(
         f"- `plan` share `{plan}`: invited {stats[f'plan_{plan}']['treated']:.4f}, "
@@ -929,7 +948,7 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
         "\n"
         f"> {CS8_ESTIMAND}\n"
         "\n"
-        "## Realized first stage\n"
+        "## Realized first stage (from the by-arm counts)\n"
         "\n"
         f"- Enrollment rate, invited: {first['treated']:.4f}.\n"
         f"- Enrollment rate, not invited: {first['control']:.4f}.\n"
@@ -951,37 +970,27 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
         f"- Intent-to-treat difference (invited minus not invited): {itt['diff']:+.4f} "
         f"(z = {itt['z']:.2f}, 95% interval {itt['lo']:+.4f} to {itt['hi']:+.4f}).\n"
         f"- Wald ratio (intent-to-treat difference over first-stage difference): {wald:+.4f}.\n"
-        f"- Naive enrolled-minus-unenrolled difference: {naive['diff']:+.4f}, "
-        f"{naive['diff'] / wald:.2f} times the Wald ratio.\n"
-        "The naive contrast overstates autopay's benefit because customers who enroll "
-        "without an invitation were already paying late less often.\n"
         "\n"
         "## Ground-truth assessment of each assumption\n"
         "\n"
-        "- Relevance: probed by the first stage above, not contradicted.\n"
+        "- Relevance: probed by the first stage from `enrollment_by_arm.csv`, not "
+        "contradicted.\n"
         "- Independence: randomization is stated and quoted, and balance on prior late "
         "payments, tenure, and plan came back clean: not contradicted.\n"
-        "- Exclusion and monotonicity: one weak joint probe exists, and nothing else.\n"
-        "  With a randomized binary invitation, binary enrollment, and a count outcome, the "
-        "instrument's inequality restrictions are observable: for every outcome value, "
-        "P(y, enrolled | invited) is at least P(y, enrolled | not invited), and "
-        "P(y, not enrolled | not invited) is at least P(y, not enrolled | invited).\n"
-        f"  Over the outcome values holding at least {CS8_INEQUALITY_MASS_FLOOR:.0%} of "
-        f"customers, the smallest of those differences is {inequality_min:+.4f}, so the "
-        "restrictions hold.\n"
-        "  They test exclusion, independence, and monotonicity jointly, and they can see only "
-        "a violation large enough to turn a cell's difference negative: a modest direct effect "
-        "of the email, or a modest share of defiers, passes them.\n"
-        "  Nothing else in the extract bears on either assumption: every customer was "
-        "eligible, so no subgroup exists in which the invitation cannot move enrollment; "
-        "whether a customer opened the email is unrecorded; and the prior-period placebo is "
-        "balanced by randomization alone whatever the email does after it is sent, so it is "
-        "silent on exclusion.\n"
-        "  Two records are therefore sound for each of the two assumptions: not contradicted "
-        "by the inequality restrictions, with what they cannot see named; or not testable "
-        "here, with the placebo named as a check considered and the reason it is silent.\n"
-        "  What is unsound is the placebo, the balance checks, or the first stage filed as a "
-        "probe of exclusion, and either assumption absent from the conditions.\n"
+        "- Exclusion: not testable from this extract.\n"
+        "  Enrollment exists only as counts by arm, so the joint distribution of invitation, "
+        "enrollment, and outcome -- which the instrument's inequality restrictions need -- "
+        "cannot be formed.\n"
+        "  Every customer was eligible, so no subgroup exists in which the invitation cannot "
+        "move enrollment.\n"
+        "  Whether a customer opened the email is unrecorded.\n"
+        "  The prior-period placebo is balanced by randomization alone whatever the email "
+        "does after it is sent, so it is silent on exclusion.\n"
+        "  A customer-level enrollment field, or a randomized arm sent an email with no "
+        "enrollment content, would make it testable.\n"
+        "- Monotonicity: not testable from this extract: defiers are unobservable, and "
+        "without customer-level enrollment the inequality restrictions that could expose a "
+        "large share of them cannot be formed.\n"
         "\n"
         "## Documented ground-truth disposition\n"
         "\n"

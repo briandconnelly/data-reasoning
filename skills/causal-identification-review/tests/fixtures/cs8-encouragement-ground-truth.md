@@ -7,7 +7,7 @@ Every number below is computed from the generated data.
 
 > the average effect of autopay enrollment on 90-day late-payment count among customers whose enrollment the invitation changes (compliers)
 
-## Realized first stage
+## Realized first stage (from the by-arm counts)
 
 - Enrollment rate, invited: 0.4520.
 - Enrollment rate, not invited: 0.1480.
@@ -25,20 +25,18 @@ Every number below is computed from the generated data.
 
 - Intent-to-treat difference (invited minus not invited): -0.2000 (z = -6.55, 95% interval -0.2599 to -0.1401).
 - Wald ratio (intent-to-treat difference over first-stage difference): -0.6579.
-- Naive enrolled-minus-unenrolled difference: -0.8705, 1.32 times the Wald ratio.
-The naive contrast overstates autopay's benefit because customers who enroll without an invitation were already paying late less often.
 
 ## Ground-truth assessment of each assumption
 
-- Relevance: probed by the first stage above, not contradicted.
+- Relevance: probed by the first stage from `enrollment_by_arm.csv`, not contradicted.
 - Independence: randomization is stated and quoted, and balance on prior late payments, tenure, and plan came back clean: not contradicted.
-- Exclusion and monotonicity: one weak joint probe exists, and nothing else.
-  With a randomized binary invitation, binary enrollment, and a count outcome, the instrument's inequality restrictions are observable: for every outcome value, P(y, enrolled | invited) is at least P(y, enrolled | not invited), and P(y, not enrolled | not invited) is at least P(y, not enrolled | invited).
-  Over the outcome values holding at least 1% of customers, the smallest of those differences is +0.0003, so the restrictions hold.
-  They test exclusion, independence, and monotonicity jointly, and they can see only a violation large enough to turn a cell's difference negative: a modest direct effect of the email, or a modest share of defiers, passes them.
-  Nothing else in the extract bears on either assumption: every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; whether a customer opened the email is unrecorded; and the prior-period placebo is balanced by randomization alone whatever the email does after it is sent, so it is silent on exclusion.
-  Two records are therefore sound for each of the two assumptions: not contradicted by the inequality restrictions, with what they cannot see named; or not testable here, with the placebo named as a check considered and the reason it is silent.
-  What is unsound is the placebo, the balance checks, or the first stage filed as a probe of exclusion, and either assumption absent from the conditions.
+- Exclusion: not testable from this extract.
+  Enrollment exists only as counts by arm, so the joint distribution of invitation, enrollment, and outcome -- which the instrument's inequality restrictions need -- cannot be formed.
+  Every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment.
+  Whether a customer opened the email is unrecorded.
+  The prior-period placebo is balanced by randomization alone whatever the email does after it is sent, so it is silent on exclusion.
+  A customer-level enrollment field, or a randomized arm sent an email with no enrollment content, would make it testable.
+- Monotonicity: not testable from this extract: defiers are unobservable, and without customer-level enrollment the inequality restrictions that could expose a large share of them cannot be formed.
 
 ## Documented ground-truth disposition
 

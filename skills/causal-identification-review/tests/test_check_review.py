@@ -773,20 +773,32 @@ def test_not_constructible_with_none_run_probes_accepted() -> None:
     assert findings == []
 
 
-def test_unresolved_with_none_run_probes_accepted() -> None:
-    record = (
+def test_unresolved_with_inline_none_run_probes_rejected() -> None:
+    """Before issue #40 a design could end `unresolved` over an inline
+    `none run`; every named assumption now owes an assessed row, so probes
+    proposed and not run are `not-run` rows (the next test)."""
+    record = _as_disposition(
         VALID_RECORD.replace(
-            _PROBES_BLOCK,
-            "- Assumption probes: none run — proposed, not yet executed\n",
-        )
-        .replace(
-            "Disposition: identified-if — parallel trends and no-anticipation both hold",
-            "Disposition: unresolved — the probes are proposed but not run",
-        )
-        .replace("- Dispositions: identified-if", "- Dispositions: unresolved")
+            _PROBES_BLOCK, "- Assumption probes: none run — proposed, not yet executed\n"
+        ),
+        "unresolved",
     )
     findings, _ = cr.check_record(record)
-    assert findings == []
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_unresolved_with_not_run_rows_accepted() -> None:
+    record = _as_disposition(
+        VALID_RECORD.replace(
+            "| A2 | retention in the two weeks before each switch date | not-contradicted | "
+            "no discontinuity |",
+            "| A2 | retention in the two weeks before each switch date | not-run | "
+            "proposed, not yet executed |",
+        ),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
 
 
 # --------------------------------------------------------------------------- #
@@ -800,12 +812,12 @@ _SECOND_DESIGN_BLOCK = """\
 
 - Design: event-study around each cohort's switch date
 - Identifying assumptions:
-  - no anticipation: behavior does not shift ahead of the switch
+  - A1: no anticipation: behavior does not shift ahead of the switch
 - Assumption probes:
 
-  | assumption | probe | result |
-  | --- | --- | --- |
-  | no anticipation | pre-switch window inspection | could not discriminate from noise |
+  | assumption | probe | assessment | evidence or reason |
+  | --- | --- | --- | --- |
+  | A1 | pre-switch window inspection | non-discriminating | could not discriminate from noise |
 
 - Data requirements: per-customer switch date and daily retention status
 - Threat register:
@@ -1227,7 +1239,7 @@ def test_identified_if_without_the_assessment_column_is_rejected() -> None:
         .replace(_A2_ROW, "  | A2 | two-week window | no discontinuity |\n")
     )
     findings, _ = cr.check_record(record)
-    assert any("assessment column" in f for f in findings), findings
+    assert any("probes table" in f and "columns" in f for f in findings), findings
 
 
 def test_an_assessment_outside_the_closed_set_is_rejected() -> None:
@@ -1396,3 +1408,36 @@ def test_a_bold_assumption_id_is_read_as_the_id() -> None:
     )
     findings, _ = cr.check_record(record)
     assert findings == [], findings
+
+
+# Design review pass 2 (Codex, 2026-09-20), each reproduced before the fix.
+def test_an_unfavorable_disposition_still_owes_the_assessment_column() -> None:
+    """SKILL.md gives *every* named assumption an assessed row, so a block
+    cannot leave the schema by ending somewhere other than `identified-if`."""
+    record = _as_disposition(
+        VALID_RECORD.replace(
+            "  | assumption | probe | assessment | evidence or reason |\n"
+            "  | --- | --- | --- | --- |\n",
+            "  | assumption | probe | result |\n  | --- | --- | --- |\n",
+        )
+        .replace(_A1_ROW, "  | A1 | pre-period slope | inconclusive |\n")
+        .replace(_A2_ROW, "  | A2 | two-week window | inconclusive |\n"),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_a_probes_table_with_a_missing_column_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        "  | assumption | probe | assessment | evidence or reason |\n  | --- | --- | --- | --- |\n",
+        "  | assumption | assessment | evidence or reason |\n  | --- | --- | --- |\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_an_assumption_cell_with_trailing_text_is_not_an_id() -> None:
+    record = VALID_RECORD.replace("  | A2 | retention in", "  | A2 trailing junk | retention in")
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "no probe row" in f for f in findings), findings

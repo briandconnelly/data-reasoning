@@ -1,6 +1,6 @@
 # Preregistration: 2026-09-20 untestable-assumptions wave (issue #40)
 
-Written before any arm ran, and revised once before any arm ran, on the first pass of the cross-model design review recorded in `2026-09-20-untestable-assumptions/design-review.md`; the first draft is commit `b0ec13b`.
+Written before any arm ran, and revised twice before any arm ran, on the two passes of the cross-model design review recorded in `2026-09-20-untestable-assumptions/design-review.md`; the first draft is commit `b0ec13b`.
 This is the `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` step 1 artifact for every cell below; the step 0 check, the step 2 entanglement pass, the step 3 review pointer, and the step 4 canary rule are recorded here too, so the scored runs can point at one document.
 Harness, isolation, archive layout, and the per-cell verdict rows are those of `skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity-prereg.md` (§ Arms, § Per-cell verdict table), reused by pointer and not restated; this wave's archive is `2026-09-20-untestable-assumptions/`, its prompts are under `prompts/` there, and `run_wave.sh` there runs one arm.
 
@@ -64,10 +64,11 @@ Ground truth for CS8 is `fixtures/cs8-encouragement-ground-truth.md`, generated 
 An invitation assigned at random to 3000 of 6000 customers moves enrollment by 0.304 (z = 27.2); prior-period late payments, tenure, and plan are balanced across it (prior-period difference −0.023, 95% interval −0.085 to +0.038); the reduced form is not flat (z = −6.6).
 So relevance and independence each have a probe the extract can feed, and each comes back clean.
 Enrollment is fixed on 2026-03-16 and the outcome window opens that day, so treatment precedes outcome and the design is constructible.
-Exclusion and monotonicity have one weak joint probe and nothing else: the instrument's inequality restrictions are observable with a binary invitation, binary enrollment, and a count outcome, they hold in the fixture (validator trap 8, which fires on a planted direct effect), and they can see only a violation large enough to turn a cell's difference negative.
-No other check reaches either assumption: every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; who opened the email is unrecorded; and the prior-period placebo is balanced by randomization alone whatever the email does after it is sent, so it is silent on exclusion.
-The ground-truth file therefore allows two sound records for exclusion — not contradicted by the inequality restrictions with their blind spot named, or not testable here with the placebo named as a check considered and found silent — and one disposition.
-A review is not required to know the inequality restrictions; it is required not to mistake the placebo for them.
+Exclusion has no probe, by construction.
+Enrollment is held in the billing system and reaches the extract only as counts by invitation arm (`enrollment_by_arm.csv`), privacy rules barring a customer-level link to payment history; so the joint distribution of invitation, enrollment, and outcome, which an instrument's inequality restrictions need, cannot be formed, while the first stage and the ratio the analyst proposes still can.
+Every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; who opened the email is unrecorded; and the prior-period placebo is balanced by randomization alone whatever the email does after it is sent, so it is silent on exclusion.
+Monotonicity has none either.
+The first fixture carried enrollment per customer, and the design review's two passes showed that made exclusion weakly testable and the ground truth double; the redesign is recorded in the design-review file, pass 2.
 The analyst's note plants the overread: the placebo "confirms the instrument is clean, so the IV estimate is the causal effect of autopay".
 
 Assertions, each a single check on archived output, worded so an arm on either wording can pass or fail them:
@@ -75,11 +76,11 @@ Assertions, each a single check on archived output, worded so an arm on either w
 - **CS8.1** — the record's route is `review`, and it carries a Design block for the invitation-as-instrument design.
 - **CS8.2** — that block names relevance, independence of the invitation, and the exclusion restriction, all three, each as a claim evidence could break; and when its estimand is an effect among compliers it also names monotonicity, or the alternative restriction it relies on instead.
 - **CS8.3** — the probes the extract can feed were run and reported with results: a first stage for relevance, and a balance or prior-period check for independence. Either assumption recorded as untestable, or its probe proposed and not run, fails.
-- **CS8.4** — the prior-period placebo, the balance checks, and the first stage are nowhere given as evidence for the exclusion restriction, in a probes-table row or in a sentence. "The placebo is consistent with randomization and says nothing about exclusion" passes. A check of the instrument's inequality restrictions is a probe of exclusion and passes here.
-- **CS8.5** — exclusion's evidential state is stated as one of the two the ground-truth file allows: not testable from this extract, with a reason that says why the checks on offer are silent on it; or not contradicted by the inequality restrictions, with what they cannot see named. A statement that any check supports, confirms, or establishes exclusion fails.
+- **CS8.4** — the prior-period placebo, the balance checks, and the first stage are nowhere given as evidence for the exclusion restriction, in a probes-table row or in a sentence. "The placebo is consistent with randomization and says nothing about exclusion" passes.
+- **CS8.5** — the record or the report says the exclusion restriction cannot be tested from this extract, with a reason specific to it: enrollment exists only as counts by arm, every customer was eligible, email opens are unrecorded, or the placebo predates the email. A statement that any check supports, confirms, or establishes exclusion fails.
 - **CS8.6** — the instrument design's disposition is `identified-if`, with exclusion among the conditions stated with it. `unresolved` or `not-constructible` fails; so does `identified-if` with exclusion absent from its conditions.
 - **CS8.7** — the Handoff block's Assumptions slot carries the exclusion restriction as a condition on any downstream estimate.
-- **CS8.8** — post only, recorded, decides no row: `check_review.py` exits 0 on the record, and the exclusion row reads either probe `NONE` with assessment `not-testable-here`, or a named inequality check with assessment `not-contradicted`.
+- **CS8.8** — post only, recorded, decides no row: `check_review.py` exits 0 on the record, and the exclusion row reads probe `NONE`, assessment `not-testable-here`.
 
 The baseline is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of CS8.6 (identification stated as conditional on exclusion, neither refused nor unconditional); it writes no template record, so CS8.1, CS8.2's block, and CS8.7 do not apply to it.
 
@@ -88,7 +89,7 @@ The baseline is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of C
 - CS8 baseline: corrects the analyst, says exclusion is an untestable assumption, and calls the estimate conditional on it. Skill needed on this cell: probably no, on the report-level assertions.
 - CS8 pre: names all three assumptions, runs the first stage and the balance checks, then either lands `unresolved` because exclusion has no probe (fails CS8.6 — the CS7 stranding), or files the placebo in exclusion's row to complete the table (fails CS8.4).
   At-risk: pre writes "untestable" in the result cell and assigns `identified-if` anyway, passing everything — row 5, and a fair result: the text's literal reading did not bind the arm.
-- CS8 post: exclusion and monotonicity `not-testable-here` with probe `NONE` and the placebo named as silent, or `not-contradicted` by the inequality restrictions; relevance and independence `not-contradicted`; disposition `identified-if` with both conditions named, carried into Handoff.
+- CS8 post: exclusion and monotonicity `not-testable-here` with probe `NONE` and the placebo named as a check considered and found silent; relevance and independence `not-contradicted`; disposition `identified-if` with both conditions named, carried into Handoff.
   At-risk: post treats the untestable value as an exit and assigns it to independence without running the balance check (fails CS8.3, row 7); post lands `unresolved` out of caution the new precedence does not ask for (fails CS8.6, row 7).
 - CS3, CS6b: post passes every catalog assertion pre passes, both designs still ending on the contradicted-assumption value.
   At-risk: the new `unresolved` clause or the restated precedence moves a CS3 design off its documented disposition (row 3); the longer procedure displaces a threat from the register (row 3).
@@ -102,6 +103,8 @@ The baseline is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of C
 - The favorable row is earned on the whole cell: CS8 lands on row 6 only if post passes CS8.2 through CS8.7, so an arm that reaches the conditional disposition by calling a testable assumption untestable is row 7, not row 6.
 - A CS8 row 7 revises the text once and remeasures CS8; a second row 7 drops it.
 - The checker's assessment gates are coupled to the template: they ship only with it, because a record written from `main`'s template cannot satisfy them under the favorable disposition.
+- No arm runs until a design-review pass has read the fixture as redesigned and said go; both passes so far ended no-go (`2026-09-20-untestable-assumptions/design-review.md`).
+- The wording does not merge until the owner has settled the open disagreement over `hypothesis-driven-analysis/SKILL.md` lines 45 and 319 recorded there (finding 2.5).
 - Whatever ships, CS4 and CS7 stage 1 stay owed against it, and the catalog says so.
 - Baseline results are recorded as "skill needed on this cell: yes/no" and decide nothing about the text.
 
@@ -112,10 +115,10 @@ The baseline is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of C
 - **Completeness semantics.** `data_notes.md` states the extract complete with every field populated, so no absent-record reading is live.
 - **Authorization and costly collection.** A frozen local export, stated as such in the prompt; both gates quiet.
 - **Route.** The analyst presents a design as identifying, which selects `review`; the question asks what the number would be conditional on, not for the number, so the estimation boundary CS6b probes is not reached.
-- **A testable exclusion by accident.** The validator fails the fixture if `customers.csv` gains any column beyond the seven named (an eligibility, open, or segment column would create a zero-first-stage subgroup), if `data_notes.md` loses the all-eligible or no-open-record sentence, or if either note uses the words `exclusion`, `direct effect`, `reminder`, `due date`, or `late fee`. The email body is quoted in full and speaks only of how to enroll, so an arm can reason about a direct channel and cannot settle one.
-- **Compliance types from the data.** Always-takers are visible among the uninvited and never-takers among the invited. Comparing outcomes by invitation within the unenrolled is not a probe of exclusion — that cell mixes never-takers with compliers on one side only, so exclusion does not imply equality there — and an arm that files it as one fails CS8.4. The joint distribution of invitation, enrollment, and outcome does carry the inequality restrictions, which is why the ground truth allows a second record.
+- **A testable exclusion by accident.** The validator fails the fixture if `customers.csv` gains any column beyond the six named (an enrollment, eligibility, open, or segment column would make exclusion testable), if `data_notes.md` loses the all-eligible or no-open-record sentence, or if either note uses the words `exclusion`, `direct effect`, `reminder`, `due date`, or `late fee`. The email body is quoted in full and speaks only of how to enroll, so an arm can reason about a direct channel and cannot settle one.
+- **No customer-level enrollment.** `customers.csv` has no enrollment column and the validator fails the fixture if it gains one, so neither a comparison within the unenrolled nor the inequality restrictions can be computed; `data_notes.md` says the link cannot be requested either, so the costly-collection and authorization gates are not the reason the probe is absent.
 - **Treatment timing.** `data_notes.md` fixes enrollment on 2026-03-16 and opens the outcome window that day; the validator requires both sentences. Without them the data-requirements check, which precedes assumptions, could fairly end the design before the cell's question is reached.
-- **The estimation boundary.** The prompt asks which assumptions a downstream estimate would be conditional on and says not to estimate. Probe statistics — a first-stage difference, a balance difference, cell differences in the inequality check — are evidence about assumptions and may appear.
+- **The estimation boundary.** The prompt asks which assumptions a downstream estimate would be conditional on and says not to estimate. Probe statistics — a first-stage difference, a balance difference — are evidence about assumptions and may appear.
 - **Monotonicity.** Untestable here as well. No assertion keys on it, so an arm that omits it, or states the estimand as the intent-to-treat effect of the invitation in a second Design block, loses nothing; the ground-truth file records it so a scorer does not read its appearance as an error.
 
 ## Canary rule (PROTOCOL step 4)

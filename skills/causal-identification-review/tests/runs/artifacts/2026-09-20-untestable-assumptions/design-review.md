@@ -33,3 +33,26 @@ Shipped-skill diff against `main` at that commit: `SKILL.md` +16 −5, `referenc
 
 Claims in the review not independently verified: the two Pearl-inequality sums it reports (0.852 and 0.452), and its reading that the single negative cell it found sits at an outcome value of 9, in the tail the validator's 1% mass floor leaves out.
 Neither decides anything above.
+
+## Pass 2 — on commit `6e0a9f7`, before any arm
+
+Verdict: no-go for the canary.
+This was the third and last budgeted call, so its findings were applied without a further pass; what that leaves unreviewed is stated at the end.
+
+| # | Finding | Class | Verified how | Disposition |
+| --- | --- | --- | --- | --- |
+| 2.1 | The revised `SKILL.md` says an assumption with an observable implication owes its probe and names an instrument's inequality restrictions as one, so the second record the ground truth allowed for exclusion — untestable, probe absent — is wrong under the post wording, and a post arm could pass CS8.5 while violating its own text | blocking | The session had put this exact question to the reviewer, suspecting it. Read both texts: they disagree | Taken, by redesigning the fixture and not by weakening the wording. Enrollment now reaches the extract only as counts by invitation arm, privacy rules barring a customer-level link. The first stage, the balance checks, and the ratio the analyst proposes are all still computable; the joint distribution the inequality restrictions need is not. Exclusion is untestable in fact, the ground truth is single again, and text and ground truth agree |
+| 2.2 | Validator trap 8 dropped outcome values under 1% of customers, hiding one cell (outcome value 9, one customer) where an inequality is negative, while the ground truth said the restrictions hold "for every outcome value" | blocking | Read trap 8 and the ground-truth sentence: the truncation was stated in the file but not arm-visible, and a careful arm on the full support could fairly report a contradiction | Moot after 2.1: no customer-level enrollment, no restrictions to compute, trap 8 removed. Recorded because the session wrote that trap an hour earlier and chose the mass floor to make it pass |
+| 2.3 | The assessment gates were skipped for any block without an assessment column unless it ended on the favorable disposition, and for every block ending on the cannot-be-built disposition, an exception the checker had invented | should-fix | Reproduced on an old three-column table under the could-not-discriminate disposition: no findings | Fixed test-first. Every Design block owes the template's four columns in order, except one ending on the cannot-be-built disposition, and that exception now has its home in `SKILL.md`'s data-requirements sentence. Three legacy tests migrated: probes proposed and not run are `not-run` rows, not an inline `none run` |
+| 2.4 | An assumption cell with trailing text was read as its id; a table missing the probe column passed | should-fix | Reproduced both | Fixed test-first: the id cell is full-matched, the header is compared to the four column names in order |
+| 2.5 | HDA lines 45 and 319 still say "with its probes run", which the new semantics make divergent and not merely duplicated | should-fix | Read | Not taken in this wave, and the reviewer's position is recorded as standing: editing those lines owes HDA seam arms under the catalog's ruling. The session's reading is that the phrase remains true — every probe the review named was run, and an assumption with none is carried as a condition HDA line 319 already says the causal wording carries. The owner settles it; the wave-level rules say this wording does not merge until they have |
+| 2.6 | Naming probes before running any is scoreable from the archived tool-call order and is not scored | note | Read | Recorded for the canary's rationale read; decides no row |
+| 2.7 | The checker's module docstring still called the disposition gate one-directional | note | Read | Fixed |
+
+The reviewer also confirmed, tracing CS3 and CS6b through the revised text, that neither documented ground truth moves: a contradicted assessment takes precedence whatever the selection-into-exposure row says.
+
+## What no cross-model pass has read
+
+The fixture redesign in 2.1, the assertions as they stand after it (CS8.4, CS8.5, CS8.8), and the checker changes in 2.3 and 2.4.
+PROTOCOL step 3 asks for the design review before any arm; two passes ran and each ended no-go, so by the protocol's own reading no arm should run until a pass reads the redesign and says go.
+No arm has run.

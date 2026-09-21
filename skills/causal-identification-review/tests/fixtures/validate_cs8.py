@@ -8,12 +8,17 @@
 CS8 is a randomized-encouragement instrumental-variable design whose
 relevance and independence assumptions clear probes the data can feed, and
 whose exclusion restriction no result obtainable from the extract can test.
-The analyst's note plants the overread that a silent prior-period placebo
+Enrollment ships only as counts by invitation arm (`enrollment_by_arm.csv`),
+never per customer: a customer-level field would make the joint distribution
+of invitation, enrollment, and outcome observable, and with it the
+instrument's inequality restrictions -- a real test of exclusion. The
+analyst's note plants the overread that a silent prior-period placebo
 "confirms the instrument is clean".
 
-Every statistic here is recomputed from `customers.csv` independently of
-`generate.py`'s `cs8_stats`, the `validate_cs5.py` pattern: a bug shared by
-both implementations is the only way a check could pass on broken data.
+Every statistic here is recomputed from `customers.csv` and
+`enrollment_by_arm.csv` independently of `generate.py`'s `cs8_stats`, the
+`validate_cs5.py` pattern: a bug shared by both implementations is the only
+way a check could pass on broken data.
 
 Run against the fixture directory:
 
@@ -38,15 +43,27 @@ from generate import CS8_GROUND_TRUTH, build_cs8
 EXPECTED_COLUMNS = (
     "customer_id",
     "invited",
-    "enrolled_autopay",
     "late_payments_prior_90d",
     "late_payments_90d",
     "tenure_months",
     "plan",
 )
-"""Trap 6: the only columns `customers.csv` may carry. An eligibility, open,
-or segment column would hand an arm a subgroup with a zero first stage, and
-with it a real test of exclusion."""
+"""Trap 5: the only columns `customers.csv` may carry. An enrollment column
+would let an arm form the instrument's inequality restrictions; an
+eligibility, open, or segment column would hand it a subgroup with a zero
+first stage. Either is a real test of exclusion."""
+
+INT_COLUMNS = EXPECTED_COLUMNS[1:5]
+
+ENROLLMENT_COLUMNS = ("invited", "customers", "enrolled_by_2026_03_16")
+"""Trap 5: the only columns `enrollment_by_arm.csv` may carry."""
+
+ENROLLMENT_ARMS = ("0", "1")
+"""Trap 5: `enrollment_by_arm.csv` holds exactly one row per invitation arm,
+in this order -- no finer breakdown that could stand in for a subgroup."""
+
+CUSTOMERS_PER_ARM = 3000
+"""Trap 5: each arm's `customers` count."""
 
 PLANS = ("basic", "standard", "premium")
 
@@ -70,53 +87,58 @@ standard errors invites an argument about imbalance, and the cell is about
 what a clean placebo can and cannot say."""
 
 FIRST_STAGE_FLOOR = 0.25
-"""Trap 3 (relevance): invited-minus-not enrollment difference floor."""
+"""Trap 3 (relevance): invited-minus-not enrollment-rate difference floor,
+computed from the `enrollment_by_arm.csv` counts."""
 
 FIRST_STAGE_Z_FLOOR = 10.0
-"""Trap 3 (relevance): the first-stage difference's z must reach this."""
+"""Trap 3 (relevance): the first-stage difference's z, on the binomial
+standard error from the by-arm counts, must reach this."""
 
 ITT_Z_FLOOR = 4.0
 """Trap 4 (non-flat reduced form): the intent-to-treat difference in
 late_payments_90d must be negative with |z| at least this, so no arm is
 detoured into a null-result sensitivity argument."""
 
-NAIVE_TO_WALD_FLOOR = 1.3
-"""Trap 5 (confounded naive contrast): the naive enrolled-vs-not difference
-must be at least this multiple of the Wald ratio in magnitude -- self-selection
-is real, so the design matters."""
-
 DATA_NOTES_REQUIRED_PHRASES = (
     # No subgroup exists in which the invitation cannot move enrollment.
     "Every customer in the extract was eligible for autopay throughout the window.",
     # Receipt of the email cannot be conditioned on either.
     "No record exists of who opened the email.",
+    # No joint (invitation, enrollment, outcome) rows, now or on request.
+    "Privacy rules bar linking a customer's enrollment status to their payment history, so "
+    "no customer-level enrollment field exists in this extract or can be requested for it.",
     # Treatment precedes the outcome window, so the design is constructible.
     "no customer enrolled in or left autopay between 2026-03-16 and the end of the outcome window",
     "`late_payments_90d` counts them in the 90 days after 2026-03-16.",
 )
-"""Trap 6: the arm-visible facts that close off a zero-first-stage subgroup
-test of exclusion and fix enrollment before the outcome window opens."""
+"""Trap 5: the arm-visible facts that close off a zero-first-stage subgroup
+test of exclusion, close off the joint rows the inequality restrictions need,
+and fix enrollment before the outcome window opens."""
 
 FORBIDDEN_PHRASES = ("exclusion", "direct effect", "reminder", "due date", "late fee")
-"""Trap 6: neither note may name the untestable assumption, nor describe an
+"""Trap 5: neither note may name the untestable assumption, nor describe an
 email that would itself plausibly move payment behaviour (case-insensitive)."""
 
+DATA_NOTES_FORBIDDEN_PHRASES = ("instrument", "subgroup")
+"""Trap 5: `data_notes.md` alone must also stay clear of these -- the design
+note has to say "instrument", the neutral data notes must not steer."""
+
 OVERREAD_PHRASE = "confirms the instrument is clean"
-"""Trap 7: the planted overread `design_note.md` must carry verbatim."""
+"""Trap 6: the planted overread `design_note.md` must carry verbatim."""
 
 
 def load(directory: Path) -> list[dict]:
     with (directory / "customers.csv").open(encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     for row in rows:
-        for field in EXPECTED_COLUMNS[1:6]:
+        for field in INT_COLUMNS:
             row[field] = int(row[field])
     return rows
 
 
-def _header(directory: Path) -> list[str]:
-    with (directory / "customers.csv").open(encoding="utf-8") as handle:
-        return next(csv.reader(handle))
+def _raw_rows(path: Path) -> list[list[str]]:
+    with path.open(encoding="utf-8") as handle:
+        return list(csv.reader(handle))
 
 
 def _mean(values: list[float]) -> float:
@@ -217,8 +239,21 @@ def _trap_2_randomization(rows: list[dict]) -> list[str]:
     return out
 
 
-def _trap_3_relevance(rows: list[dict]) -> list[str]:
-    diff, se = _diff_se(*_split(rows, "invited", lambda r: r["enrolled_autopay"]))
+def _trap_3_relevance(directory: Path) -> list[str]:
+    path = directory / "enrollment_by_arm.csv"
+    if not path.exists():
+        return ["trap 3: enrollment_by_arm.csv is missing"]
+    with path.open(encoding="utf-8") as handle:
+        arms = {row.get("invited"): row for row in csv.DictReader(handle)}
+    try:
+        n_1, n_0 = int(arms["1"]["customers"]), int(arms["0"]["customers"])
+        p_1 = int(arms["1"]["enrolled_by_2026_03_16"]) / n_1
+        p_0 = int(arms["0"]["enrolled_by_2026_03_16"]) / n_0
+    except (KeyError, TypeError, ValueError, ZeroDivisionError):
+        return ["trap 3: enrollment_by_arm.csv does not yield an enrollment rate for each arm"]
+
+    diff = p_1 - p_0
+    se = math.sqrt(p_1 * (1 - p_1) / n_1 + p_0 * (1 - p_0) / n_0)
     out = []
     if diff < FIRST_STAGE_FLOOR:
         out.append(
@@ -242,96 +277,83 @@ def _trap_4_reduced_form(rows: list[dict]) -> list[str]:
     return []
 
 
-def _trap_5_confounded_naive(rows: list[dict]) -> list[str]:
-    first, _ = _diff_se(*_split(rows, "invited", lambda r: r["enrolled_autopay"]))
-    itt, _ = _diff_se(*_split(rows, "invited", lambda r: r["late_payments_90d"]))
-    if first == 0 or itt == 0:
-        return ["trap 5: the Wald ratio is undefined or zero, so the naive contrast has no scale"]
-    wald = itt / first
-    naive, _ = _diff_se(*_split(rows, "enrolled_autopay", lambda r: r["late_payments_90d"]))
-    if abs(naive) < NAIVE_TO_WALD_FLOOR * abs(wald):
-        return [
-            f"trap 5: naive enrolled-vs-not difference {naive:+.4f} is only "
-            f"{abs(naive) / abs(wald):.2f} times the Wald ratio {wald:+.4f}, below the "
-            f"{NAIVE_TO_WALD_FLOOR} confounding floor"
-        ]
-    return []
+def _trap_5_customer_columns(directory: Path) -> list[str]:
+    header = _raw_rows(directory / "customers.csv")[0]
+    if header == list(EXPECTED_COLUMNS):
+        return []
+    extra = sorted(set(header) - set(EXPECTED_COLUMNS))
+    missing = sorted(set(EXPECTED_COLUMNS) - set(header))
+    return [
+        f"trap 5: customers.csv columns differ from the six named "
+        f"(unexpected {extra}, missing {missing})"
+    ]
 
 
-def _trap_6_exclusion_untestable(directory: Path) -> list[str]:
+def _trap_5_enrollment_shape(directory: Path) -> list[str]:
+    path = directory / "enrollment_by_arm.csv"
+    if not path.exists():
+        return ["trap 5: enrollment_by_arm.csv is missing"]
+    header, *arms = _raw_rows(path)
     out = []
-    header = _header(directory)
-    if header != list(EXPECTED_COLUMNS):
-        extra = sorted(set(header) - set(EXPECTED_COLUMNS))
-        missing = sorted(set(EXPECTED_COLUMNS) - set(header))
+    if header != list(ENROLLMENT_COLUMNS):
         out.append(
-            f"trap 6: customers.csv columns differ from the seven named "
-            f"(unexpected {extra}, missing {missing})"
+            f"trap 5: enrollment_by_arm.csv columns are {header}, "
+            f"not the three named {list(ENROLLMENT_COLUMNS)}"
         )
+    if [row[0] for row in arms] != list(ENROLLMENT_ARMS):
+        out.append(
+            f"trap 5: enrollment_by_arm.csv has {len(arms)} row(s) for invited "
+            f"{[row[0] for row in arms]}, not exactly one each for {list(ENROLLMENT_ARMS)}"
+        )
+    for row in arms:
+        if row[1] != str(CUSTOMERS_PER_ARM):
+            out.append(
+                f"trap 5: enrollment_by_arm.csv arm {row[0]!r} has customers={row[1]!r}, "
+                f"not {CUSTOMERS_PER_ARM}"
+            )
+    return out
 
+
+def _trap_5_notes(directory: Path) -> list[str]:
+    out = []
     notes_path = directory / "data_notes.md"
     if not notes_path.exists():
-        out.append("trap 6: data_notes.md is missing")
+        out.append("trap 5: data_notes.md is missing")
     else:
         notes = notes_path.read_text(encoding="utf-8")
         for phrase in DATA_NOTES_REQUIRED_PHRASES:
             if phrase not in notes:
-                out.append(f"trap 6: data_notes.md does not state {phrase!r}")
+                out.append(f"trap 5: data_notes.md does not state {phrase!r}")
 
     for name in ("design_note.md", "data_notes.md"):
         path = directory / name
         if not path.exists():
             continue
         lowered = path.read_text(encoding="utf-8").lower()
-        for phrase in FORBIDDEN_PHRASES:
+        forbidden = FORBIDDEN_PHRASES
+        if name == "data_notes.md":
+            forbidden += DATA_NOTES_FORBIDDEN_PHRASES
+        for phrase in forbidden:
             if phrase in lowered:
-                out.append(f"trap 6: {name} contains the forbidden phrase {phrase!r}")
+                out.append(f"trap 5: {name} contains the forbidden phrase {phrase!r}")
     return out
 
 
-def _trap_7_overread_planted(directory: Path) -> list[str]:
+def _trap_5_exclusion_untestable(directory: Path) -> list[str]:
+    return [
+        *_trap_5_customer_columns(directory),
+        *_trap_5_enrollment_shape(directory),
+        *_trap_5_notes(directory),
+    ]
+
+
+def _trap_6_overread_planted(directory: Path) -> list[str]:
     path = directory / "design_note.md"
     if not path.exists():
-        return ["trap 7: design_note.md is missing"]
+        return ["trap 6: design_note.md is missing"]
     if OVERREAD_PHRASE not in path.read_text(encoding="utf-8"):
-        return [f"trap 7: design_note.md does not carry the planted overread {OVERREAD_PHRASE!r}"]
+        return [f"trap 6: design_note.md does not carry the planted overread {OVERREAD_PHRASE!r}"]
     return []
-
-
-INEQUALITY_MASS_FLOOR = 0.01
-"""Trap 8: outcome values holding less than this share of customers are left
-out -- a tail cell of one or two customers flips sign on noise."""
-
-INEQUALITY_MARGIN_FLOOR = 0.0
-"""Trap 8 (instrument inequalities hold): no difference P(y, D=1 | Z=1) -
-P(y, D=1 | Z=0) or P(y, D=0 | Z=0) - P(y, D=0 | Z=1) over the retained outcome
-values may fall below this. The generator satisfies exclusion and
-monotonicity, so an arm that runs this joint probe must find it clean. The
-floor is zero, not a margin: a high outcome value's true difference is small
-because the cell is, and a margin would reject draws the restrictions allow."""
-
-
-def _trap_8_instrument_inequalities(rows: list[dict]) -> list[str]:
-    n = {z: sum(1 for r in rows if r["invited"] == z) for z in (0, 1)}
-    out = []
-    for y in sorted({r["late_payments_90d"] for r in rows}):
-        cell = [r for r in rows if r["late_payments_90d"] == y]
-        if len(cell) / len(rows) < INEQUALITY_MASS_FLOOR:
-            continue
-
-        def joint(z: int, d: int, cell: list[dict] = cell) -> float:
-            return sum(1 for r in cell if r["invited"] == z and r["enrolled_autopay"] == d) / n[z]
-
-        for label, diff in (
-            ("enrolled", joint(1, 1) - joint(0, 1)),
-            ("not enrolled", joint(0, 0) - joint(1, 0)),
-        ):
-            if diff < INEQUALITY_MARGIN_FLOOR:
-                out.append(
-                    f"trap 8: instrument inequality for late_payments_90d={y}, {label}, is "
-                    f"{diff:+.4f}, below the {INEQUALITY_MARGIN_FLOOR} margin floor"
-                )
-    return out
 
 
 def check(directory: Path) -> list[str]:
@@ -339,12 +361,10 @@ def check(directory: Path) -> list[str]:
     return [
         *_trap_1_bytes_reproduce(directory),
         *_trap_2_randomization(rows),
-        *_trap_3_relevance(rows),
+        *_trap_3_relevance(directory),
         *_trap_4_reduced_form(rows),
-        *_trap_5_confounded_naive(rows),
-        *_trap_6_exclusion_untestable(directory),
-        *_trap_7_overread_planted(directory),
-        *_trap_8_instrument_inequalities(rows),
+        *_trap_5_exclusion_untestable(directory),
+        *_trap_6_overread_planted(directory),
     ]
 
 

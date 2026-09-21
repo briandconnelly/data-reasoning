@@ -19,8 +19,7 @@ per-assumption assessment gates (issue #40: every assumption carries an
 ``A<n>`` id and exactly one probes-table row, each row's assessment is drawn
 from its closed set, ``not-testable-here`` pairs with the probe cell ``NONE``
 and a reason, and the disposition is one the assessments allow --
-``_check_assessments`` states the scope and why the consistency check is
-one-directional), and forbidden certification vocabulary
+``_check_assessments`` states the scope), and forbidden certification vocabulary
 (``valid``, ``certified``) absent from disposition slots. The
 closed-set vocabulary and its semantics are governed by
 ``../SKILL.md`` § Routing (authority) and are already fixed
@@ -79,6 +78,7 @@ ASSESSMENTS = frozenset(
 RUN_ASSESSMENTS = frozenset({"contradicted", "not-contradicted", "non-discriminating"})
 BLOCKING_ASSESSMENTS = frozenset({"non-discriminating", "not-run"})
 NO_PROBE = "NONE"
+PROBE_COLUMNS = ("assumption", "probe", "assessment", "evidence or reason")
 
 # A table counts as present-with-data when it carries a header row, a
 # separator row, and at least one data row -- three pipe-delimited lines.
@@ -513,7 +513,7 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
 
 
 # Emphasis or code markup around an id is markup, not part of the id.
-_ROW_ASSUMPTION_ID = re.compile(r"[*_`]*(A\d+)\b")
+_ROW_ASSUMPTION_ID = re.compile(r"[*_`]*(A\d+)[*_`]*")
 _SUBLIST_ASSUMPTION_ID = re.compile(r"[*_`]*A\d+[*_`]*\s*:")
 
 
@@ -550,14 +550,13 @@ def _defined_assumption_ids(where: str, body: str, findings: list[str]) -> list[
 def _check_assessments(header: str, body: str, disposition: str, findings: list[str]) -> None:
     """Per-assumption assessment gates (issue #40).
 
-    Binds a Design block whose probes table carries the ``assessment`` column;
-    ``identified-if`` requires that column, and ``not-constructible`` -- a
-    design the data cannot feed, which SKILL.md checks before assumptions --
-    owes none of this. What is checked is shape and consistency: ids on every
-    assumption, one row per id, a closed-set assessment per row, the
-    ``NONE``-plus-reason form of ``not-testable-here``, and a disposition the
-    assessments allow. Whether an assessment is the *right* one is the scored
-    arms' question, not this file's.
+    Binds every Design block but one ending ``not-constructible``, the
+    exception SKILL.md's data-requirements sentence states. What is checked is
+    shape and consistency: the template's four probes-table columns in order,
+    ids on every assumption, one row per id, a closed-set assessment per row,
+    the ``NONE``-plus-reason form of ``not-testable-here``, and the disposition
+    the assessments reach. Whether an assessment is the *right* one is the
+    scored arms' question, not this file's.
 
     The disposition must be the first SKILL.md's precedence list reaches from
     the assessments: a threat acts through the assumption it threatens, so
@@ -568,21 +567,20 @@ def _check_assessments(header: str, body: str, disposition: str, findings: list[
     where = f"Design block ({header!r})"
     header_cells, rows = _probe_rows(body)
     columns = [c.strip().lower() for c in header_cells or []]
-    if "assessment" not in columns:
-        if disposition == "identified-if":
-            findings.append(
-                f"{where}: disposition 'identified-if' requires the probes table's "
-                "assessment column -- one assessed row per assumption id"
-            )
+    if columns[: len(PROBE_COLUMNS)] != list(PROBE_COLUMNS):
+        findings.append(
+            f"{where}: the probes table's columns are {columns or 'absent'}, not "
+            f"{list(PROBE_COLUMNS)} -- every named assumption owes an assessed row"
+        )
         return
-    col = columns.index("assessment")
+    col = PROBE_COLUMNS.index("assessment")
     before = len(findings)
 
     defined = _defined_assumption_ids(where, body, findings)
 
     assessed: dict[str, str] = {}
     for cells in rows:
-        m = _ROW_ASSUMPTION_ID.match(cells[0])
+        m = _ROW_ASSUMPTION_ID.fullmatch(cells[0].strip())
         if m is None or len(cells) <= col + 1:
             continue  # not a row for any id; a missing id is reported below
         aid = m.group(1)
