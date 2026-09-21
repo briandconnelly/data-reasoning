@@ -63,8 +63,32 @@ Verdict: no-go for the canary.
 
 The reviewer found no further checker-shape conflict, and confirmed the disposition is unique and the design constructible.
 
+## Pass 4 — on commit `6db1d3c`, before any arm (a fifth call, asked for by the owner)
+
+The first attempt ended in 52 seconds on the reviewer's usage limit and produced nothing; this is the retry.
+Verdict: no-go for the canary.
+The reviewer accepted the two-record ground truth and the reading of the untestable value as the review's own contestable finding ("this makes ignorance auditable but does not prevent it"); what it blocked on is narrower than in any earlier pass.
+
+| # | Finding | Class | Verified how | Disposition |
+| --- | --- | --- | --- | --- |
+| 4.1 | The text never says which assessment a weak bound gets, and the could-not-have-come-back value is defined by sensitivity, so an arm can defensibly call the 0.079-against-0.304 bound that, which the precedence list turns into the stranded disposition — against the ground truth | blocking | The session had put this exact case to the reviewer. Read the two definitions: the reading is fair | Taken, close to the reviewer's wording: a weak probe some obtainable result would have contradicted is not contradicted when its result is not that one, its reach being the blind spot the row names; the could-not-have-come-back value is for a check the data leave with no contradicting result |
+| 4.2 | The threat-register sentence requires every threat to carry a probe run, while the untestable value allows none; CS8's direct-effect threat has no probe | blocking | Read `SKILL.md` and the template's threat row | Taken: the sentence allows `NONE` with why no probe exists, and the template's cells say the same |
+| 4.3 | CS8.5 and CS8.8 checked exclusion only, so monotonicity could be marked clean on the placebo; and the untestable value's row owes the data that would make the assumption testable, which no assertion asked for | blocking | Read the assertions against `SKILL.md`'s definition | Taken: both assertions cover exclusion and monotonicity, CS8.5 requires the data that would make it testable, and placebo, balance, or the first stage's size offered for either assumption fails |
+| 4.4 | The total-variation bound follows from independence, exclusion, and monotonicity together, not from exclusion alone; the generator's docstring said so and the ground truth, catalog, and prereg did not | blocking | Checked the derivation: without monotonicity the first stage is compliers net of defiers and bounds nothing | Taken in all three, and CS8.5 scores a bound record only when it states what the bound follows from |
+| 4.5 | The canary rule still required exclusion assessed as untestable, and an entanglement bullet still said no assertion keys on monotonicity | blocking | Read | Taken: the canary accepts either record and is read for the weak-probe and silent-check distinction; the bullet is rewritten |
+| 4.6 | "However weak" needs a floor, or a vacuous bound earns the one clean row the favorable disposition needs | should-fix | Read against the rule that at least one assumption be not contradicted | Taken: a bound no obtainable result could violate is a silent check, not a probe |
+| 4.7 | `validate_cs8.py`'s docstrings and one helper name still claimed strict untestability | should-fix | Read | Taken |
+
+## The reviewer's recommendation on the wave itself
+
+Asked whether the wave is still worth running as designed, the reviewer said no: a knowledgeable arm on `main` is now expected to pass, so one pre arm against one post arm on a pass-everything comparison cannot tell the wording change from domain knowledge.
+It offered two routes.
+Ship the clarification unmeasured, at the owner's call, after the blockers are fixed, and keep CS8 as a regression scenario.
+Or, if behavior is to be measured, preregister the primary endpoint as the two errors the issue names — a silent diagnostic credited to exclusion, or the stranded disposition chosen only because no exclusion probe was known — and run repeated independent pre and post arms, not one of each.
+The session agrees with the diagnosis and leaves the choice to the owner: the second route is a larger spend than the wave preregistered here, and the prereg's row 5 already says an unmeasured clarification is the owner's call.
+
 ## What no cross-model pass has read
 
-The pass-3 dispositions: the `SKILL.md` sentence on weak probes, the two-record ground truth with the total-variation bound, validator trap 7, and CS8.3 through CS8.8 as they now stand.
-PROTOCOL step 3 asks for the design review before any arm; three passes ran and each ended no-go, so no arm should run until a pass reads the wave as it stands and says go.
+The pass-4 dispositions above.
+PROTOCOL step 3 asks for the design review before any arm; four passes ran and each ended no-go, so no arm should run until a pass reads the wave as it stands and says go, or the owner takes the reviewer's first route and no arm runs at all.
 No arm has run.

@@ -30,8 +30,9 @@ Every number below is computed from the generated data.
 
 - Relevance: probed by the first stage from `enrollment_by_arm.csv`, not contradicted.
 - Independence: randomization is stated and quoted, and balance on prior late payments, tenure, and plan came back clean: not contradicted.
-- Exclusion: one weak bound, and nothing else.
-  If the invitation reaches late payments only through enrollment, the two arms' outcome distributions can differ only among customers whose enrollment it moves, so their total-variation distance cannot exceed that share.
+- Exclusion: one weak joint bound, and nothing else.
+  If the invitation is independent of outcomes, reaches late payments only through enrollment, and moves no customer's enrollment the wrong way, the two arms' outcome distributions can differ only among customers whose enrollment it moves, so their total-variation distance cannot exceed the first-stage difference.
+  The bound follows from independence, exclusion, and monotonicity together, not from exclusion alone; a record that uses it says so.
   The distance is 0.0790 against a first-stage difference of 0.3040, so the bound holds, and with that much slack it could be broken only by a direct effect of the email on a large share of customers.
   Enrollment exists only as counts by arm, so the joint distribution of invitation, enrollment, and outcome -- which the instrument's inequality restrictions need -- cannot be formed.
   Every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment.

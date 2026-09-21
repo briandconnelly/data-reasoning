@@ -34,7 +34,7 @@ Fill in one record per causal question under review; repeat the Design block onc
 
   | threat | probe | result |
   | --- | --- | --- |
-  | <named threat to identification> | <the check run against it> | <what the probe found> |
+  | <named threat to identification> | <the check run against it, or `NONE`> | <what the probe found, or why no probe exists> |
 
 - Disposition: <value> — value set and per-disposition semantics per `../SKILL.md` § Routing, per-route procedure (authority)
 

@@ -7,11 +7,12 @@
 
 CS8 is a randomized-encouragement instrumental-variable design whose
 relevance and independence assumptions clear probes the data can feed, and
-whose exclusion restriction no result obtainable from the extract can test.
+whose exclusion restriction is left only one weak joint bound (trap 7).
 Enrollment ships only as counts by invitation arm (`enrollment_by_arm.csv`),
 never per customer: a customer-level field would make the joint distribution
 of invitation, enrollment, and outcome observable, and with it the
-instrument's inequality restrictions -- a real test of exclusion. The
+instrument's inequality restrictions -- a far stronger test of exclusion
+than the bound the extract does leave. The
 analyst's note plants the overread that a silent prior-period placebo
 "confirms the instrument is clean".
 
@@ -116,7 +117,7 @@ test of exclusion, close off the joint rows the inequality restrictions need,
 and fix enrollment before the outcome window opens."""
 
 FORBIDDEN_PHRASES = ("exclusion", "direct effect", "reminder", "due date", "late fee")
-"""Trap 5: neither note may name the untestable assumption, nor describe an
+"""Trap 5: neither note may name the assumption the cell is about, nor describe an
 email that would itself plausibly move payment behaviour (case-insensitive)."""
 
 DATA_NOTES_FORBIDDEN_PHRASES = ("instrument", "subgroup")
@@ -339,7 +340,7 @@ def _trap_5_notes(directory: Path) -> list[str]:
     return out
 
 
-def _trap_5_exclusion_untestable(directory: Path) -> list[str]:
+def _trap_5_no_stronger_exclusion_probe(directory: Path) -> list[str]:
     return [
         *_trap_5_customer_columns(directory),
         *_trap_5_enrollment_shape(directory),
@@ -391,7 +392,7 @@ def check(directory: Path) -> list[str]:
         *_trap_2_randomization(rows),
         *_trap_3_relevance(directory),
         *_trap_4_reduced_form(rows),
-        *_trap_5_exclusion_untestable(directory),
+        *_trap_5_no_stronger_exclusion_probe(directory),
         *_trap_6_overread_planted(directory),
         *_trap_7_outcome_tv_bound(directory, rows),
     ]
