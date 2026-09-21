@@ -521,6 +521,25 @@ _ROW_ASSUMPTION_ID = re.compile(r"[*_`]*(A\d+)[*_`]*")
 _SUBLIST_ASSUMPTION_ID = re.compile(r"[*_`]*A\d+[*_`]*\s*:")
 
 
+_SEPARATOR_CELL = re.compile(r":?-{3,}:?")
+
+
+def _probes_separator_ok(body: str) -> bool:
+    """True when the line under the probes table's header is a Markdown
+    separator with one cell per column. ``_data_row_cells`` drops separator
+    rows, so without this a header followed straight by data rows -- which
+    does not render as a table -- reads the same as a real one."""
+    lines = [
+        line.strip()
+        for line in _label_region(visible_markdown(body), "Assumption probes").splitlines()
+        if line.strip().startswith("|")
+    ]
+    if len(lines) < 2:  # noqa: PLR2004 -- a header line and the line under it
+        return False
+    cells = [c.strip() for c in lines[1].strip("|").split("|")]
+    return len(cells) == len(PROBE_COLUMNS) and all(_SEPARATOR_CELL.fullmatch(c) for c in cells)
+
+
 def _probe_rows(body: str) -> tuple[list[str] | None, list[list[str]]]:
     """``(header_cells, data_rows)`` of the Assumption probes table, read from
     visible markdown only. The header is the row whose first cell is
@@ -575,6 +594,12 @@ def _check_assessments(header: str, body: str, disposition: str, findings: list[
         findings.append(
             f"{where}: the probes table's columns are {columns or 'absent'}, not "
             f"{list(PROBE_COLUMNS)} -- every named assumption owes an assessed row"
+        )
+        return
+    if not _probes_separator_ok(body):
+        findings.append(
+            f"{where}: the probes table has no separator row of {len(PROBE_COLUMNS)} cells "
+            "under its header, so it does not render as a table"
         )
         return
     col = PROBE_COLUMNS.index("assessment")
@@ -644,6 +669,11 @@ def _check_assessed_row(
             )
         if value in RUN_ASSESSMENTS and (not evidence or _NO_RESULT_PROBES.match(evidence)):
             findings.append(f"{where}: assumption {aid} is {value!r} with no evidence recorded")
+        if value == "not-run" and not evidence:
+            findings.append(
+                f"{where}: assumption {aid} is 'not-run' and its row does not say why the "
+                "named probe stayed unrun"
+            )
 
 
 def _check_disposition_against(

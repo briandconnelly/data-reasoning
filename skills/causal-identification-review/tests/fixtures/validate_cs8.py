@@ -33,6 +33,7 @@ import argparse
 import csv
 import filecmp
 import math
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -386,6 +387,62 @@ def _trap_7_outcome_tv_bound(directory: Path, rows: list[dict]) -> list[str]:
     return []
 
 
+RECORDED_NUMBERS = {
+    "first-stage difference": r"^- Difference: ([-+]?\d+\.\d{4}) ",
+    "prior-period difference": (
+        r"^- `late_payments_prior_90d` mean: .*?, difference ([-+]\d+\.\d{4}) "
+    ),
+    "intent-to-treat difference": r"^- Intent-to-treat difference .*?: ([-+]\d+\.\d{4}) ",
+    "Wald ratio": r"^- Wald ratio .*?: ([-+]\d+\.\d{4})\.$",
+    "outcome total-variation distance": r"^  The distance is (\d+\.\d{4}) against ",
+}
+"""Trap 8: the ground-truth lines whose numbers are checked, each with the one
+group that captures the number as recorded, to four places."""
+
+
+def _trap_8_recorded_numbers(directory: Path, rows: list[dict]) -> list[str]:
+    """The numbers the ground-truth file records must equal this file's own
+    recomputation. Trap 1 cannot see a wrong number: it regenerates the file
+    through the same `cs8_stats` that wrote it, so a bug there reproduces
+    byte for byte. `validate_cs5.py` reads its recorded bounds back for the
+    same reason."""
+    if not CS8_GROUND_TRUTH.exists():
+        return ["trap 8: cs8-encouragement-ground-truth.md is missing"]
+    text = CS8_GROUND_TRUTH.read_text(encoding="utf-8")
+    with (directory / "enrollment_by_arm.csv").open(encoding="utf-8") as handle:
+        counts = {r["invited"]: r for r in csv.DictReader(handle)}
+    rate = {
+        z: int(counts[z]["enrolled_by_2026_03_16"]) / int(counts[z]["customers"])
+        for z in ("0", "1")
+    }
+    first_stage = rate["1"] - rate["0"]
+    prior, _ = _diff_se(*_split(rows, "invited", lambda r: r["late_payments_prior_90d"]))
+    itt, _ = _diff_se(*_split(rows, "invited", lambda r: r["late_payments_90d"]))
+    arms = {z: [r["late_payments_90d"] for r in rows if r["invited"] == z] for z in (0, 1)}
+    tv = 0.5 * sum(
+        abs(arms[1].count(y) / len(arms[1]) - arms[0].count(y) / len(arms[0]))
+        for y in set(arms[0]) | set(arms[1])
+    )
+    recomputed = {
+        "first-stage difference": first_stage,
+        "prior-period difference": prior,
+        "intent-to-treat difference": itt,
+        "Wald ratio": itt / first_stage,
+        "outcome total-variation distance": tv,
+    }
+    out = []
+    for name, pattern in RECORDED_NUMBERS.items():
+        match = re.search(pattern, text, re.MULTILINE)
+        if match is None:
+            out.append(f"trap 8: the ground-truth file records no {name} this trap can read")
+        elif abs(float(match.group(1)) - recomputed[name]) >= 0.00005:  # noqa: PLR2004
+            out.append(
+                f"trap 8: the ground-truth file records the {name} as {match.group(1)}, and "
+                f"this file recomputes {recomputed[name]:+.4f}"
+            )
+    return out
+
+
 def check(directory: Path) -> list[str]:
     rows = load(directory)
     return [
@@ -396,6 +453,7 @@ def check(directory: Path) -> list[str]:
         *_trap_5_no_stronger_exclusion_probe(directory),
         *_trap_6_overread_planted(directory),
         *_trap_7_outcome_tv_bound(directory, rows),
+        *_trap_8_recorded_numbers(directory, rows),
     ]
 
 

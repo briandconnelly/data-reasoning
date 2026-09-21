@@ -1468,3 +1468,39 @@ def test_a_probe_row_with_too_few_cells_is_reported() -> None:
     record = VALID_RECORD.replace(_A2_ROW, "  | A2 | two-week window | not-contradicted |\n")
     findings, _ = cr.check_record(record)
     assert any("A2" in f and "cells" in f for f in findings), findings
+
+
+# Copilot's third review of PR #50, each reproduced before the fix.
+_PROBES_HEADER = "  | assumption | probe | assessment | evidence or reason |\n"
+_PROBES_SEPARATOR = "  | --- | --- | --- | --- |\n"
+
+
+def test_a_probes_table_without_a_separator_row_is_rejected() -> None:
+    """Without its separator the block does not render as a table at all."""
+    record = VALID_RECORD.replace(_PROBES_HEADER + _PROBES_SEPARATOR, _PROBES_HEADER)
+    findings, _ = cr.check_record(record)
+    assert any("separator" in f for f in findings), findings
+
+
+def test_a_probes_table_with_a_short_separator_row_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        _PROBES_HEADER + _PROBES_SEPARATOR, _PROBES_HEADER + "  | --- | --- | --- |\n"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("separator" in f for f in findings), findings
+
+
+def test_an_aligned_separator_row_is_accepted() -> None:
+    record = VALID_RECORD.replace(_PROBES_SEPARATOR, "  | :--- | :---: | ---: | --- |\n")
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
+
+
+def test_a_not_run_row_without_a_reason_is_rejected() -> None:
+    """SKILL.md has a not-run row say whether a gate withheld the probe or the
+    budget ended first; an empty last cell says neither."""
+    record = _as_disposition(
+        VALID_RECORD.replace(_A2_ROW, "  | A2 | planned check | not-run | |\n"), "unresolved"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "not-run" in f and "why" in f for f in findings), findings

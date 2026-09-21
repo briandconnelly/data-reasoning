@@ -667,8 +667,9 @@ CS8_P_ALWAYS_TAKER = 0.15
 CS8_P_COMPLIER = 0.30
 """Latent compliance types, drawn independently of `invited`: always-takers
 enroll whatever happens, compliers enroll only if invited, and the remaining
-55% never enroll. There are no defiers by construction -- a fact no shipped
-file can show, which is why monotonicity stays untestable."""
+55% never enroll. There are no defiers by construction. No shipped file
+can show that: the positive first stage is the one weak probe of it, blind to
+any defier share smaller than the complier share."""
 
 CS8_RATE_MEAN = {"always": 0.5, "complier": 1.0, "never": 1.3}
 CS8_RATE_SHAPE = 4.0

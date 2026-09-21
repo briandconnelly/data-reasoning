@@ -90,7 +90,7 @@ The session agrees with the diagnosis and leaves the choice to the owner: the se
 ## The owner's rulings, 2026-09-20
 
 On the wave: the reviewer's first route.
-The wording ships as an unmeasured clarification and CS8 as a regression scenario, with no arm run (`../../../decisions/007-assessments-ship-unmeasured.md`).
+The wording ships as an unmeasured clarification and CS8 as a regression scenario, with no arm run (`../../../../decisions/007-assessments-ship-unmeasured.md`).
 
 On finding 2.5: `hypothesis-driven-analysis/SKILL.md` lines 45 and 319 stay as they are and the change merges.
 The phrase is read as still true — every probe the review named was run, and an assumption with none is carried as a condition — and pointer-izing both lines is filed for the next HDA wording wave, where the seam arms can batch (issue #49).
