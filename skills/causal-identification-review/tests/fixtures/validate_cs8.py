@@ -197,7 +197,12 @@ def _trap_1_bytes_reproduce(directory: Path) -> list[str]:
 
 def _trap_2_randomization(rows: list[dict]) -> list[str]:
     out = []
-    n_invited = sum(r["invited"] for r in rows)
+    # Count the arm, never sum the flag: a 2 beside a 0 keeps the sum and
+    # loses two customers from the design.
+    stray = sorted({r["invited"] for r in rows} - {0, 1})
+    if stray:
+        return [f"trap 2: invited takes value(s) {stray}, not only 0 and 1"]
+    n_invited = sum(1 for r in rows if r["invited"] == 1)
     if n_invited != len(rows) * INVITED_SHARE:
         out.append(
             f"trap 2: {n_invited} of {len(rows)} customers are invited, "

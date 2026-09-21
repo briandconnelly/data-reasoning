@@ -46,7 +46,8 @@ Every named assumption gets an `A<n>` id and one row in the probes table, and th
 A probe is a check of something the assumption implies about data the gates below already permit you to read — a check that could come back against it.
 Name each assumption's probes before running any, and run the ones you named.
 A named probe stays unrun only when a gate below withholds it or the collection budget ends first, and its row says which.
-A result may suggest a further probe, and adding one is permitted: what it owes is a row that says it was added after a result was read, so a reader can weigh it as chosen with the data in view.
+A result may suggest a further probe, and adding one is permitted: the assumption's row names it as added after a result was read, so a reader can weigh it as chosen with the data in view.
+An assumption keeps one row however many probes bear on it: the probe cell names each, the last cell gives each one's result, and the assessment is `contradicted` if any came back against the assumption, otherwise `not-run` if any named probe stayed unrun, otherwise `not-contradicted` if any that could have come back against it did not, otherwise `non-discriminating`.
 
 - `contradicted` — a probe came back against the assumption.
 - `not-contradicted` — a probe that could have come back against the assumption did not; that is the absence of a contradiction this probe could see, never support, and the row names what the probe could not have seen.
@@ -60,7 +61,7 @@ A weak probe that some obtainable result would have contradicted is `not-contrad
 However weak does not include a tautology: a bound no obtainable result could violate is a silent check, not a probe.
 Negative controls, placebo outcomes, pre-period trend comparisons, manipulation or covariate-balance checks at a cutoff, and an instrument's first stage and its inequality restrictions are probes, and the list is examples, not a census: proposing them is this skill's work, and running one against data in hand is review work, not estimation — a probe's result is evidence about an assumption, never an effect estimate.
 Check data requirements before assumptions: a design the available data cannot feed — synthetic control with no donor pool, difference-in-differences with no pre-period — is not proposed as admissible, and when it must appear because someone claimed it or its absence needs explaining, its disposition is `not-constructible` with the failed requirement named, and its assumptions owe no assessed rows — a design that cannot run has nothing to probe.
-Fill the threat register with the identification threats the facts raise — a concurrent change, a pre-existing trend, selection into exposure — each with the probe run against it and that probe's result, or `NONE` and why no probe exists.
+Fill the threat register with the identification threats the facts raise — a concurrent change, a pre-existing trend, selection into exposure — each with the probe run against it and that probe's result, the probe named and why it stayed unrun, or `NONE` and why no probe exists.
 A threat bears on the disposition through the assumption it threatens: its probe's result is evidence for that assumption's assessment, and a threat no assumption covers means an assumption is missing from the list.
 Assign each disposition from the probe and threat evidence actually in the record, never from the design's reputation.
 

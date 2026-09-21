@@ -472,7 +472,7 @@ The template's opening two sentences were expanded for readability after externa
 The scoping authority is the same as the cost line's: no cell's decision point traverses the intro sentences — every assertion keys on record shape and content, which the slots below the intro determine — so the edit ships without arms, with the judgement recorded here rather than assumed.
 
 **Drift watch: HDA's seam sentences restate a condition this skill owns.**
-`skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
+`skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 (line 319 as of 2026-09-20; the file has grown since this watch was written, and issue #49 tracks the change) each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
 No hook watches that pairing; a future change to this skill's disposition semantics must re-check those two HDA lines by hand.
 Re-flagged by the 2026-08-09 final cross-model review; the ruling stands — the wording is measured, pointer-izing it owes arms, and the change batches with the next HDA wording wave.
 

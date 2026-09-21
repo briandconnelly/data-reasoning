@@ -694,7 +694,11 @@ def _check_disposition_against(
     elif "not-contradicted" not in values:
         expected, why = "unresolved", "no assumption is 'not-contradicted' by a probe run"
     else:
-        expected, why = "identified-if", "no assumption is contradicted, blocking, or unprobed"
+        expected = "identified-if"
+        why = (
+            "no assumption is contradicted, non-discriminating, or not-run, and at least one "
+            "is not-contradicted"
+        )
     if disposition != expected:
         findings.append(
             f"{where}: disposition {disposition!r} does not follow from the assessments "

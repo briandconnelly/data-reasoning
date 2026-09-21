@@ -106,6 +106,16 @@ The session was wrong on the PR and says so there.
 CS8.5 and CS8.8 now allow monotonicity one record and exclusion two, and the ground-truth file carries the principle that separates them: a check every passing record must already run is a probe of every assumption an obtainable result of it would contradict, while an implication needing a separate derivation no assertion requires may stay outside a documented untestable finding.
 No `SKILL.md` sentence changed; the result follows from the text as it stood.
 
+## After the PR: what the Copilot rounds changed in the wording
+
+Four Copilot reviews of PR #50 found checker and validator defects, each reproduced and fixed test-first, and three gaps in `SKILL.md` that the design passes had not.
+A named probe may stay unrun only when a gate withholds it or the budget ends first, and its row says which.
+A probe may be added after a result is read, and the assumption's row names it as added.
+An assumption keeps one row however many probes bear on it, with a stated order for the row's assessment: contradicted by any, then unrun if any named probe stayed unrun, then not contradicted if any that could have come back did not, then the could-not-have-come-back value.
+The last of these was a real hole: the procedure permitted a second probe and the one-row rule left it nowhere to go.
+A threat's row may likewise name a probe that stayed unrun.
+None of this has been read by the cross-model reviewer, and like the rest of the wording it ships unmeasured under decision 007.
+
 ## What no cross-model pass has read
 
 The pass-4 dispositions above.

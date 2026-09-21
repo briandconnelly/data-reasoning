@@ -25,7 +25,7 @@ Fill in one record per causal question under review; repeat the Design block onc
 
   | assumption | probe | assessment | evidence or reason |
   | --- | --- | --- | --- |
-  | A1 | <the check run against it, or `NONE`> | <value> | <what the probe found and what it could not have seen, or why no probe exists and what data would supply one> |
+  | A1 | <the check or checks run against it, or `NONE`> | <value> | <what the probe found and what it could not have seen, or why no probe exists and what data would supply one> |
 
   Rows, the assessment value set, and each value's meaning per `../SKILL.md` § Routing, per-route procedure (authority).
 
@@ -34,7 +34,7 @@ Fill in one record per causal question under review; repeat the Design block onc
 
   | threat | probe | result |
   | --- | --- | --- |
-  | <named threat to identification> | <the check run against it, or `NONE`> | <what the probe found, or why no probe exists> |
+  | <named threat to identification> | <the check run against it, the check named and not run, or `NONE`> | <what the probe found, why it stayed unrun, or why no probe exists> |
 
 - Disposition: <value> — value set and per-disposition semantics per `../SKILL.md` § Routing, per-route procedure (authority)
 
