@@ -876,8 +876,9 @@ def _two_group_contrast(treated: list[float], control: list[float]) -> dict:
 
 def cs8_outcome_tv(rows: list[dict]) -> float:
     """Total-variation distance between the two arms' `late_payments_90d`
-    distributions -- bounded by the complier share if exclusion and
-    monotonicity hold, the one observable implication the extract leaves them."""
+    distributions -- bounded by the first-stage difference if independence,
+    exclusion, and monotonicity all hold, the one observable implication the
+    extract leaves, and an implication of the three together."""
     arms = {z: [r["late_payments_90d"] for r in rows if r["invited"] == z] for z in (0, 1)}
     support = set(arms[0]) | set(arms[1])
     return 0.5 * sum(
@@ -998,7 +999,9 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
         "exclusion alone; a record that uses it says so.\n"
         f"  The distance is {outcome_tv:.4f} against a first-stage difference of "
         f"{first['diff']:.4f}, so the bound holds, and with that much slack it could be "
-        "broken only by a direct effect of the email on a large share of customers.\n"
+        "broken only by a large violation of one of the three: a direct effect of the email "
+        "on a large share of customers, say, or a large share whose enrollment it moves the "
+        "wrong way.\n"
         "  Enrollment exists only as counts by arm, so the joint distribution of invitation, "
         "enrollment, and outcome -- which the instrument's inequality restrictions need -- "
         "cannot be formed.\n"

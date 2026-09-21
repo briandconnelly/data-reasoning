@@ -31,7 +31,8 @@ The preregistration wrote this outcome down before any review: a cell landing wh
 
 Four design-review passes, recorded with every finding and its disposition in `../tests/runs/artifacts/2026-09-20-untestable-assumptions/design-review.md`.
 They did not show the wording to work; they showed that the measurement as designed could not show it either way, and they removed a run of defects from the wording, the checker, and the fixture that a single arm would not have found.
-The substantive thing they settled is that strict untestability almost never survives the presence of outcome data, so the wording does not depend on it: an implication the review can name owes its probe however weak, a weak probe that could have been contradicted is assessed as not contradicted with its blind spot named, a bound nothing could violate is a silent check, and the untestable value is the review's own finding, which its row makes contestable by naming the checks considered and why each is silent.
+The substantive thing they settled is that strict untestability almost never survives the presence of outcome data, so the wording does not depend on it.
+How it treats a weak probe, a vacuous bound, and the untestable value is `../SKILL.md` § Per-route procedure's to state, and is not restated here.
 
 What this decision does not claim: that the wording changes what an agent does.
 No arm has run against it.

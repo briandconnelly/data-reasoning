@@ -1441,3 +1441,30 @@ def test_an_assumption_cell_with_trailing_text_is_not_an_id() -> None:
     record = VALID_RECORD.replace("  | A2 | retention in", "  | A2 trailing junk | retention in")
     findings, _ = cr.check_record(record)
     assert any("A2" in f and "no probe row" in f for f in findings), findings
+
+
+# Copilot review of PR #50, each reproduced before the fix.
+def test_a_probes_table_with_an_extra_column_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        "  | assumption | probe | assessment | evidence or reason |\n  | --- | --- | --- | --- |\n",
+        "  | assumption | probe | assessment | evidence or reason | notes |\n"
+        "  | --- | --- | --- | --- | --- |\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_a_contradicted_row_without_an_id_cannot_hide_under_identified_if() -> None:
+    """A row keyed on the assumption's name instead of its id was skipped, so
+    a recorded contradiction left an otherwise clean `identified-if` passing."""
+    record = VALID_RECORD.replace(
+        _A2_ROW, _A2_ROW + "  | exclusion | dose-response check | contradicted | reverses sign |\n"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("'exclusion'" in f and "A<n>" in f for f in findings), findings
+
+
+def test_a_probe_row_with_too_few_cells_is_reported() -> None:
+    record = VALID_RECORD.replace(_A2_ROW, "  | A2 | two-week window | not-contradicted |\n")
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "cells" in f for f in findings), findings

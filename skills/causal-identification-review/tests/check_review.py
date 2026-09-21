@@ -567,7 +567,7 @@ def _check_assessments(header: str, body: str, disposition: str, findings: list[
     where = f"Design block ({header!r})"
     header_cells, rows = _probe_rows(body)
     columns = [c.strip().lower() for c in header_cells or []]
-    if columns[: len(PROBE_COLUMNS)] != list(PROBE_COLUMNS):
+    if columns != list(PROBE_COLUMNS):
         findings.append(
             f"{where}: the probes table's columns are {columns or 'absent'}, not "
             f"{list(PROBE_COLUMNS)} -- every named assumption owes an assessed row"
@@ -581,8 +581,17 @@ def _check_assessments(header: str, body: str, disposition: str, findings: list[
     assessed: dict[str, str] = {}
     for cells in rows:
         m = _ROW_ASSUMPTION_ID.fullmatch(cells[0].strip())
-        if m is None or len(cells) <= col + 1:
-            continue  # not a row for any id; a missing id is reported below
+        # A row the gates cannot read is a finding, never a skip: a skipped row
+        # can carry the contradiction the disposition then ignores.
+        if m is None:
+            findings.append(f"{where}: probe row's assumption cell {cells[0]!r} is not an A<n> id")
+            continue
+        if len(cells) != len(PROBE_COLUMNS):
+            findings.append(
+                f"{where}: probe row {m.group(1)} has {len(cells)} cells, "
+                f"not the {len(PROBE_COLUMNS)} the table's columns name"
+            )
+            continue
         aid = m.group(1)
         if aid in assessed:
             findings.append(f"{where}: assumption {aid} has more than one probe row")

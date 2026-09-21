@@ -358,7 +358,8 @@ def _trap_6_overread_planted(directory: Path) -> list[str]:
 
 
 OUTCOME_TV_SLACK = 0.5
-"""Trap 7 (the one bound exclusion implies stays clean): the total-variation
+"""Trap 7 (the one bound the extract leaves stays clean -- implied by
+independence, exclusion, and monotonicity together, by none alone): the total-variation
 distance between the arms' late_payments_90d distributions must stay below
 this fraction of the first-stage difference, so an arm that computes the
 bound finds it holding with room, never flipped by sampling noise."""
