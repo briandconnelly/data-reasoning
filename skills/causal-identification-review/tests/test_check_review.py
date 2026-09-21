@@ -52,14 +52,14 @@ VALID_RECORD = """\
 
 - Design: staggered-rollout difference-in-differences across cohorts
 - Identifying assumptions:
-  - parallel trends: absent the tier change, cohorts would trend in retention the same way
-  - no anticipation: customers did not change behavior ahead of their cohort's switch
+  - A1: parallel trends: absent the tier change, cohorts would trend in retention the same way
+  - A2: no anticipation: customers did not change behavior ahead of their cohort's switch
 - Assumption probes:
 
-  | assumption | probe | result |
-  | --- | --- | --- |
-  | parallel trends | pre-period retention slope by cohort | slopes match within noise |
-  | no anticipation | retention in the two weeks before each switch date | no discontinuity |
+  | assumption | probe | assessment | evidence or reason |
+  | --- | --- | --- | --- |
+  | A1 | pre-period retention slope by cohort | not-contradicted | slopes match within noise |
+  | A2 | retention in the two weeks before each switch date | not-contradicted | no discontinuity |
 
 - Data requirements: per-customer enrollment date, cohort, switch date, retention status
 - Threat register:
@@ -529,16 +529,18 @@ def test_handoff_dispositions_none_with_rationale_but_assigned_still_rejected() 
 
 _ASSUMPTIONS_BLOCK = (
     "- Identifying assumptions:\n"
-    "  - parallel trends: absent the tier change, cohorts would trend in retention the same way\n"
-    "  - no anticipation: customers did not change behavior ahead of their cohort's switch\n"
+    "  - A1: parallel trends: absent the tier change, cohorts would trend in retention "
+    "the same way\n"
+    "  - A2: no anticipation: customers did not change behavior ahead of their cohort's switch\n"
 )
 _PROBES_BLOCK = (
     "- Assumption probes:\n"
     "\n"
-    "  | assumption | probe | result |\n"
-    "  | --- | --- | --- |\n"
-    "  | parallel trends | pre-period retention slope by cohort | slopes match within noise |\n"
-    "  | no anticipation | retention in the two weeks before each switch date | "
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | A1 | pre-period retention slope by cohort | not-contradicted | "
+    "slopes match within noise |\n"
+    "  | A2 | retention in the two weeks before each switch date | not-contradicted | "
     "no discontinuity |\n"
 )
 _THREATS_BLOCK = (
@@ -649,8 +651,8 @@ def test_tab_indented_sublist_accepted() -> None:
     record = VALID_RECORD.replace(
         _ASSUMPTIONS_BLOCK,
         "- Identifying assumptions:\n"
-        "\t- parallel trends: absent the tier change, cohorts would trend the same way\n"
-        "\t- no anticipation: customers did not change behavior ahead of the switch\n",
+        "\t- A1: parallel trends: absent the tier change, cohorts would trend the same way\n"
+        "\t- A2: no anticipation: customers did not change behavior ahead of the switch\n",
     )
     findings, _ = cr.check_record(record)
     assert findings == []
@@ -771,20 +773,32 @@ def test_not_constructible_with_none_run_probes_accepted() -> None:
     assert findings == []
 
 
-def test_unresolved_with_none_run_probes_accepted() -> None:
-    record = (
+def test_unresolved_with_inline_none_run_probes_rejected() -> None:
+    """Before issue #40 a design could end `unresolved` over an inline
+    `none run`; every named assumption now owes an assessed row, so probes
+    proposed and not run are `not-run` rows (the next test)."""
+    record = _as_disposition(
         VALID_RECORD.replace(
-            _PROBES_BLOCK,
-            "- Assumption probes: none run — proposed, not yet executed\n",
-        )
-        .replace(
-            "Disposition: identified-if — parallel trends and no-anticipation both hold",
-            "Disposition: unresolved — the probes are proposed but not run",
-        )
-        .replace("- Dispositions: identified-if", "- Dispositions: unresolved")
+            _PROBES_BLOCK, "- Assumption probes: none run — proposed, not yet executed\n"
+        ),
+        "unresolved",
     )
     findings, _ = cr.check_record(record)
-    assert findings == []
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_unresolved_with_not_run_rows_accepted() -> None:
+    record = _as_disposition(
+        VALID_RECORD.replace(
+            "| A2 | retention in the two weeks before each switch date | not-contradicted | "
+            "no discontinuity |",
+            "| A2 | retention in the two weeks before each switch date | not-run | "
+            "proposed, not yet executed |",
+        ),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
 
 
 # --------------------------------------------------------------------------- #
@@ -798,12 +812,12 @@ _SECOND_DESIGN_BLOCK = """\
 
 - Design: event-study around each cohort's switch date
 - Identifying assumptions:
-  - no anticipation: behavior does not shift ahead of the switch
+  - A1: no anticipation: behavior does not shift ahead of the switch
 - Assumption probes:
 
-  | assumption | probe | result |
-  | --- | --- | --- |
-  | no anticipation | pre-switch window inspection | could not discriminate from noise |
+  | assumption | probe | assessment | evidence or reason |
+  | --- | --- | --- | --- |
+  | A1 | pre-switch window inspection | non-discriminating | could not discriminate from noise |
 
 - Data requirements: per-customer switch date and daily retention status
 - Threat register:
@@ -967,9 +981,9 @@ TWO_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
     _PROBES_BLOCK,
     "- Assumption probes:\n"
     "\n"
-    "  | assumption | probe | result |\n"
-    "  | --- | --- | --- |\n"
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
 )
 
 
@@ -979,9 +993,9 @@ def test_identified_if_with_an_unprobed_assumption_is_caught() -> None:
 
 
 TWO_ASSUMPTIONS_TWO_PROBES = TWO_ASSUMPTIONS_ONE_PROBE.replace(
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
-    "  | A2 | rollout-date placebo check | no break at the placebo date |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n"
+    "  | A2 | rollout-date placebo check | not-contradicted | no break at the placebo date |\n",
 )
 
 
@@ -1002,9 +1016,9 @@ INLINE_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
     _PROBES_BLOCK,
     "- Assumption probes:\n"
     "\n"
-    "  | assumption | probe | result |\n"
-    "  | --- | --- | --- |\n"
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
 )
 
 
@@ -1022,9 +1036,9 @@ PARAGRAPH_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
     _PROBES_BLOCK,
     "- Assumption probes:\n"
     "\n"
-    "  | assumption | probe | result |\n"
-    "  | --- | --- | --- |\n"
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
 )
 
 
@@ -1042,9 +1056,9 @@ COMMA_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
     _PROBES_BLOCK,
     "- Assumption probes:\n"
     "\n"
-    "  | assumption | probe | result |\n"
-    "  | --- | --- | --- |\n"
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
 )
 
 
@@ -1073,9 +1087,9 @@ CONJUNCTION_ASSUMPTIONS_ONE_PROBE = VALID_RECORD.replace(
     _PROBES_BLOCK,
     "- Assumption probes:\n"
     "\n"
-    "  | assumption | probe | result |\n"
-    "  | --- | --- | --- |\n"
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
 )
 
 
@@ -1094,8 +1108,9 @@ def test_an_id_referenced_without_a_definition_is_not_a_named_assumption() -> No
 
 
 PIPE_LINE_NOT_A_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n  | A2 not run\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n"
+    "  | A2 not run\n",
 )
 
 
@@ -1107,12 +1122,13 @@ def test_a_pipe_prefixed_line_is_not_a_probe_row() -> None:
 
 
 EMPTY_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n  | A2 | |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n"
+    "  | A2 | |\n",
 )
 NO_RESULT_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n"
     "  | A2 | not run | none |\n",
 )
 
@@ -1144,8 +1160,8 @@ def test_an_assumption_only_in_a_comment_is_not_a_named_assumption() -> None:
 
 
 HIDDEN_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n"
     "  <!--\n  | A2 | notional probe | notional result |\n  -->\n",
 )
 
@@ -1156,8 +1172,8 @@ def test_a_probe_row_only_in_a_comment_does_not_satisfy_the_gate() -> None:
 
 
 ESCAPED_PIPE_PROBE_ROW = TWO_ASSUMPTIONS_ONE_PROBE.replace(
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n",
-    "  | A1 | pre-period retention slope by cohort | slopes match within noise |\n"
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n",
+    "  | A1 | pre-period slope by cohort | not-contradicted | slopes match within noise |\n"
     "  | A2 | compare a \\| b | not run |\n",
 )
 
@@ -1166,3 +1182,325 @@ def test_an_escaped_pipe_does_not_shift_the_result_cell() -> None:
     """The escaped pipe is cell content, so the result cell is `not run`."""
     findings, _ = cr.check_record(ESCAPED_PIPE_PROBE_ROW)
     assert any("A2" in f and "no probe" in f for f in findings), findings
+
+
+# --------------------------------------------------------------------------- #
+# Per-assumption assessments (issue #40). SKILL.md's per-route procedure gives
+# every assumption an `A<n>` id and one probes-table row whose assessment is
+# drawn from a closed set, so an assumption the data cannot test has an honest
+# record (`not-testable-here`, probe `NONE`) instead of a silent diagnostic
+# filed as support. The gates bind a block whose probes table carries the
+# assessment column, and `identified-if` requires that column; a named-only
+# block ending `not-constructible` owes none of it.
+# --------------------------------------------------------------------------- #
+_A1_ROW = (
+    "  | A1 | pre-period retention slope by cohort | not-contradicted | "
+    "slopes match within noise |\n"
+)
+_A2_ROW = (
+    "  | A2 | retention in the two weeks before each switch date | not-contradicted | "
+    "no discontinuity |\n"
+)
+_IDENTIFIED_IF = "Disposition: identified-if — parallel trends and no-anticipation both hold"
+
+
+def _with_a2_row(row: str) -> str:
+    assert _A2_ROW in VALID_RECORD
+    return VALID_RECORD.replace(_A2_ROW, row)
+
+
+def _as_disposition(record: str, value: str) -> str:
+    return record.replace(_IDENTIFIED_IF, f"Disposition: {value} — see the probes table").replace(
+        "- Dispositions: identified-if", f"- Dispositions: {value}"
+    )
+
+
+NOT_TESTABLE_ROW = (
+    "  | A2 | NONE | not-testable-here | anticipation leaves no trace in this extract; "
+    "a pre-announcement survey would supply one |\n"
+)
+
+
+def test_not_testable_here_with_none_probe_keeps_identified_if() -> None:
+    """The record issue #40 had no honest form for: one assumption probed and
+    not contradicted, one the data cannot test, carried as a condition."""
+    findings, _ = cr.check_record(_with_a2_row(NOT_TESTABLE_ROW))
+    assert findings == [], findings
+
+
+def test_identified_if_without_the_assessment_column_is_rejected() -> None:
+    record = (
+        VALID_RECORD.replace(
+            "  | assumption | probe | assessment | evidence or reason |\n"
+            "  | --- | --- | --- | --- |\n",
+            "  | assumption | probe | result |\n  | --- | --- | --- |\n",
+        )
+        .replace(_A1_ROW, "  | A1 | pre-period slope | slopes match |\n")
+        .replace(_A2_ROW, "  | A2 | two-week window | no discontinuity |\n")
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_an_assessment_outside_the_closed_set_is_rejected() -> None:
+    """`supported` is the word the vocabulary exists to keep out."""
+    findings, _ = cr.check_record(
+        _with_a2_row("  | A2 | two-week window | supported | no discontinuity |\n")
+    )
+    assert any("A2" in f and "'supported'" in f and "closed set" in f for f in findings), findings
+
+
+def test_a_backtick_wrapped_assessment_is_accepted() -> None:
+    findings, _ = cr.check_record(
+        _with_a2_row("  | A2 | two-week window | `not-contradicted` | no discontinuity |\n")
+    )
+    assert findings == [], findings
+
+
+def test_not_testable_here_with_a_named_probe_is_rejected() -> None:
+    """A silent diagnostic filed beside `not-testable-here` is the pairing the
+    rule forbids: the probe cell is `NONE` or the assessment is something else."""
+    findings, _ = cr.check_record(
+        _with_a2_row("  | A2 | prior-period placebo | not-testable-here | placebo was null |\n")
+    )
+    assert any("A2" in f and "NONE" in f for f in findings), findings
+
+
+def test_not_testable_here_without_a_reason_is_rejected() -> None:
+    findings, _ = cr.check_record(_with_a2_row("  | A2 | NONE | not-testable-here | |\n"))
+    assert any("A2" in f and "reason" in f for f in findings), findings
+
+
+def test_none_probe_under_a_run_assessment_is_rejected() -> None:
+    findings, _ = cr.check_record(
+        _with_a2_row("  | A2 | NONE | not-contradicted | nothing came back against it |\n")
+    )
+    assert any("A2" in f and "NONE" in f for f in findings), findings
+
+
+def test_a_run_assessment_with_an_empty_evidence_cell_is_rejected() -> None:
+    findings, _ = cr.check_record(_with_a2_row("  | A2 | two-week window | not-contradicted | |\n"))
+    assert any("A2" in f and "evidence" in f for f in findings), findings
+
+
+def test_an_assumption_without_an_id_is_rejected() -> None:
+    record = VALID_RECORD.replace("  - A2: no anticipation:", "  - no anticipation:")
+    findings, _ = cr.check_record(record)
+    assert any("A<n>" in f for f in findings), findings
+
+
+def test_a_probe_row_for_an_undefined_assumption_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        _A2_ROW, _A2_ROW + "  | A3 | placebo outcome | not-contradicted | null |\n"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A3" in f and "not defined" in f for f in findings), findings
+
+
+def test_two_probe_rows_for_one_assumption_are_rejected() -> None:
+    record = VALID_RECORD.replace(
+        _A2_ROW, _A2_ROW + "  | A2 | second look | not-contradicted | still flat |\n"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "more than one" in f for f in findings), findings
+
+
+def test_identified_if_over_a_not_run_assessment_is_rejected() -> None:
+    findings, _ = cr.check_record(
+        _with_a2_row("  | A2 | two-week window | not-run | not executed |\n")
+    )
+    assert any("identified-if" in f and "A2" in f and "not-run" in f for f in findings), findings
+
+
+def test_identified_if_over_a_non_discriminating_assessment_is_rejected() -> None:
+    findings, _ = cr.check_record(
+        _with_a2_row("  | A2 | two-week window | non-discriminating | 11 accounts in window |\n")
+    )
+    assert any("identified-if" in f and "non-discriminating" in f for f in findings), findings
+
+
+def test_identified_if_with_no_assumption_not_contradicted_is_rejected() -> None:
+    """Every assumption untestable is a design no probe has touched: the
+    conditional is true of any design, so the disposition is not earned."""
+    record = _with_a2_row(NOT_TESTABLE_ROW).replace(
+        _A1_ROW,
+        "  | A1 | NONE | not-testable-here | no pre-period exists; an earlier export would |\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("identified-if" in f and "not-contradicted" in f for f in findings), findings
+
+
+def test_a_contradicted_assessment_under_another_disposition_is_rejected() -> None:
+    record = _as_disposition(
+        _with_a2_row("  | A2 | two-week window | contradicted | retention dips 9 days early |\n"),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "assumption-contradicted" in f for f in findings), findings
+
+
+def test_a_contradicted_assessment_under_assumption_contradicted_is_accepted() -> None:
+    record = _as_disposition(
+        _with_a2_row("  | A2 | two-week window | contradicted | retention dips 9 days early |\n"),
+        "assumption-contradicted",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
+
+
+def test_assumption_contradicted_with_no_contradicted_row_is_rejected() -> None:
+    findings, _ = cr.check_record(_as_disposition(VALID_RECORD, "assumption-contradicted"))
+    assert any("assumption-contradicted" in f and "no assumption" in f for f in findings), findings
+
+
+def test_unresolved_over_clean_assessments_is_rejected() -> None:
+    """SKILL.md's precedence list is keyed on the assessments alone -- a
+    threat acts through the assumption it threatens -- so a design held at
+    `unresolved` owes the row that holds it there."""
+    findings, _ = cr.check_record(_as_disposition(VALID_RECORD, "unresolved"))
+    assert any("'unresolved'" in f and "identified-if" in f for f in findings), findings
+
+
+def test_not_constructible_owes_no_assessments() -> None:
+    record = _as_disposition(
+        VALID_RECORD.replace("  - A2: no anticipation:", "  - no anticipation:").replace(
+            _A2_ROW, ""
+        ),
+        "not-constructible",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
+
+
+# Design review pass 1 (Codex, 2026-09-20), each reproduced before the fix.
+def test_a_probe_cell_saying_not_run_cannot_carry_a_run_assessment() -> None:
+    """`not run | not-contradicted` is the overclaim the gate exists for: a
+    favorable assessment over a probe the row itself says never ran."""
+    record = VALID_RECORD.replace(
+        _A1_ROW, "  | A1 | not run | not-contradicted | not executed yet |\n"
+    ).replace(_A2_ROW, NOT_TESTABLE_ROW)
+    findings, _ = cr.check_record(record)
+    assert any("A1" in f and "names a probe" in f for f in findings), findings
+
+
+def test_two_assumptions_sharing_an_id_are_rejected() -> None:
+    record = VALID_RECORD.replace("  - A2: no anticipation:", "  - A1: no anticipation:").replace(
+        _A2_ROW, ""
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A1" in f and "defined more than once" in f for f in findings), findings
+
+
+def test_inline_assumptions_without_ids_are_rejected_when_the_gates_bind() -> None:
+    record = _as_disposition(
+        VALID_RECORD.replace(
+            _ASSUMPTIONS_BLOCK, "- Identifying assumptions: relevance and exclusion\n"
+        ),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A<n>" in f for f in findings), findings
+
+
+def test_a_bold_assumption_id_is_read_as_the_id() -> None:
+    record = VALID_RECORD.replace("  - A1: parallel", "  - **A1**: parallel").replace(
+        "  | A1 | pre-period retention", "  | **A1** | pre-period retention"
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
+
+
+# Design review pass 2 (Codex, 2026-09-20), each reproduced before the fix.
+def test_an_unfavorable_disposition_still_owes_the_assessment_column() -> None:
+    """SKILL.md gives *every* named assumption an assessed row, so a block
+    cannot leave the schema by ending somewhere other than `identified-if`."""
+    record = _as_disposition(
+        VALID_RECORD.replace(
+            "  | assumption | probe | assessment | evidence or reason |\n"
+            "  | --- | --- | --- | --- |\n",
+            "  | assumption | probe | result |\n  | --- | --- | --- |\n",
+        )
+        .replace(_A1_ROW, "  | A1 | pre-period slope | inconclusive |\n")
+        .replace(_A2_ROW, "  | A2 | two-week window | inconclusive |\n"),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_a_probes_table_with_a_missing_column_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        "  | assumption | probe | assessment | evidence or reason |\n  | --- | --- | --- | --- |\n",
+        "  | assumption | assessment | evidence or reason |\n  | --- | --- | --- |\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_an_assumption_cell_with_trailing_text_is_not_an_id() -> None:
+    record = VALID_RECORD.replace("  | A2 | retention in", "  | A2 trailing junk | retention in")
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "no probe row" in f for f in findings), findings
+
+
+# Copilot review of PR #50, each reproduced before the fix.
+def test_a_probes_table_with_an_extra_column_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        "  | assumption | probe | assessment | evidence or reason |\n  | --- | --- | --- | --- |\n",
+        "  | assumption | probe | assessment | evidence or reason | notes |\n"
+        "  | --- | --- | --- | --- | --- |\n",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("probes table" in f and "columns" in f for f in findings), findings
+
+
+def test_a_contradicted_row_without_an_id_cannot_hide_under_identified_if() -> None:
+    """A row keyed on the assumption's name instead of its id was skipped, so
+    a recorded contradiction left an otherwise clean `identified-if` passing."""
+    record = VALID_RECORD.replace(
+        _A2_ROW, _A2_ROW + "  | exclusion | dose-response check | contradicted | reverses sign |\n"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("'exclusion'" in f and "A<n>" in f for f in findings), findings
+
+
+def test_a_probe_row_with_too_few_cells_is_reported() -> None:
+    record = VALID_RECORD.replace(_A2_ROW, "  | A2 | two-week window | not-contradicted |\n")
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "cells" in f for f in findings), findings
+
+
+# Copilot's third review of PR #50, each reproduced before the fix.
+_PROBES_HEADER = "  | assumption | probe | assessment | evidence or reason |\n"
+_PROBES_SEPARATOR = "  | --- | --- | --- | --- |\n"
+
+
+def test_a_probes_table_without_a_separator_row_is_rejected() -> None:
+    """Without its separator the block does not render as a table at all."""
+    record = VALID_RECORD.replace(_PROBES_HEADER + _PROBES_SEPARATOR, _PROBES_HEADER)
+    findings, _ = cr.check_record(record)
+    assert any("separator" in f for f in findings), findings
+
+
+def test_a_probes_table_with_a_short_separator_row_is_rejected() -> None:
+    record = VALID_RECORD.replace(
+        _PROBES_HEADER + _PROBES_SEPARATOR, _PROBES_HEADER + "  | --- | --- | --- |\n"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("separator" in f for f in findings), findings
+
+
+def test_an_aligned_separator_row_is_accepted() -> None:
+    record = VALID_RECORD.replace(_PROBES_SEPARATOR, "  | :--- | :---: | ---: | --- |\n")
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
+
+
+def test_a_not_run_row_without_a_reason_is_rejected() -> None:
+    """SKILL.md has a not-run row say whether a gate withheld the probe or the
+    budget ended first; an empty last cell says neither."""
+    record = _as_disposition(
+        VALID_RECORD.replace(_A2_ROW, "  | A2 | planned check | not-run | |\n"), "unresolved"
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A2" in f and "not-run" in f and "why" in f for f in findings), findings

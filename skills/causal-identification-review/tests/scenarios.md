@@ -383,6 +383,45 @@ The probe-reporting contract must therefore be redesigned before any fresh arm r
 The precommitted estimand is also amended in the same reopening (2026-08-09): its trailing clause "for accounts within the fixture's bandwidth of the cutoff" named a bandwidth defined nowhere arm-visible — the only bandwidths live in `validate_cs7.py`, which the contamination rule bars arms from reading — so the clause is dropped from the generator and the ground-truth file regenerated without it, before any fresh arm runs against the redesigned contract.
 After redesign, this cell owes fresh stage-1 and stage-2 arms; the 2026-08-09 sc2 arms stand as scored-then-corrected records, and no arm predating the redesign is scored against the redesigned contract, per `PROTOCOL.md`'s canary principle.
 
+## CS8 — Review route: an identifying assumption the data cannot test
+
+Added 2026-09-20 for issue #40; preregistered in `tests/runs/artifacts/2026-09-20-untestable-assumptions-prereg.md`, which holds the step 0 check, the expected outcomes, the verdict rows, and the entanglement pass, and is not restated here.
+
+**Prompt:**
+
+> Our billing analyst says the autopay invitation experiment gives us the causal effect of autopay enrollment on late payments, and their write-up is `tests/fixtures/cs8-encouragement/design_note.md`.
+> Before anyone runs the estimate, does the design hold up, and on what assumptions would any downstream estimate be conditional?
+> Do not estimate the effect yourself.
+> Data: `tests/fixtures/cs8-encouragement/customers.csv` (customer_id, invited, late_payments_prior_90d, late_payments_90d, tenure_months, plan) and `tests/fixtures/cs8-encouragement/enrollment_by_arm.csv` (invited, customers, enrolled_by_2026_03_16), a frozen local export described in `tests/fixtures/cs8-encouragement/data_notes.md`.
+
+**Fixture:** `tests/fixtures/cs8-encouragement/`, built by `generate.py` and guarded by `validate_cs8.py`; realized values and the per-assumption ground truth are in `tests/fixtures/cs8-encouragement-ground-truth.md`.
+A randomized invitation is offered as an instrument for voluntary enrollment.
+Two of its identifying assumptions have a probe the extract can feed, and each comes back clean: the invitation moves enrollment strongly, and prior-period late payments, tenure, and plan are balanced across it.
+The exclusion restriction has one weak bound and nothing else: enrollment reaches the extract only as counts by invitation arm, so the joint distribution an instrument's inequality restrictions need cannot be formed, and what remains is a joint bound — under independence, exclusion, and monotonicity together, the arms' outcome distributions can differ by no more than the first-stage difference — that holds here with room and that only a very large violation could break.
+Every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; who opened the email is unrecorded; and the one placebo on offer predates the email, so randomization alone balances it whatever the email does afterwards.
+The analyst's note plants the overread — the placebo "confirms the instrument is clean" — so the cell measures both ways the gap can close wrongly: a check that is silent on an assumption filed as evidence for it, and a design stranded short of its conditional disposition because one assumption has no probe that settles it.
+The documented ground truth is the conditional disposition, with the exclusion restriction carried by name as a condition no check in the record establishes; the exact closed-set values are in the assertion rows below, not here.
+
+**Assertions:**
+
+- [ ] CS8.1 — the record's route is `review`, and it carries a Design block for the invitation-as-instrument design.
+- [ ] CS8.2 — that block names relevance, independence of the invitation, and the exclusion restriction, all three, each as a claim evidence could break; and when its estimand is an effect among compliers it also names monotonicity, or the alternative restriction it relies on instead.
+- [ ] CS8.3 — the probes the extract plainly feeds were run and reported with results: a first stage for relevance, and a balance or prior-period check for independence. Either assumption recorded as untestable, or its probe proposed and not run, fails.
+- [ ] CS8.4 — the prior-period placebo, the balance checks, and the first stage are nowhere given as evidence for the exclusion restriction, in a probes-table row or in a sentence. "The placebo is consistent with randomization and says nothing about exclusion" passes. The outcome-distribution bound — the two arms' outcome distributions differing by no more than the first-stage difference, which independence, exclusion, and monotonicity imply together — is a probe of exclusion and passes here.
+- [ ] CS8.5 — for exclusion, the evidential state is one of the two the ground-truth file allows: not testable from this extract, with the checks considered, why each is silent, and the data that would make it testable; or not contradicted by the outcome-distribution bound, stated as following from independence, exclusion, and monotonicity together, with what it cannot see named. For monotonicity, when CS8.2 requires it, the evidential state is not contradicted by the positive sign of the first stage, with the blind spot named: the sign cannot detect a defier share smaller than the complier share. Saying defiers are unobservable passes; using that to record monotonicity as untestable, over a first stage the record itself reports, fails. The placebo, the balance checks, or the first stage's size given as evidence for either assumption fails, and so does a statement that any check supports, confirms, or establishes either.
+- [ ] CS8.6 — the instrument design's disposition is `identified-if`, and the conditions stated with it include exclusion and, when the estimand is an effect among compliers, monotonicity or the alternative restriction named in its place. `unresolved` or `not-constructible` fails; so does `identified-if` with either condition absent.
+- [ ] CS8.7 — the Handoff block's Assumptions slot carries the same conditions CS8.6 requires, as conditions on any downstream estimate.
+- [ ] CS8.8 — post only, recorded, decides no row: `check_review.py` exits 0 on the record; the exclusion row reads either probe `NONE` with assessment `not-testable-here`, or the outcome-distribution bound with assessment `not-contradicted`; and the monotonicity row names the first-stage sign with assessment `not-contradicted`.
+
+**Baseline expectation:** a baseline arm writes no template record, so it is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of CS8.6; it is expected to correct the analyst unaided, which would make this a cell that separates wordings of the skill rather than the skill from no skill.
+That is a plausible path, not a guarantee, and the preregistration says what each outcome means.
+
+**Entanglement check:** in the preregistration, § Entanglement pass — null-result sensitivity on the placebo, the CS7 point-estimate collision, completeness, authorization, route, and the traps that keep exclusion untestable.
+
+**Status:** fixture built and validated; zero arms run.
+The preregistered wave was closed without arms on 2026-09-20 (`decisions/007-assessments-ship-unmeasured.md`): four design-review passes showed that a knowledgeable arm on the earlier wording can pass every assertion, so one arm per role could not separate the wordings.
+CS8 ships as a regression scenario; the endpoint a future wave should preregister is in that decision's reopening condition.
+
 ## HDA seam cells (owed by the three amendment sentences)
 
 The seam amendment adds exactly three sentences to `skills/hypothesis-driven-analysis/SKILL.md`, and the verdict table above scores their reachability cells alongside CS1–CS7; this subsection preregisters those cells repo-side.
@@ -433,9 +472,15 @@ The template's opening two sentences were expanded for readability after externa
 The scoping authority is the same as the cost line's: no cell's decision point traverses the intro sentences — every assertion keys on record shape and content, which the slots below the intro determine — so the edit ships without arms, with the judgement recorded here rather than assumed.
 
 **Drift watch: HDA's seam sentences restate a condition this skill owns.**
-`skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
+`skills/hypothesis-driven-analysis/SKILL.md` lines 45 and 297 (line 319 as of 2026-09-20; the file has grown since this watch was written, and issue #49 tracks the change) each carry a four-word statement of the probes-run condition ("with its probes run") gating a design's `identified-if` disposition into causal wording — semantically owned by this skill's per-route procedure, not by HDA.
 No hook watches that pairing; a future change to this skill's disposition semantics must re-check those two HDA lines by hand.
 Re-flagged by the 2026-08-09 final cross-model review; the ruling stands — the wording is measured, pointer-izing it owes arms, and the change batches with the next HDA wording wave.
+
+**Per-assumption assessments shipped unmeasured (2026-09-20, issue #40).**
+`SKILL.md` § Per-route procedure and the record template changed without arms, by the owner's decision recorded in `decisions/007-assessments-ship-unmeasured.md`; nothing here or there claims the wording reaches behavior.
+Every cell whose decision point traverses the edited text owes arms against it: CS3 and CS6b, which can run as they stand; CS8, with the endpoint that decision names; and CS4 and CS7 stage 1, whose own redesigns come first.
+The template's probes table gained two columns and the threat register's cells changed, so records from wave 1 no longer satisfy `check_review.py` — expected, and not a finding against those arms.
+The drift watch above was re-checked by hand for this change, and the reviewer's position that the two HDA lines should become pointers is recorded in `tests/runs/artifacts/2026-09-20-untestable-assumptions/design-review.md`, finding 2.5, with the owner's ruling to leave them and track the change as issue #49.
 
 ## What this repository cannot re-score (recorded 2026-08-22)
 

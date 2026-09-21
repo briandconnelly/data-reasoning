@@ -13,11 +13,12 @@ block; ``bound`` requires the Bound block and no Design blocks), the Handoff
 Dispositions slot reusing exactly the disposition values assigned above --
 set equality, neither fabricating nor omitting -- (or the literal ``none``
 when the record's route assigns none), an ``identified-if`` disposition
-carrying at least one assumption probe run with its result recorded (probes
-that are empty or ``none run`` reject that disposition and no other) and,
-when assumptions carry ``A<n>`` ids, a probe row for every such id
-(free-text assumptions -- the template's default form -- are not
-individually matched to probes), and forbidden certification vocabulary
+carrying at least one assumption probe run with its result recorded, the
+per-assumption assessment gates (issue #40: every assumption carries an
+``A<n>`` id and exactly one probes-table row, each row's assessment is drawn
+from its closed set, ``not-testable-here`` pairs with the probe cell ``NONE``
+and a reason, and the disposition is one the assessments allow --
+``_check_assessments`` states the scope), and forbidden certification vocabulary
 (``valid``, ``certified``) absent from disposition slots. The
 closed-set vocabulary and its semantics are governed by
 ``../SKILL.md`` § Routing (authority) and are already fixed
@@ -67,6 +68,17 @@ DISPOSITIONS = frozenset(
 )
 FORBIDDEN_WORDS = ("valid", "certified")
 
+# Per-assumption assessments (SKILL.md's per-route procedure, the authority
+# for what each value means). RUN_ASSESSMENTS are the values a probe that ran
+# can end on; `not-testable-here` pairs with the literal probe cell NO_PROBE.
+ASSESSMENTS = frozenset(
+    {"contradicted", "not-contradicted", "non-discriminating", "not-run", "not-testable-here"}
+)
+RUN_ASSESSMENTS = frozenset({"contradicted", "not-contradicted", "non-discriminating"})
+BLOCKING_ASSESSMENTS = frozenset({"non-discriminating", "not-run"})
+NO_PROBE = "NONE"
+PROBE_COLUMNS = ("assumption", "probe", "assessment", "evidence or reason")
+
 # A table counts as present-with-data when it carries a header row, a
 # separator row, and at least one data row -- three pipe-delimited lines.
 _MIN_TABLE_LINES = 3
@@ -89,9 +101,11 @@ _SUBLIST_ITEM = re.compile(r"^[ \t]+- .+$")
 # followed by a dash-introduced rationale (same dash discipline as
 # _NONE_DISPOSITION below). SKILL.md's disposition semantics make
 # `identified-if` conditional on probes run and reported, so a Design block
-# pairing that disposition with one of these slots is rejected; other
-# dispositions legitimately carry them (a named-only design ends
-# `not-constructible`).
+# pairing that disposition with one of these slots is rejected, and so is one
+# of these forms in a probe or evidence cell under a run assessment. Since
+# issue #40 the assessment gates reject an inline slot of this kind under
+# every disposition but `not-constructible`, which a named-only design ends
+# on and which owes no assessed rows.
 _NO_RESULT_PROBES = re.compile(
     r"^`?(?:none(?:\s+run)?|not\s+run|n/a)`?(?:\s+[—-]\s+.+)?$",
     re.IGNORECASE,
@@ -219,7 +233,7 @@ def _label_region(body: str, label: str) -> str:
 # slot's shape: inline, sub-list, paragraph, and any separator between items
 # are all covered by the same rule, and a bare mention of `A1` with no colon
 # is a reference, not a definition.
-_ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)\s*:")
+_ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)[*_`]*\s*:")
 
 
 _TABLE_DELIMITER = re.compile(r"^[\s|:-]+$")
@@ -270,7 +284,8 @@ def _row_records_a_run(cells: list[str]) -> bool:
 
 
 def _assumption_ids(body: str) -> list[str]:
-    """Assumption ids defined in the ``- Identifying assumptions:`` slot.
+    """Assumption ids defined in the ``- Identifying assumptions:`` slot, in
+    order, a repeated definition kept so the caller can report it.
 
     Scans the inline value on the label line together with the raw region
     below it, so every shape the slot is accepted in is covered without
@@ -280,7 +295,7 @@ def _assumption_ids(body: str) -> list[str]:
     if m is None:
         return []
     slot = m.group(1) + "\n" + _label_region(visible_markdown(body), "Identifying assumptions")
-    return list(dict.fromkeys(d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)))
+    return [d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)]
 
 
 def find_bullet(body: str, label: str) -> str | None:
@@ -483,7 +498,10 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     # assigning it over an empty or `none run` probes slot claims probe
     # support the record does not carry. A probes table with a data row
     # carries run results by shape; an inline value carries them unless it
-    # is one of the no-result forms.
+    # is one of the no-result forms. `_check_assessments` below is the wider
+    # gate -- it rejects any probes slot that is not the four-column table,
+    # under every disposition but `not-constructible` -- and this one stays
+    # for the message that names the overclaim.
     if (
         disposition_value == "identified-if"
         and not probes_table
@@ -494,31 +512,198 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
             "least one assumption probe run with its result recorded -- the "
             "probes slot is empty or records no run result ('none', 'none run')"
         )
-    # identified-if claims every *named* assumption was probed (SKILL.md's
-    # per-route procedure), not merely that some probe ran. Match assumption
-    # ids (`A1`, `A2`, ...) named in the slot against the probes table's
-    # first column -- this only fires when the record uses the `A<digits>`
-    # id convention; the template's free-text assumption form (no ids)
-    # never trips it.
-    assumption_ids = _assumption_ids(body)
-    # Only a structurally valid data row counts: a line that merely starts
-    # with a pipe ("| A2 not run") is not a table row, and must not satisfy
-    # the probe requirement it appears to.
-    probed_ids = {
-        cells[0]
+    _check_assessments(header, body, disposition_value, findings)
+    return disposition_value if disposition_value in DISPOSITIONS else None
+
+
+# Emphasis or code markup around an id is markup, not part of the id.
+_ROW_ASSUMPTION_ID = re.compile(r"[*_`]*(A\d+)[*_`]*")
+_SUBLIST_ASSUMPTION_ID = re.compile(r"[*_`]*A\d+[*_`]*\s*:")
+
+
+_SEPARATOR_CELL = re.compile(r":?-{3,}:?")
+
+
+def _probes_separator_ok(body: str) -> bool:
+    """True when the line under the probes table's header is a Markdown
+    separator with one cell per column. ``_data_row_cells`` drops separator
+    rows, so without this a header followed straight by data rows -- which
+    does not render as a table -- reads the same as a real one."""
+    lines = [
+        line.strip()
+        for line in _label_region(visible_markdown(body), "Assumption probes").splitlines()
+        if line.strip().startswith("|")
+    ]
+    if len(lines) < 2:  # noqa: PLR2004 -- a header line and the line under it
+        return False
+    cells = [c.strip() for c in lines[1].strip("|").split("|")]
+    return len(cells) == len(PROBE_COLUMNS) and all(_SEPARATOR_CELL.fullmatch(c) for c in cells)
+
+
+def _probe_rows(body: str) -> tuple[list[str] | None, list[list[str]]]:
+    """``(header_cells, data_rows)`` of the Assumption probes table, read from
+    visible markdown only. The header is the row whose first cell is
+    ``assumption``; a table without one has no header to key columns on."""
+    rows = [
+        cells
         for line in _label_region(visible_markdown(body), "Assumption probes").splitlines()
         if (cells := _data_row_cells(line))
-        and re.fullmatch(r"A\d+", cells[0])
-        and _row_records_a_run(cells)
-    }
-    if assumption_ids and disposition_value == "identified-if":
-        for aid in assumption_ids:
-            if aid not in probed_ids:
-                findings.append(
-                    f"Design block ({header!r}): assumption {aid} has no probe row, "
-                    "so identified-if is not available"
-                )
-    return disposition_value if disposition_value in DISPOSITIONS else None
+    ]
+    if rows and rows[0][0].strip().lower() == "assumption":
+        return rows[0], rows[1:]
+    return None, rows
+
+
+def _defined_assumption_ids(where: str, body: str, findings: list[str]) -> list[str]:
+    """The block's assumption ids, deduplicated, reporting an item without an
+    id, an id defined twice, and a block that defines none."""
+    for item in find_sublist(visible_markdown(body), "Identifying assumptions"):
+        if not _SUBLIST_ASSUMPTION_ID.match(item):
+            findings.append(f"{where}: assumption {item!r} carries no A<n> id")
+    definitions = _assumption_ids(body)
+    defined = list(dict.fromkeys(definitions))
+    for aid in defined:
+        if definitions.count(aid) > 1:
+            findings.append(f"{where}: assumption id {aid} is defined more than once")
+    if not defined:
+        findings.append(f"{where}: no assumption carries an A<n> id")
+    return defined
+
+
+def _check_assessments(header: str, body: str, disposition: str, findings: list[str]) -> None:
+    """Per-assumption assessment gates (issue #40).
+
+    Binds every Design block but one ending ``not-constructible``, the
+    exception SKILL.md's data-requirements sentence states. What is checked is
+    shape and consistency: the template's four probes-table columns in order,
+    ids on every assumption, one row per id, a closed-set assessment per row,
+    the ``NONE``-plus-reason form of ``not-testable-here``, and the disposition
+    the assessments reach. Whether an assessment is the *right* one is the
+    scored arms' question, not this file's.
+
+    The disposition must be the first SKILL.md's precedence list reaches from
+    the assessments: a threat acts through the assumption it threatens, so
+    nothing outside the rows can hold a design short of, or past, that value.
+    """
+    if disposition == "not-constructible":
+        return
+    where = f"Design block ({header!r})"
+    header_cells, rows = _probe_rows(body)
+    columns = [c.strip().lower() for c in header_cells or []]
+    if columns != list(PROBE_COLUMNS):
+        findings.append(
+            f"{where}: the probes table's columns are {columns or 'absent'}, not "
+            f"{list(PROBE_COLUMNS)} -- every named assumption owes an assessed row"
+        )
+        return
+    if not _probes_separator_ok(body):
+        findings.append(
+            f"{where}: the probes table has no separator row of {len(PROBE_COLUMNS)} cells "
+            "under its header, so it does not render as a table"
+        )
+        return
+    col = PROBE_COLUMNS.index("assessment")
+    before = len(findings)
+
+    defined = _defined_assumption_ids(where, body, findings)
+
+    assessed: dict[str, str] = {}
+    for cells in rows:
+        m = _ROW_ASSUMPTION_ID.fullmatch(cells[0].strip())
+        # A row the gates cannot read is a finding, never a skip: a skipped row
+        # can carry the contradiction the disposition then ignores.
+        if m is None:
+            findings.append(f"{where}: probe row's assumption cell {cells[0]!r} is not an A<n> id")
+            continue
+        if len(cells) != len(PROBE_COLUMNS):
+            findings.append(
+                f"{where}: probe row {m.group(1)} has {len(cells)} cells, "
+                f"not the {len(PROBE_COLUMNS)} the table's columns name"
+            )
+            continue
+        aid = m.group(1)
+        if aid in assessed:
+            findings.append(f"{where}: assumption {aid} has more than one probe row")
+            continue
+        assessed[aid] = cells[col].strip().strip("`").strip()
+        if aid not in defined:
+            findings.append(f"{where}: probe row {aid} names an assumption not defined above")
+        _check_assessed_row(where, aid, cells, col, findings)
+    for aid in defined:
+        if aid not in assessed:
+            findings.append(
+                f"{where}: assumption {aid} has no probe row, so it carries no assessment"
+            )
+    if len(findings) == before:  # a disposition check over malformed rows only cascades
+        _check_disposition_against(where, disposition, assessed, findings)
+
+
+def _check_assessed_row(
+    where: str, aid: str, cells: list[str], col: int, findings: list[str]
+) -> None:
+    """One probes-table row: a closed-set assessment, and the probe and
+    evidence cells that assessment owes."""
+    probe = cells[1].strip().strip("`").strip()
+    value = cells[col].strip().strip("`").strip()
+    evidence = cells[col + 1].strip()
+    if value not in ASSESSMENTS:
+        findings.append(
+            f"{where}: assumption {aid} assessment {value!r} is not in the "
+            f"closed set {sorted(ASSESSMENTS)}"
+        )
+    elif value == "not-testable-here":
+        if probe != NO_PROBE:
+            findings.append(
+                f"{where}: assumption {aid} is 'not-testable-here', so its probe "
+                f"cell must be {NO_PROBE}, not {probe!r}"
+            )
+        if not evidence:
+            findings.append(
+                f"{where}: assumption {aid} is 'not-testable-here' with no reason given"
+            )
+    else:
+        if probe == NO_PROBE or not probe or _NO_RESULT_PROBES.match(probe):
+            findings.append(
+                f"{where}: assumption {aid} is {value!r}, which names a probe -- "
+                f"{NO_PROBE} or an empty probe cell belongs to 'not-testable-here' alone"
+            )
+        if value in RUN_ASSESSMENTS and (not evidence or _NO_RESULT_PROBES.match(evidence)):
+            findings.append(f"{where}: assumption {aid} is {value!r} with no evidence recorded")
+        if value == "not-run" and not evidence:
+            findings.append(
+                f"{where}: assumption {aid} is 'not-run' and its row does not say why the "
+                "named probe stayed unrun"
+            )
+
+
+def _check_disposition_against(
+    where: str, disposition: str, assessed: dict[str, str], findings: list[str]
+) -> None:
+    """The recorded disposition against the one the assessments reach."""
+    values = set(assessed.values())
+    if "contradicted" in values:
+        contradicted = sorted(a for a, v in assessed.items() if v == "contradicted")
+        expected, why = (
+            "assumption-contradicted",
+            f"assumption(s) {contradicted} are 'contradicted'",
+        )
+    elif values & BLOCKING_ASSESSMENTS:
+        blocking = sorted(a for a, v in assessed.items() if v in BLOCKING_ASSESSMENTS)
+        expected = "unresolved"
+        why = f"assumption(s) {blocking} are {sorted(values & BLOCKING_ASSESSMENTS)}"
+    elif "not-contradicted" not in values:
+        expected, why = "unresolved", "no assumption is 'not-contradicted' by a probe run"
+    else:
+        expected = "identified-if"
+        why = (
+            "no assumption is contradicted, non-discriminating, or not-run, and at least one "
+            "is not-contradicted"
+        )
+    if disposition != expected:
+        findings.append(
+            f"{where}: disposition {disposition!r} does not follow from the assessments "
+            f"-- {why}, so the disposition is {expected!r}"
+        )
 
 
 def _check_bound(body: str, findings: list[str]) -> None:

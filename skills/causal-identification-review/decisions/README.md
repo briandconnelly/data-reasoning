@@ -19,7 +19,7 @@ One file per decision, `NNN-slug.md`, with five parts:
   A decision with no reopening condition is a belief.
 - **Where the rule lives** — a pointer.
 
-Six decisions (D1–D6), one file each, so each can be reopened independently of the others.
+Six decisions (D1–D6) from the skill's design, and a seventh (`007`) taken on issue #40, one file each, so each can be reopened independently of the others.
 
 ## The pointer rule
 

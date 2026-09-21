@@ -2,7 +2,7 @@
 
 This template records a review's content.
 `../SKILL.md` governs what that content means.
-Every closed-vocabulary slot below — route, disposition — names only the slot: which value applies, what values exist, and what each value means are `../SKILL.md`'s to state, not this template's.
+Every closed-vocabulary slot below — route, assessment, disposition — names only the slot: which value applies, what values exist, and what each value means are `../SKILL.md`'s to state, not this template's.
 Fill in one record per causal question under review; repeat the Design block once per candidate design the record considers.
 
 ```markdown
@@ -19,20 +19,22 @@ Fill in one record per causal question under review; repeat the Design block onc
 
 - Design: <name of the candidate identifying design>
 - Identifying assumptions:
-  - <assumption 1, stated as a claim evidence could break>
-  - <assumption 2, stated as a claim evidence could break>
+  - A1: <assumption 1, stated as a claim evidence could break>
+  - A2: <assumption 2, stated as a claim evidence could break>
 - Assumption probes:
 
-  | assumption | probe | result |
-  | --- | --- | --- |
-  | <assumption> | <the check run against it> | <what the probe found> |
+  | assumption | probe | assessment | evidence or reason |
+  | --- | --- | --- | --- |
+  | A1 | <the check or checks run against it, or `NONE`> | <value> | <what the probe found and what it could not have seen, or why no probe exists and what data would supply one> |
+
+  Rows, the assessment value set, and each value's meaning per `../SKILL.md` § Routing, per-route procedure (authority).
 
 - Data requirements: <the records, fields, and coverage this design needs to run>
 - Threat register:
 
   | threat | probe | result |
   | --- | --- | --- |
-  | <named threat to identification> | <the check run against it> | <what the probe found> |
+  | <named threat to identification> | <the check run against it, the check named and not run, or `NONE`> | <what the probe found, why it stayed unrun, or why no probe exists> |
 
 - Disposition: <value> — value set and per-disposition semantics per `../SKILL.md` § Routing, per-route procedure (authority)
 

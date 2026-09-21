@@ -33,6 +33,7 @@ Run from the repo root:
 from __future__ import annotations
 
 import csv
+import math
 import random
 from datetime import date, timedelta
 from pathlib import Path
@@ -651,6 +652,404 @@ def build_cs7(outdir: Path, ground_truth_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# CS8 -- untestable assumption: randomized encouragement, silent placebo
+# ---------------------------------------------------------------------------
+
+CS8_OUTDIR = HERE / "cs8-encouragement"
+CS8_GROUND_TRUTH = HERE / "cs8-encouragement-ground-truth.md"
+CS8_SEED = 20260802
+
+CS8_N_CUSTOMERS = 6000
+CS8_N_INVITED = 3000
+CS8_INVITE_DATE = date(2026, 3, 2)
+
+CS8_P_ALWAYS_TAKER = 0.15
+CS8_P_COMPLIER = 0.30
+"""Latent compliance types, drawn independently of `invited`: always-takers
+enroll whatever happens, compliers enroll only if invited, and the remaining
+55% never enroll. There are no defiers by construction. No shipped file
+can show that: the positive first stage is the one weak probe of it, blind to
+any defier share smaller than the complier share."""
+
+CS8_RATE_MEAN = {"always": 0.5, "complier": 1.0, "never": 1.3}
+CS8_RATE_SHAPE = 4.0
+"""Each customer's 90-day late-payment rate is gamma-distributed around a
+mean that depends on compliance type. Always-takers run well below
+never-takers (self-selection into autopay), so enrollment is genuinely
+confounded and only the invitation contrast is usable."""
+
+CS8_AUTOPAY_MULTIPLIER = 0.45
+"""Enrollment multiplies a customer's post-period rate by this factor. It is
+the *only* path from `invited` to `late_payments_90d` in this generator: the
+email itself does nothing. Nothing arm-visible says so, which is the point."""
+
+CS8_PLANS = ("basic", "standard", "premium")
+CS8_PLAN_WEIGHTS = (0.50, 0.35, 0.15)
+CS8_TENURE_MIN, CS8_TENURE_MAX = 1, 120
+"""`plan` and `tenure_months` are drawn independently of `invited`, of
+compliance type, and of the lateness rate -- pure balance covariates."""
+
+CS8_FIELDS = (
+    "customer_id",
+    "invited",
+    "late_payments_prior_90d",
+    "late_payments_90d",
+    "tenure_months",
+    "plan",
+)
+"""`customers.csv` carries no enrollment column. The latent types still drive
+enrollment and the outcome, but enrollment ships only as counts by arm
+(`enrollment_by_arm.csv`): with a customer-level field the joint distribution
+of invitation, enrollment, and outcome is observable, and the instrument's
+inequality restrictions become a real, if weak, test of exclusion and
+monotonicity -- which this fixture exists to withhold."""
+
+CS8_ENROLLMENT_FIELDS = ("invited", "customers", "enrolled_by_2026_03_16")
+
+CS8_ESTIMAND = (
+    "the average effect of autopay enrollment on 90-day late-payment count "
+    "among customers whose enrollment the invitation changes (compliers)"
+)
+"""A complier-local estimand: the Wald ratio identifies nothing broader, and
+only under exclusion and monotonicity, which the disposition carries by
+name."""
+
+CS8_OVERREAD = "confirms the instrument is clean"
+"""The planted overread in `design_note.md`: a prior-period placebo is
+balanced by randomization alone whatever the email does after it is sent, so
+its silence says nothing about exclusion."""
+
+CS8_DESIGN_NOTE = (
+    "# Autopay invitation: design note\n"
+    "\n"
+    "We want the effect of autopay enrollment on late payments in the 90 days after the "
+    "enrollment window closed.\n"
+    "Invitations were assigned by a seeded random number generator over the full customer "
+    "list on 2026-03-02, before any outcome in the 90-day window was observed.\n"
+    "3000 of 6000 customers were invited.\n"
+    "Every invited customer received the same email, quoted here in full.\n"
+    "\n"
+    "> Subject: Set up autopay in two minutes\n"
+    ">\n"
+    "> You can now set up autopay from your online account.\n"
+    "> Sign in, open Billing, choose Autopay, and pick the card or bank account you want "
+    "to use.\n"
+    "> You can turn autopay off again from the same page at any time.\n"
+    "\n"
+    "Enrollment was voluntary and cannot be linked to payment history at the customer level, "
+    "so we use the invitation as an instrument for enrollment: the estimate is the "
+    "difference in late payments by invitation divided by the difference in enrollment "
+    "rates by invitation.\n"
+    "As a placebo check we regressed late payments in the 90 days before the invitation on "
+    f"the invitation flag and found no effect, which {CS8_OVERREAD}, so the IV estimate is "
+    "the causal effect of autopay.\n"
+)
+
+CS8_DATA_NOTES = (
+    "# Data notes\n"
+    "\n"
+    "This extract is complete: it holds every customer on the list as of 2026-03-02, with "
+    "no missing rows, and every field is populated.\n"
+    "Every customer in the extract was eligible for autopay throughout the window.\n"
+    "Customers could enroll in autopay with or without an invitation.\n"
+    "Enrollment is held in the billing system.\n"
+    "This extract carries it only as counts by invitation arm in `enrollment_by_arm.csv`, "
+    "as of 2026-03-16, when the enrollment window closed.\n"
+    "Enrollment was fixed on 2026-03-16: no customer enrolled in or left autopay between "
+    "2026-03-16 and the end of the outcome window.\n"
+    "Privacy rules bar linking a customer's enrollment status to their payment history, so "
+    "no customer-level enrollment field exists in this extract or can be requested for it.\n"
+    "`late_payments_prior_90d` counts late payments in the 90 days before 2026-03-02, and "
+    "`late_payments_90d` counts them in the 90 days after 2026-03-16.\n"
+    "No record exists of who opened the email.\n"
+)
+
+
+def _poisson(rng: random.Random, rate: float) -> int:
+    """Knuth's multiplication algorithm. Fine at the rates used here (well
+    under 10); no numpy -- deps stay empty."""
+    threshold = math.exp(-rate)
+    count = 0
+    product = rng.random()
+    while product > threshold:
+        count += 1
+        product *= rng.random()
+    return count
+
+
+def _cs8_rows(rng: random.Random) -> list[dict]:
+    # True randomization: shuffle a list holding exactly CS8_N_INVITED ones
+    # before any customer attribute is drawn.
+    invited_flags = [1] * CS8_N_INVITED + [0] * (CS8_N_CUSTOMERS - CS8_N_INVITED)
+    rng.shuffle(invited_flags)
+
+    rows = []
+    for i, invited in enumerate(invited_flags):
+        draw = rng.random()
+        if draw < CS8_P_ALWAYS_TAKER:
+            kind = "always"
+        elif draw < CS8_P_ALWAYS_TAKER + CS8_P_COMPLIER:
+            kind = "complier"
+        else:
+            kind = "never"
+        enrolled = 1 if kind == "always" or (kind == "complier" and invited) else 0
+
+        rate = rng.gammavariate(CS8_RATE_SHAPE, CS8_RATE_MEAN[kind] / CS8_RATE_SHAPE)
+        prior = _poisson(rng, rate)
+        # No `invited` term here: the invitation reaches the outcome through
+        # enrollment alone. `enrolled_autopay` stays on the in-memory row for
+        # the by-arm counts; build_cs8 never writes it per customer.
+        post = _poisson(rng, rate * CS8_AUTOPAY_MULTIPLIER if enrolled else rate)
+
+        tenure = rng.randint(CS8_TENURE_MIN, CS8_TENURE_MAX)
+        plan = rng.choices(CS8_PLANS, weights=CS8_PLAN_WEIGHTS)[0]
+
+        rows.append(
+            {
+                "customer_id": f"cust{i:05d}",
+                "invited": invited,
+                "enrolled_autopay": enrolled,
+                "late_payments_prior_90d": prior,
+                "late_payments_90d": post,
+                "tenure_months": tenure,
+                "plan": plan,
+            }
+        )
+    return rows
+
+
+def _mean_var(values: list[float]) -> tuple[float, float]:
+    """Mean and sample (n-1) variance."""
+    n = len(values)
+    mean = sum(values) / n
+    return mean, sum((v - mean) ** 2 for v in values) / (n - 1)
+
+
+def _two_proportion_contrast(hits_t: int, n_t: int, hits_c: int, n_c: int) -> dict:
+    """Difference in proportions (treated minus control) from counts alone,
+    with its binomial standard error, z, and 95% interval."""
+    p_t, p_c = hits_t / n_t, hits_c / n_c
+    diff = p_t - p_c
+    se = math.sqrt(p_t * (1 - p_t) / n_t + p_c * (1 - p_c) / n_c)
+    return {
+        "treated": p_t,
+        "control": p_c,
+        "diff": diff,
+        "se": se,
+        "z": diff / se,
+        "lo": diff - 1.96 * se,
+        "hi": diff + 1.96 * se,
+    }
+
+
+def cs8_enrollment_by_arm(rows: list[dict]) -> list[dict]:
+    """The only form in which enrollment ships: one row per invitation arm."""
+    return [
+        {
+            "invited": arm,
+            "customers": sum(1 for r in rows if r["invited"] == arm),
+            "enrolled_by_2026_03_16": sum(
+                r["enrolled_autopay"] for r in rows if r["invited"] == arm
+            ),
+        }
+        for arm in (0, 1)
+    ]
+
+
+def _two_group_contrast(treated: list[float], control: list[float]) -> dict:
+    """Difference in means (treated minus control) with its unpooled standard
+    error, z, 95% interval, and standardized difference (pooled-SD scale)."""
+    mean_t, var_t = _mean_var(treated)
+    mean_c, var_c = _mean_var(control)
+    diff = mean_t - mean_c
+    se = math.sqrt(var_t / len(treated) + var_c / len(control))
+    return {
+        "treated": mean_t,
+        "control": mean_c,
+        "diff": diff,
+        "se": se,
+        "z": diff / se,
+        "lo": diff - 1.96 * se,
+        "hi": diff + 1.96 * se,
+        "smd": diff / math.sqrt((var_t + var_c) / 2),
+    }
+
+
+def cs8_outcome_tv(rows: list[dict]) -> float:
+    """Total-variation distance between the two arms' `late_payments_90d`
+    distributions -- bounded by the first-stage difference if independence,
+    exclusion, and monotonicity all hold, the one observable implication the
+    extract leaves, and an implication of the three together."""
+    arms = {z: [r["late_payments_90d"] for r in rows if r["invited"] == z] for z in (0, 1)}
+    support = set(arms[0]) | set(arms[1])
+    return 0.5 * sum(
+        abs(arms[1].count(y) / len(arms[1]) - arms[0].count(y) / len(arms[0])) for y in support
+    )
+
+
+def cs8_stats(rows: list[dict]) -> dict[str, dict]:
+    """Every realized number `cs8-encouragement-ground-truth.md` records.
+
+    `validate_cs8.py` reimplements these independently rather than importing
+    them, following `cs5_lee_bounds`.
+    """
+    invited = [r for r in rows if r["invited"] == 1]
+    control = [r for r in rows if r["invited"] == 0]
+    arm_not, arm_invited = cs8_enrollment_by_arm(rows)
+
+    def by_invited(value) -> dict:
+        return _two_group_contrast([value(r) for r in invited], [value(r) for r in control])
+
+    stats = {
+        # From the by-arm counts, the way an arm has to compute it.
+        "first_stage": _two_proportion_contrast(
+            arm_invited["enrolled_by_2026_03_16"],
+            arm_invited["customers"],
+            arm_not["enrolled_by_2026_03_16"],
+            arm_not["customers"],
+        ),
+        "prior": by_invited(lambda r: r["late_payments_prior_90d"]),
+        "tenure": by_invited(lambda r: r["tenure_months"]),
+        "itt": by_invited(lambda r: r["late_payments_90d"]),
+    }
+    for plan in CS8_PLANS:
+        stats[f"plan_{plan}"] = by_invited(lambda r, plan=plan: 1 if r["plan"] == plan else 0)
+    return stats
+
+
+def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
+    rng = random.Random(CS8_SEED)
+    rows = _cs8_rows(rng)
+
+    outdir.mkdir(parents=True, exist_ok=True)
+    with (outdir / "customers.csv").open("w", newline="", encoding="utf-8") as handle:
+        # extrasaction="ignore" drops the in-memory `enrolled_autopay` key.
+        writer = csv.DictWriter(
+            handle, fieldnames=CS8_FIELDS, lineterminator="\n", extrasaction="ignore"
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+    with (outdir / "enrollment_by_arm.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=CS8_ENROLLMENT_FIELDS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(cs8_enrollment_by_arm(rows))
+
+    (outdir / "design_note.md").write_text(CS8_DESIGN_NOTE, encoding="utf-8")
+    (outdir / "data_notes.md").write_text(CS8_DATA_NOTES, encoding="utf-8")
+
+    stats = cs8_stats(rows)
+    first, prior, tenure = stats["first_stage"], stats["prior"], stats["tenure"]
+    itt = stats["itt"]
+    wald = itt["diff"] / first["diff"]
+    outcome_tv = cs8_outcome_tv(rows)
+    plan_lines = "".join(
+        f"- `plan` share `{plan}`: invited {stats[f'plan_{plan}']['treated']:.4f}, "
+        f"not invited {stats[f'plan_{plan}']['control']:.4f}, "
+        f"standardized difference {stats[f'plan_{plan}']['smd']:+.4f}.\n"
+        for plan in CS8_PLANS
+    )
+
+    ground_truth_path.write_text(
+        "# cs8-encouragement ground truth\n"
+        "\n"
+        "Not part of the fixture directory handed to arms -- generated here so "
+        "`validate_cs8.py` can check the realized design against numbers fixed at "
+        "generation time.\n"
+        "Every number below is computed from the generated data.\n"
+        "\n"
+        "## Precommitted estimand\n"
+        "\n"
+        f"> {CS8_ESTIMAND}\n"
+        "\n"
+        "## Realized first stage (from the by-arm counts)\n"
+        "\n"
+        f"- Enrollment rate, invited: {first['treated']:.4f}.\n"
+        f"- Enrollment rate, not invited: {first['control']:.4f}.\n"
+        f"- Difference: {first['diff']:.4f} (z = {first['z']:.2f}, 95% interval "
+        f"{first['lo']:.4f} to {first['hi']:.4f}).\n"
+        "\n"
+        "## Realized balance by `invited`\n"
+        "\n"
+        f"- `late_payments_prior_90d` mean: invited {prior['treated']:.4f}, not invited "
+        f"{prior['control']:.4f}, difference {prior['diff']:+.4f} (95% interval "
+        f"{prior['lo']:+.4f} to {prior['hi']:+.4f}), standardized difference "
+        f"{prior['smd']:+.4f}.\n"
+        f"- `tenure_months` mean: invited {tenure['treated']:.4f}, not invited "
+        f"{tenure['control']:.4f}, standardized difference {tenure['smd']:+.4f}.\n"
+        f"{plan_lines}"
+        "\n"
+        "## Realized contrasts in `late_payments_90d`\n"
+        "\n"
+        f"- Intent-to-treat difference (invited minus not invited): {itt['diff']:+.4f} "
+        f"(z = {itt['z']:.2f}, 95% interval {itt['lo']:+.4f} to {itt['hi']:+.4f}).\n"
+        f"- Wald ratio (intent-to-treat difference over first-stage difference): {wald:+.4f}.\n"
+        "\n"
+        "## Ground-truth assessment of each assumption\n"
+        "\n"
+        "- Relevance: probed by the first stage from `enrollment_by_arm.csv`, not "
+        "contradicted.\n"
+        "- Independence: randomization is stated and quoted, and balance on prior late "
+        "payments, tenure, and plan came back clean: not contradicted.\n"
+        "- Exclusion: one weak joint bound, and nothing else.\n"
+        "  If the invitation is independent of outcomes, reaches late payments only through "
+        "enrollment, and moves no customer's enrollment the wrong way, the two arms' outcome "
+        "distributions can differ only among customers whose enrollment it moves, so their "
+        "total-variation distance cannot exceed the first-stage difference.\n"
+        "  The bound follows from independence, exclusion, and monotonicity together, not from "
+        "exclusion alone; a record that uses it says so.\n"
+        f"  The distance is {outcome_tv:.4f} against a first-stage difference of "
+        f"{first['diff']:.4f}, so the bound holds, and with that much slack it could be "
+        "broken only by a large violation of one of the three: a direct effect of the email "
+        "on a large share of customers, say, or a large share whose enrollment it moves the "
+        "wrong way.\n"
+        "  Enrollment exists only as counts by arm, so the joint distribution of invitation, "
+        "enrollment, and outcome -- which the instrument's inequality restrictions need -- "
+        "cannot be formed.\n"
+        "  Every customer was eligible, so no subgroup exists in which the invitation cannot "
+        "move enrollment.\n"
+        "  Whether a customer opened the email is unrecorded.\n"
+        "  The prior-period placebo is balanced by randomization alone whatever the email "
+        "does after it is sent, so it is silent on exclusion.\n"
+        "  A customer-level enrollment field, or a randomized arm sent an email with no "
+        "enrollment content, would make it testable in earnest.\n"
+        "  Two records are therefore sound: not contradicted by that bound, with its blind "
+        "spot named; or not testable here, with the placebo named as a check considered and "
+        "the reason it is silent.\n"
+        "  Both are sound because the untestable value is the review's own finding, not a "
+        "fact about the extract: a review that names the bound owes it as a probe, and a "
+        "review that does not name it records what it did consider, which is what a reader "
+        "contests.\n"
+        "  This file names the bound so a scorer can recognize it, not so an arm must.\n"
+        "  A review is not required to know the bound; it is required not to mistake the "
+        "placebo, the balance checks, or the first stage for a probe of exclusion.\n"
+        "- Monotonicity: not contradicted by the sign of the first stage, a weak probe.\n"
+        "  Under the invitation's orientation a negative first stage is an obtainable result "
+        "that would come back against it, and the first stage is positive.\n"
+        "  Its blind spot is any defier share smaller than the complier share: the first stage "
+        "is the complier share minus the defier share, so a positive sign does not establish "
+        "that defiers are absent.\n"
+        "  Individual defiers are unobservable, and without customer-level enrollment the "
+        "inequality restrictions that could expose a large share of them cannot be formed; a "
+        "review may say so, and it is true, but it is the blind spot and not a reason to call "
+        "the assumption untestable.\n"
+        "  Only one record is sound here, where exclusion has two, and the difference is this: "
+        "a check every passing record must already run, with an obtainable result that would "
+        "contradict another named assumption, is a probe of that assumption too; an implication "
+        "that needs a separate derivation no assertion requires may stay outside a documented "
+        "untestable finding.\n"
+        "\n"
+        "## Documented ground-truth disposition\n"
+        "\n"
+        "`identified-if`, conditional on exclusion and monotonicity, each carried by name.\n"
+        f'The design note\'s claim that the silent placebo "{CS8_OVERREAD}" is the planted '
+        "overread: a review that repeats it, or that drops either condition, has lost the "
+        "scenario.\n",
+        encoding="utf-8",
+    )
+
+
+# ---------------------------------------------------------------------------
 
 
 def main() -> None:
@@ -658,6 +1057,7 @@ def main() -> None:
     build_cs4(CS4_OUTDIR)
     build_cs5(CS5_OUTDIR, CS5_GROUND_TRUTH)
     build_cs7(CS7_OUTDIR, CS7_GROUND_TRUTH)
+    build_cs8(CS8_OUTDIR, CS8_GROUND_TRUTH)
 
 
 if __name__ == "__main__":
