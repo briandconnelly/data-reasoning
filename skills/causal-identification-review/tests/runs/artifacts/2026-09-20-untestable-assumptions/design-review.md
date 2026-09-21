@@ -96,6 +96,16 @@ On finding 2.5: `hypothesis-driven-analysis/SKILL.md` lines 45 and 319 stay as t
 The phrase is read as still true — every probe the review named was run, and an assumption with none is carried as a condition — and pointer-izing both lines is filed for the next HDA wording wave, where the seam arms can batch (issue #49).
 The reviewer's contrary position stands recorded above; it was not argued away.
 
+## After the PR: monotonicity, settled by a second reviewer and a reversal
+
+Copilot's second review of PR #50 objected that the ground truth named the first-stage sign as something monotonicity implies and still allowed the untestable record for it.
+The session defended the two-record rule on the PR, on the ground that the untestable value is the review's own finding, which pass 4 had accepted.
+Asked the sharper form of the objection in a sixth, single-question call, the cross-model reviewer reversed its pass-4 recommendation and said what it had missed: CS8.3 already has every passing record run the first stage, and the procedure says a check that bears on several assumptions is a probe of each, so an arm with the first stage in hand cannot fairly record that it found nothing monotonicity implies.
+A negative first stage is obtainable and would contradict it, so the sign is a weak probe and not a silent check; its blind spot is any defier share smaller than the complier share.
+The session was wrong on the PR and says so there.
+CS8.5 and CS8.8 now allow monotonicity one record and exclusion two, and the ground-truth file carries the principle that separates them: a check every passing record must already run is a probe of every assumption an obtainable result of it would contradict, while an implication needing a separate derivation no assertion requires may stay outside a documented untestable finding.
+No `SKILL.md` sentence changed; the result follows from the text as it stood.
+
 ## What no cross-model pass has read
 
 The pass-4 dispositions above.

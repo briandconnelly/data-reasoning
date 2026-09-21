@@ -43,9 +43,11 @@ Every number below is computed from the generated data.
   Both are sound because the untestable value is the review's own finding, not a fact about the extract: a review that names the bound owes it as a probe, and a review that does not name it records what it did consider, which is what a reader contests.
   This file names the bound so a scorer can recognize it, not so an arm must.
   A review is not required to know the bound; it is required not to mistake the placebo, the balance checks, or the first stage for a probe of exclusion.
-- Monotonicity: defiers are unobservable, and without customer-level enrollment the inequality restrictions that could expose a large share of them cannot be formed.
-  Its only observable implication is the sign of the first stage, which is positive; the same two records are sound, for the same reason.
-  A review that writes the sign down as something monotonicity implies has named the implication and owes the row; one that reports the first stage for relevance and says defiers are unobservable has not, and its untestable row stands.
+- Monotonicity: not contradicted by the sign of the first stage, a weak probe.
+  Under the invitation's orientation a negative first stage is an obtainable result that would come back against it, and the first stage is positive.
+  Its blind spot is any defier share smaller than the complier share: the first stage is the complier share minus the defier share, so a positive sign does not establish that defiers are absent.
+  Individual defiers are unobservable, and without customer-level enrollment the inequality restrictions that could expose a large share of them cannot be formed; a review may say so, and it is true, but it is the blind spot and not a reason to call the assumption untestable.
+  Only one record is sound here, where exclusion has two, and the difference is this: a check every passing record must already run, with an obtainable result that would contradict another named assumption, is a probe of that assumption too; an implication that needs a separate derivation no assertion requires may stay outside a documented untestable finding.
 
 ## Documented ground-truth disposition
 
