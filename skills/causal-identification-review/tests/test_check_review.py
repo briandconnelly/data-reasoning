@@ -1341,11 +1341,12 @@ def test_assumption_contradicted_with_no_contradicted_row_is_rejected() -> None:
     assert any("assumption-contradicted" in f and "no assumption" in f for f in findings), findings
 
 
-def test_unresolved_over_clean_assessments_is_not_second_guessed() -> None:
-    """The threat register can hold a design at `unresolved` with every
-    assumption row clean; the gate polices the overclaim, not the caution."""
+def test_unresolved_over_clean_assessments_is_rejected() -> None:
+    """SKILL.md's precedence list is keyed on the assessments alone -- a
+    threat acts through the assumption it threatens -- so a design held at
+    `unresolved` owes the row that holds it there."""
     findings, _ = cr.check_record(_as_disposition(VALID_RECORD, "unresolved"))
-    assert findings == [], findings
+    assert any("'unresolved'" in f and "identified-if" in f for f in findings), findings
 
 
 def test_not_constructible_owes_no_assessments() -> None:
@@ -1354,6 +1355,44 @@ def test_not_constructible_owes_no_assessments() -> None:
             _A2_ROW, ""
         ),
         "not-constructible",
+    )
+    findings, _ = cr.check_record(record)
+    assert findings == [], findings
+
+
+# Design review pass 1 (Codex, 2026-09-20), each reproduced before the fix.
+def test_a_probe_cell_saying_not_run_cannot_carry_a_run_assessment() -> None:
+    """`not run | not-contradicted` is the overclaim the gate exists for: a
+    favorable assessment over a probe the row itself says never ran."""
+    record = VALID_RECORD.replace(
+        _A1_ROW, "  | A1 | not run | not-contradicted | not executed yet |\n"
+    ).replace(_A2_ROW, NOT_TESTABLE_ROW)
+    findings, _ = cr.check_record(record)
+    assert any("A1" in f and "names a probe" in f for f in findings), findings
+
+
+def test_two_assumptions_sharing_an_id_are_rejected() -> None:
+    record = VALID_RECORD.replace("  - A2: no anticipation:", "  - A1: no anticipation:").replace(
+        _A2_ROW, ""
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A1" in f and "defined more than once" in f for f in findings), findings
+
+
+def test_inline_assumptions_without_ids_are_rejected_when_the_gates_bind() -> None:
+    record = _as_disposition(
+        VALID_RECORD.replace(
+            _ASSUMPTIONS_BLOCK, "- Identifying assumptions: relevance and exclusion\n"
+        ),
+        "unresolved",
+    )
+    findings, _ = cr.check_record(record)
+    assert any("A<n>" in f for f in findings), findings
+
+
+def test_a_bold_assumption_id_is_read_as_the_id() -> None:
+    record = VALID_RECORD.replace("  - A1: parallel", "  - **A1**: parallel").replace(
+        "  | A1 | pre-period retention", "  | **A1** | pre-period retention"
     )
     findings, _ = cr.check_record(record)
     assert findings == [], findings

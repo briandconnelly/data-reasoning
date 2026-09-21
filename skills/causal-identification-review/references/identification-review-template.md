@@ -27,7 +27,7 @@ Fill in one record per causal question under review; repeat the Design block onc
   | --- | --- | --- | --- |
   | A1 | <the check run against it, or `NONE`> | <value> | <what the probe found and what it could not have seen, or why no probe exists and what data would supply one> |
 
-  One row per assumption id; the assessment value set and each value's meaning per `../SKILL.md` § Routing, per-route procedure (authority).
+  Rows, the assessment value set, and each value's meaning per `../SKILL.md` § Routing, per-route procedure (authority).
 
 - Data requirements: <the records, fields, and coverage this design needs to run>
 - Threat register:

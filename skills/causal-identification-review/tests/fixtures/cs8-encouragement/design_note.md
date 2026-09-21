@@ -1,6 +1,6 @@
 # Autopay invitation: design note
 
-We want the effect of autopay enrollment on late payments in the following 90 days.
+We want the effect of autopay enrollment on late payments in the 90 days after the enrollment window closed.
 Invitations were assigned by a seeded random number generator over the full customer list on 2026-03-02, before any outcome in the 90-day window was observed.
 3000 of 6000 customers were invited.
 Every invited customer received the same email, quoted here in full.

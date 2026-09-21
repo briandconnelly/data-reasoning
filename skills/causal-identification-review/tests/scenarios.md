@@ -390,28 +390,30 @@ Added 2026-09-20 for issue #40; preregistered in `tests/runs/artifacts/2026-09-2
 **Prompt:**
 
 > Our billing analyst says the autopay invitation experiment gives us the causal effect of autopay enrollment on late payments, and their write-up is `tests/fixtures/cs8-encouragement/design_note.md`.
-> Before anyone runs the estimate, does the design hold up, and what would the number be conditional on?
+> Before anyone runs the estimate, does the design hold up, and on what assumptions would any downstream estimate be conditional?
+> Do not estimate the effect yourself.
 > Data: `tests/fixtures/cs8-encouragement/customers.csv` (customer_id, invited, enrolled_autopay, late_payments_prior_90d, late_payments_90d, tenure_months, plan), a frozen local export described in `tests/fixtures/cs8-encouragement/data_notes.md`.
 
 **Fixture:** `tests/fixtures/cs8-encouragement/`, built by `generate.py` and guarded by `validate_cs8.py`; realized values and the per-assumption ground truth are in `tests/fixtures/cs8-encouragement-ground-truth.md`.
 A randomized invitation is offered as an instrument for voluntary enrollment.
 Two of its identifying assumptions have a probe the extract can feed, and each comes back clean: the invitation moves enrollment strongly, and prior-period late payments, tenure, and plan are balanced across it.
-The exclusion restriction has none, by construction: every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; who opened the email is unrecorded; and the one placebo on offer predates the email, so randomization alone balances it whatever the email does afterwards.
-The analyst's note plants the overread — the placebo "confirms the instrument is clean" — so the cell measures both ways the gap can close wrongly: a check that is silent on an assumption filed as evidence for it, and a design stranded short of its conditional disposition because one assumption has no probe.
-The documented ground truth is the conditional disposition, with the exclusion restriction carried by name as a condition no probe bears on; the exact closed-set values are in the assertion rows below, not here.
+The exclusion restriction has one weak probe and nothing else: the instrument's inequality restrictions, which test it jointly with independence and monotonicity and see only a large violation.
+Every customer was eligible, so no subgroup exists in which the invitation cannot move enrollment; who opened the email is unrecorded; and the one placebo on offer predates the email, so randomization alone balances it whatever the email does afterwards.
+The analyst's note plants the overread — the placebo "confirms the instrument is clean" — so the cell measures both ways the gap can close wrongly: a check that is silent on an assumption filed as evidence for it, and a design stranded short of its conditional disposition because one assumption has no probe that settles it.
+The documented ground truth is the conditional disposition, with the exclusion restriction carried by name as a condition no check in the record establishes; the exact closed-set values are in the assertion rows below, not here.
 
 **Assertions:**
 
-- [ ] CS8.1 — Route recorded is `review`, with a Design block for the invitation-as-instrument design.
-- [ ] CS8.2 — That block names relevance, independence of the invitation, and the exclusion restriction — all three — each as a claim evidence could break.
-- [ ] CS8.3 — Nowhere in the record or the report is the prior-period placebo, or any other check, given as evidence for the exclusion restriction: no probes-table row pairs exclusion with a check that ran, and no sentence says a check supports, confirms, or is consistent with it.
-  Saying the placebo bears on randomization and not on exclusion passes.
-- [ ] CS8.4 — The record or the report says the exclusion restriction cannot be tested from this extract, with a reason specific to it.
-- [ ] CS8.5 — The instrument design's disposition is `identified-if`, with exclusion among the conditions stated with it; `unresolved` fails, and so does `identified-if` with exclusion absent from its conditions.
-- [ ] CS8.6 — The Handoff block's Assumptions slot carries the exclusion restriction as a condition on any downstream estimate.
-- [ ] CS8.7 — Recorded, decides no row, and applies only to a record written from a template that has the assessment column: `check_review.py` exits 0, and the exclusion row reads probe `NONE`, assessment `not-testable-here`.
+- [ ] CS8.1 — the record's route is `review`, and it carries a Design block for the invitation-as-instrument design.
+- [ ] CS8.2 — that block names relevance, independence of the invitation, and the exclusion restriction, all three, each as a claim evidence could break; and when its estimand is an effect among compliers it also names monotonicity, or the alternative restriction it relies on instead.
+- [ ] CS8.3 — the probes the extract can feed were run and reported with results: a first stage for relevance, and a balance or prior-period check for independence. Either assumption recorded as untestable, or its probe proposed and not run, fails.
+- [ ] CS8.4 — the prior-period placebo, the balance checks, and the first stage are nowhere given as evidence for the exclusion restriction, in a probes-table row or in a sentence. "The placebo is consistent with randomization and says nothing about exclusion" passes. A check of the instrument's inequality restrictions is a probe of exclusion and passes here.
+- [ ] CS8.5 — exclusion's evidential state is stated as one of the two the ground-truth file allows: not testable from this extract, with a reason that says why the checks on offer are silent on it; or not contradicted by the inequality restrictions, with what they cannot see named. A statement that any check supports, confirms, or establishes exclusion fails.
+- [ ] CS8.6 — the instrument design's disposition is `identified-if`, with exclusion among the conditions stated with it. `unresolved` or `not-constructible` fails; so does `identified-if` with exclusion absent from its conditions.
+- [ ] CS8.7 — the Handoff block's Assumptions slot carries the exclusion restriction as a condition on any downstream estimate.
+- [ ] CS8.8 — post only, recorded, decides no row: `check_review.py` exits 0 on the record, and the exclusion row reads either probe `NONE` with assessment `not-testable-here`, or a named inequality check with assessment `not-contradicted`.
 
-**Baseline expectation:** a baseline arm writes no template record, so it is scored on CS8.3, CS8.4, and the report-level reading of CS8.5; it is expected to correct the analyst unaided, which would make this a cell that separates wordings of the skill rather than the skill from no skill.
+**Baseline expectation:** a baseline arm writes no template record, so it is scored on CS8.3, CS8.4, CS8.5, and the report-level reading of CS8.6; it is expected to correct the analyst unaided, which would make this a cell that separates wordings of the skill rather than the skill from no skill.
 That is a plausible path, not a guarantee, and the preregistration says what each outcome means.
 
 **Entanglement check:** in the preregistration, § Entanglement pass — null-result sensitivity on the placebo, the CS7 point-estimate collision, completeness, authorization, route, and the traps that keep exclusion untestable.

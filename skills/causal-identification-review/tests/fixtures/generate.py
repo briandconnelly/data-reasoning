@@ -714,7 +714,8 @@ its silence says nothing about exclusion."""
 CS8_DESIGN_NOTE = (
     "# Autopay invitation: design note\n"
     "\n"
-    "We want the effect of autopay enrollment on late payments in the following 90 days.\n"
+    "We want the effect of autopay enrollment on late payments in the 90 days after the "
+    "enrollment window closed.\n"
     "Invitations were assigned by a seeded random number generator over the full customer "
     "list on 2026-03-02, before any outcome in the 90-day window was observed.\n"
     "3000 of 6000 customers were invited.\n"
@@ -742,9 +743,11 @@ CS8_DATA_NOTES = (
     "no missing rows, and every field is populated.\n"
     "Every customer in the extract was eligible for autopay throughout the window.\n"
     "Customers could enroll in autopay with or without an invitation.\n"
-    "`enrolled_autopay` is enrollment status as of day 90.\n"
+    "`enrolled_autopay` is enrollment status as of 2026-03-16, when the enrollment window "
+    "closed: no customer enrolled in or left autopay between 2026-03-16 and the end of the "
+    "outcome window.\n"
     "`late_payments_prior_90d` counts late payments in the 90 days before 2026-03-02, and "
-    "`late_payments_90d` counts them in the 90 days after.\n"
+    "`late_payments_90d` counts them in the 90 days after 2026-03-16.\n"
     "No record exists of who opened the email.\n"
 )
 
@@ -827,6 +830,39 @@ def _two_group_contrast(treated: list[float], control: list[float]) -> dict:
     }
 
 
+CS8_INEQUALITY_MASS_FLOOR = 0.01
+"""Outcome values holding less than this share of customers are left out of
+the inequality check: a tail cell of one or two customers flips sign on noise."""
+
+
+def cs8_instrument_inequality_min(rows: list[dict]) -> float:
+    """Smallest difference among the instrument's inequality restrictions.
+
+    For each outcome value y: P(y, D=1 | Z=1) - P(y, D=1 | Z=0) and
+    P(y, D=0 | Z=0) - P(y, D=0 | Z=1), each non-negative when independence,
+    exclusion, and monotonicity hold.
+    """
+    n = {z: sum(1 for r in rows if r["invited"] == z) for z in (0, 1)}
+    diffs = []
+    for y in sorted({r["late_payments_90d"] for r in rows}):
+        if (
+            sum(1 for r in rows if r["late_payments_90d"] == y) / len(rows)
+            < CS8_INEQUALITY_MASS_FLOOR
+        ):
+            continue
+
+        def joint(z: int, d: int, y: int = y) -> float:
+            hits = sum(
+                1
+                for r in rows
+                if r["invited"] == z and r["enrolled_autopay"] == d and r["late_payments_90d"] == y
+            )
+            return hits / n[z]
+
+        diffs += [joint(1, 1) - joint(0, 1), joint(0, 0) - joint(1, 0)]
+    return min(diffs)
+
+
 def cs8_stats(rows: list[dict]) -> dict[str, dict]:
     """Every realized number `cs8-encouragement-ground-truth.md` records.
 
@@ -872,6 +908,7 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
     stats = cs8_stats(rows)
     first, prior, tenure = stats["first_stage"], stats["prior"], stats["tenure"]
     itt, naive = stats["itt"], stats["naive"]
+    inequality_min = cs8_instrument_inequality_min(rows)
     wald = itt["diff"] / first["diff"]
     plan_lines = "".join(
         f"- `plan` share `{plan}`: invited {stats[f'plan_{plan}']['treated']:.4f}, "
@@ -924,13 +961,27 @@ def build_cs8(outdir: Path, ground_truth_path: Path) -> None:
         "- Relevance: probed by the first stage above, not contradicted.\n"
         "- Independence: randomization is stated and quoted, and balance on prior late "
         "payments, tenure, and plan came back clean: not contradicted.\n"
-        "- Exclusion: not testable from this extract.\n"
-        "  Every customer was eligible, so no subgroup exists in which the invitation "
-        "cannot move enrollment.\n"
-        "  Whether a customer opened or read the email is unrecorded.\n"
-        "  The prior-period placebo is balanced by randomization alone whatever the email "
-        "does after it is sent, so it is silent on exclusion.\n"
-        "- Monotonicity: not testable from this extract, because defiers are unobservable.\n"
+        "- Exclusion and monotonicity: one weak joint probe exists, and nothing else.\n"
+        "  With a randomized binary invitation, binary enrollment, and a count outcome, the "
+        "instrument's inequality restrictions are observable: for every outcome value, "
+        "P(y, enrolled | invited) is at least P(y, enrolled | not invited), and "
+        "P(y, not enrolled | not invited) is at least P(y, not enrolled | invited).\n"
+        f"  Over the outcome values holding at least {CS8_INEQUALITY_MASS_FLOOR:.0%} of "
+        f"customers, the smallest of those differences is {inequality_min:+.4f}, so the "
+        "restrictions hold.\n"
+        "  They test exclusion, independence, and monotonicity jointly, and they can see only "
+        "a violation large enough to turn a cell's difference negative: a modest direct effect "
+        "of the email, or a modest share of defiers, passes them.\n"
+        "  Nothing else in the extract bears on either assumption: every customer was "
+        "eligible, so no subgroup exists in which the invitation cannot move enrollment; "
+        "whether a customer opened the email is unrecorded; and the prior-period placebo is "
+        "balanced by randomization alone whatever the email does after it is sent, so it is "
+        "silent on exclusion.\n"
+        "  Two records are therefore sound for each of the two assumptions: not contradicted "
+        "by the inequality restrictions, with what they cannot see named; or not testable "
+        "here, with the placebo named as a check considered and the reason it is silent.\n"
+        "  What is unsound is the placebo, the balance checks, or the first stage filed as a "
+        "probe of exclusion, and either assumption absent from the conditions.\n"
         "\n"
         "## Documented ground-truth disposition\n"
         "\n"

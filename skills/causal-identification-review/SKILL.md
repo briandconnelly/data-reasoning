@@ -43,26 +43,28 @@ The gates and the data rules below bind on every route; only the record's blocks
 Write the record to a file from [references/identification-review-template.md](references/identification-review-template.md) before the reasoning that fills it; a record that first appears alongside its conclusions was not a review, it was a write-up.
 Every Design block states its identifying assumptions as claims evidence could break: "no other change at the pilot depots that month moves delivery time" is breakable, "the comparison is sound" is not.
 Every named assumption gets an `A<n>` id and one row in the probes table, and the row's assessment is exactly one of `contradicted`, `not-contradicted`, `non-discriminating`, `not-run`, or `not-testable-here`.
-A probe is a check that could come back against the assumption, and every probe the data in hand can feed is run.
+A probe is a check of something the assumption implies about data the gates below already permit you to read — a check that could come back against it.
+Name each assumption's probes before running any, and run the ones you named; a probe added after a result is read says so in its row.
 
 - `contradicted` — a probe came back against the assumption.
 - `not-contradicted` — a probe that could have come back against the assumption did not; that is the absence of a contradiction this probe could see, never support, and the row names what the probe could not have seen.
 - `non-discriminating` — a probe ran, and at the sensitivity this data gives it, it could not have come back against the assumption.
-- `not-run` — a probe the data in hand could feed was not run.
-- `not-testable-here` — no result obtainable from the data in hand could come back against the assumption; the row's probe cell is `NONE`, and its last cell gives the reason and names the data that would make the assumption testable.
+- `not-run` — a named probe was not run.
+- `not-testable-here` — the review found nothing the assumption implies about the data in hand; the row's probe cell is `NONE`, and its last cell names the checks considered, says why each is silent on this assumption, and names the data that would make it testable.
 
 A check that is silent on an assumption is not a probe of it: a placebo outcome that randomization alone would balance says nothing about an instrument's exclusion restriction, and pairing the two to fill a row records a diagnostic's silence as evidence.
-`not-testable-here` is a finding to defend, not an exit: it is unavailable while any check in the next sentence's family can be run against the assumption with the data in hand.
-Negative controls, placebo outcomes, pre-period trend comparisons, and manipulation or covariate-balance checks at a cutoff are probes: proposing them is this skill's work, and running one against data in hand is review work, not estimation — a probe's result is evidence about an assumption, never an effect estimate.
+`not-testable-here` is a finding a reader can contest, not an exit: an assumption with an observable implication in the data in hand owes that probe, and a check that tests several assumptions jointly is a probe of each of them.
+Negative controls, placebo outcomes, pre-period trend comparisons, manipulation or covariate-balance checks at a cutoff, and an instrument's first stage and its inequality restrictions are probes, and the list is examples, not a census: proposing them is this skill's work, and running one against data in hand is review work, not estimation — a probe's result is evidence about an assumption, never an effect estimate.
 Check data requirements before assumptions: a design the available data cannot feed — synthetic control with no donor pool, difference-in-differences with no pre-period — is not proposed as admissible, and when it must appear because someone claimed it or its absence needs explaining, its disposition is `not-constructible` with the failed requirement named.
 Fill the threat register with the identification threats the facts raise — a concurrent change, a pre-existing trend, selection into exposure — each with the probe run against it and that probe's result.
+A threat bears on the disposition through the assumption it threatens: its probe's result is evidence for that assumption's assessment, and a threat no assumption covers means an assumption is missing from the list.
 Assign each disposition from the probe and threat evidence actually in the record, never from the design's reputation.
 
 The disposition set is closed, every value is evidence-bounded, and the first that applies governs:
 
 - `not-constructible` — the design's data requirements cannot be met from the data that exists.
 - `assumption-contradicted` — an assumption is `contradicted`; the record says which probe and which assumption.
-- `unresolved` — an assumption is `non-discriminating` or `not-run`, or no assumption is `not-contradicted`: a probe the data could feed has not discriminated, and the assumption stands untested, not supported.
+- `unresolved` — an assumption is `non-discriminating` or `not-run`, or no assumption is `not-contradicted`: something the data could have settled stands untested, not supported.
 - `identified-if` — the design identifies the effect conditional on every named assumption, each carried with its assessment; the conditions are part of the disposition, not a footnote.
 
 `identified-if` is earned by probes run and reported, not merely proposed; a design whose probes could not discriminate is `unresolved`, however plausible its assumptions.

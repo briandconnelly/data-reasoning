@@ -232,7 +232,7 @@ def _label_region(body: str, label: str) -> str:
 # slot's shape: inline, sub-list, paragraph, and any separator between items
 # are all covered by the same rule, and a bare mention of `A1` with no colon
 # is a reference, not a definition.
-_ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)\s*:")
+_ASSUMPTION_DEF = re.compile(r"(?<![A-Za-z0-9])(A\d+)[*_`]*\s*:")
 
 
 _TABLE_DELIMITER = re.compile(r"^[\s|:-]+$")
@@ -283,7 +283,8 @@ def _row_records_a_run(cells: list[str]) -> bool:
 
 
 def _assumption_ids(body: str) -> list[str]:
-    """Assumption ids defined in the ``- Identifying assumptions:`` slot.
+    """Assumption ids defined in the ``- Identifying assumptions:`` slot, in
+    order, a repeated definition kept so the caller can report it.
 
     Scans the inline value on the label line together with the raw region
     below it, so every shape the slot is accepted in is covered without
@@ -293,7 +294,7 @@ def _assumption_ids(body: str) -> list[str]:
     if m is None:
         return []
     slot = m.group(1) + "\n" + _label_region(visible_markdown(body), "Identifying assumptions")
-    return list(dict.fromkeys(d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)))
+    return [d.group(1) for d in _ASSUMPTION_DEF.finditer(slot)]
 
 
 def find_bullet(body: str, label: str) -> str | None:
@@ -511,8 +512,9 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     return disposition_value if disposition_value in DISPOSITIONS else None
 
 
-_ROW_ASSUMPTION_ID = re.compile(r"`?(A\d+)\b")
-_SUBLIST_ASSUMPTION_ID = re.compile(r"`?A\d+`?\s*:")
+# Emphasis or code markup around an id is markup, not part of the id.
+_ROW_ASSUMPTION_ID = re.compile(r"[*_`]*(A\d+)\b")
+_SUBLIST_ASSUMPTION_ID = re.compile(r"[*_`]*A\d+[*_`]*\s*:")
 
 
 def _probe_rows(body: str) -> tuple[list[str] | None, list[list[str]]]:
@@ -529,6 +531,22 @@ def _probe_rows(body: str) -> tuple[list[str] | None, list[list[str]]]:
     return None, rows
 
 
+def _defined_assumption_ids(where: str, body: str, findings: list[str]) -> list[str]:
+    """The block's assumption ids, deduplicated, reporting an item without an
+    id, an id defined twice, and a block that defines none."""
+    for item in find_sublist(visible_markdown(body), "Identifying assumptions"):
+        if not _SUBLIST_ASSUMPTION_ID.match(item):
+            findings.append(f"{where}: assumption {item!r} carries no A<n> id")
+    definitions = _assumption_ids(body)
+    defined = list(dict.fromkeys(definitions))
+    for aid in defined:
+        if definitions.count(aid) > 1:
+            findings.append(f"{where}: assumption id {aid} is defined more than once")
+    if not defined:
+        findings.append(f"{where}: no assumption carries an A<n> id")
+    return defined
+
+
 def _check_assessments(header: str, body: str, disposition: str, findings: list[str]) -> None:
     """Per-assumption assessment gates (issue #40).
 
@@ -541,11 +559,9 @@ def _check_assessments(header: str, body: str, disposition: str, findings: list[
     assessments allow. Whether an assessment is the *right* one is the scored
     arms' question, not this file's.
 
-    The consistency gate is one-directional on purpose: it rejects a
-    disposition the rows cannot carry (``identified-if`` over a blocking or
-    contradicted row, ``assumption-contradicted`` with no contradicted row, a
-    contradicted row under any other value) and leaves ``unresolved`` over
-    clean rows alone, because the threat register can hold a design there.
+    The disposition must be the first SKILL.md's precedence list reaches from
+    the assessments: a threat acts through the assumption it threatens, so
+    nothing outside the rows can hold a design short of, or past, that value.
     """
     if disposition == "not-constructible":
         return
@@ -562,10 +578,7 @@ def _check_assessments(header: str, body: str, disposition: str, findings: list[
     col = columns.index("assessment")
     before = len(findings)
 
-    for item in find_sublist(visible_markdown(body), "Identifying assumptions"):
-        if not _SUBLIST_ASSUMPTION_ID.match(item):
-            findings.append(f"{where}: assumption {item!r} carries no A<n> id")
-    defined = _assumption_ids(body)
+    defined = _defined_assumption_ids(where, body, findings)
 
     assessed: dict[str, str] = {}
     for cells in rows:
@@ -613,7 +626,7 @@ def _check_assessed_row(
                 f"{where}: assumption {aid} is 'not-testable-here' with no reason given"
             )
     else:
-        if probe == NO_PROBE or not probe:
+        if probe == NO_PROBE or not probe or _NO_RESULT_PROBES.match(probe):
             findings.append(
                 f"{where}: assumption {aid} is {value!r}, which names a probe -- "
                 f"{NO_PROBE} or an empty probe cell belongs to 'not-testable-here' alone"
@@ -625,31 +638,26 @@ def _check_assessed_row(
 def _check_disposition_against(
     where: str, disposition: str, assessed: dict[str, str], findings: list[str]
 ) -> None:
-    """The disposition must be one the assessments allow; see
-    ``_check_assessments`` for why ``unresolved`` over clean rows passes."""
-    contradicted = sorted(a for a, v in assessed.items() if v == "contradicted")
-    if contradicted and disposition != "assumption-contradicted":
-        findings.append(
-            f"{where}: assumption(s) {contradicted} are 'contradicted', so the "
-            f"disposition is 'assumption-contradicted', not {disposition!r}"
+    """The recorded disposition against the one the assessments reach."""
+    values = set(assessed.values())
+    if "contradicted" in values:
+        contradicted = sorted(a for a, v in assessed.items() if v == "contradicted")
+        expected, why = (
+            "assumption-contradicted",
+            f"assumption(s) {contradicted} are 'contradicted'",
         )
-    if disposition == "assumption-contradicted" and not contradicted:
+    elif values & BLOCKING_ASSESSMENTS:
+        blocking = sorted(a for a, v in assessed.items() if v in BLOCKING_ASSESSMENTS)
+        expected = "unresolved"
+        why = f"assumption(s) {blocking} are {sorted(values & BLOCKING_ASSESSMENTS)}"
+    elif "not-contradicted" not in values:
+        expected, why = "unresolved", "no assumption is 'not-contradicted' by a probe run"
+    else:
+        expected, why = "identified-if", "no assumption is contradicted, blocking, or unprobed"
+    if disposition != expected:
         findings.append(
-            f"{where}: disposition 'assumption-contradicted' but no assumption is "
-            "assessed 'contradicted'"
-        )
-    if disposition != "identified-if":
-        return
-    for aid, value in assessed.items():
-        if value in BLOCKING_ASSESSMENTS:
-            findings.append(
-                f"{where}: disposition 'identified-if' is not available while "
-                f"assumption {aid} is {value!r}"
-            )
-    if "not-contradicted" not in assessed.values():
-        findings.append(
-            f"{where}: disposition 'identified-if' needs at least one assumption "
-            "'not-contradicted' by a probe run"
+            f"{where}: disposition {disposition!r} does not follow from the assessments "
+            f"-- {why}, so the disposition is {expected!r}"
         )
 
 

@@ -90,9 +90,12 @@ DATA_NOTES_REQUIRED_PHRASES = (
     "Every customer in the extract was eligible for autopay throughout the window.",
     # Receipt of the email cannot be conditioned on either.
     "No record exists of who opened the email.",
+    # Treatment precedes the outcome window, so the design is constructible.
+    "no customer enrolled in or left autopay between 2026-03-16 and the end of the outcome window",
+    "`late_payments_90d` counts them in the 90 days after 2026-03-16.",
 )
-"""Trap 6: the two arm-visible facts that close off a zero-first-stage
-subgroup test of exclusion."""
+"""Trap 6: the arm-visible facts that close off a zero-first-stage subgroup
+test of exclusion and fix enrollment before the outcome window opens."""
 
 FORBIDDEN_PHRASES = ("exclusion", "direct effect", "reminder", "due date", "late fee")
 """Trap 6: neither note may name the untestable assumption, nor describe an
@@ -295,6 +298,42 @@ def _trap_7_overread_planted(directory: Path) -> list[str]:
     return []
 
 
+INEQUALITY_MASS_FLOOR = 0.01
+"""Trap 8: outcome values holding less than this share of customers are left
+out -- a tail cell of one or two customers flips sign on noise."""
+
+INEQUALITY_MARGIN_FLOOR = 0.0
+"""Trap 8 (instrument inequalities hold): no difference P(y, D=1 | Z=1) -
+P(y, D=1 | Z=0) or P(y, D=0 | Z=0) - P(y, D=0 | Z=1) over the retained outcome
+values may fall below this. The generator satisfies exclusion and
+monotonicity, so an arm that runs this joint probe must find it clean. The
+floor is zero, not a margin: a high outcome value's true difference is small
+because the cell is, and a margin would reject draws the restrictions allow."""
+
+
+def _trap_8_instrument_inequalities(rows: list[dict]) -> list[str]:
+    n = {z: sum(1 for r in rows if r["invited"] == z) for z in (0, 1)}
+    out = []
+    for y in sorted({r["late_payments_90d"] for r in rows}):
+        cell = [r for r in rows if r["late_payments_90d"] == y]
+        if len(cell) / len(rows) < INEQUALITY_MASS_FLOOR:
+            continue
+
+        def joint(z: int, d: int, cell: list[dict] = cell) -> float:
+            return sum(1 for r in cell if r["invited"] == z and r["enrolled_autopay"] == d) / n[z]
+
+        for label, diff in (
+            ("enrolled", joint(1, 1) - joint(0, 1)),
+            ("not enrolled", joint(0, 0) - joint(1, 0)),
+        ):
+            if diff < INEQUALITY_MARGIN_FLOOR:
+                out.append(
+                    f"trap 8: instrument inequality for late_payments_90d={y}, {label}, is "
+                    f"{diff:+.4f}, below the {INEQUALITY_MARGIN_FLOOR} margin floor"
+                )
+    return out
+
+
 def check(directory: Path) -> list[str]:
     rows = load(directory)
     return [
@@ -305,6 +344,7 @@ def check(directory: Path) -> list[str]:
         *_trap_5_confounded_naive(rows),
         *_trap_6_exclusion_untestable(directory),
         *_trap_7_overread_planted(directory),
+        *_trap_8_instrument_inequalities(rows),
     ]
 
 

@@ -1,3 +1,4 @@
 Our billing analyst says the autopay invitation experiment gives us the causal effect of autopay enrollment on late payments, and their write-up is {FIXTURE_PATH}/design_note.md.
-Before anyone runs the estimate, does the design hold up, and what would the number be conditional on?
+Before anyone runs the estimate, does the design hold up, and on what assumptions would any downstream estimate be conditional?
+Do not estimate the effect yourself.
 Data: {FIXTURE_PATH}/customers.csv (customer_id, invited, enrolled_autopay, late_payments_prior_90d, late_payments_90d, tenure_months, plan), a frozen local export described in {FIXTURE_PATH}/data_notes.md.
