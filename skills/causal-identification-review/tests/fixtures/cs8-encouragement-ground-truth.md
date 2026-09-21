@@ -40,9 +40,12 @@ Every number below is computed from the generated data.
   The prior-period placebo is balanced by randomization alone whatever the email does after it is sent, so it is silent on exclusion.
   A customer-level enrollment field, or a randomized arm sent an email with no enrollment content, would make it testable in earnest.
   Two records are therefore sound: not contradicted by that bound, with its blind spot named; or not testable here, with the placebo named as a check considered and the reason it is silent.
+  Both are sound because the untestable value is the review's own finding, not a fact about the extract: a review that names the bound owes it as a probe, and a review that does not name it records what it did consider, which is what a reader contests.
+  This file names the bound so a scorer can recognize it, not so an arm must.
   A review is not required to know the bound; it is required not to mistake the placebo, the balance checks, or the first stage for a probe of exclusion.
 - Monotonicity: defiers are unobservable, and without customer-level enrollment the inequality restrictions that could expose a large share of them cannot be formed.
-  Its only observable implication is the sign of the first stage, which is positive; the same two records are sound.
+  Its only observable implication is the sign of the first stage, which is positive; the same two records are sound, for the same reason.
+  A review that writes the sign down as something monotonicity implies has named the implication and owes the row; one that reports the first stage for relevance and says defiers are unobservable has not, and its untestable row stands.
 
 ## Documented ground-truth disposition
 

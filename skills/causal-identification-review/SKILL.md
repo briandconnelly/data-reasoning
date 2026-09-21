@@ -45,7 +45,8 @@ Every Design block states its identifying assumptions as claims evidence could b
 Every named assumption gets an `A<n>` id and one row in the probes table, and the row's assessment is exactly one of `contradicted`, `not-contradicted`, `non-discriminating`, `not-run`, or `not-testable-here`.
 A probe is a check of something the assumption implies about data the gates below already permit you to read — a check that could come back against it.
 Name each assumption's probes before running any, and run the ones you named.
-A named probe stays unrun only when a gate below withholds it or the collection budget ends first, and its row says which; a probe added after a result is read says so in its row.
+A named probe stays unrun only when a gate below withholds it or the collection budget ends first, and its row says which.
+A result may suggest a further probe, and adding one is permitted: what it owes is a row that says it was added after a result was read, so a reader can weigh it as chosen with the data in view.
 
 - `contradicted` — a probe came back against the assumption.
 - `not-contradicted` — a probe that could have come back against the assumption did not; that is the absence of a contradiction this probe could see, never support, and the row names what the probe could not have seen.

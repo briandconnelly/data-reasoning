@@ -13,8 +13,7 @@ block; ``bound`` requires the Bound block and no Design blocks), the Handoff
 Dispositions slot reusing exactly the disposition values assigned above --
 set equality, neither fabricating nor omitting -- (or the literal ``none``
 when the record's route assigns none), an ``identified-if`` disposition
-carrying at least one assumption probe run with its result recorded (probes
-that are empty or ``none run`` reject that disposition and no other), the
+carrying at least one assumption probe run with its result recorded, the
 per-assumption assessment gates (issue #40: every assumption carries an
 ``A<n>`` id and exactly one probes-table row, each row's assessment is drawn
 from its closed set, ``not-testable-here`` pairs with the probe cell ``NONE``
@@ -102,9 +101,11 @@ _SUBLIST_ITEM = re.compile(r"^[ \t]+- .+$")
 # followed by a dash-introduced rationale (same dash discipline as
 # _NONE_DISPOSITION below). SKILL.md's disposition semantics make
 # `identified-if` conditional on probes run and reported, so a Design block
-# pairing that disposition with one of these slots is rejected; other
-# dispositions legitimately carry them (a named-only design ends
-# `not-constructible`).
+# pairing that disposition with one of these slots is rejected, and so is one
+# of these forms in a probe or evidence cell under a run assessment. Since
+# issue #40 the assessment gates reject an inline slot of this kind under
+# every disposition but `not-constructible`, which a named-only design ends
+# on and which owes no assessed rows.
 _NO_RESULT_PROBES = re.compile(
     r"^`?(?:none(?:\s+run)?|not\s+run|n/a)`?(?:\s+[—-]\s+.+)?$",
     re.IGNORECASE,
@@ -497,7 +498,10 @@ def _check_design(header: str, body: str, findings: list[str]) -> str | None:
     # assigning it over an empty or `none run` probes slot claims probe
     # support the record does not carry. A probes table with a data row
     # carries run results by shape; an inline value carries them unless it
-    # is one of the no-result forms.
+    # is one of the no-result forms. `_check_assessments` below is the wider
+    # gate -- it rejects any probes slot that is not the four-column table,
+    # under every disposition but `not-constructible` -- and this one stays
+    # for the message that names the overclaim.
     if (
         disposition_value == "identified-if"
         and not probes_table
