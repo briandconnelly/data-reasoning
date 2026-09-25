@@ -1,0 +1,520 @@
+{
+ "wave": "2026-09-24 pilot: Codex blind questions against the agent-scored 2026-09-15 and 2026-09-20 waves",
+ "models": [
+  "jev-1.13.0"
+ ],
+ "questions_sha256_16": "52581cbad2cf8514",
+ "abstain_band": [
+  0.4,
+  0.6
+ ],
+ "reference_scorer": "the dispatching session (Fable), with the cross-model (Codex) review corrections the run records note; not a human",
+ "input_tokens": 82544,
+ "counts": {
+  "reference": {
+   "agree": 38,
+   "disagree": 8,
+   "abstain": 3
+  },
+  "control": {
+   "agree": 6
+  }
+ },
+ "points": [
+  {
+   "arm": "s9-baseline",
+   "item": "S9.4a",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.07,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s9-baseline",
+   "item": "S9.4b",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.03,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s9-pre",
+   "item": "S9.4a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.26,
+   "jev": "fail",
+   "status": "disagree"
+  },
+  {
+   "arm": "s9-pre",
+   "item": "S9.4b",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.75,
+   "jev": "pass",
+   "status": "disagree"
+  },
+  {
+   "arm": "s9-post",
+   "item": "S9.4a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.92,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s9-post",
+   "item": "S9.4b",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.97,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "b10-baseline",
+   "item": "B10.5a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.98,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "b10-baseline",
+   "item": "B10.5b",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.97,
+   "jev": "pass",
+   "status": "disagree"
+  },
+  {
+   "arm": "b10-baseline",
+   "item": "B10.5c",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.05,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "b10-pre",
+   "item": "B10.5a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "b10-pre",
+   "item": "B10.5b",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.97,
+   "jev": "pass",
+   "status": "disagree"
+  },
+  {
+   "arm": "b10-pre",
+   "item": "B10.5c",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.41,
+   "jev": "abstain",
+   "status": "abstain"
+  },
+  {
+   "arm": "b10-post",
+   "item": "B10.5a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "b10-post",
+   "item": "B10.5b",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.96,
+   "jev": "pass",
+   "status": "disagree"
+  },
+  {
+   "arm": "b10-post",
+   "item": "B10.5c",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.58,
+   "jev": "abstain",
+   "status": "abstain"
+  },
+  {
+   "arm": "w2-b10-post",
+   "item": "B10.5a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "w2-b10-post",
+   "item": "B10.5b",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.91,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "w2-b10-post",
+   "item": "B10.5c",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.93,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s1-baseline",
+   "item": "DA-S1.5a",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.02,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s1-pre",
+   "item": "DA-S1.5a",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.01,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s1-post",
+   "item": "DA-S1.5a",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.62,
+   "jev": "pass",
+   "status": "disagree"
+  },
+  {
+   "arm": "w2-da-s1-post",
+   "item": "DA-S1.5a",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.87,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s8-baseline",
+   "item": "DA-S8.2",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.09,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s8-baseline",
+   "item": "DA-S8.4",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.03,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s8-pre",
+   "item": "DA-S8.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.21,
+   "jev": "fail",
+   "status": "disagree"
+  },
+  {
+   "arm": "da-s8-pre",
+   "item": "DA-S8.4",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.25,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s8-post",
+   "item": "DA-S8.2",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.28,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "da-s8-post",
+   "item": "DA-S8.4",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.55,
+   "jev": "abstain",
+   "status": "abstain"
+  },
+  {
+   "arm": "w2-da-s8-post",
+   "item": "DA-S8.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.97,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "w2-da-s8-post",
+   "item": "DA-S8.4",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.62,
+   "jev": "pass",
+   "status": "disagree"
+  },
+  {
+   "arm": "w3-da-s8-post",
+   "item": "DA-S8.2",
+   "kind": "reference",
+   "reference": false,
+   "p_pass": 0.1,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-baseline",
+   "item": "S22a.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-baseline",
+   "item": "S22a.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-pre",
+   "item": "S22a.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-pre",
+   "item": "S22a.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-post",
+   "item": "S22a.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-post",
+   "item": "S22a.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-baseline",
+   "item": "S22b.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-baseline",
+   "item": "S22b.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-baseline",
+   "item": "S22b.4",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.96,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-pre",
+   "item": "S22b.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-pre",
+   "item": "S22b.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-pre",
+   "item": "S22b.4",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.94,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-post",
+   "item": "S22b.2",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-post",
+   "item": "S22b.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.99,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-post",
+   "item": "S22b.4",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 0.97,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22d-baseline",
+   "item": "S22d.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22d-pre",
+   "item": "S22d.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22d-post",
+   "item": "S22d.3",
+   "kind": "reference",
+   "reference": true,
+   "p_pass": 1.0,
+   "jev": "pass",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-baseline",
+   "item": "S22b.3",
+   "kind": "control",
+   "reference": false,
+   "p_pass": 0.08,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-baseline",
+   "item": "S22a.3",
+   "kind": "control",
+   "reference": false,
+   "p_pass": 0.0,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-pre",
+   "item": "S22b.3",
+   "kind": "control",
+   "reference": false,
+   "p_pass": 0.06,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-pre",
+   "item": "S22a.3",
+   "kind": "control",
+   "reference": false,
+   "p_pass": 0.0,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s22a-post",
+   "item": "S22b.3",
+   "kind": "control",
+   "reference": false,
+   "p_pass": 0.08,
+   "jev": "fail",
+   "status": "agree"
+  },
+  {
+   "arm": "s22b-post",
+   "item": "S22a.3",
+   "kind": "control",
+   "reference": false,
+   "p_pass": 0.01,
+   "jev": "fail",
+   "status": "agree"
+  }
+ ]
+}

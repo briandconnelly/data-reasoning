@@ -68,6 +68,7 @@ All three are ordering failures, not effort failures.
    **Quote only from the archived artifact, and grep each quote against it.**
    An arm's final message and the answer file it wrote are different texts; quoting the convenient one produces a citation that does not resolve in the evidence a reader is handed.
    `scripts/check-citations.py` cannot catch this, because it keys on a nearby filename and arm names do not qualify.
+   An optional second-scorer pass exists in `jev/`; what its output may be used for is `jev/README.md`'s to say.
 
 7. **Review the commit, not the plan for it.**
    A design review reads what you intended to do; only a review of the diff reads what shipped, and the two diverge most exactly when the measurement changed the conclusion — which is the case the whole protocol exists to produce.
