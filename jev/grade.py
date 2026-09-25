@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -29,13 +30,32 @@ sys.path.insert(0, str(Path(__file__).parent))
 import jev_client
 
 REPO = Path(__file__).resolve().parents[1]
-TEXT_SUFFIXES = {".md", ".txt", ".csv", ".json", ".py", ".sql"}
 # Jev has two budgets: 32k tokens for the state plus the longest question, and
 # 64k for the state plus every question in the request. ~4 chars a token.
 MAX_STATE_CHARS = 100_000
 MAX_REQUEST_CHARS = 200_000
 HALF = 0.5
 EXIT_UNAVAILABLE = 2
+
+
+def redacted(state: dict[str, Any], rules: list[list[str]]) -> dict[str, Any]:
+    """Apply `[pattern, replacement]` rules to every string in the state.
+
+    A wave that is also scored by hand blinds both scorers the same way: the
+    harness writes the arm's name into its paths, and a scorer who can read
+    `pre` or `post` there is no longer blind to the condition.
+    """
+
+    def clean(text: str) -> str:
+        for pattern, replacement in rules:
+            text = re.sub(pattern, replacement, text)
+        return text
+
+    return {
+        "user_prompt": clean(state["user_prompt"]),
+        "final_answer": clean(state["final_answer"]),
+        "files_written": {clean(k): clean(v) for k, v in state["files_written"].items()},
+    }
 
 
 def arm_state(arm_dir: Path, arm: str) -> dict[str, Any]:
@@ -51,8 +71,14 @@ def arm_state(arm_dir: Path, arm: str) -> dict[str, Any]:
     scratch = arm_dir / f"{arm}.scratch"
     if scratch.is_dir():
         for f in sorted(scratch.rglob("*")):
-            if f.is_file() and f.suffix in TEXT_SUFFIXES:
-                files[str(f.relative_to(scratch))] = f.read_text(errors="replace")
+            if not f.is_file():
+                continue
+            # Any file that decodes as text is evidence, whatever its extension: an
+            # arm that saves query output as `.out` wrote it as surely as one using `.txt`.
+            try:
+                files[str(f.relative_to(scratch))] = f.read_bytes().decode("utf-8")
+            except UnicodeDecodeError:
+                continue
     prompt_file = arm_dir / f"{arm}.prompt.txt"
     prompt = prompt_file.read_text() if prompt_file.is_file() else ""
     return {"user_prompt": prompt, "final_answer": final, "files_written": files}
@@ -104,7 +130,7 @@ def grade(wave: dict[str, Any], transport: jev_client.Transport | None = None) -
     points, models, tokens = [], set(), 0
     for arm in wave["arms"]:
         kind = arm.get("kind", "reference")
-        state = arm_state(REPO / arm["dir"], arm["arm"])
+        state = redacted(arm_state(REPO / arm["dir"], arm["arm"]), wave.get("redact", []))
         qs = {item: items[item]["question"] for item in arm["items"]}
         state_size = len(json.dumps(state))
         q_sizes = [len(json.dumps(q)) for q in qs.values()]

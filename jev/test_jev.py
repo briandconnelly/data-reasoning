@@ -134,13 +134,31 @@ def wave_file(tmp_path: Path, arms: list[dict], **extra) -> Path:
 
 
 def test_arm_state_reads_final_result_and_scratch(tmp_path):
-    write_arm(tmp_path, "a1", "the answer", {"ledger.md": "L", "blob.bin": "ignored"})
+    write_arm(tmp_path, "a1", "the answer", {"ledger.md": "L", "day-01.out": "42"})
+    (tmp_path / "a1.scratch" / "blob.bin").write_bytes(b"\xff\xfe\x00binary")
     state = grade.arm_state(tmp_path, "a1")
     assert state == {
         "user_prompt": "the task",
         "final_answer": "the answer",
-        "files_written": {"ledger.md": "L"},
+        "files_written": {"day-01.out": "42", "ledger.md": "L"},
     }
+
+
+def test_redaction_blinds_every_field(tmp_path):
+    write_arm(tmp_path, "a1", "see /tmp/arm-s2-pre-x1/work", {"arm-s2-pre-x1.md": "arm-s2-pre-x1"})
+    state = grade.redacted(grade.arm_state(tmp_path, "a1"), [[r"arm-[\w-]+", "arm-run"]])
+    assert "pre" not in json.dumps(state)
+    assert state["files_written"] == {"arm-run.md": "arm-run"}
+
+
+def test_grade_sends_the_redacted_state(tmp_path, monkeypatch):
+    monkeypatch.setattr(grade, "REPO", tmp_path)
+    write_arm(tmp_path, "a1", "arm-s2-pre-x1", {})
+    arms = [{"dir": ".", "arm": "a1", "items": {"i1": True}}]
+    wave = grade.load_wave(wave_file(tmp_path, arms, redact=[[r"arm-[\w-]+", "arm-run"]]))
+    seen: list[dict[str, Any]] = []
+    grade.grade(wave, transport=fake({"i1": noul(0.9)}, seen))
+    assert seen[0]["state"]["final_answer"] == "arm-run"
 
 
 def test_load_wave_refuses_unnamed_reference_scorer(tmp_path):
@@ -262,8 +280,11 @@ def test_main_exits_2_when_unavailable(tmp_path, monkeypatch):
     assert grade.main([str(path)]) == grade.EXIT_UNAVAILABLE
 
 
-def test_pilot_wave_file_is_well_formed():
-    wave = grade.load_wave(HERE / "pilot/2026-09-24/wave.json")
+@pytest.mark.parametrize(
+    "path", sorted(HERE.glob("*/*/wave.json")), ids=lambda p: str(p.relative_to(HERE))
+)
+def test_committed_wave_files_are_well_formed(path):
+    wave = grade.load_wave(path)
     for arm in wave["arms"]:
         assert (REPO / arm["dir"] / f"{arm['arm']}.jsonl").is_file(), arm["arm"]
 
