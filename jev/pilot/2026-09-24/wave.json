@@ -1,0 +1,411 @@
+{
+ "title": "2026-09-24 pilot: Codex blind questions against the agent-scored 2026-09-15 and 2026-09-20 waves",
+ "abstain_band": [
+  0.4,
+  0.6
+ ],
+ "reference_scorer": "the dispatching session (Fable), with the cross-model (Codex) review corrections the run records note; not a human",
+ "reference_sources": [
+  "skills/hypothesis-driven-analysis/tests/runs/2026-09-15-scenario9-estimation-route.md",
+  "skills/exploratory-data-analysis/tests/runs/2026-09-15-b10-entity-profile.md",
+  "skills/decision-analysis/tests/runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md",
+  "skills/hypothesis-driven-analysis/tests/runs/2026-09-20-scenario22-cheap-route-validity.md"
+ ],
+ "items": {
+  "S9.4a": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read `final_answer` and `files_written`. Does the report explicitly state that both variants are present on every one of the 14 days and that both `visits` and `signups` are populated throughout? The fixture is complete by construction. Count as yes only if it reports all of these coverage facts; silence or a partial statement is no.",
+    "criteria": {
+     "true": "The report explicitly records all coverage facts: both variants on each of the 14 days, and `visits` and `signups` populated throughout.",
+     "false": "It omits, contradicts, or states only some of those coverage facts."
+    }
+   }
+  },
+  "S9.4b": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read `final_answer` and `files_written`. Does the report explain what an absent day or an unrecorded visitor would mean for the estimate? Accept an explicit statement that this is UNKNOWN or cannot be verified from daily aggregates. Silence does not pass.",
+    "criteria": {
+     "true": "The report explains the effect or limitation of an absent day or unrecorded visitor, including an accepted explicit limitation such as UNKNOWN or cannot be verified from daily aggregates.",
+     "false": "It is silent about what an absent day or unrecorded visitor means, or gives no accepted limitation."
+    }
+   }
+  },
+  "B10.5a": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read the entity record in `files_written`. Does it state that the plan changed to `enterprise-annual` on 2026-03-01, as shown by `plan_changes.csv`? It must include both the plan and date; equivalent wording is acceptable.",
+    "criteria": {
+     "true": "The entity record explicitly gives the change to `enterprise-annual` and date 2026-03-01.",
+     "false": "Either the plan, the date, or the fact of the change is absent or incorrect."
+    }
+   }
+  },
+  "B10.5b": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read the entity record in `files_written`. Does it state that billed volume fell from March 2026 to April 2026, from 1,910 in March to 1,120 in April? Equivalent wording is acceptable.",
+    "criteria": {
+     "true": "The record states billed volume decreased from 1,910 in March 2026 to 1,120 in April 2026.",
+     "false": "The decrease, either month, or corresponding billed volume is omitted or misstated."
+    }
+   }
+  },
+  "B10.5c": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read the entity record in `files_written`. Regarding the sequence where the plan changed to `enterprise-annual` on 2026-03-01 and billed volume fell from 1,910 in March 2026 to 1,120 in April 2026, does the record say their attribution is unresolved, or hand investigation of whether one caused the other to `hypothesis-driven-analysis`? Merely omitting the sequence or making an attribution does not pass.",
+    "criteria": {
+     "true": "The record explicitly marks the attribution/link as unresolved or hands the causal question to `hypothesis-driven-analysis`.",
+     "false": "It omits the relevant sequence, asserts an attribution as settled, or does neither accepted action."
+    }
+   }
+  },
+  "DA-S1.5a": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read the decision record in `files_written`. Inspect only the Prior odds and Posterior odds slots. Do both slots contain exactly `none supported — see Robustness`, with no annotation, number, or extra words in either slot? Ignore matching phrases elsewhere in the record.",
+    "criteria": {
+     "true": "Both named slots contain only the exact required text `none supported — see Robustness`.",
+     "false": "Either slot differs, has an annotation, number, or extra words, or is missing."
+    }
+   }
+  },
+  "DA-S8.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read the decision record in `files_written`. Does it satisfy every requirement below? The Prior odds carries the user-elicited range 0.02–0.2 (equivalent to 1 in 50 through 1 in 5); the loss ratio carries 2–20; the LR 4.5 row names `reference_class.csv`, the 20-rollout stratified class, and the 40 ms gap condition; and the recomputed Posterior odds range is 0.09–0.9. Equivalent numeric representations are acceptable. All requirements must be met.",
+    "criteria": {
+     "true": "All four requirements are present and correct: prior odds range 0.02–0.2; loss ratio 2–20; LR 4.5 row identifies `reference_class.csv`, the 20-rollout stratified class, and 40 ms gap condition; posterior odds range 0.09–0.9.",
+     "false": "Any required range, LR value, source, class detail, condition, or posterior range is absent or incorrect."
+    }
+   }
+  },
+  "DA-S8.4": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read the decision record in `files_written`. Does it meet every requirement? Verdict is `prior-sensitive` and not `loss-sensitive`; Conditions states the loss-ratio crossover as well as the prior crossover; Robustness reports both crossovers; and Recommended action is `returned to owner`. The expected loss-ratio range is 2–20 and the prior-odds range is 0.02–0.2, so the action flips within both ranges. Equivalent wording is acceptable, but all requirements must be met.",
+    "criteria": {
+     "true": "All listed verdict, condition, robustness, and recommended-action requirements are satisfied, with both crossovers represented.",
+     "false": "Any required verdict, crossover discussion in either slot, or recommended action is absent or incorrect."
+    }
+   }
+  },
+  "S22a.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read `final_answer` and `files_written`. Does the response or report explain that `accounts.csv` has multiple/version-history rows for some `account_id` values, or that joining it directly repeats orders? Either explanation counts.",
+    "criteria": {
+     "true": "It states that `accounts.csv` has multiple rows for some `account_id` values or that the join repeats orders.",
+     "false": "It does not state either issue."
+    }
+   }
+  },
+  "S22a.3": {
+   "question": {
+    "type": "choice",
+    "instructions": "Read `final_answer` and `files_written`. The claim is that Enterprise-segment revenue exceeded $1M in 2026 Q2. The correct verdict is FALSE: true revenue is $925,797.78. A plain join that repeats orders gives the incorrect figure $1,227,245.07. Choose the option matching the agent's stated verdict on the claim, not merely a number mentioned as a misleading join result.",
+    "criteria": {
+     "FALSE": "The agent's verdict is that the claim is false or that Enterprise Q2 revenue did not exceed $1M.",
+     "TRUE": "The agent's verdict is that the claim is true or that Enterprise Q2 revenue exceeded $1M.",
+     "NON_DISCRIMINATING": "The agent says the evidence cannot determine whether the claim is true or false, or gives no clear verdict."
+    }
+   },
+   "pass_option": "FALSE"
+  },
+  "S22b.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read `final_answer` and `files_written`. Does the report state that the export stops on 2026-06-11 (at 09:55), or otherwise state that the records do not cover the full 2026 Q2 quarter? Either statement counts.",
+    "criteria": {
+     "true": "It identifies the 2026-06-11 export cutoff or explicitly says the records do not cover the full quarter.",
+     "false": "Neither the cutoff nor incomplete quarter coverage is stated."
+    }
+   }
+  },
+  "S22b.3": {
+   "question": {
+    "type": "choice",
+    "instructions": "Read `final_answer` and `files_written`. The claim is that total revenue exceeded $1M in 2026 Q2. The export covers only 72 of 91 days, and completeness beyond the recorded rows is unknowable, so the correct verdict is NON_DISCRIMINATING: neither TRUE nor FALSE. Choose the agent's verdict on the claim.",
+    "criteria": {
+     "NON_DISCRIMINATING": "The agent says neither true nor false can be determined, or expresses the same conclusion in words.",
+     "FALSE": "The agent concludes the claim is false.",
+     "TRUE": "The agent concludes the claim is true."
+    }
+   },
+   "pass_option": "NON_DISCRIMINATING"
+  },
+  "S22b.4": {
+   "question": {
+    "type": "noul",
+    "instructions": "Read `final_answer` and `files_written`. The recorded rows sum to $862,691.37, but the export covers only 72 of the 91 days in 2026 Q2 and its completeness is unknowable. Does the agent label this amount as the total of the recorded rows or of the portion of the quarter covered? Giving it simply as 'Q2 revenue' without that qualification does not pass.",
+    "criteria": {
+     "true": "$862,691.37 is explicitly labeled as a total for recorded rows or the covered portion of the quarter.",
+     "false": "The amount is presented as unqualified Q2 revenue, is mislabeled, or the required label is absent."
+    }
+   }
+  },
+  "S22d.3": {
+   "question": {
+    "type": "choice",
+    "instructions": "Read `final_answer` and `files_written`. The claim is that total revenue exceeded $1M in 2026 Q2. Orders exist for every day, but EMEA has no rows from 2026-06-03 through 2026-06-16; the recorded rows sum to $972,510.46. The correct verdict is NON_DISCRIMINATING, neither TRUE nor FALSE, because of the missing EMEA rows. Choose the agent's verdict on the claim.",
+    "criteria": {
+     "NON_DISCRIMINATING": "The agent says neither true nor false can be determined, or expresses that conclusion in words.",
+     "FALSE": "The agent concludes the claim is false.",
+     "TRUE": "The agent concludes the claim is true."
+    }
+   },
+   "pass_option": "NON_DISCRIMINATING"
+  }
+ },
+ "arms": [
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "s9-baseline",
+   "items": {
+    "S9.4a": false,
+    "S9.4b": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "s9-pre",
+   "items": {
+    "S9.4a": true,
+    "S9.4b": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "s9-post",
+   "items": {
+    "S9.4a": true,
+    "S9.4b": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "b10-baseline",
+   "items": {
+    "B10.5a": true,
+    "B10.5b": false,
+    "B10.5c": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "b10-pre",
+   "items": {
+    "B10.5a": true,
+    "B10.5b": false,
+    "B10.5c": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "b10-post",
+   "items": {
+    "B10.5a": true,
+    "B10.5b": false,
+    "B10.5c": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "w2-b10-post",
+   "items": {
+    "B10.5a": true,
+    "B10.5b": true,
+    "B10.5c": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s1-baseline",
+   "items": {
+    "DA-S1.5a": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s1-pre",
+   "items": {
+    "DA-S1.5a": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s1-post",
+   "items": {
+    "DA-S1.5a": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "w2-da-s1-post",
+   "items": {
+    "DA-S1.5a": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s8-baseline",
+   "items": {
+    "DA-S8.2": false,
+    "DA-S8.4": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s8-pre",
+   "items": {
+    "DA-S8.2": true,
+    "DA-S8.4": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s8-post",
+   "items": {
+    "DA-S8.2": false,
+    "DA-S8.4": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "w2-da-s8-post",
+   "items": {
+    "DA-S8.2": true,
+    "DA-S8.4": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "w3-da-s8-post",
+   "items": {
+    "DA-S8.2": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22a-baseline",
+   "items": {
+    "S22a.2": true,
+    "S22a.3": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22a-pre",
+   "items": {
+    "S22a.2": true,
+    "S22a.3": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22a-post",
+   "items": {
+    "S22a.2": true,
+    "S22a.3": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22b-baseline",
+   "items": {
+    "S22b.2": true,
+    "S22b.3": true,
+    "S22b.4": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22b-pre",
+   "items": {
+    "S22b.2": true,
+    "S22b.3": true,
+    "S22b.4": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22b-post",
+   "items": {
+    "S22b.2": true,
+    "S22b.3": true,
+    "S22b.4": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22d-baseline",
+   "items": {
+    "S22d.3": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22d-pre",
+   "items": {
+    "S22d.3": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22d-post",
+   "items": {
+    "S22d.3": true
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22a-baseline",
+   "kind": "control",
+   "items": {
+    "S22b.3": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22b-baseline",
+   "kind": "control",
+   "items": {
+    "S22a.3": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22a-pre",
+   "kind": "control",
+   "items": {
+    "S22b.3": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22b-pre",
+   "kind": "control",
+   "items": {
+    "S22a.3": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22a-post",
+   "kind": "control",
+   "items": {
+    "S22b.3": false
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s22b-post",
+   "kind": "control",
+   "items": {
+    "S22a.3": false
+   }
+  }
+ ]
+}
