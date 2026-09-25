@@ -11,8 +11,9 @@ answer differs); controls are counted apart from the reference labels.
 How this report may and may not be used is owned by jev/README.md; this
 module only produces it.
 
-Exit 0 when every point was asked, 2 when Jev was unavailable (nothing was
-checked), 1 on a malformed wave file.
+Exit 0 when every point was asked, 2 when any point was not checked (Jev
+unavailable, or an arm over the budget; the report is still written), 1 on a
+malformed wave file.
 """
 
 from __future__ import annotations
@@ -84,7 +85,9 @@ def load_wave(path: Path) -> dict[str, Any]:
         unknown = set(arm["items"]) - set(items)
         if unknown:
             raise ValueError(f"arm {arm['arm']} names unknown items {sorted(unknown)}")
-        if any(v is not None for v in arm["items"].values()) and not wave.get("reference_scorer"):
+        is_reference = arm.get("kind", "reference") == "reference"
+        labelled = any(v is not None for v in arm["items"].values())
+        if is_reference and labelled and not wave.get("reference_scorer"):
             raise ValueError("reference labels need `reference_scorer`: who scored them")
     return wave
 
@@ -120,9 +123,22 @@ def grade(wave: dict[str, Any], transport: jev_client.Transport | None = None) -
         models.add(resp.get("model"))
         tokens += resp.get("usage", {}).get("input_tokens", 0)
         for item, ref in arm["items"].items():
-            p = jev_client.probability_of_pass(
-                resp["answers"][item], items[item].get("pass_option")
-            )
+            try:
+                p = jev_client.probability_of_pass(
+                    resp["answers"][item], items[item].get("pass_option")
+                )
+            except jev_client.JevUnavailable as exc:
+                points.append(
+                    {
+                        "arm": arm["arm"],
+                        "item": item,
+                        "kind": kind,
+                        "reference": ref,
+                        "status": "not_checked",
+                        "reason": str(exc),
+                    }
+                )
+                continue
             jl = label(p, band)
             points.append(
                 {
@@ -202,6 +218,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.out:
         args.out.write_text(json.dumps(report, indent=1) + "\n")
     sys.stdout.write(render(report))
+    skipped = sum(by.get("not_checked", 0) for by in report["counts"].values())
+    if skipped:
+        print(f"incomplete: {skipped} point(s) not checked", file=sys.stderr)
+        return EXIT_UNAVAILABLE
     return 0
 
 

@@ -19,6 +19,8 @@ This section is the one home of these rules; other files point here.
 5. "Not checked" — no key, no network, a missing answer, a state over Jev's budget — is never read as a pass.
 6. Nothing here runs inside the plugin, its hook, or a skill, and no agent-read wording points an agent at it; wording that did would owe measured arms (`skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`).
 7. A change of model version is a new calibration: questions validated on one version are not evidence about the next.
+8. `route.py`'s output is Jev's routing, not the agent's: it does not bear on the description freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md`, and its use is choosing which prompts deserve real agent arms.
+9. Until a `semantic_check.py` question set passes known-legitimate plans without having been written against them, its output is a prompt to look, never a finding and never a gate.
 
 ## Tools
 
@@ -33,8 +35,7 @@ python3 jev/grade.py jev/pilot/2026-09-24/wave.json --out report.json
 ```
 
 `route.py` — routes every standalone catalog prompt against the frozen descriptions in `scripts/frontmatter-descriptions/`, plus a "none of these" option, and lists the prompts Jev cannot place.
-It measures whether a prompt's text separates the routes as the descriptions draw them.
-It is Jev's routing, not the agent's, so it does not bear on the description freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md`; its use is choosing which prompts deserve real agent arms.
+It measures whether a prompt's text separates the routes as the descriptions draw them; what that output may be used for is rule 8 above.
 `--labels` scores agreement against a file mapping prompt ids to intended routes, and refuses an id that names no current prompt.
 An id is the catalog's skill name and a hash of the prompt text, because one scenario heading can carry several prompts; the ids are in `route.py`'s JSON output.
 No labels file exists yet.
@@ -46,9 +47,9 @@ python3 jev/route.py --out routing.json
 `semantic_check.py` — **experimental, not validated.**
 For a full-route ledger it asks whether each hypothesis's necessary prediction follows from its candidate explanation, and whether the stop condition is fixed independently of the answer: the two questions decision 006 names as beyond structural checks.
 Only Plan-time text is sent, so an outcome cannot move an answer.
-On its one real known-negative — the S15 post arm's plan, whose H3 and H4 both scorers accepted as legitimately refuted — it flags H4 (p≈0.34) and the stop condition (p≈0.35), and a strict `xfail` in `test_jev.py` records that.
+On its one real known-negative — the S15 post arm's plan, whose H3 and H4 both scorers accepted as legitimately refuted — it passes H3 but flags H4 (p≈0.34) and the stop condition (p≈0.35); `test_jev.py` records H3 as a live test and each flag as its own strict `xfail`.
 It catches the planted-bad ledger in the same suite.
-Until a question set passes known-legitimate plans, its output is a prompt to look, not a finding.
+What its output may be used for is rule 9 above.
 
 ```bash
 python3 jev/semantic_check.py path/to/ledger.md

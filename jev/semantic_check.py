@@ -10,10 +10,11 @@ answer? These are HDA decisions/006's named blind spots of structural checks.
 Only Plan-time text is sent: the hypothesis row and the Problem section's stop
 condition. Tests, outcomes, statuses, and the Conclusion never reach Jev, so a
 correct refutation cannot change an answer. What the output may be used for is
-owned by jev/README.md; it is advisory and never a gate.
+owned by jev/README.md.
 
 Exit 0 when checked (flags are printed, not failed), 2 when Jev was
-unavailable, 1 when the file is not a full-route ledger.
+unavailable, 1 when the file is not a full-route ledger or lacks a stop
+condition.
 """
 
 from __future__ import annotations
@@ -81,7 +82,7 @@ STOP = {
 }
 
 
-def plan_time_states(text: str) -> tuple[list[dict[str, Any]], str | None]:
+def plan_time_states(text: str) -> tuple[list[dict[str, Any]], str]:
     """The hypothesis rows and stop condition, and nothing written after Plan."""
     body = check_record.strip_frontmatter(text)
     rows = check_record._table_rows(check_record._section(body, "## Hypotheses"))
@@ -109,6 +110,8 @@ def plan_time_states(text: str) -> tuple[list[dict[str, Any]], str | None]:
         for r in rows[1:]
     ]
     stop = check_record._slot_value(check_record._section(body, "## Problem"), "Stop condition")
+    if not stop:
+        raise ValueError("no Stop condition in § Problem: not a full-route ledger")
     return hyps, stop
 
 
@@ -130,26 +133,16 @@ def check(text: str, transport: jev_client.Transport | None = None) -> dict[str,
                 "verdict": verdict(p),
             }
         )
-    if stop:
-        resp = jev_client.evaluate({"stop_condition": stop}, {"stop": STOP}, transport=transport)
-        p = jev_client.probability_of_pass(resp["answers"]["stop"])
-        results.append(
-            {
-                "id": "Problem",
-                "question": "stop condition fixed in advance",
-                "p": round(p, 3),
-                "verdict": verdict(p),
-            }
-        )
-    else:
-        results.append(
-            {
-                "id": "Problem",
-                "question": "stop condition fixed in advance",
-                "p": None,
-                "verdict": "not_checked",
-            }
-        )
+    resp = jev_client.evaluate({"stop_condition": stop}, {"stop": STOP}, transport=transport)
+    p = jev_client.probability_of_pass(resp["answers"]["stop"])
+    results.append(
+        {
+            "id": "Problem",
+            "question": "stop condition fixed in advance",
+            "p": round(p, 3),
+            "verdict": verdict(p),
+        }
+    )
     return {"results": results}
 
 

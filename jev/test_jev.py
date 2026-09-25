@@ -75,6 +75,12 @@ def test_probability_of_pass():
         jev_client.probability_of_pass({"type": "score", "score": 1.0})
 
 
+def test_missing_pass_option_probability_is_unavailable_not_fail():
+    choice = {"type": "choice", "choice": "b", "probabilities": {"b": 1.0}}
+    with pytest.raises(jev_client.JevUnavailable):
+        jev_client.probability_of_pass(choice, "a")
+
+
 def test_model_is_pinned_not_aliased():
     assert jev_client.MODEL != "jev-latest"
     seen: list[dict[str, Any]] = []
@@ -144,6 +150,11 @@ def test_load_wave_refuses_unnamed_reference_scorer(tmp_path):
         grade.load_wave(path)
 
 
+def test_control_only_wave_needs_no_reference_scorer(tmp_path):
+    arms = [{"dir": "x", "arm": "a1", "kind": "control", "items": {"i1": False}}]
+    assert grade.load_wave(wave_file(tmp_path, arms, reference_scorer=None))
+
+
 def test_load_wave_refuses_band_not_straddling_half(tmp_path):
     path = wave_file(tmp_path, [], abstain_band=[0.6, 0.8])
     with pytest.raises(ValueError, match="straddle"):
@@ -197,6 +208,28 @@ def test_size_guard_counts_the_longest_question(tmp_path, monkeypatch):
     wave["items"]["i1"]["question"]["instructions"] = "x" * 50
     report = grade.grade(wave, transport=fake({"i1": noul(0.9)}))
     assert report["counts"] == {"reference": {"not_checked": 1}}
+
+
+def test_main_exits_2_when_any_point_is_skipped(tmp_path, monkeypatch):
+    monkeypatch.setattr(grade, "REPO", tmp_path)
+    monkeypatch.setattr(grade, "MAX_STATE_CHARS", 10)
+    monkeypatch.setattr(grade.jev_client, "_http_transport", fake({}))
+    write_arm(tmp_path, "a1", "a long answer", {})
+    path = wave_file(tmp_path, [{"dir": ".", "arm": "a1", "items": {"i1": True}}])
+    out = tmp_path / "report.json"
+    assert grade.main([str(path), "--out", str(out)]) == grade.EXIT_UNAVAILABLE
+    assert json.loads(out.read_text())["counts"] == {"reference": {"not_checked": 1}}
+
+
+def test_malformed_choice_answer_marks_only_that_point(tmp_path, monkeypatch):
+    monkeypatch.setattr(grade, "REPO", tmp_path)
+    write_arm(tmp_path, "a1", "ok", {})
+    path = wave_file(tmp_path, [{"dir": ".", "arm": "a1", "items": {"i1": True, "i2": True}}])
+    wave = grade.load_wave(path)
+    wave["items"]["i2"] = {"question": {"type": "choice"}, "pass_option": "yes"}
+    bad = {"type": "choice", "choice": "no", "probabilities": {"no": 1.0}}
+    report = grade.grade(wave, transport=fake({"i1": noul(0.9), "i2": bad}))
+    assert report["counts"] == {"reference": {"agree": 1, "not_checked": 1}}
 
 
 def test_load_wave_refuses_an_arm_with_no_items(tmp_path):
@@ -325,6 +358,13 @@ def test_semantic_check_rejects_non_ledger():
         semantic_check.plan_time_states("# Notes\n\nnothing here\n")
 
 
+def test_semantic_check_refuses_a_ledger_without_stop_condition():
+    text = S15_PLAN.read_text()
+    no_stop = "\n".join(ln for ln in text.splitlines() if "Stop condition" not in ln)
+    with pytest.raises(ValueError, match="no Stop condition"):
+        semantic_check.plan_time_states(no_stop)
+
+
 def test_semantic_check_verdicts():
     assert semantic_check.verdict(0.2) == "flag"
     assert semantic_check.verdict(0.5) == "abstain"
@@ -377,18 +417,38 @@ BAD_LEDGER = "\n".join(
 )
 
 
+@pytest.fixture(scope="module")
+def s15_verdicts() -> dict[str, str]:
+    report = semantic_check.check(S15_PLAN.read_text())
+    return {r["id"]: r["verdict"] for r in report["results"]}
+
+
+# H3 and H4 were legitimately refuted in this arm (s15-scoring/scoring.md), and
+# its stop condition is outcome-independent; each is its own test so a fix or
+# a regression in one is visible on its own.
+@live
+def test_live_refuted_h3_is_not_flagged(s15_verdicts):
+    assert s15_verdicts["H3"] != "flag"
+
+
 @live
 @pytest.mark.xfail(
     strict=True,
     reason="known false positive, 2026-09-24: jev-1.13.0 flags H4 (p~0.34), a data-artifact "
     "hypothesis both scorers accepted as legitimately refuted; see jev/README.md",
 )
-def test_live_refuted_hypotheses_are_not_flagged():
-    report = semantic_check.check(S15_PLAN.read_text())
-    by_id = {r["id"]: r["verdict"] for r in report["results"]}
-    # H3 and H4 were legitimately refuted in this arm (s15-scoring/scoring.md).
-    assert by_id["H3"] != "flag"
-    assert by_id["H4"] != "flag"
+def test_live_refuted_h4_is_not_flagged(s15_verdicts):
+    assert s15_verdicts["H4"] != "flag"
+
+
+@live
+@pytest.mark.xfail(
+    strict=True,
+    reason="known false positive, 2026-09-24: jev-1.13.0 flags the S15 stop condition "
+    "(p~0.35), which fixes a decision criterion independent of the answer",
+)
+def test_live_s15_stop_condition_is_not_flagged(s15_verdicts):
+    assert s15_verdicts["Problem"] != "flag"
 
 
 @live

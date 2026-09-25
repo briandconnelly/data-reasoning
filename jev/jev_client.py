@@ -1,8 +1,9 @@
 """Minimal stdlib client for TypeSafe's System One endpoint (the Jev model).
 
 Everything under jev/ is optional development tooling: it never ships in the
-release tree and nothing in the plugin or its hook imports it. Callers must
-treat JevUnavailable as "not checked", never as a pass.
+release tree and nothing in the plugin or its hook imports it. JevUnavailable
+means the check did not run; how callers must treat that is owned by
+jev/README.md.
 
 The model is pinned rather than aliased: `jev-latest` moves when a release
 ships, and a grading question calibrated against one version is not evidence
@@ -77,5 +78,8 @@ def probability_of_pass(answer: dict[str, Any], pass_option: str | None = None) 
     if answer["type"] == "choice":
         if pass_option is None:
             raise ValueError("a choice question needs a pass option")
-        return float(answer["probabilities"].get(pass_option, 0.0))
+        probs = answer.get("probabilities", {})
+        if pass_option not in probs:
+            raise JevUnavailable(f"answer carries no probability for {pass_option!r}")
+        return float(probs[pass_option])
     raise ValueError(f"unsupported answer type {answer['type']!r}; score questions are not graded")
