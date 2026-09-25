@@ -1,0 +1,132 @@
+{
+ "S2.1": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent followed the direct route for the prompt asking for the median order value in June: it computed the median and answered with it. The route is direct because no claim is being adjudicated and the answer is settled by the records themselves; computing a bounded statistic counts as direct.",
+   "criteria": {
+    "true": "PASS: the agent used the direct route, computed the median, and answered with it.",
+    "false": "FAIL: the agent did not use the direct route, did not compute the median, or did not answer with it."
+   }
+  }
+ },
+ "S2.2": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoided a ledger, hypothesis language, and PPDAC ceremony for the June median prompt. Raw calculation output saved by the agent, such as a results file or a notes file of numbers, is a working artifact and does not fail this item. A structured analysis note that names its route or carries completeness-semantics vocabulary is a record and fails this item.",
+   "criteria": {
+    "true": "PASS: there is no ledger, hypothesis language, or PPDAC ceremony, and no structured analysis note that names its route or carries completeness-semantics vocabulary. Raw calculation output alone is allowed.",
+    "false": "FAIL: the evidence shows a ledger, hypothesis language, PPDAC ceremony, or a structured analysis note that names its route or carries completeness-semantics vocabulary."
+   }
+  }
+ },
+ "S9.1": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent used the estimation route for comparing signup variants A and B, and stated all four required parts: the estimand, population, an uncertainty statement, and a practical threshold. The visitors were randomly assigned to A or B for two weeks; `signups.csv` has variant, visits, and signups per day.",
+   "criteria": {
+    "true": "PASS: the response states the estimand, population, an uncertainty statement, and a practical threshold, consistent with the estimation route.",
+    "false": "FAIL: the response omits any of those four parts or does not use the estimation route."
+   }
+  }
+ },
+ "S9.2": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoided inventing causal why hypotheses and avoided a full PPDAC ledger when answering whether signup variant B is better than A and by how much. The visitors were randomly assigned to variants; the prompt asks for a comparison and magnitude, with no why question.",
+   "criteria": {
+    "true": "PASS: no causal why hypotheses and no full PPDAC ledger are present.",
+    "false": "FAIL: the agent invents causal why hypotheses or presents a full PPDAC ledger."
+   }
+  }
+ },
+ "S9.3": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent reported the estimate comparing signup variants A and B with uncertainty, rather than reporting only a bare point difference. The visitors were randomly assigned to variants for two weeks; `signups.csv` has variant, visits, and signups per day.",
+   "criteria": {
+    "true": "PASS: the estimate is reported with an uncertainty statement.",
+    "false": "FAIL: the estimate is only a bare point difference or uncertainty is not reported."
+   }
+  }
+ },
+ "S11.1": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent used the mini route for adjudicating the claim that checkout p95 latency exceeded 500ms on 2026-07-15. Mini means one paragraph containing the claim, prediction, probe, and outcome; it is not the full loop.",
+   "criteria": {
+    "true": "PASS: the agent presents a one-paragraph ledger containing the claim, prediction, probe, and outcome, without using the full loop.",
+    "false": "FAIL: the one-paragraph ledger is missing one or more required parts, or the agent uses the full loop instead of mini."
+   }
+  }
+ },
+ "S11.2": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoided a hypothesis table and avoided sections titled Sources, Tests, or Amendments when adjudicating the claim that checkout p95 latency exceeded 500ms on 2026-07-15.",
+   "criteria": {
+    "true": "PASS: there is no hypothesis table and no Sources, Tests, or Amendments section.",
+    "false": "FAIL: a hypothesis table or any of those sections appears."
+   }
+  }
+ },
+ "S11.3": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent correctly answers that the claim 'checkout p95 latency exceeded 500ms yesterday (2026-07-15)' is false and reports the measured p95. The realized p95 is about 392ms.",
+   "criteria": {
+    "true": "PASS: the agent says the claim is false and reports the measured p95, about 392ms.",
+    "false": "FAIL: the agent does not say the claim is false, or does not report the measured p95 correctly."
+   }
+  }
+ },
+ "S13.1": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent uses the mini route for the claim that checkout p95 exceeded 500ms only on mobile, only during the evening peak, and only for returning users, and does not build a hypothesis table. This item requires mini even though settling the claim needs three or more probes.",
+   "criteria": {
+    "true": "PASS: the agent uses mini and does not build a hypothesis table, despite needing three or more probes.",
+    "false": "FAIL: the agent does not use mini or builds a hypothesis table."
+   }
+  }
+ },
+ "S13.2": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoids routing the mobile, evening-peak, returning-users claim to full on the grounds that the number of probes exceeds two. The item requires mini despite needing three or more probes.",
+   "criteria": {
+    "true": "PASS: the agent does not route full because the probe count exceeds two.",
+    "false": "FAIL: the agent routes full on the grounds that the probe count exceeds two."
+   }
+  }
+ },
+ "S13.3": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent settles each conjunct of the claim—device (mobile), time (evening peak), and user type (returning versus new)—and correctly answers that the claim as stated is false. The full conjunction has p95 about 439ms; mobile in the evening peak without the user-type condition has p95 about 601ms; new users in that window have p95 about 804ms. The claim is that p95 exceeded 500ms only on mobile, only during the evening peak, and only for returning users.",
+   "criteria": {
+    "true": "PASS: the agent addresses device, evening window, and returning-versus-new user type, and answers that the full claim as stated is false.",
+    "false": "FAIL: the agent does not settle each of those conjuncts or does not correctly answer that the claim as stated is false."
+   }
+  }
+ },
+ "S14.1": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent routes the June median order value question to direct. Orders are available only in the warehouse through the metered command `warehouse.py --dataset orders --day <YYYY-MM-DD>`; each query bills per call and takes a few seconds. The source being metered adds a collection plan on the direct route, but does not promote the descriptive question to full. The direct route records nothing unless collection is costly; when collection is costly, it records the collection plan and nothing else.",
+   "criteria": {
+    "true": "PASS: the agent uses the direct route, and if it records anything because collection is costly, it records only the collection plan.",
+    "false": "FAIL: the agent promotes the question from direct to another route, or records material beyond the collection plan on the costly-collection direct route."
+   }
+  }
+ },
+ "S14.3": {
+  "question": {
+   "type": "noul",
+   "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoids a hypothesis table, competing explanations, and a coverage matrix when answering the June median order value question. Orders are in the warehouse and each query is metered, billed per call, and takes a few seconds.",
+   "criteria": {
+    "true": "PASS: there is no hypothesis table, no competing explanations, and no coverage matrix.",
+    "false": "FAIL: any of a hypothesis table, competing explanations, or a coverage matrix appears."
+   }
+  }
+ }
+}

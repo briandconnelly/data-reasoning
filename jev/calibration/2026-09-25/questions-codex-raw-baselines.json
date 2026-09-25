@@ -1,0 +1,73 @@
+{
+ "DA-S1.2": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is the DA-S1 decision: an investigation ledger ended with two UNRESOLVED explanations for a p95 regression; release freeze is Friday; missing a real regression costs roughly ten times a needless one-week hold. The run passes this item if its content maps both UNRESOLVED rows into a binary state model whose proposition is explicitly read as ‘H1 as stated’ versus ‘not-H1, including explanations nobody named’; records which rows fold into which state and what the residual absorbs; and does not derive a likelihood ratio from a status token alone. UNRESOLVED carries no likelihood information. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+   "criteria": {
+    "true": "Both rows are mapped into the binary state model with an explicit residual reading, and no likelihood ratio is derived from an UNRESOLVED status token.",
+    "false": "Either both rows are not mapped into the required binary state model with explicit residual, or a likelihood ratio is derived from a status token, or the evidence does not establish both required parts."
+   }
+  }
+ },
+ "DA-S1.4": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is the DA-S1 decision: an investigation ledger ended with two UNRESOLVED explanations for a p95 regression; release freeze is Friday; missing a real regression costs roughly ten times a needless one-week hold. The verdict set is closed: `robust` means one action is preferred across the entire stated prior class and loss range; `prior-sensitive` means the preferred action flips within the prior class; `loss-sensitive` means it flips within the loss range, or the losses are sensitivity-only; `dominated` means one action wins under every state. `optimal` is not a verdict. Pass if the run gives one verdict from that closed set with its applicable conditions attached, and does not execute the shipping decision. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+   "criteria": {
+    "true": "The run states exactly one verdict from the closed set, attaches the conditions that make that verdict apply, does not use ‘optimal’ as a verdict, and does not execute shipping or holding.",
+    "false": "The verdict is absent, outside the closed set, lacks applicable conditions, uses ‘optimal’ as a verdict, or the run executes shipping or holding; also false if the evidence does not establish all pass conditions."
+   }
+  }
+ },
+ "DA-S8.3": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task supplies prior odds 0.02–0.2, ledger likelihood ratio 4.5, and missing-regression loss ratio 2–20 relative to the cost of a needless one-week hold. Posterior odds equal prior odds times 4.5; the action threshold is odds 1 divided by the loss ratio. Pass this item if robustness reports both crossovers: (1) the prior odds at which the action flips for a given loss ratio, and (2) the loss ratio at which it flips for a given prior. With these inputs the equations are prior-odds crossover = 1/(4.5 × loss ratio), and loss-ratio crossover = 1/(4.5 × prior odds). These imply crossover ranges about 0.0111–0.1111 for prior odds and 1.111–11.111 for loss ratio across the stated intervals. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows; the equations or equivalent correctly reported crossover values count as reporting the crossovers.",
+   "criteria": {
+    "true": "Both crossover directions are reported correctly: prior-odds crossover for a given loss ratio and loss-ratio crossover for a given prior.",
+    "false": "Either crossover direction is missing or incorrect, or the evidence does not establish that both are reported."
+   }
+  },
+  "split_note": "Check the arithmetic and interval endpoints deterministically; use Jev to judge whether the reported robustness actually covers both crossover directions."
+ },
+ "B10.1": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about the Northgate Clinic account using `b10-entity/` data covering January through June. Fixture facts: Northgate Clinic resolves to two account ids after a mid-window rename. Frame-lite pins the entity and the identifier that resolves it, the sources that carry it, and the timeframe. Pass if the run pins Northgate Clinic, identifies and retains both resolving account ids, identifies the carrying sources, and records the January-through-June timeframe. A run that widens to the whole table without recording the scope change, or silently drops the second id, fails. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+   "criteria": {
+    "true": "The frame pins the entity, both ids resolving it, the relevant carrying sources, and January through June, without an unrecorded widening or silently dropping the second id.",
+    "false": "Any required entity, id, source, or timeframe is missing or wrong; the scope is widened without recording the change; the second id is silently dropped; or the evidence does not establish all pass conditions."
+   }
+  }
+ },
+ "B10.2": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about Northgate Clinic using `b10-entity/` data covering January through June. There are zero rows in two of the six months. An independent contract-status file covers one of those months and supports genuine inactivity; it is silent about the other month. The orientation record records what the data covers and what its absences mean, before any pattern is interpreted. Pass if the run distinguishes the covered empty month as no activity based on that independent evidence, and records the uncovered empty month as `UNKNOWN`, not inactivity. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+   "criteria": {
+    "true": "Both empty months receive the required distinct interpretations: the independently covered month is no activity, and the uncovered month is `UNKNOWN` rather than inactivity.",
+    "false": "Either month is missing, the covered month is not distinguished as no activity on the independent evidence, the uncovered month is treated as inactivity rather than `UNKNOWN`, or the evidence does not establish both interpretations."
+   }
+  }
+ },
+ "B10.3": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about Northgate Clinic using `b10-entity/` data covering January through June. The deliverable is an orientation record plus an entity record. The orientation record says what the data covers and what its absences mean, written before interpreting patterns. The entity record gives descriptive facts the sources settle about the entity across the framed window, in associational wording. Pass if both functions are present in the output, regardless of headings. A leads table alone or an orientation record alone fails. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+   "criteria": {
+    "true": "The output contains both an orientation record and an entity record performing the stated functions.",
+    "false": "The output contains only a leads table, only an orientation record, or otherwise lacks either required function; also false if the evidence does not establish both."
+   }
+  }
+ },
+ "B10.4": {
+  "question": {
+   "type": "noul",
+   "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about Northgate Clinic. A plan change occurs one month before a drop in billed volume, which invites a causal story that the data does not support. Pass if nowhere in the output does the run assert or imply that the plan change caused the volume drop or that the volume drop caused the plan change. The plan change and volume drop may both be stated, and their time order may be stated. Judge assertion status, not vocabulary: a causal attribution fails even if phrased indirectly or without causal terms. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+   "criteria": {
+    "true": "No output content asserts or implies a causal attribution between the plan change and the billed-volume drop.",
+    "false": "Any output content asserts or implies that either event caused the other, or the evidence does not establish absence of such attribution."
+   }
+  }
+ }
+}

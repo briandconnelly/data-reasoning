@@ -1,0 +1,329 @@
+{
+ "title": "2026-09-25 calibration: Jev against a person (preregistered in prereg.md)",
+ "abstain_band": [
+  0.4,
+  0.6
+ ],
+ "reference_scorer": null,
+ "redact": [
+  [
+   "arm-[A-Za-z0-9_-]+",
+   "arm-run"
+  ]
+ ],
+ "items": {
+  "S2.1": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent followed the direct route for the prompt asking for the median order value in June: it computed the median and answered with it. The route is direct because no claim is being adjudicated and the answer is settled by the records themselves; computing a bounded statistic counts as direct.",
+    "criteria": {
+     "true": "PASS: the agent used the direct route, computed the median, and answered with it.",
+     "false": "FAIL: the agent did not use the direct route, did not compute the median, or did not answer with it."
+    }
+   }
+  },
+  "S2.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoided a ledger, hypothesis language, and PPDAC ceremony for the June median prompt. Raw calculation output saved by the agent, such as a results file or a notes file of numbers, is a working artifact and does not fail this item. A structured analysis note that names its route or carries completeness-semantics vocabulary is a record and fails this item.",
+    "criteria": {
+     "true": "PASS: there is no ledger, hypothesis language, or PPDAC ceremony, and no structured analysis note that names its route or carries completeness-semantics vocabulary. Raw calculation output alone is allowed.",
+     "false": "FAIL: the evidence shows a ledger, hypothesis language, PPDAC ceremony, or a structured analysis note that names its route or carries completeness-semantics vocabulary."
+    }
+   }
+  },
+  "S9.1": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent used the estimation route for comparing signup variants A and B, and stated all four required parts: the estimand, population, an uncertainty statement, and a practical threshold. The visitors were randomly assigned to A or B for two weeks; `signups.csv` has variant, visits, and signups per day.",
+    "criteria": {
+     "true": "PASS: the response states the estimand, population, an uncertainty statement, and a practical threshold, consistent with the estimation route.",
+     "false": "FAIL: the response omits any of those four parts or does not use the estimation route."
+    }
+   }
+  },
+  "S9.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoided inventing causal why hypotheses and avoided a full PPDAC ledger when answering whether signup variant B is better than A and by how much. The visitors were randomly assigned to variants; the prompt asks for a comparison and magnitude, with no why question.",
+    "criteria": {
+     "true": "PASS: no causal why hypotheses and no full PPDAC ledger are present.",
+     "false": "FAIL: the agent invents causal why hypotheses or presents a full PPDAC ledger."
+    }
+   }
+  },
+  "S9.3": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent reported the estimate comparing signup variants A and B with uncertainty, rather than reporting only a bare point difference. The visitors were randomly assigned to variants for two weeks; `signups.csv` has variant, visits, and signups per day.",
+    "criteria": {
+     "true": "PASS: the estimate is reported with an uncertainty statement.",
+     "false": "FAIL: the estimate is only a bare point difference or uncertainty is not reported."
+    }
+   }
+  },
+  "S11.1": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent used the mini route for adjudicating the claim that checkout p95 latency exceeded 500ms on 2026-07-15. Mini means one paragraph containing the claim, prediction, probe, and outcome; it is not the full loop.",
+    "criteria": {
+     "true": "PASS: the agent presents a one-paragraph ledger containing the claim, prediction, probe, and outcome, without using the full loop.",
+     "false": "FAIL: the one-paragraph ledger is missing one or more required parts, or the agent uses the full loop instead of mini."
+    }
+   }
+  },
+  "S11.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoided a hypothesis table and avoided sections titled Sources, Tests, or Amendments when adjudicating the claim that checkout p95 latency exceeded 500ms on 2026-07-15.",
+    "criteria": {
+     "true": "PASS: there is no hypothesis table and no Sources, Tests, or Amendments section.",
+     "false": "FAIL: a hypothesis table or any of those sections appears."
+    }
+   }
+  },
+  "S11.3": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent correctly answers that the claim 'checkout p95 latency exceeded 500ms yesterday (2026-07-15)' is false and reports the measured p95. The realized p95 is about 392ms.",
+    "criteria": {
+     "true": "PASS: the agent says the claim is false and reports the measured p95, about 392ms.",
+     "false": "FAIL: the agent does not say the claim is false, or does not report the measured p95 correctly."
+    }
+   }
+  },
+  "S13.1": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent uses the mini route for the claim that checkout p95 exceeded 500ms only on mobile, only during the evening peak, and only for returning users, and does not build a hypothesis table. This item requires mini even though settling the claim needs three or more probes.",
+    "criteria": {
+     "true": "PASS: the agent uses mini and does not build a hypothesis table, despite needing three or more probes.",
+     "false": "FAIL: the agent does not use mini or builds a hypothesis table."
+    }
+   }
+  },
+  "S13.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoids routing the mobile, evening-peak, returning-users claim to full on the grounds that the number of probes exceeds two. The item requires mini despite needing three or more probes.",
+    "criteria": {
+     "true": "PASS: the agent does not route full because the probe count exceeds two.",
+     "false": "FAIL: the agent routes full on the grounds that the probe count exceeds two."
+    }
+   }
+  },
+  "S13.3": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent settles each conjunct of the claim—device (mobile), time (evening peak), and user type (returning versus new)—and correctly answers that the claim as stated is false. The full conjunction has p95 about 439ms; mobile in the evening peak without the user-type condition has p95 about 601ms; new users in that window have p95 about 804ms. The claim is that p95 exceeded 500ms only on mobile, only during the evening peak, and only for returning users.",
+    "criteria": {
+     "true": "PASS: the agent addresses device, evening window, and returning-versus-new user type, and answers that the full claim as stated is false.",
+     "false": "FAIL: the agent does not settle each of those conjuncts or does not correctly answer that the claim as stated is false."
+    }
+   }
+  },
+  "S14.1": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent routes the June median order value question to direct. Orders are available only in the warehouse through the metered command `warehouse.py --dataset orders --day <YYYY-MM-DD>`; each query bills per call and takes a few seconds. The source being metered adds a collection plan on the direct route, but does not promote the descriptive question to full. The direct route records nothing unless collection is costly; when collection is costly, it records the collection plan and nothing else.",
+    "criteria": {
+     "true": "PASS: the agent uses the direct route, and if it records anything because collection is costly, it records only the collection plan.",
+     "false": "FAIL: the agent promotes the question from direct to another route, or records material beyond the collection plan on the costly-collection direct route."
+    }
+   }
+  },
+  "S14.3": {
+   "question": {
+    "type": "noul",
+    "instructions": "Using only the run evidence in `user_prompt`, `final_answer`, and `files_written`, judge whether the agent avoids a hypothesis table, competing explanations, and a coverage matrix when answering the June median order value question. Orders are in the warehouse and each query is metered, billed per call, and takes a few seconds.",
+    "criteria": {
+     "true": "PASS: there is no hypothesis table, no competing explanations, and no coverage matrix.",
+     "false": "FAIL: any of a hypothesis table, competing explanations, or a coverage matrix appears."
+    }
+   }
+  },
+  "DA-S1.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is the DA-S1 decision: an investigation ledger ended with two UNRESOLVED explanations for a p95 regression; release freeze is Friday; missing a real regression costs roughly ten times a needless one-week hold. The run passes this item if its content maps both UNRESOLVED rows into a binary state model whose proposition is explicitly read as ‘H1 as stated’ versus ‘not-H1, including explanations nobody named’; records which rows fold into which state and what the residual absorbs; and does not derive a likelihood ratio from a status token alone. UNRESOLVED carries no likelihood information. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+    "criteria": {
+     "true": "Both rows are mapped into the binary state model with an explicit residual reading, and no likelihood ratio is derived from an UNRESOLVED status token.",
+     "false": "Either both rows are not mapped into the required binary state model with explicit residual, or a likelihood ratio is derived from a status token, or the evidence does not establish both required parts."
+    }
+   }
+  },
+  "DA-S1.4": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is the DA-S1 decision: an investigation ledger ended with two UNRESOLVED explanations for a p95 regression; release freeze is Friday; missing a real regression costs roughly ten times a needless one-week hold. The verdict set is closed: `robust` means one action is preferred across the entire stated prior class and loss range; `prior-sensitive` means the preferred action flips within the prior class; `loss-sensitive` means it flips within the loss range, or the losses are sensitivity-only; `dominated` means one action wins under every state. `optimal` is not a verdict. Pass if the run gives one verdict from that closed set with its applicable conditions attached, and does not execute the shipping decision. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+    "criteria": {
+     "true": "The run states exactly one verdict from the closed set, attaches the conditions that make that verdict apply, does not use ‘optimal’ as a verdict, and does not execute shipping or holding.",
+     "false": "The verdict is absent, outside the closed set, lacks applicable conditions, uses ‘optimal’ as a verdict, or the run executes shipping or holding; also false if the evidence does not establish all pass conditions."
+    }
+   }
+  },
+  "DA-S8.3": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task supplies prior odds 0.02–0.2, ledger likelihood ratio 4.5, and missing-regression loss ratio 2–20 relative to the cost of a needless one-week hold. Posterior odds equal prior odds times 4.5; the action threshold is odds 1 divided by the loss ratio. Pass this item if robustness reports both crossovers: (1) the prior odds at which the action flips for a given loss ratio, and (2) the loss ratio at which it flips for a given prior. With these inputs the equations are prior-odds crossover = 1/(4.5 × loss ratio), and loss-ratio crossover = 1/(4.5 × prior odds). These imply crossover ranges about 0.0111–0.1111 for prior odds and 1.111–11.111 for loss ratio across the stated intervals. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows; the equations or equivalent correctly reported crossover values count as reporting the crossovers.",
+    "criteria": {
+     "true": "Both crossover directions are reported correctly: prior-odds crossover for a given loss ratio and loss-ratio crossover for a given prior.",
+     "false": "Either crossover direction is missing or incorrect, or the evidence does not establish that both are reported."
+    }
+   }
+  },
+  "B10.1": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about the Northgate Clinic account using `b10-entity/` data covering January through June. Fixture facts: Northgate Clinic resolves to two account ids after a mid-window rename. Frame-lite pins the entity and the identifier that resolves it, the sources that carry it, and the timeframe. Pass if the run pins Northgate Clinic, identifies and retains both resolving account ids, identifies the carrying sources, and records the January-through-June timeframe. A run that widens to the whole table without recording the scope change, or silently drops the second id, fails. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+    "criteria": {
+     "true": "The frame pins the entity, both ids resolving it, the relevant carrying sources, and January through June, without an unrecorded widening or silently dropping the second id.",
+     "false": "Any required entity, id, source, or timeframe is missing or wrong; the scope is widened without recording the change; the second id is silently dropped; or the evidence does not establish all pass conditions."
+    }
+   }
+  },
+  "B10.2": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about Northgate Clinic using `b10-entity/` data covering January through June. There are zero rows in two of the six months. An independent contract-status file covers one of those months and supports genuine inactivity; it is silent about the other month. The orientation record records what the data covers and what its absences mean, before any pattern is interpreted. Pass if the run distinguishes the covered empty month as no activity based on that independent evidence, and records the uncovered empty month as `UNKNOWN`, not inactivity. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+    "criteria": {
+     "true": "Both empty months receive the required distinct interpretations: the independently covered month is no activity, and the uncovered month is `UNKNOWN` rather than inactivity.",
+     "false": "Either month is missing, the covered month is not distinguished as no activity on the independent evidence, the uncovered month is treated as inactivity rather than `UNKNOWN`, or the evidence does not establish both interpretations."
+    }
+   }
+  },
+  "B10.3": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about Northgate Clinic using `b10-entity/` data covering January through June. The deliverable is an orientation record plus an entity record. The orientation record says what the data covers and what its absences mean, written before interpreting patterns. The entity record gives descriptive facts the sources settle about the entity across the framed window, in associational wording. Pass if both functions are present in the output, regardless of headings. A leads table alone or an orientation record alone fails. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+    "criteria": {
+     "true": "The output contains both an orientation record and an entity record performing the stated functions.",
+     "false": "The output contains only a leads table, only an orientation record, or otherwise lacks either required function; also false if the evidence does not establish both."
+    }
+   }
+  },
+  "B10.4": {
+   "question": {
+    "type": "noul",
+    "instructions": "Assess the run using only the evidence in `user_prompt`, `final_answer`, and `files_written`. The task is to tell the user about Northgate Clinic. A plan change occurs one month before a drop in billed volume, which invites a causal story that the data does not support. Pass if nowhere in the output does the run assert or imply that the plan change caused the volume drop or that the volume drop caused the plan change. The plan change and volume drop may both be stated, and their time order may be stated. Judge assertion status, not vocabulary: a causal attribution fails even if phrased indirectly or without causal terms. Apply the section reading rule: content doing the named job passes whatever it is headed. Judge only what the evidence shows.",
+    "criteria": {
+     "true": "No output content asserts or implies a causal attribution between the plan change and the billed-volume drop.",
+     "false": "Any output content asserts or implies that either event caused the other, or the evidence does not establish absence of such attribution."
+    }
+   }
+  }
+ },
+ "arms": [
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "b10-baseline",
+   "items": {
+    "B10.1": null,
+    "B10.2": null,
+    "B10.3": null,
+    "B10.4": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s1-baseline",
+   "items": {
+    "DA-S1.2": null,
+    "DA-S1.4": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave",
+   "arm": "da-s8-baseline",
+   "items": {
+    "DA-S8.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s11-post",
+   "items": {
+    "S11.1": null,
+    "S11.2": null,
+    "S11.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s11-pre",
+   "items": {
+    "S11.1": null,
+    "S11.2": null,
+    "S11.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s13-post",
+   "items": {
+    "S13.1": null,
+    "S13.2": null,
+    "S13.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s13-pre",
+   "items": {
+    "S13.1": null,
+    "S13.2": null,
+    "S13.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s14-post",
+   "items": {
+    "S14.1": null,
+    "S14.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s14-pre",
+   "items": {
+    "S14.1": null,
+    "S14.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s2-post",
+   "items": {
+    "S2.1": null,
+    "S2.2": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s2-pre",
+   "items": {
+    "S2.1": null,
+    "S2.2": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s9-post",
+   "items": {
+    "S9.1": null,
+    "S9.2": null,
+    "S9.3": null
+   }
+  },
+  {
+   "dir": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-20-cheap-route-validity",
+   "arm": "s9-pre",
+   "items": {
+    "S9.1": null,
+    "S9.2": null,
+    "S9.3": null
+   }
+  }
+ ]
+}
