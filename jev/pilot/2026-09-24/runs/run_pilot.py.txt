@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+"""Grade archived arms with Jev and compare against human gold. Stdlib only."""
+
+import json
+import os
+import sys
+import urllib.request
+from pathlib import Path
+
+REPO = Path("/Users/bdc/projects/data-reasoning/skills")
+HDA = REPO / "hypothesis-driven-analysis/tests/runs/artifacts"
+W15 = HDA / "2026-09-15-remediation-wave"
+W20 = HDA / "2026-09-20-cheap-route-validity"
+HERE = Path(__file__).parent
+
+P, F = True, False
+# (item, arm_dir, arm, gold, kind) — kind "human" from run records, "control" constructed
+GOLD = []
+def add(item, d, arms_gold, kind="human"):
+    for arm, g in arms_gold.items():
+        GOLD.append((item, d, arm, g, kind))
+
+add("S9.4a", W15, {"s9-baseline": F, "s9-pre": P, "s9-post": P})
+add("S9.4b", W15, {"s9-baseline": F, "s9-pre": F, "s9-post": P})
+add("B10.5a", W15, {"b10-baseline": P, "b10-pre": P, "b10-post": P, "w2-b10-post": P})
+add("B10.5b", W15, {"b10-baseline": F, "b10-pre": F, "b10-post": F, "w2-b10-post": P})
+add("B10.5c", W15, {"b10-baseline": F, "b10-pre": P, "b10-post": P, "w2-b10-post": P})
+add("DA-S1.5a", W15, {"da-s1-baseline": F, "da-s1-pre": F, "da-s1-post": F, "w2-da-s1-post": P})
+add("DA-S8.2", W15, {"da-s8-baseline": F, "da-s8-pre": P, "da-s8-post": F, "w2-da-s8-post": P, "w3-da-s8-post": F})
+add("DA-S8.4", W15, {"da-s8-baseline": F, "da-s8-pre": F, "da-s8-post": P, "w2-da-s8-post": F})
+for c, items in {"s22a": ["S22a.2", "S22a.3"], "s22b": ["S22b.2", "S22b.3", "S22b.4"], "s22d": ["S22d.3"]}.items():
+    for it in items:
+        add(it, W20, {f"{c}-{v}": P for v in ("baseline", "pre", "post")})
+# constructed negative controls: verdict questions asked of arms whose correct verdict differs
+add("S22b.3", W20, {f"s22a-{v}": F for v in ("baseline", "pre", "post")}, "control")
+add("S22a.3", W20, {f"s22b-{v}": F for v in ("baseline", "pre", "post")}, "control")
+
+
+def state_for(d: Path, arm: str) -> dict:
+    final = ""
+    for line in (d / f"{arm}.jsonl").read_text().splitlines():
+        ev = json.loads(line)
+        if ev.get("type") == "result":
+            final = ev.get("result") or ""
+    files = {}
+    sd = d / f"{arm}.scratch"
+    if sd.is_dir():
+        for f in sorted(sd.rglob("*")):
+            if f.is_file() and f.suffix in {".md", ".txt", ".csv", ".json", ".py"} and f.stat().st_size < 40000:
+                files[str(f.relative_to(sd))] = f.read_text(errors="replace")
+    prompt = (d / f"{arm}.prompt.txt").read_text()
+    return {"user_prompt": prompt, "final_answer": final, "files_written": files}
+
+
+def load_sets() -> dict:
+    sets = {}
+    mine = json.loads((HERE / "questions_claude.json").read_text())
+    rules = {"S22a.3": ("choice", "false"), "S22b.3": ("choice", "undetermined"), "S22d.3": ("choice", "undetermined")}
+    sets["claude"] = {k: (q, rules.get(k, ("noul", None))) for k, q in mine.items()}
+    cx = HERE / "questions_codex.json"
+    if cx.exists():
+        sets["codex"] = {k: (v["question"], parse_rule(v["pass_rule"])) for k, v in json.loads(cx.read_text()).items()}
+    return sets
+
+
+def parse_rule(rule: str):
+    import re
+    m = re.search(r'choice\s*==\s*["\']([^"\']+)', rule)
+    if m:
+        return ("choice", m.group(1))
+    m = re.search(r"score\D*>=?\s*(\d+)", rule)
+    if m:
+        return ("score_ge", int(m.group(1)))
+    return ("noul", None)
+
+
+def call(state, questions):
+    body = json.dumps({"state": state, "model": "jev-latest", "questions": questions}).encode()
+    req = urllib.request.Request("https://api.typesafe.ai/v1/systemone", data=body, method="POST",
+                                 headers={"Authorization": f"Bearer {os.environ['TYPESAFE_API_KEY']}", "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return json.loads(r.read())
+
+
+def verdict(ans, rule):
+    kind, arg = rule
+    if ans["type"] == "noul":
+        return ans["noul"] > 0.5, round(ans["noul"], 3)
+    if ans["type"] == "choice":
+        return ans["choice"] == arg, {k: round(v, 3) for k, v in ans["probabilities"].items()}
+    if ans["type"] == "score":
+        return ans["score"] >= (arg if kind == "score_ge" else 0.5), round(ans["score"], 3)
+    raise ValueError(ans)
+
+
+def main():
+    sets = load_sets()
+    by_arm = {}
+    for item, d, arm, g, kind in GOLD:
+        by_arm.setdefault((d, arm), []).append((item, g, kind))
+    rows, usage = [], 0
+    for (d, arm), entries in by_arm.items():
+        st = state_for(d, arm)
+        qs = {f"{s}|{item}": sets[s][item][0] for s in sets for item, _, _ in entries if item in sets[s]}
+        resp = call(st, qs)
+        usage += resp["usage"]["input_tokens"]
+        for item, g, kind in entries:
+            for s in sets:
+                key = f"{s}|{item}"
+                if key not in resp["answers"]:
+                    continue
+                v, raw = verdict(resp["answers"][key], sets[s][item][1])
+                rows.append({"set": s, "item": item, "arm": arm, "kind": kind, "gold": g, "jev": v, "raw": raw, "model": resp["model"]})
+        print(f"{arm}: {len(qs)} questions", file=sys.stderr)
+    (HERE / "results.json").write_text(json.dumps(rows, indent=1))
+    print(f"input tokens: {usage}")
+    for s in sets:
+        for kind in ("human", "control"):
+            rs = [r for r in rows if r["set"] == s and r["kind"] == kind]
+            agree = sum(r["gold"] == r["jev"] for r in rs)
+            print(f"{s:6} {kind:7} agree {agree}/{len(rs)}")
+        for r in rows:
+            if r["set"] == s and r["gold"] != r["jev"]:
+                print(f"   MISS {r['item']:9} {r['arm']:16} gold={'P' if r['gold'] else 'F'} jev={r['raw']}")
+
+
+if __name__ == "__main__":
+    main()

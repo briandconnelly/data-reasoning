@@ -10,9 +10,9 @@ Should it score arms, route prompts, or check ledgers, and on what terms?
 
 ## What was decided
 
-**Jev is optional development tooling that runs beside the existing scorer and never replaces it.**
+**Jev was adopted as optional development tooling beside the existing scorer, in the role of a second scorer.**
 It lives in `jev/`, outside the release tree and outside every skill, hook, and instrument.
-Its output marks points for a person to read; it is never itself a measured result.
+The terms on which its output may be used are not stated here; they live where the pointer below says.
 
 ## Positions
 
@@ -26,16 +26,19 @@ Declined outright, and not built.
 *Add a `--semantic` mode to `instruments/check_record.py`.* Decision 006 keeps the instrument stdlib-only and fixture-neutral, and a network call inside the live hook's validator breaks the first and makes "not checked" a routine hook outcome.
 Built instead as a separate script that nothing imports.
 
-*Second scorer with an abstain band.* Adopted.
-It keeps the part of the proposal the pilot supports — cheap flags on the points where a scorer is most likely wrong — and nothing the pilot contradicts.
+*Second scorer.* Adopted.
+It keeps the part of the proposal the pilot supports — a cheap, independent-of-Claude reading whose disagreements point a person at arms worth rereading — and nothing the pilot contradicts.
 
 ## What settled it
 
 The pilot (`jev/pilot/2026-09-24/record.md`), in three results.
 
-The honest agreement figure was 80%, against an agent reference, from questions written blind to it; the near-perfect figure came from questions written after reading the reference, which measures the author's hindsight, not Jev.
+The honest agreement figure was 39–40 of 49 over four runs against an agent reference, from questions written blind to it; the near-perfect figure came from questions written after reading the reference, which measures the author's hindsight, not Jev.
+That rules out a sole scorer.
 
-The points where Jev sat near 0.5 were the points the agent scorer had itself got wrong and corrected on review, which is the property a second scorer needs and a sole scorer cannot use.
+About half of the blind set's ten misses in its first archived run were not Jev errors: they were a rubric whose text did not say what its scorer required, a question that looked in the wrong place, and a reference that accepted less than its rubric asked.
+A second reading that surfaces those is useful even at 80% agreement, provided a person decides each disagreement.
+The pilot did not show that Jev's uncertain answers track the scorer's own mistakes; an earlier draft of this record said so from an unarchived run, and the archived runs do not support it.
 
 The semantic check flagged a hypothesis that both scorers had accepted as legitimately refuted, the same failure mode as the over-cautious refutation rule this skill has already had to walk back once.
 A check that punishes a correct refutation cannot be trusted as a gate, whatever it catches elsewhere.

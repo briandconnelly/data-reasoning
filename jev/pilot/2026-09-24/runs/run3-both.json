@@ -1,0 +1,1222 @@
+[
+ {
+  "set": "claude",
+  "item": "S9.4a",
+  "arm": "s9-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.11,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S9.4a",
+  "arm": "s9-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.07,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S9.4b",
+  "arm": "s9-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.03,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S9.4b",
+  "arm": "s9-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.03,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S9.4a",
+  "arm": "s9-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.54,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S9.4a",
+  "arm": "s9-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": false,
+  "raw": 0.23,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S9.4b",
+  "arm": "s9-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.21,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S9.4b",
+  "arm": "s9-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": true,
+  "raw": 0.75,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S9.4a",
+  "arm": "s9-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.97,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S9.4a",
+  "arm": "s9-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.89,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S9.4b",
+  "arm": "s9-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S9.4b",
+  "arm": "s9-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.97,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5a",
+  "arm": "b10-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5a",
+  "arm": "b10-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5b",
+  "arm": "b10-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.16,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5b",
+  "arm": "b10-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": true,
+  "raw": 0.94,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5c",
+  "arm": "b10-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.18,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5c",
+  "arm": "b10-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.04,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5a",
+  "arm": "b10-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5a",
+  "arm": "b10-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5b",
+  "arm": "b10-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.1,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5b",
+  "arm": "b10-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": true,
+  "raw": 0.98,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5c",
+  "arm": "b10-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.75,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5c",
+  "arm": "b10-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": false,
+  "raw": 0.34,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5a",
+  "arm": "b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5a",
+  "arm": "b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5b",
+  "arm": "b10-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.09,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5b",
+  "arm": "b10-post",
+  "kind": "human",
+  "gold": false,
+  "jev": true,
+  "raw": 0.96,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5c",
+  "arm": "b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.67,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5c",
+  "arm": "b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.66,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5a",
+  "arm": "w2-b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5a",
+  "arm": "w2-b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5b",
+  "arm": "w2-b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.94,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5b",
+  "arm": "w2-b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.91,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "B10.5c",
+  "arm": "w2-b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.98,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "B10.5c",
+  "arm": "w2-b10-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.94,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S1.5a",
+  "arm": "da-s1-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.02,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S1.5a",
+  "arm": "da-s1-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.02,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S1.5a",
+  "arm": "da-s1-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.01,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S1.5a",
+  "arm": "da-s1-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.01,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S1.5a",
+  "arm": "da-s1-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.34,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S1.5a",
+  "arm": "da-s1-post",
+  "kind": "human",
+  "gold": false,
+  "jev": true,
+  "raw": 0.52,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S1.5a",
+  "arm": "w2-da-s1-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.84,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S1.5a",
+  "arm": "w2-da-s1-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.89,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.2",
+  "arm": "da-s8-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.05,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.2",
+  "arm": "da-s8-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.08,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.4",
+  "arm": "da-s8-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.02,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.4",
+  "arm": "da-s8-baseline",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.03,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.2",
+  "arm": "da-s8-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.81,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.2",
+  "arm": "da-s8-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": false,
+  "raw": 0.19,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.4",
+  "arm": "da-s8-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.37,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.4",
+  "arm": "da-s8-pre",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.24,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.2",
+  "arm": "da-s8-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.11,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.2",
+  "arm": "da-s8-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.26,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.4",
+  "arm": "da-s8-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.87,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.4",
+  "arm": "da-s8-post",
+  "kind": "human",
+  "gold": true,
+  "jev": false,
+  "raw": 0.5,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.2",
+  "arm": "w2-da-s8-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.51,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.2",
+  "arm": "w2-da-s8-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.97,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.4",
+  "arm": "w2-da-s8-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.18,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.4",
+  "arm": "w2-da-s8-post",
+  "kind": "human",
+  "gold": false,
+  "jev": true,
+  "raw": 0.56,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "DA-S8.2",
+  "arm": "w3-da-s8-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.07,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "DA-S8.2",
+  "arm": "w3-da-s8-post",
+  "kind": "human",
+  "gold": false,
+  "jev": false,
+  "raw": 0.09,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.2",
+  "arm": "s22a-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.2",
+  "arm": "s22a-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.3",
+  "arm": "s22a-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "false": 1.0,
+   "undetermined": 0.0,
+   "true": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.3",
+  "arm": "s22a-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "TRUE": 0.0,
+   "FALSE": 1.0,
+   "NON_DISCRIMINATING": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.3",
+  "arm": "s22a-baseline",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "false": 1.0,
+   "undetermined": 0.0,
+   "true": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.3",
+  "arm": "s22a-baseline",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "TRUE": 0.02,
+   "FALSE": 0.91,
+   "NON_DISCRIMINATING": 0.07
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.2",
+  "arm": "s22a-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.2",
+  "arm": "s22a-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.3",
+  "arm": "s22a-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "false": 1.0,
+   "true": 0.0,
+   "undetermined": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.3",
+  "arm": "s22a-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "TRUE": 0.0,
+   "NON_DISCRIMINATING": 0.0,
+   "FALSE": 1.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.3",
+  "arm": "s22a-pre",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "false": 1.0,
+   "true": 0.0,
+   "undetermined": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.3",
+  "arm": "s22a-pre",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "TRUE": 0.0,
+   "NON_DISCRIMINATING": 0.04,
+   "FALSE": 0.96
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.2",
+  "arm": "s22a-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.2",
+  "arm": "s22a-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.3",
+  "arm": "s22a-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "undetermined": 0.0,
+   "true": 0.0,
+   "false": 1.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.3",
+  "arm": "s22a-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "NON_DISCRIMINATING": 0.0,
+   "FALSE": 1.0,
+   "TRUE": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.3",
+  "arm": "s22a-post",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "undetermined": 0.0,
+   "true": 0.0,
+   "false": 1.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.3",
+  "arm": "s22a-post",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "NON_DISCRIMINATING": 0.07,
+   "FALSE": 0.93,
+   "TRUE": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.2",
+  "arm": "s22b-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.2",
+  "arm": "s22b-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.3",
+  "arm": "s22b-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "true": 0.0,
+   "undetermined": 1.0,
+   "false": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.3",
+  "arm": "s22b-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "FALSE": 0.0,
+   "TRUE": 0.0,
+   "NON_DISCRIMINATING": 1.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.4",
+  "arm": "s22b-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.98,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.4",
+  "arm": "s22b-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.95,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.3",
+  "arm": "s22b-baseline",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "true": 0.0,
+   "undetermined": 1.0,
+   "false": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.3",
+  "arm": "s22b-baseline",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "FALSE": 0.0,
+   "TRUE": 0.04,
+   "NON_DISCRIMINATING": 0.96
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.2",
+  "arm": "s22b-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.2",
+  "arm": "s22b-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.3",
+  "arm": "s22b-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "true": 0.0,
+   "false": 0.0,
+   "undetermined": 1.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.3",
+  "arm": "s22b-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "NON_DISCRIMINATING": 1.0,
+   "TRUE": 0.0,
+   "FALSE": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.4",
+  "arm": "s22b-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.97,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.4",
+  "arm": "s22b-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.95,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.3",
+  "arm": "s22b-pre",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "true": 0.01,
+   "false": 0.0,
+   "undetermined": 0.99
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.3",
+  "arm": "s22b-pre",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "NON_DISCRIMINATING": 0.99,
+   "TRUE": 0.01,
+   "FALSE": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.2",
+  "arm": "s22b-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.2",
+  "arm": "s22b-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.99,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.3",
+  "arm": "s22b-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "undetermined": 1.0,
+   "true": 0.0,
+   "false": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.3",
+  "arm": "s22b-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "TRUE": 0.01,
+   "FALSE": 0.0,
+   "NON_DISCRIMINATING": 0.99
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22b.4",
+  "arm": "s22b-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.98,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22b.4",
+  "arm": "s22b-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": 0.97,
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22a.3",
+  "arm": "s22b-post",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "undetermined": 0.98,
+   "true": 0.02,
+   "false": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22a.3",
+  "arm": "s22b-post",
+  "kind": "control",
+  "gold": false,
+  "jev": false,
+  "raw": {
+   "TRUE": 0.08,
+   "FALSE": 0.0,
+   "NON_DISCRIMINATING": 0.92
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22d.3",
+  "arm": "s22d-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "true": 0.0,
+   "undetermined": 0.98,
+   "false": 0.02
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22d.3",
+  "arm": "s22d-baseline",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "TRUE": 0.0,
+   "NON_DISCRIMINATING": 1.0,
+   "FALSE": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22d.3",
+  "arm": "s22d-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "false": 0.0,
+   "undetermined": 1.0,
+   "true": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22d.3",
+  "arm": "s22d-pre",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "FALSE": 0.0,
+   "NON_DISCRIMINATING": 1.0,
+   "TRUE": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "claude",
+  "item": "S22d.3",
+  "arm": "s22d-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "true": 0.0,
+   "undetermined": 1.0,
+   "false": 0.0
+  },
+  "model": "jev-1.13.0"
+ },
+ {
+  "set": "codex",
+  "item": "S22d.3",
+  "arm": "s22d-post",
+  "kind": "human",
+  "gold": true,
+  "jev": true,
+  "raw": {
+   "TRUE": 0.0,
+   "NON_DISCRIMINATING": 1.0,
+   "FALSE": 0.0
+  },
+  "model": "jev-1.13.0"
+ }
+]

@@ -23,19 +23,26 @@ Every agreement figure below is agreement with that agent scorer.
 
 ## Results
 
-| question set | reference agreement | controls | notes |
-| --- | --- | --- | --- |
-| Codex, blind, PASS at p > 0.5 | 39, 40, 39, 39 of 49 over four runs | 6/6 | the honest out-of-the-box figure, against an agent reference |
-| Codex, blind, abstain band 0.4–0.6 (`grade-report.md`) | 38 agree, 8 disagree, 3 abstain | 6/6 | as `grade.py` reports it |
-| host, in-sample | 47–49 of 49 over six runs | 6/6 | not a validation: written after reading the reference |
+Every figure below recomputes from a committed file.
+`runs/` holds the per-point outputs of the archived runs, and `runs/README.md` says what each file is and what it cannot show.
+Agreement is agreeing points over all 49 reference points; an abstention counts as not agreeing.
 
-Identical requests are not deterministic: answers moved by up to about ±0.04 between runs, enough to flip points near 0.5, which is why `grade.py` has an abstain band.
-The points nearest 0.5 were the ones the scorer itself found hard: DA-S8.4 on the pre arm, first scored PASS and corrected to FAIL on review, drew 0.42 from the host set.
+| question set | runs | reference agreement | controls | source |
+| --- | --- | --- | --- | --- |
+| Codex, blind, PASS at p > 0.5 or the named choice | 3–6 | 39, 40, 39, 39 of 49 | 6/6 each run | `runs/run3-both.json` … `runs/run6-both.json` |
+| Codex, blind, through `grade.py`, abstain band 0.4–0.6 | one later run | 38 of 49 (8 disagree, 3 abstain) | 6/6 | `grade-report.json` |
+| host, in-sample, PASS at p > 0.5 or the named choice | 2–6 | 47, 49, 48, 49, 48 of 49 | 6/6 each run | `runs/run2-host-only.json`, `runs/run3-both.json` … `runs/run6-both.json` |
+
+The host set's figures are not a validation: it was written after reading the reference.
+A first run of the host set scored 49 of 49 and was overwritten before it was archived; it is not counted.
+
+Identical requests are not deterministic.
+Across the archived runs, a yes/no answer's spread from its lowest to its highest value had a median of 0.01 and a maximum of 0.11 (DA-S8.4 on the post arm, 0.47–0.58 from the Codex set), enough to flip a point near 0.5; that is why `grade.py` has an abstain band.
 A full pass over 25 arms cost about 80k input tokens.
 
 ## The disagreements
 
-The host and Codex read the ten misses of the first Codex-set run separately and did not fully agree.
+The host and Codex read the ten misses of the Codex set's run 3 separately and did not fully agree.
 
 - Genuine Jev errors, by both readings: S9.4b pre (accepted a randomization caveat as a completeness statement), DA-S1.5a post (missed annotations after the sentinel), and DA-S8.4 on w2 (accepted "the crossover falls inside both ranges" as stating the loss crossover).
 - Question or rubric scope: B10.5b on three arms — the rubric text says "states that billed volume fell", the scorer required "stated as a change", and Codex's question tested the former; B10.5c pre — the question looked only in the written file, where the handoff is in the final answer.
@@ -48,7 +55,7 @@ The host and Codex read the ten misses of the first Codex-set run separately and
 
 `routing.md`: 60 standalone catalog prompts against the frozen descriptions.
 Most prompts Jev sends away from their own catalog are that catalog's planted non-trigger or cross-route cases, but no labels file exists, so no accuracy is claimed.
-Eight prompts fall below 0.75 confidence; those are the candidates for real agent arms.
+Nine prompts fall below 0.75 confidence in the committed run, against eight in an earlier run that was not kept; the set shifts near the threshold, and its members are candidates for real agent arms, not a fixed list.
 
 ## Semantic check
 
