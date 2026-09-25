@@ -8,9 +8,11 @@ descriptions draw them. It is Jev's routing, not the agent's: what it may be
 used for is owned by jev/README.md. The output that matters is the list of
 prompts Jev cannot place, which are candidates for real agent arms.
 
-`--labels` maps a scenario heading to its intended route (a skill name or
-`none`); labelled prompts are then scored for agreement. With no labels the
-probe reports distributions and ambiguity only.
+`--labels` maps a prompt id to its intended route (a skill name or `none`);
+labelled prompts are then scored for agreement. An id is the catalog's skill
+name and the first 12 hex digits of the prompt text's sha256, because one
+scenario heading can carry several prompts (a pair, or S22's three routes).
+With no labels the probe reports distributions and ambiguity only.
 
 Exit 0 on success, 2 when Jev was unavailable.
 """
@@ -18,6 +20,7 @@ Exit 0 on success, 2 when Jev was unavailable.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -78,6 +81,10 @@ def catalog_prompts(text: str) -> list[tuple[str, str]]:
     return out
 
 
+def prompt_id(skill: str, prompt: str) -> str:
+    return f"{skill}:{hashlib.sha256(prompt.encode()).hexdigest()[:12]}"
+
+
 def route_question(descriptions: dict[str, str]) -> dict[str, Any]:
     criteria = dict(descriptions)
     criteria[NONE_OPTION] = NONE_TEXT
@@ -103,6 +110,7 @@ def probe(transport: jev_client.Transport | None = None) -> list[dict[str, Any]]
             ans = resp["answers"]["route"]
             rows.append(
                 {
+                    "id": prompt_id(skill, prompt),
                     "catalog": skill,
                     "scenario": heading,
                     "prompt": prompt,
@@ -125,11 +133,14 @@ def summarize(rows: list[dict[str, Any]], labels: dict[str, str] | None = None) 
         if r["confidence"] < AMBIGUOUS_BELOW:
             top = sorted(r["probabilities"].items(), key=lambda kv: -kv[1])[:2]
             pair = ", ".join(f"{k} {v:.2f}" for k, v in top)
-            out.append(f"- {r['scenario']} [{r['catalog']}]: {pair}")
+            out.append(f"- {r['scenario']} [{r['id']}]: {pair}")
     if labels:
-        scored = [r for r in rows if r["scenario"] in labels]
-        agree = sum(r["choice"] == labels[r["scenario"]] for r in scored)
-        out += ["", f"Labelled: {agree}/{len(scored)} agree"]
+        by_id = {r["id"]: r for r in rows}
+        unknown = sorted(set(labels) - set(by_id))
+        if unknown:
+            raise ValueError(f"labels name no current prompt: {unknown}")
+        agree = sum(by_id[k]["choice"] == route for k, route in labels.items())
+        out += ["", f"Labelled: {agree}/{len(labels)} agree"]
     return "\n".join(out) + "\n"
 
 

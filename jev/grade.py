@@ -79,6 +79,8 @@ def load_wave(path: Path) -> dict[str, Any]:
         raise ValueError("abstain_band must straddle 0.5 within [0, 1]")
     items = wave["items"]
     for arm in wave["arms"]:
+        if not arm["items"]:
+            raise ValueError(f"arm {arm['arm']} asks no items")
         unknown = set(arm["items"]) - set(items)
         if unknown:
             raise ValueError(f"arm {arm['arm']} names unknown items {sorted(unknown)}")
@@ -98,7 +100,9 @@ def grade(wave: dict[str, Any], transport: jev_client.Transport | None = None) -
     for arm in wave["arms"]:
         kind = arm.get("kind", "reference")
         state = arm_state(REPO / arm["dir"], arm["arm"])
-        size = len(json.dumps(state))
+        qs = {item: items[item]["question"] for item in arm["items"]}
+        # The budget covers the state plus the longest question, so both are counted.
+        size = len(json.dumps(state)) + max(len(json.dumps(q)) for q in qs.values())
         if size > MAX_STATE_CHARS:
             for item, ref in arm["items"].items():
                 points.append(
@@ -108,11 +112,10 @@ def grade(wave: dict[str, Any], transport: jev_client.Transport | None = None) -
                         "kind": kind,
                         "reference": ref,
                         "status": "not_checked",
-                        "reason": f"state {size} chars",
+                        "reason": f"state and longest question {size} chars",
                     }
                 )
             continue
-        qs = {item: items[item]["question"] for item in arm["items"]}
         resp = jev_client.evaluate(state, qs, transport=transport)
         models.add(resp.get("model"))
         tokens += resp.get("usage", {}).get("input_tokens", 0)

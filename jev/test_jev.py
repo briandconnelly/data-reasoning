@@ -188,6 +188,23 @@ def test_oversize_state_is_not_checked(tmp_path, monkeypatch):
     assert report["counts"] == {"reference": {"not_checked": 1}}
 
 
+def test_size_guard_counts_the_longest_question(tmp_path, monkeypatch):
+    monkeypatch.setattr(grade, "REPO", tmp_path)
+    write_arm(tmp_path, "a1", "ok", {})
+    state_size = len(json.dumps(grade.arm_state(tmp_path, "a1")))
+    monkeypatch.setattr(grade, "MAX_STATE_CHARS", state_size + 5)
+    wave = grade.load_wave(wave_file(tmp_path, [{"dir": ".", "arm": "a1", "items": {"i1": True}}]))
+    wave["items"]["i1"]["question"]["instructions"] = "x" * 50
+    report = grade.grade(wave, transport=fake({"i1": noul(0.9)}))
+    assert report["counts"] == {"reference": {"not_checked": 1}}
+
+
+def test_load_wave_refuses_an_arm_with_no_items(tmp_path):
+    path = wave_file(tmp_path, [{"dir": ".", "arm": "a1", "items": {}}])
+    with pytest.raises(ValueError, match="asks no items"):
+        grade.load_wave(path)
+
+
 def test_main_exits_2_when_unavailable(tmp_path, monkeypatch):
     monkeypatch.delenv(jev_client.KEY_VAR, raising=False)
     monkeypatch.setattr(grade, "REPO", tmp_path)
@@ -243,6 +260,37 @@ def test_real_catalogs_yield_no_empty_or_marker_prompts():
             assert not prompt.startswith("**"), prompt
         total += len(prompts)
     assert total >= at_least
+
+
+def routed(prompts: list[tuple[str, str, str]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": route.prompt_id(c, p),
+            "catalog": c,
+            "scenario": h,
+            "prompt": p,
+            "choice": choice,
+            "confidence": 0.9,
+            "probabilities": {choice: 0.9},
+            "model": "m",
+        }
+        for c, h, p, choice in [(*t[:3], t[3]) for t in prompts]
+    ]
+
+
+def test_route_labels_are_keyed_by_prompt_not_heading():
+    rows = routed(
+        [("c", "Scenario 22", "first prompt", "none"), ("c", "Scenario 22", "second prompt", "hda")]
+    )
+    assert rows[0]["id"] != rows[1]["id"]
+    labels = {rows[0]["id"]: "none", rows[1]["id"]: "none"}
+    assert "Labelled: 1/2 agree" in route.summarize(rows, labels)
+
+
+def test_route_labels_naming_no_prompt_are_refused():
+    rows = routed([("c", "Scenario 22", "first prompt", "none")])
+    with pytest.raises(ValueError, match="name no current prompt"):
+        route.summarize(rows, {"Scenario 22": "none"})
 
 
 def test_route_reads_the_frozen_goldens():

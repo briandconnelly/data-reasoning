@@ -35,7 +35,9 @@ python3 jev/grade.py jev/pilot/2026-09-24/wave.json --out report.json
 `route.py` — routes every standalone catalog prompt against the frozen descriptions in `scripts/frontmatter-descriptions/`, plus a "none of these" option, and lists the prompts Jev cannot place.
 It measures whether a prompt's text separates the routes as the descriptions draw them.
 It is Jev's routing, not the agent's, so it does not bear on the description freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md`; its use is choosing which prompts deserve real agent arms.
-`--labels` scores agreement against a file mapping scenario headings to intended routes; no such file exists yet.
+`--labels` scores agreement against a file mapping prompt ids to intended routes, and refuses an id that names no current prompt.
+An id is the catalog's skill name and a hash of the prompt text, because one scenario heading can carry several prompts; the ids are in `route.py`'s JSON output.
+No labels file exists yet.
 
 ```bash
 python3 jev/route.py --out routing.json
