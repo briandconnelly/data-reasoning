@@ -30,8 +30,10 @@ import jev_client
 
 REPO = Path(__file__).resolve().parents[1]
 TEXT_SUFFIXES = {".md", ".txt", ".csv", ".json", ".py", ".sql"}
-# Jev's state budget is 32k tokens including the longest question; ~4 chars a token.
+# Jev has two budgets: 32k tokens for the state plus the longest question, and
+# 64k for the state plus every question in the request. ~4 chars a token.
 MAX_STATE_CHARS = 100_000
+MAX_REQUEST_CHARS = 200_000
 HALF = 0.5
 EXIT_UNAVAILABLE = 2
 
@@ -104,9 +106,11 @@ def grade(wave: dict[str, Any], transport: jev_client.Transport | None = None) -
         kind = arm.get("kind", "reference")
         state = arm_state(REPO / arm["dir"], arm["arm"])
         qs = {item: items[item]["question"] for item in arm["items"]}
-        # The budget covers the state plus the longest question, so both are counted.
-        size = len(json.dumps(state)) + max(len(json.dumps(q)) for q in qs.values())
-        if size > MAX_STATE_CHARS:
+        state_size = len(json.dumps(state))
+        q_sizes = [len(json.dumps(q)) for q in qs.values()]
+        size = state_size + max(q_sizes)
+        total = state_size + sum(q_sizes)
+        if size > MAX_STATE_CHARS or total > MAX_REQUEST_CHARS:
             for item, ref in arm["items"].items():
                 points.append(
                     {
@@ -115,7 +119,10 @@ def grade(wave: dict[str, Any], transport: jev_client.Transport | None = None) -
                         "kind": kind,
                         "reference": ref,
                         "status": "not_checked",
-                        "reason": f"state and longest question {size} chars",
+                        "reason": (
+                            f"state + longest question {size} chars, "
+                            f"state + all questions {total} chars"
+                        ),
                     }
                 )
             continue

@@ -37,7 +37,7 @@ The honest agreement figure was 39–40 of 49 over four runs against an agent re
 That rules out a sole scorer.
 
 About half of the blind set's ten misses in its first archived run were not Jev errors: they were a rubric whose text did not say what its scorer required, a question that looked in the wrong place, and a reference that accepted less than its rubric asked.
-A second reading that surfaces those is useful even at 80% agreement, provided a person decides each disagreement.
+A second reading that surfaces those is useful even at 80% agreement, on the terms `jev/README.md` § Rules for using the output sets.
 The pilot did not show that Jev's uncertain answers track the scorer's own mistakes; an earlier draft of this record said so from an unarchived run, and the archived runs do not support it.
 
 The semantic check flagged a hypothesis that both scorers had accepted as legitimately refuted, the same failure mode as the over-cautious refutation rule this skill has already had to walk back once.

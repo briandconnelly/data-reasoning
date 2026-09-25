@@ -232,6 +232,22 @@ def test_malformed_choice_answer_marks_only_that_point(tmp_path, monkeypatch):
     assert report["counts"] == {"reference": {"agree": 1, "not_checked": 1}}
 
 
+def test_size_guard_counts_all_questions_together(tmp_path, monkeypatch):
+    monkeypatch.setattr(grade, "REPO", tmp_path)
+    write_arm(tmp_path, "a1", "ok", {})
+    wave = grade.load_wave(
+        wave_file(tmp_path, [{"dir": ".", "arm": "a1", "items": {"i1": True, "i2": True}}])
+    )
+    for item in ("i1", "i2"):
+        wave["items"][item]["question"]["instructions"] = "x" * 40
+    state_size = len(json.dumps(grade.arm_state(tmp_path, "a1")))
+    one_question = len(json.dumps(wave["items"]["i1"]["question"]))
+    # Each question fits beside the state on its own; the two together do not.
+    monkeypatch.setattr(grade, "MAX_REQUEST_CHARS", state_size + one_question + 5)
+    report = grade.grade(wave, transport=fake({"i1": noul(0.9), "i2": noul(0.9)}))
+    assert report["counts"] == {"reference": {"not_checked": 2}}
+
+
 def test_load_wave_refuses_an_arm_with_no_items(tmp_path):
     path = wave_file(tmp_path, [{"dir": ".", "arm": "a1", "items": {}}])
     with pytest.raises(ValueError, match="asks no items"):

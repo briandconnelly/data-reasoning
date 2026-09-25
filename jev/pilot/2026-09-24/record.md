@@ -19,7 +19,8 @@ Every agreement figure below is agreement with that agent scorer.
 - Controls: 6 constructed points — S22b's verdict question asked of the S22a arms and S22a's asked of the S22b arms — whose correct answer is FAIL.
 - Two question sets:
   - Codex's (`wave.json`), written from `packet.md` alone, told not to open `skills/*/tests/`, and with no pointer to the host's draft.
-  - The host's (`questions-in-sample.json`), written after the host had read the reference tables. It encodes the scorer's unwritten rules and is in-sample; it is kept as evidence of that and is not a validation.
+  - The host's (`questions-in-sample.json`), written after the host had read the reference tables.
+    It encodes the scorer's unwritten rules and is in-sample; it is kept as evidence of that and is not a validation.
 
 ## Results
 
