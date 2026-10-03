@@ -4,7 +4,7 @@
 The release tree is what an install should fetch: the four skills, their
 references, decision records, and agent interface metadata, the hook, the
 validator, the output style, and the manifests. Evaluation fixtures, archived
-runs, and test suites stay on `main`. The output directory is created fresh;
+runs, and test suites stay on `dev`. The output directory is created fresh;
 an existing directory is rebuilt only when it carries this builder's marker
 file."""
 

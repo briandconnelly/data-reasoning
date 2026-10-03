@@ -93,7 +93,7 @@ RELEASE_DENYLIST = (
     # four skills under it ship.
     ".agents/skills/*",
     # Scenario catalogs, fixtures, and archived runs: ~43 MB of evaluation
-    # evidence that stays on `main` by the release tree's design.
+    # evidence that stays on `dev` by the release tree's design.
     "skills/*/tests/*",
 )
 

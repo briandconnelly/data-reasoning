@@ -87,29 +87,23 @@ These commands provide structural validation, not a review of the analysis or ev
 
 ## Installation
 
+The default branch, `main`, holds only the runtime tree, rebuilt by CI on every push to `dev`, so an install never downloads the evidence archive.
+This repository is its own plugin marketplace; the plugin is also listed in [briandconnelly-plugins](https://github.com/briandconnelly/briandconnelly-plugins).
+
 ### Claude Code
 
-This repository is its own plugin marketplace (`.claude-plugin/marketplace.json`).
-Add it from the `release` branch, then install the plugin from it:
-
 ```
-/plugin marketplace add briandconnelly/data-reasoning#release
+/plugin marketplace add briandconnelly/data-reasoning
 /plugin install data-reasoning@data-reasoning
 ```
 
-`#release` is a runtime-only branch rebuilt by CI on every push to `main`.
-Adding the marketplace without it clones the full evidence archive.
-
 ### Codex
 
-Add the marketplace pinned to the `release` branch, then install the plugin from it:
-
 ```bash
-codex plugin marketplace add briandconnelly/data-reasoning --ref release
+codex plugin marketplace add briandconnelly/data-reasoning
 codex plugin add data-reasoning@data-reasoning
 ```
 
-Adding the marketplace without `--ref release` clones the full evidence archive.
 Start a new Codex session after installation so the bundled skills are available.
 
 Continue with [Verify a Codex install](#verify-a-codex-install) before relying on automatic validation.
@@ -144,9 +138,9 @@ An extra `data-reasoning:s18-analytics` comes from a development fixture: a full
 The release builder excludes fixtures, and the install checker reports nested discoverable skills.
 For an older install without that checker, run the current source checkout's `instruments/check_install.py` with the installed plugin root as its argument.
 
-Reinstall from the `release` branch using the [Codex installation commands](#codex), then start a new session and repeat [verification](#verify-a-codex-install).
-If an existing non-default marketplace entry prevents registering the release source, remove that configured marketplace by its actual name with `codex plugin marketplace remove <marketplace-name>` before adding the release marketplace.
-For the default personal marketplace, remove the plugin with `codex plugin remove data-reasoning@data-reasoning`, then add it again from the release marketplace.
+Remove the old install, then reinstall using the [Codex installation commands](#codex), start a new session, and repeat [verification](#verify-a-codex-install).
+For a plugin installed from a configured marketplace, remove that marketplace by its actual name with `codex plugin marketplace remove <marketplace-name>`.
+For the default personal marketplace, remove the plugin with `codex plugin remove data-reasoning@<marketplace-name>`.
 Do not delete or edit individual cached fixture files: the source package determines what returns on the next install.
 
 For local development installs, build a runtime tree first and register that directory as the marketplace:
@@ -163,6 +157,7 @@ Resolve an existing marketplace registration as described above before registeri
 
 ## Development
 
+Development happens on the `dev` branch, which carries the test suites, fixtures, and archived runs; see `AGENTS.md` for the branch rules.
 All gates run through [prek](https://github.com/j178/prek):
 
 ```bash
