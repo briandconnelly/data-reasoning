@@ -507,8 +507,11 @@ def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
     ordered = sorted(rows, key=lambda x: x.ordinal)
     earlier: list[tuple[Row, str]] = []
     # The ledger-writing Bash call itself may run analysis before its redirect
-    # (``python a.py data.csv; cat > ledger.md``); list it first.
-    own_note = classification_note(ledger, data) if bash_write else None
+    # (``python a.py data.csv; cat > ledger.md``); list it first. Only its shell
+    # line counts (the text ``shell_redirect_target`` searches): the heredoc
+    # body is the plan, and a plan naming its data file is not analysis.
+    shell_line = _decode_manifest_escapes(ledger.target).split("\n", 1)[0]
+    own_note = classification_note(ledger._replace(target=shell_line), data) if bash_write else None
     if own_note is not None:
         earlier.append((ledger, own_note + LEDGER_CALL_NOTE))
     earlier += _noted([r for r in ordered if r.ordinal < ledger.ordinal], data)

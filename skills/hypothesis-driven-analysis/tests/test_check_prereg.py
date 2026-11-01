@@ -292,6 +292,16 @@ def test_analysis_inside_the_ledger_writing_call_is_listed(
     assert "ordinal 2" in out
 
 
+def test_heredoc_body_naming_data_does_not_list_the_ledger_call(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    ledger = row(2, "Bash", "cat > ledger.md <<'E'\n# plan reads data.csv\nE")
+    code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "CLEAN" in out
+
+
 def test_plain_ledger_writing_call_stays_clean(capsys: pytest.CaptureFixture[str]) -> None:
     ledger = row(2, "Bash", "cat > ledger.md <<'E'")
     code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
