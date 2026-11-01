@@ -9,8 +9,9 @@ The skill's central promise is that predictions are written before
 cause-outcome relationships are inspected. A ledger emitted only in the final
 report cannot demonstrate that, so this checker reads the transcript manifest
 (TSV from ``extract_evidence.py manifest``) and establishes the ordering
-facts: the ordinal of the first *executed* Write/Edit whose target matches
---ledger-pattern, and every earlier tool_use that must be classified.
+facts: the ordinal of the first *executed* ledger write (a Write/Edit whose
+target matches --ledger-pattern, or a Bash redirect into a matching path), and
+every earlier tool_use that must be classified.
 
 It deliberately does not judge whether a pre-write data touch was orientation
 (schema, row counts, coverage -- permitted before preregistration) or analysis
@@ -40,11 +41,18 @@ Fail-closed behaviors:
   ``make``/``npm run``, bare extensionless PATH executables) still require
   reading the events stream. This listing rule applies to the SAME-BATCH scan
   as well, so a timestamp-tied script write cannot slip through as CLEAN.
-- If no executed Write/Edit matches --ledger-pattern, Bash rows (any status)
-  whose command matches the pattern are surfaced as possible Bash-mediated
-  ledger writes (``cat > ledger.md`` and the like); the run stays
-  UNVERIFIABLE (exit 2) and those candidates must be verified from the
-  events stream and scored manually.
+- A ledger write is the first row with status ``ok`` that is either a
+  Write/Edit whose target matches --ledger-pattern or a Bash command whose
+  shell redirect (``>`` or ``>>``, see ``shell_redirect_target``) points into
+  a matching path (``cat > ledger.md <<'E'``). For a redirect, the target's
+  basename must END with a match of --ledger-pattern, so ``ledger.md.bak`` is
+  not the ledger; a pattern that does not reach the end of the basename
+  (``ledger`` against ``ledger.md``) recovers nothing and the run stays
+  UNVERIFIABLE. Only the command's first line is searched, so a ``>`` inside
+  a heredoc body is never read as a redirect. Any other Bash row that merely
+  mentions a matching path (``tee``, an interpreter heredoc, an errored
+  redirect) is named as a candidate, but the run stays UNVERIFIABLE (exit 2)
+  and the preregistration assertion fails. There is no manual rescue.
 
 Content check: finding the write proves *when* a ledger file was touched, not
 *what* it contained. Whenever a ledger write is found the checker prints a
@@ -67,7 +75,8 @@ Exit codes:
   1  ledger write found; pre-write touches and/or same-batch rows listed for
      classification
   2  UNVERIFIABLE: unreadable manifest, integrity failure, invalid pattern,
-     or no executed ledger write -- the preregistration assertion fails
+     or no executed ledger write (Write/Edit, or a Bash redirect into a
+     matching path) -- the preregistration assertion fails
 """
 
 from __future__ import annotations
@@ -171,6 +180,102 @@ _SCRIPT_EXTS = (
 )
 # A version/point-release suffix on an interpreter name (python3, python3.12).
 _VERSION_SUFFIX = re.compile(r"\d+(?:\.\d+)*$")
+# An output redirect (``>`` or ``>>``) and its target. The lookbehind excludes
+# fd duplication (``2>&1``, ``2>``), heredoc/herestring markers (``<<``), and
+# arrows (``->``, ``=>``).
+_REDIRECT = re.compile(r"(?<![<>\d=-])>{1,2}\s*(?:[\"']([^\"']+)[\"']|([^\s\"'|;&<>]+))")
+
+
+def _mask_quotes_and_comment(line: str) -> str:
+    """``line`` with quoted interiors and any unquoted ``#`` comment blanked.
+
+    Index-for-index: every masked character becomes one ``x`` (quote interiors)
+    or one space (the comment), so a match's span on the masked text is the
+    same span on ``line``. The quote characters themselves are kept.
+
+    Outside single quotes a backslash masks itself and the next character, so
+    ``\\>`` is not a redirect and ``\\"`` does not close a double-quoted span;
+    inside single quotes a backslash is literal, as in the shell.
+    """
+    out: list[str] = []
+    quote: str | None = None
+    escaped = False
+    for i, ch in enumerate(line):
+        if escaped:
+            escaped = False
+            out.append("x")
+        elif ch == "\\" and quote != "'":
+            escaped = True
+            out.append("x")
+        elif quote is not None:
+            if ch == quote:
+                quote = None
+                out.append(ch)
+            else:
+                out.append("x")
+        elif ch in "\"'":
+            quote = ch
+            out.append(ch)
+        elif ch == "#" and (i == 0 or line[i - 1].isspace()):
+            out.append(" " * (len(line) - i))
+            break
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
+_MANIFEST_ESCAPES = {"\\": "\\", "n": "\n", "t": "\t", "r": "\r"}
+
+
+def _decode_manifest_escapes(text: str) -> str:
+    """Undo extract_evidence.py's ``_flatten`` escaping, left to right.
+
+    ``\\\\`` becomes ``\\``, ``\\n`` a newline, ``\\t`` a tab, ``\\r`` a carriage
+    return; any other ``\\x`` pair is kept as-is.
+    """
+    out: list[str] = []
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "\\" and i + 1 < len(text) and text[i + 1] in _MANIFEST_ESCAPES:
+            out.append(_MANIFEST_ESCAPES[text[i + 1]])
+            i += 2
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def shell_redirect_target(command: str) -> str | None:
+    """The target of the first unquoted ``>``/``>>`` output redirect, or None.
+
+    Recovers ``ledger.md`` from ``cat > ledger.md <<'E'`` so a heredoc-written
+    ledger counts as the ledger write. ``tee`` and interpreter-mediated writes
+    (``python3 - <<'E' ... open('ledger.md', 'w')``) are out of reach on
+    purpose: they stay candidates named in the UNVERIFIABLE message, never
+    writes. A heuristic, not a shell parser.
+
+    Before searching, the interiors of single- and double-quoted spans and
+    everything from an unquoted word-initial ``#`` onward are masked, so a
+    ``>`` inside a string (``echo "a > ledger.md"``) or a comment
+    (``cmd # > ledger.md``) is not a redirect. The masking keeps positions,
+    and the target is read from the original text at the match's span, so a
+    quoted target (``> "my ledger.md"``) is still recovered.
+
+    ``command`` may be in manifest form: its escapes are decoded with
+    ``_decode_manifest_escapes`` before the first line is taken, so only a real
+    newline ends the shell line.
+    """
+    # Only the first line: a heredoc body (``if a > b:``) is not shell. The
+    # manifest escapes are decoded first, so ``\\\\n`` (an escaped backslash
+    # followed by ``n``) is not mistaken for extract_evidence.py's ``\\n``.
+    first_line = _decode_manifest_escapes(command).split("\n", 1)[0]
+    match = _REDIRECT.search(_mask_quotes_and_comment(first_line))
+    if match is None:
+        return None
+    group = 1 if match.group(1) is not None else 2
+    start, end = match.span(group)
+    return first_line[start:end]
 
 
 def _looks_like_script_path(token: str) -> bool:
@@ -260,6 +365,11 @@ def looks_like_script_execution(command: str) -> bool:
     return False
 
 
+LEDGER_CALL_NOTE = (
+    " (the ledger-writing call itself: anything it ran before the redirect precedes the plan)"
+)
+
+
 def classification_note(row: Row, data: re.Pattern[str]) -> str | None:
     """Why this row needs manual classification, or None if it does not.
 
@@ -324,14 +434,30 @@ def parse_manifest(text: str) -> tuple[list[Row], list[str]]:
     return rows, fails
 
 
-def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
-    """The first executed Write/Edit whose target matches the ledger pattern.
+def _redirect_matches(target: str, pattern: re.Pattern[str]) -> bool:
+    """A recovered redirect target whose basename ends with a ledger-pattern match."""
+    base = target.rsplit("/", 1)[-1]
+    return any(m.end() == len(base) for m in pattern.finditer(base))
 
+
+def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
+    """The first executed ledger write: a Write/Edit or a Bash redirect.
+
+    A Write/Edit qualifies when its target matches the ledger pattern; a Bash
+    row qualifies when ``shell_redirect_target`` recovers a matching path.
     Only a paired ok result proves execution (extract_evidence.py's contract),
     so an errored or unpaired write attempt is not a preregistration.
     """
     for row in sorted(rows, key=lambda r: r.ordinal):
-        if row.tool in WRITE_TOOLS and row.status == "ok" and pattern.search(row.target):
+        if row.status != "ok":
+            continue
+        if row.tool in WRITE_TOOLS and pattern.search(row.target):
+            return row
+        if (
+            row.tool == "Bash"
+            and (t := shell_redirect_target(row.target))
+            and _redirect_matches(t, pattern)
+        ):
             return row
     return None
 
@@ -339,7 +465,7 @@ def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
 def no_ledger_message(rows: list[Row], pattern: re.Pattern[str], raw_pattern: str) -> str:
     """UNVERIFIABLE message, naming any Bash rows that look like ledger writes."""
     message = (
-        f"UNVERIFIABLE: no executed Write/Edit matches --ledger-pattern "
+        f"UNVERIFIABLE: no executed ledger write matches --ledger-pattern "
         f"{raw_pattern!r}; preregistration ordering cannot be "
         f"established from this transcript"
     )
@@ -350,15 +476,22 @@ def no_ledger_message(rows: list[Row], pattern: re.Pattern[str], raw_pattern: st
     if bash_candidates:
         ordinals = ",".join(str(r.ordinal) for r in bash_candidates)
         message += (
-            f"; possible Bash-mediated ledger write(s) at ordinal(s) {ordinals} "
-            f"— verify from the events stream and score manually"
+            f"; Bash row(s) at ordinal(s) {ordinals} mention a matching path "
+            f"without a recoverable redirect — the preregistration assertion fails"
         )
     return message
 
 
+def _noted(rows: list[Row], data: re.Pattern[str]) -> list[tuple[Row, str]]:
+    """Each row that needs classification, paired with its note suffix."""
+    return [(r, note) for r in rows if (note := classification_note(r, data)) is not None]
+
+
 def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
     """Print the ordering facts for a found ledger write; return the exit code."""
-    print(f"PREREG_WRITE: ordinal {ledger.ordinal} ({ledger.tool} -> {ledger.target})")
+    bash_write = ledger.tool == "Bash"
+    target = (shell_redirect_target(ledger.target) if bash_write else None) or ledger.target
+    print(f"PREREG_WRITE: ordinal {ledger.ordinal} ({ledger.tool} -> {target})")
     print(
         f"CONTENT-CHECK REQUIRED: confirm from the events stream "
         f"(extract_evidence.py events <transcript> --ordinal {ledger.ordinal}) "
@@ -366,21 +499,26 @@ def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
         f"— a placeholder written early and filled after analysis is a "
         f"reconstruction, not a preregistration."
     )
+    if bash_write:
+        print(
+            "BASH-WRITE: the ledger was written by a shell redirect; the content "
+            "check above applies to the redirect body in the events stream."
+        )
     ordered = sorted(rows, key=lambda x: x.ordinal)
     earlier: list[tuple[Row, str]] = []
-    for r in ordered:
-        if r.ordinal >= ledger.ordinal:
-            continue
-        note = classification_note(r, data)
-        if note is not None:
-            earlier.append((r, note))
-    same_batch: list[tuple[Row, str]] = []
-    for r in ordered:
-        if r.ordinal <= ledger.ordinal or r.timestamp != ledger.timestamp:
-            continue
-        note = classification_note(r, data)
-        if note is not None:
-            same_batch.append((r, note))
+    # The ledger-writing Bash call itself may run analysis before its redirect
+    # (``python a.py data.csv; cat > ledger.md``); list it first. Only its shell
+    # line counts (the text ``shell_redirect_target`` searches): the heredoc
+    # body is the plan, and a plan naming its data file is not analysis.
+    shell_line = _decode_manifest_escapes(ledger.target).split("\n", 1)[0]
+    own_note = classification_note(ledger._replace(target=shell_line), data) if bash_write else None
+    if own_note is not None:
+        earlier.append((ledger, own_note + LEDGER_CALL_NOTE))
+    earlier += _noted([r for r in ordered if r.ordinal < ledger.ordinal], data)
+    same_batch = _noted(
+        [r for r in ordered if r.ordinal > ledger.ordinal and r.timestamp == ledger.timestamp],
+        data,
+    )
     if not earlier and not same_batch:
         print("CLEAN: no data-matching tool_use precedes the ledger write")
         return 0

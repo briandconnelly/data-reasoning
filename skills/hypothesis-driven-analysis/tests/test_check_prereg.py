@@ -208,3 +208,103 @@ def test_same_batch_hidden_script_is_listed(capsys: pytest.CaptureFixture[str]) 
     assert "SAME-BATCH" in out
     assert "ordinal 2" in out
     assert cp.SCRIPT_EXEC_NOTE in out  # SAME-BATCH lines carry the note too (parity with CLASSIFY)
+
+
+LEDGER = re.compile(r"ledger\.md")
+
+
+@pytest.mark.parametrize(
+    ("cmd", "target"),
+    [
+        ("cd /w; cat > ledger.md <<'E'\n# plan\nE", "ledger.md"),
+        ("printf 'x' >> work/ledger.md", "work/ledger.md"),
+        ('tee "ledger.md" <<EOF', None),
+        ("python3 - <<'E'\ns=open('ledger.md').read()\nE", None),
+        ("cat ledger.md", None),
+        ("sed -i 's/a/b/' ledger.md", None),
+        ("python a.py > out.txt 2>&1", "out.txt"),
+        ("python3 - <<E\nif a > ledger.md: pass\nE", None),
+        ("cat > ledger.md <<'E'\nx > y\nE", "ledger.md"),
+        ("python3 - <<E\\nif a > ledger.md: pass\\nE", None),
+        ('echo "note > ledger.md"', None),
+        ("echo 'see > ledger.md later'", None),
+        ("grep -c x data.csv # > ledger.md", None),
+        ("cat > \"ledger.md\" <<'E'\nx\nE", "ledger.md"),
+        # A backslash-escaped `>` is a literal, not a redirect (raw and manifest form).
+        (r"echo note \> ledger.md", None),
+        ("echo note \\\\> ledger.md", None),
+        # An escaped quote does not close a double-quoted span.
+        (r'echo "a \" > ledger.md"', None),
+        # extract_evidence doubles a real backslash: `\\n` is backslash + n, not a newline.
+        ("printf '# Plan\\\\n' > ledger.md", "ledger.md"),
+        ("cat > ledger.md <<'E'\\n# plan\\nE", "ledger.md"),
+    ],
+)
+def test_shell_redirect_target(cmd: str, target: str | None) -> None:
+    assert cp.shell_redirect_target(cmd) == target
+
+
+def test_redirect_written_ledger_counts_as_the_ledger_write() -> None:
+    rows = [row(1, "Read", "SKILL.md"), row(2, "Bash", "cat > ledger.md <<'E'\n# plan\nE")]
+    found = cp.first_ledger_write(rows, LEDGER)
+    assert found is not None
+    assert found.ordinal == rows[1].ordinal
+
+
+def test_errored_redirect_is_not_a_ledger_write() -> None:
+    rows = [row(2, "Bash", "cat > ledger.md <<'E'\nE", status="error")]
+    assert cp.first_ledger_write(rows, LEDGER) is None
+
+
+def test_python_heredoc_touching_the_ledger_is_not_a_write() -> None:
+    rows = [row(2, "Bash", "python3 - <<'E'\nopen('ledger.md').read()\nE")]
+    assert cp.first_ledger_write(rows, LEDGER) is None
+    msg = cp.no_ledger_message(rows, LEDGER, "ledger")
+    assert "ordinal(s) 2" in msg
+    assert "manually" not in msg
+    assert "assertion fails" in msg
+
+
+def test_bash_write_is_labelled_in_the_report(capsys: pytest.CaptureFixture[str]) -> None:
+    ledger = row(2, "Bash", "cat > ledger.md <<'E'\nE")
+    cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert "PREREG_WRITE: ordinal 2 (Bash -> ledger.md)" in out
+    assert "BASH-WRITE" in out
+
+
+@pytest.mark.parametrize(
+    "cmd",
+    ["cat ledger.md > ledger.md.bak", "grep H ledger.md > /tmp/ledger.md.txt"],
+)
+def test_redirect_to_a_non_ledger_basename_is_not_a_write(cmd: str) -> None:
+    assert cp.first_ledger_write([row(2, "Bash", cmd)], LEDGER) is None
+
+
+def test_analysis_inside_the_ledger_writing_call_is_listed(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    ledger = row(2, "Bash", "python analyze.py data.csv; cat > ledger.md <<'E'")
+    code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert code == 1
+    assert "CLASSIFY" in out
+    assert "ordinal 2" in out
+
+
+def test_heredoc_body_naming_data_does_not_list_the_ledger_call(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    ledger = row(2, "Bash", "cat > ledger.md <<'E'\n# plan reads data.csv\nE")
+    code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "CLEAN" in out
+
+
+def test_plain_ledger_writing_call_stays_clean(capsys: pytest.CaptureFixture[str]) -> None:
+    ledger = row(2, "Bash", "cat > ledger.md <<'E'")
+    code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "CLEAN" in out

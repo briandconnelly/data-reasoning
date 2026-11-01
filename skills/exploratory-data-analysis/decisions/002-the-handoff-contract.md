@@ -82,7 +82,7 @@ lead id and its search-provenance class; the associational statement; source ids
 
 **Amending HDA's `mini` row to carry a batch of leads.**
 Proposed in the first plan draft and withdrawn.
-It fails three ways: most handed-off leads carry named untested rivals and are `full`-shaped, so the amendment would route the seam's main traffic into a row that does not match it; `mini` has no retrospective label, no promotion bar, and no source-id requirement, so it is the one route lacking the safeguard the handoff depends on, and `compare_prereg.py` excludes the mini paragraph from its scope; and editing the row's condition supersedes S11 and S13, both measured 3/3 against the current table, plus S17 and arguably S12.
+It fails three ways: most handed-off leads carry named untested rivals and are `full`-shaped, so the amendment would route the seam's main traffic into a row that does not match it; `mini` has no retrospective label, no promotion bar, and no source-id requirement, so it is the one route lacking the safeguard the handoff depends on, and `skills/hypothesis-driven-analysis/tests/compare_prereg.py` excludes the mini paragraph from its scope; and editing the row's condition supersedes S11 and S13, both measured 3/3 against the current table, plus S17 and arguably S12.
 The additive alternative above owes no reruns of existing cells.
 
 **A behavioral claim that agents fall through HDA's routing table on a batch of leads.**

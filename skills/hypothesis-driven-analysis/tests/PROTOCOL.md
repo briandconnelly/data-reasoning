@@ -87,6 +87,14 @@ It owes one confirmation cell per rule removed — not a batch — and the reaso
 
 Why this rule and not a stricter or looser one: [decisions/001-rerun-obligation.md](../decisions/001-rerun-obligation.md).
 
+## Who scored it
+
+Every scored run record names its scorer on a line beginning `Scorer:`, directly under its date line.
+The line names a model and the session that ran it (`Scorer: the dispatching session (Fable)`) or a person by name, and then any reviewer who changed a score, with the model or person and the date.
+An agreement rate against an agent scorer is agreement with that agent, not with a person; a record that wants to claim a human reading names the human.
+Records dated before 2026-11-01 without a `Scorer:` line are presumed scored by the dispatching agent session; git authorship (`briandconnelly-agent[bot]`) is the only evidence, and those records are frozen and are not backfilled.
+`scripts/check-scorer-disclosure.py` enforces the line on records dated from 2026-11-01.
+
 ## Scope caveat
 
 No step in this ordering has been measured against a counterfactual where it was skipped; every one was adopted on the reasoning above.

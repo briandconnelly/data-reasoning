@@ -149,6 +149,55 @@ def test_commented_out_heading_is_not_found():
         css.extract_section(text, heading)
 
 
+def test_close_then_open_on_one_line_opens_a_comment():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n<!-- note -->  <!--\n{heading}\n\nhidden\n-->\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_close_then_open_while_commented_stays_commented():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n<!--\na\n--> <!--\n{heading}\n\nhidden\n-->\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="heading not found"):
+        css.extract_section(text, heading)
+
+
+def test_section_with_a_commented_body_line_is_refused():
+    heading = "## Data Rules"
+    text = f"# Skill\n\n{heading}\n\nvisible rule\n<!--\nhidden rule\n-->\n\n## Other\n\nx\n"
+    with pytest.raises(ValueError, match="section body is hidden"):
+        css.extract_section(text, heading)
+
+
+def test_section_with_a_one_line_comment_body_line_is_refused():
+    heading = "## Data Rules"
+    text = f"{heading}\n\nvisible\n<!-- mandatory rule -->\n\n## Other\n"
+    with pytest.raises(ValueError, match="section body is hidden"):
+        css.extract_section(text, heading)
+
+
+def test_inline_code_showing_a_comment_is_not_hidden():
+    heading = "## Data Rules"
+    text = f"{heading}\n\nThe token `<!-- x -->` is documented.\n\n## Other\n"
+    block = css.extract_section(text, heading)
+    assert "The token `<!-- x -->` is documented." in block
+
+
+def test_update_refuses_a_hidden_body(tmp_path, capsys):
+    fake = make_fake_repo(tmp_path)
+    skill_md = fake / "skills" / "decision-analysis" / "SKILL.md"
+    text = skill_md.read_text(encoding="utf-8")
+    block = css.extract_section(text, "## Data Rules")
+    lines = block.split("\n")
+    hidden = "\n".join([lines[0], "", "<!--", *lines[2:-1], "-->", ""])
+    skill_md.write_text(text.replace(block, hidden), encoding="utf-8")
+    assert css.run(fake, frozenset({"da-data-rules"})) == EXPECTED_ERROR_CODE
+    assert "hidden" in capsys.readouterr().err
+    golden = fake / "scripts" / "shared-sections" / "da-data-rules.md"
+    assert golden.read_text(encoding="utf-8") == block
+
+
 def test_comment_opener_inside_a_fence_does_not_hide_a_later_section():
     heading = "## Data Rules"
     text = f"# Skill\n\n```\n<!--\n```\n\n{heading}\n\nvisible rule\n\n## Other\n\nx\n"

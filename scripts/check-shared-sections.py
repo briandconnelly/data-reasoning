@@ -82,6 +82,7 @@ FAULT_CODE = 2
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 BACKTICK_RUN = re.compile(r"`+")
+ONE_LINE_COMMENT = re.compile(r"<!--.*?-->")
 
 
 def _opens_fence(line: str, m) -> bool:
@@ -119,9 +120,9 @@ def _shadow(line: str) -> str:
     return "".join(out)
 
 
-def visible_indices(lines: list[str]) -> Iterator[int]:
-    """Indices of the lines an agent reads as instruction: everything not
-    inside a fenced block and not inside an HTML comment.
+def _scan(lines: list[str]) -> Iterator[tuple[int, str]]:
+    """Yield `(index, state)` per line, state one of "visible", "fence" or
+    "comment".
 
     One pass tracks both hidden-text states so neither can hide the other's
     delimiters. Per CommonMark a fence closes only on a run of the same
@@ -129,7 +130,8 @@ def visible_indices(lines: list[str]) -> Iterator[int]:
     it, `<!--` inside a fence is code, and a comment opened and never closed
     runs to the end of the document. A line that opens either state is itself
     withheld, so a one-line comment such as a marker stays visible while a
-    `<!--` that opens a block does not.
+    `<!--` that opens a block does not. A line that closes one comment and
+    opens another is withheld and leaves the reader in a comment.
     """
     fence: tuple[str, int] | None = None
     commented = False
@@ -143,28 +145,70 @@ def visible_indices(lines: list[str]) -> Iterator[int]:
                 and not line[m.end() :].strip()
             ):
                 fence = None
+            yield i, "fence"
             continue
         if commented:
-            if "-->" in line:
+            _, closer, rest = line.rpartition("-->")
+            if closer and "<!--" not in rest:
                 commented = False
+            yield i, "comment"
             continue
         m = FENCE.match(line)
         if m and _opens_fence(line, m):
             fence = (m.group(1)[0], len(m.group(1)))
+            yield i, "fence"
             continue
         masked = _shadow(line)
-        if "<!--" in masked and "-->" not in masked:
+        if masked.rfind("<!--") > masked.rfind("-->"):
             commented = True
+            yield i, "comment"
             continue
-        yield i
+        yield i, "visible"
+
+
+def visible_indices(lines: list[str]) -> Iterator[int]:
+    """Indices of the lines an agent reads as instruction: everything not
+    inside a fenced block and not inside an HTML comment (see `_scan`)."""
+    return (i for i, state in _scan(lines) if state == "visible")
+
+
+def comment_hidden_indices(lines: list[str]) -> set[int]:
+    """Indices of the lines hidden inside an HTML comment (fences excluded).
+
+    Also counts a non-blank visible line made up wholly of complete one-line
+    comments (`<!-- ... -->`, outside inline code): a reader sees nothing of
+    it. `_scan` keeps such lines visible on purpose (gate markers), so this
+    widening applies only here, to snapshot bodies.
+    """
+    hidden = set()
+    for i, state in _scan(lines):
+        if state == "comment" or (
+            state == "visible"
+            and lines[i].strip()
+            and not ONE_LINE_COMMENT.sub("", _shadow(lines[i])).strip()
+        ):
+            hidden.add(i)
+    return hidden
 
 
 def extract_section(text: str, heading: str) -> str:
     """Return the exact byte slice from `heading` to the next same-or-higher
-    heading outside code fences (boundary blank lines included)."""
+    heading outside code fences (boundary blank lines included).
+
+    A section whose body has a non-blank line inside an HTML comment is
+    refused, so a golden never freezes text a reader does not see.
+    """
     lines = text.split("\n")
     level = len(heading) - len(heading.lstrip("#"))
     boundary = re.compile(rf"^#{{1,{level}}} ")
+    hidden = comment_hidden_indices(lines)
+
+    def checked(start: int, stop: int) -> str:
+        for j in range(start, stop):
+            if lines[j].strip() and j in hidden:
+                raise ValueError(f"section body is hidden: line {j + 1} is inside an HTML comment")
+        return "\n".join(lines[start:stop]) + "\n"
+
     start = None
     for i in visible_indices(lines):
         line = lines[i]
@@ -173,10 +217,10 @@ def extract_section(text: str, heading: str) -> str:
                 start = i
             continue
         if boundary.match(line):
-            return "\n".join(lines[start:i]) + "\n"
+            return checked(start, i)
     if start is None:
         raise ValueError(f"heading not found: {heading!r}")
-    return "\n".join(lines[start:]) + "\n"
+    return checked(start, len(lines))
 
 
 def marker_bounds(text: str, name: str) -> tuple[int, int]:

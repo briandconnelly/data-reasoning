@@ -219,6 +219,12 @@ _C3A_DIRECTION = [
         r"\b(?:conservativ|optimistic)\w*\s+(?:estimate|picture|view|read\w*)\b",
         r"\bmanufactures?\s+an?\s+improvement\b",
         r"\bdirection is known\b",
+        # measured 2026-09-20 on the S15 pre arm
+        # (runs/artifacts/2026-09-20-cheap-route-validity/s15-pre.scratch/ledger.md, #47):
+        # "H2 makes Assist look better than it should" -- the anchor is inherited
+        # from H2's Conclusion-table row (see `anchored_hypothesis_ids`).
+        r"\b(?:make|makes|made|making)\b[^.;]{0,60}?\blook\s+(?:better|worse)\s+than\s+(?:it|they)\s+should\b",
+        r"\blooks?\s+(?:better|worse)\s+than\s+(?:it|they)\s+should\b",
     )
 ]
 # bias/skew/push/shift/mask are directional only with an outcome target in the
@@ -875,11 +881,17 @@ def conclusion_units(final: str) -> tuple[list[str | _AnaphoraBreak], list[str]]
     return units, fails
 
 
-def _scan_conclusion_body(body: str) -> tuple[list[str | _AnaphoraBreak], list[str]]:
+def _scan_conclusion_body(
+    body: str, rows: list[list[str]] | None = None
+) -> tuple[list[str | _AnaphoraBreak], list[str]]:
     """The line scan of `conclusion_units`: one Conclusion body -> ordered claim
     units plus row-local parse fails. Extracted so both functions stay within the
     statement budget; the table / orphan / anaphora semantics are documented on
     `conclusion_units`.
+
+    When `rows` is given, the unescaped cells of every table row the scan
+    processes are appended to it, so `anchored_hypothesis_ids` reads exactly the
+    rows this scan reads rather than re-parsing the table (#47).
     """
     units: list[str | _AnaphoraBreak] = []
     fails: list[str] = []
@@ -902,6 +914,8 @@ def _scan_conclusion_body(body: str) -> tuple[list[str | _AnaphoraBreak], list[s
         if m:
             flush()
             cells = [unescape_cell(c) for c in CELL_SPLIT.split(m.group("cells"))]
+            if rows is not None:
+                rows.append(cells)
             basis_idx, row_units = _conclusion_row_units(cells, basis_idx, not in_table)
             in_table = True
             units.extend(row_units)
@@ -945,20 +959,51 @@ def _scan_conclusion_body(body: str) -> tuple[list[str | _AnaphoraBreak], list[s
     return units, fails
 
 
-def _c3a_unit_fires(unit: str, prev_had_anchor: bool) -> tuple[bool, bool]:
+def anchored_hypothesis_ids(final: str) -> set[str]:
+    """Hypothesis ids (`H2`) whose own Conclusion-table row carries a qualified
+    missingness anchor in any cell.
+
+    Reads the rows `_scan_conclusion_body` itself processes (its `rows`
+    collector); a row counts only when its first cell is exactly an id after
+    `normalize_key`, so `**H2**` and `h2` both count. Ids are returned
+    casefolded (`h2`).
+    Fail-closed parse cases are `conclusion_units`' job, so this returns an empty
+    set when there is not exactly one Conclusion.
+    """
+    bodies = section_bodies(final, "Conclusion")
+    if len(bodies) != 1:
+        return set()
+    rows: list[list[str]] = []
+    _scan_conclusion_body(bodies[0], rows)
+    return {
+        key
+        for cells in rows
+        if re.fullmatch(r"h\d+", key := normalize_key(cells[0]))
+        and any(_c3a_has_anchor(c) for c in cells)
+    }
+
+
+def _c3a_unit_fires(
+    unit: str, prev_had_anchor: bool, anchored_ids: frozenset[str] = frozenset()
+) -> tuple[bool, bool]:
     """(fires, has_anchor) for a single claim unit.
 
     Fires when the unit carries a direction predicate and a qualified
-    missingness anchor -- its own, or inherited via a leading anaphor from the
-    previous unit's anchor -- and is not suppressed (negation, attribution,
+    missingness anchor -- its own, inherited via a leading anaphor from the
+    previous unit's anchor, or inherited from a hypothesis id named in the unit
+    (`H2`) that is in `anchored_ids` (its Conclusion-table row carries an anchor,
+    #47) -- and is not suppressed (negation, attribution,
     conditional, decline, or an opposing pair). Factored out of `c3a_report` so
     `check_c3b` can apply the identical per-unit test to a completeness
     bullet's own reason text (B1).
     """
+    # The returned has_anchor is the unit's OWN anchor only: a named anchored id
+    # licenses this unit to fire and never feeds the anaphora chain (#47 review).
     has_anchor = _c3a_has_anchor(unit)
+    named_anchor = not anchored_ids.isdisjoint(i.casefold() for i in re.findall(r"\bH\d+\b", unit))
     if not _c3a_has_direction(unit) or _c3a_suppressed(unit):
         return False, has_anchor
-    if has_anchor or (_C3A_ANAPHOR.search(unit) and prev_had_anchor):
+    if has_anchor or named_anchor or (_C3A_ANAPHOR.search(unit) and prev_had_anchor):
         return True, has_anchor
     return False, has_anchor
 
@@ -972,6 +1017,7 @@ def c3a_report(final: str) -> tuple[list[str], int]:
     the same Conclusion), and is not suppressed.
     """
     units, fails = conclusion_units(final)
+    anchored_ids = frozenset(anchored_hypothesis_ids(final))
     violations: list[str] = []
     suppressed = 0
     prev_had_anchor = False
@@ -981,7 +1027,7 @@ def c3a_report(final: str) -> tuple[list[str], int]:
             # inherit an anchor across it (#93 review), so reset the chain.
             prev_had_anchor = False
             continue
-        fires, has_anchor = _c3a_unit_fires(unit, prev_had_anchor)
+        fires, has_anchor = _c3a_unit_fires(unit, prev_had_anchor, anchored_ids)
         if fires:
             violations.append(
                 f"C3a: the Conclusion asserts a missingness-direction claim without "
