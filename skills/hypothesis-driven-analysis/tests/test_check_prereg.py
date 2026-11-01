@@ -230,6 +230,14 @@ LEDGER = re.compile(r"ledger\.md")
         ("echo 'see > ledger.md later'", None),
         ("grep -c x data.csv # > ledger.md", None),
         ("cat > \"ledger.md\" <<'E'\nx\nE", "ledger.md"),
+        # A backslash-escaped `>` is a literal, not a redirect (raw and manifest form).
+        (r"echo note \> ledger.md", None),
+        ("echo note \\\\> ledger.md", None),
+        # An escaped quote does not close a double-quoted span.
+        (r'echo "a \" > ledger.md"', None),
+        # extract_evidence doubles a real backslash: `\\n` is backslash + n, not a newline.
+        ("printf '# Plan\\\\n' > ledger.md", "ledger.md"),
+        ("cat > ledger.md <<'E'\\n# plan\\nE", "ledger.md"),
     ],
 )
 def test_shell_redirect_target(cmd: str, target: str | None) -> None:
@@ -271,3 +279,22 @@ def test_bash_write_is_labelled_in_the_report(capsys: pytest.CaptureFixture[str]
 )
 def test_redirect_to_a_non_ledger_basename_is_not_a_write(cmd: str) -> None:
     assert cp.first_ledger_write([row(2, "Bash", cmd)], LEDGER) is None
+
+
+def test_analysis_inside_the_ledger_writing_call_is_listed(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    ledger = row(2, "Bash", "python analyze.py data.csv; cat > ledger.md <<'E'")
+    code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert code == 1
+    assert "CLASSIFY" in out
+    assert "ordinal 2" in out
+
+
+def test_plain_ledger_writing_call_stays_clean(capsys: pytest.CaptureFixture[str]) -> None:
+    ledger = row(2, "Bash", "cat > ledger.md <<'E'")
+    code = cp.report_ordering([row(1, "Read", "SKILL.md"), ledger], ledger, DATA)
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "CLEAN" in out

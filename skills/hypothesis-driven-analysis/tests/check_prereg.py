@@ -192,11 +192,22 @@ def _mask_quotes_and_comment(line: str) -> str:
     Index-for-index: every masked character becomes one ``x`` (quote interiors)
     or one space (the comment), so a match's span on the masked text is the
     same span on ``line``. The quote characters themselves are kept.
+
+    Outside single quotes a backslash masks itself and the next character, so
+    ``\\>`` is not a redirect and ``\\"`` does not close a double-quoted span;
+    inside single quotes a backslash is literal, as in the shell.
     """
     out: list[str] = []
     quote: str | None = None
+    escaped = False
     for i, ch in enumerate(line):
-        if quote is not None:
+        if escaped:
+            escaped = False
+            out.append("x")
+        elif ch == "\\" and quote != "'":
+            escaped = True
+            out.append("x")
+        elif quote is not None:
             if ch == quote:
                 quote = None
                 out.append(ch)
@@ -210,6 +221,28 @@ def _mask_quotes_and_comment(line: str) -> str:
             break
         else:
             out.append(ch)
+    return "".join(out)
+
+
+_MANIFEST_ESCAPES = {"\\": "\\", "n": "\n", "t": "\t", "r": "\r"}
+
+
+def _decode_manifest_escapes(text: str) -> str:
+    """Undo extract_evidence.py's ``_flatten`` escaping, left to right.
+
+    ``\\\\`` becomes ``\\``, ``\\n`` a newline, ``\\t`` a tab, ``\\r`` a carriage
+    return; any other ``\\x`` pair is kept as-is.
+    """
+    out: list[str] = []
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "\\" and i + 1 < len(text) and text[i + 1] in _MANIFEST_ESCAPES:
+            out.append(_MANIFEST_ESCAPES[text[i + 1]])
+            i += 2
+            continue
+        out.append(ch)
+        i += 1
     return "".join(out)
 
 
@@ -228,10 +261,15 @@ def shell_redirect_target(command: str) -> str | None:
     (``cmd # > ledger.md``) is not a redirect. The masking keeps positions,
     and the target is read from the original text at the match's span, so a
     quoted target (``> "my ledger.md"``) is still recovered.
+
+    ``command`` may be in manifest form: its escapes are decoded with
+    ``_decode_manifest_escapes`` before the first line is taken, so only a real
+    newline ends the shell line.
     """
     # Only the first line: a heredoc body (``if a > b:``) is not shell. The
-    # literal two-char ``\\n`` is extract_evidence.py's flattened newline.
-    first_line = re.split(r"\n|\\n", command, maxsplit=1)[0]
+    # manifest escapes are decoded first, so ``\\\\n`` (an escaped backslash
+    # followed by ``n``) is not mistaken for extract_evidence.py's ``\\n``.
+    first_line = _decode_manifest_escapes(command).split("\n", 1)[0]
     match = _REDIRECT.search(_mask_quotes_and_comment(first_line))
     if match is None:
         return None
@@ -325,6 +363,11 @@ def looks_like_script_execution(command: str) -> bool:
         if saw_prefix and any(_token_runs_code(t, rest[j + 1 :]) for j, t in enumerate(rest)):
             return True
     return False
+
+
+LEDGER_CALL_NOTE = (
+    " (the ledger-writing call itself: anything it ran before the redirect precedes the plan)"
+)
 
 
 def classification_note(row: Row, data: re.Pattern[str]) -> str | None:
@@ -439,6 +482,11 @@ def no_ledger_message(rows: list[Row], pattern: re.Pattern[str], raw_pattern: st
     return message
 
 
+def _noted(rows: list[Row], data: re.Pattern[str]) -> list[tuple[Row, str]]:
+    """Each row that needs classification, paired with its note suffix."""
+    return [(r, note) for r in rows if (note := classification_note(r, data)) is not None]
+
+
 def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
     """Print the ordering facts for a found ledger write; return the exit code."""
     bash_write = ledger.tool == "Bash"
@@ -458,19 +506,16 @@ def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
         )
     ordered = sorted(rows, key=lambda x: x.ordinal)
     earlier: list[tuple[Row, str]] = []
-    for r in ordered:
-        if r.ordinal >= ledger.ordinal:
-            continue
-        note = classification_note(r, data)
-        if note is not None:
-            earlier.append((r, note))
-    same_batch: list[tuple[Row, str]] = []
-    for r in ordered:
-        if r.ordinal <= ledger.ordinal or r.timestamp != ledger.timestamp:
-            continue
-        note = classification_note(r, data)
-        if note is not None:
-            same_batch.append((r, note))
+    # The ledger-writing Bash call itself may run analysis before its redirect
+    # (``python a.py data.csv; cat > ledger.md``); list it first.
+    own_note = classification_note(ledger, data) if bash_write else None
+    if own_note is not None:
+        earlier.append((ledger, own_note + LEDGER_CALL_NOTE))
+    earlier += _noted([r for r in ordered if r.ordinal < ledger.ordinal], data)
+    same_batch = _noted(
+        [r for r in ordered if r.ordinal > ledger.ordinal and r.timestamp == ledger.timestamp],
+        data,
+    )
     if not earlier and not same_batch:
         print("CLEAN: no data-matching tool_use precedes the ledger write")
         return 0
