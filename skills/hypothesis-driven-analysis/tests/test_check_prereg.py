@@ -223,6 +223,9 @@ LEDGER = re.compile(r"ledger\.md")
         ("cat ledger.md", None),
         ("sed -i 's/a/b/' ledger.md", None),
         ("python a.py > out.txt 2>&1", "out.txt"),
+        ("python3 - <<E\nif a > ledger.md: pass\nE", None),
+        ("cat > ledger.md <<'E'\nx > y\nE", "ledger.md"),
+        ("python3 - <<E\\nif a > ledger.md: pass\\nE", None),
     ],
 )
 def test_shell_redirect_target(cmd: str, target: str | None) -> None:
@@ -256,3 +259,11 @@ def test_bash_write_is_labelled_in_the_report(capsys: pytest.CaptureFixture[str]
     out = capsys.readouterr().out
     assert "PREREG_WRITE: ordinal 2 (Bash -> ledger.md)" in out
     assert "BASH-WRITE" in out
+
+
+@pytest.mark.parametrize(
+    "cmd",
+    ["cat ledger.md > ledger.md.bak", "grep H ledger.md > /tmp/ledger.md.txt"],
+)
+def test_redirect_to_a_non_ledger_basename_is_not_a_write(cmd: str) -> None:
+    assert cp.first_ledger_write([row(2, "Bash", cmd)], LEDGER) is None

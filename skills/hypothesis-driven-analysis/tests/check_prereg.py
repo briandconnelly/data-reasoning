@@ -9,8 +9,9 @@ The skill's central promise is that predictions are written before
 cause-outcome relationships are inspected. A ledger emitted only in the final
 report cannot demonstrate that, so this checker reads the transcript manifest
 (TSV from ``extract_evidence.py manifest``) and establishes the ordering
-facts: the ordinal of the first *executed* Write/Edit whose target matches
---ledger-pattern, and every earlier tool_use that must be classified.
+facts: the ordinal of the first *executed* ledger write (a Write/Edit whose
+target matches --ledger-pattern, or a Bash redirect into a matching path), and
+every earlier tool_use that must be classified.
 
 It deliberately does not judge whether a pre-write data touch was orientation
 (schema, row counts, coverage -- permitted before preregistration) or analysis
@@ -43,7 +44,12 @@ Fail-closed behaviors:
 - A ledger write is the first row with status ``ok`` that is either a
   Write/Edit whose target matches --ledger-pattern or a Bash command whose
   shell redirect (``>`` or ``>>``, see ``shell_redirect_target``) points into
-  a matching path (``cat > ledger.md <<'E'``). Any other Bash row that merely
+  a matching path (``cat > ledger.md <<'E'``). For a redirect, the target's
+  basename must END with a match of --ledger-pattern, so ``ledger.md.bak`` is
+  not the ledger; a pattern that does not reach the end of the basename
+  (``ledger`` against ``ledger.md``) recovers nothing and the run stays
+  UNVERIFIABLE. Only the command's first line is searched, so a ``>`` inside
+  a heredoc body is never read as a redirect. Any other Bash row that merely
   mentions a matching path (``tee``, an interpreter heredoc, an errored
   redirect) is named as a candidate, but the run stays UNVERIFIABLE (exit 2)
   and the preregistration assertion fails. There is no manual rescue.
@@ -189,7 +195,10 @@ def shell_redirect_target(command: str) -> str | None:
     purpose: they stay candidates named in the UNVERIFIABLE message, never
     writes. A heuristic, not a shell parser.
     """
-    match = _REDIRECT.search(command)
+    # Only the first line: a heredoc body (``if a > b:``) is not shell. The
+    # literal two-char ``\\n`` is extract_evidence.py's flattened newline.
+    first_line = re.split(r"\n|\\n", command, maxsplit=1)[0]
+    match = _REDIRECT.search(first_line)
     if match is None:
         return None
     return match.group(1) or match.group(2)
@@ -346,6 +355,12 @@ def parse_manifest(text: str) -> tuple[list[Row], list[str]]:
     return rows, fails
 
 
+def _redirect_matches(target: str, pattern: re.Pattern[str]) -> bool:
+    """A recovered redirect target whose basename ends with a ledger-pattern match."""
+    base = target.rsplit("/", 1)[-1]
+    return any(m.end() == len(base) for m in pattern.finditer(base))
+
+
 def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
     """The first executed ledger write: a Write/Edit or a Bash redirect.
 
@@ -359,7 +374,11 @@ def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
             continue
         if row.tool in WRITE_TOOLS and pattern.search(row.target):
             return row
-        if row.tool == "Bash" and (t := shell_redirect_target(row.target)) and pattern.search(t):
+        if (
+            row.tool == "Bash"
+            and (t := shell_redirect_target(row.target))
+            and _redirect_matches(t, pattern)
+        ):
             return row
     return None
 
