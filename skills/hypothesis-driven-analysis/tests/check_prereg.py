@@ -40,11 +40,13 @@ Fail-closed behaviors:
   ``make``/``npm run``, bare extensionless PATH executables) still require
   reading the events stream. This listing rule applies to the SAME-BATCH scan
   as well, so a timestamp-tied script write cannot slip through as CLEAN.
-- If no executed Write/Edit matches --ledger-pattern, Bash rows (any status)
-  whose command matches the pattern are surfaced as possible Bash-mediated
-  ledger writes (``cat > ledger.md`` and the like); the run stays
-  UNVERIFIABLE (exit 2) and those candidates must be verified from the
-  events stream and scored manually.
+- A ledger write is the first row with status ``ok`` that is either a
+  Write/Edit whose target matches --ledger-pattern or a Bash command whose
+  shell redirect (``>`` or ``>>``, see ``shell_redirect_target``) points into
+  a matching path (``cat > ledger.md <<'E'``). Any other Bash row that merely
+  mentions a matching path (``tee``, an interpreter heredoc, an errored
+  redirect) is named as a candidate, but the run stays UNVERIFIABLE (exit 2)
+  and the preregistration assertion fails. There is no manual rescue.
 
 Content check: finding the write proves *when* a ledger file was touched, not
 *what* it contained. Whenever a ledger write is found the checker prints a
@@ -67,7 +69,8 @@ Exit codes:
   1  ledger write found; pre-write touches and/or same-batch rows listed for
      classification
   2  UNVERIFIABLE: unreadable manifest, integrity failure, invalid pattern,
-     or no executed ledger write -- the preregistration assertion fails
+     or no executed ledger write (Write/Edit, or a Bash redirect into a
+     matching path) -- the preregistration assertion fails
 """
 
 from __future__ import annotations
@@ -171,6 +174,25 @@ _SCRIPT_EXTS = (
 )
 # A version/point-release suffix on an interpreter name (python3, python3.12).
 _VERSION_SUFFIX = re.compile(r"\d+(?:\.\d+)*$")
+# An output redirect (``>`` or ``>>``) and its target. The lookbehind excludes
+# fd duplication (``2>&1``, ``2>``), heredoc/herestring markers (``<<``), and
+# arrows (``->``, ``=>``).
+_REDIRECT = re.compile(r"(?<![<>\d=-])>{1,2}\s*(?:[\"']([^\"']+)[\"']|([^\s\"'|;&<>]+))")
+
+
+def shell_redirect_target(command: str) -> str | None:
+    """The unquoted target of the first ``>``/``>>`` output redirect, or None.
+
+    Recovers ``ledger.md`` from ``cat > ledger.md <<'E'`` so a heredoc-written
+    ledger counts as the ledger write. ``tee`` and interpreter-mediated writes
+    (``python3 - <<'E' ... open('ledger.md', 'w')``) are out of reach on
+    purpose: they stay candidates named in the UNVERIFIABLE message, never
+    writes. A heuristic, not a shell parser.
+    """
+    match = _REDIRECT.search(command)
+    if match is None:
+        return None
+    return match.group(1) or match.group(2)
 
 
 def _looks_like_script_path(token: str) -> bool:
@@ -325,13 +347,19 @@ def parse_manifest(text: str) -> tuple[list[Row], list[str]]:
 
 
 def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
-    """The first executed Write/Edit whose target matches the ledger pattern.
+    """The first executed ledger write: a Write/Edit or a Bash redirect.
 
+    A Write/Edit qualifies when its target matches the ledger pattern; a Bash
+    row qualifies when ``shell_redirect_target`` recovers a matching path.
     Only a paired ok result proves execution (extract_evidence.py's contract),
     so an errored or unpaired write attempt is not a preregistration.
     """
     for row in sorted(rows, key=lambda r: r.ordinal):
-        if row.tool in WRITE_TOOLS and row.status == "ok" and pattern.search(row.target):
+        if row.status != "ok":
+            continue
+        if row.tool in WRITE_TOOLS and pattern.search(row.target):
+            return row
+        if row.tool == "Bash" and (t := shell_redirect_target(row.target)) and pattern.search(t):
             return row
     return None
 
@@ -339,7 +367,7 @@ def first_ledger_write(rows: list[Row], pattern: re.Pattern[str]) -> Row | None:
 def no_ledger_message(rows: list[Row], pattern: re.Pattern[str], raw_pattern: str) -> str:
     """UNVERIFIABLE message, naming any Bash rows that look like ledger writes."""
     message = (
-        f"UNVERIFIABLE: no executed Write/Edit matches --ledger-pattern "
+        f"UNVERIFIABLE: no executed ledger write matches --ledger-pattern "
         f"{raw_pattern!r}; preregistration ordering cannot be "
         f"established from this transcript"
     )
@@ -350,15 +378,17 @@ def no_ledger_message(rows: list[Row], pattern: re.Pattern[str], raw_pattern: st
     if bash_candidates:
         ordinals = ",".join(str(r.ordinal) for r in bash_candidates)
         message += (
-            f"; possible Bash-mediated ledger write(s) at ordinal(s) {ordinals} "
-            f"— verify from the events stream and score manually"
+            f"; Bash row(s) at ordinal(s) {ordinals} mention a matching path "
+            f"without a recoverable redirect — the preregistration assertion fails"
         )
     return message
 
 
 def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
     """Print the ordering facts for a found ledger write; return the exit code."""
-    print(f"PREREG_WRITE: ordinal {ledger.ordinal} ({ledger.tool} -> {ledger.target})")
+    bash_write = ledger.tool == "Bash"
+    target = (shell_redirect_target(ledger.target) if bash_write else None) or ledger.target
+    print(f"PREREG_WRITE: ordinal {ledger.ordinal} ({ledger.tool} -> {target})")
     print(
         f"CONTENT-CHECK REQUIRED: confirm from the events stream "
         f"(extract_evidence.py events <transcript> --ordinal {ledger.ordinal}) "
@@ -366,6 +396,11 @@ def report_ordering(rows: list[Row], ledger: Row, data: re.Pattern[str]) -> int:
         f"— a placeholder written early and filled after analysis is a "
         f"reconstruction, not a preregistration."
     )
+    if bash_write:
+        print(
+            "BASH-WRITE: the ledger was written by a shell redirect; the content "
+            "check above applies to the redirect body in the events stream."
+        )
     ordered = sorted(rows, key=lambda x: x.ordinal)
     earlier: list[tuple[Row, str]] = []
     for r in ordered:
