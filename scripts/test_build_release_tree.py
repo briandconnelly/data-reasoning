@@ -5,6 +5,8 @@ import sys
 from fnmatch import fnmatch
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parents[1]
 SCRIPT = REPO / "scripts" / "build-release-tree.py"
 EXPECTED_SKILL_COUNT = 4
@@ -70,15 +72,22 @@ def test_builder_rebuilds_its_own_output(tmp_path):
 # files only, so untracked scratch cannot break them -- and require every
 # file under them to be in the built tree unless it is denylisted here.
 
-_RUNTIME_PREFIXES = (
-    "hooks/",
-    "output-styles/",
-    "instruments/",
-    ".claude-plugin/",
-    ".codex-plugin/",
-    ".agents/",
+# Tracked top-level entries that are development tooling, not runtime. Every
+# other tracked path is runtime unless RELEASE_DENYLIST removes it, so a new
+# component directory (commands/, a root agents/) fails the completeness gate
+# instead of being silently dropped (#30).
+NON_RUNTIME_TOP_LEVEL = (
+    "scripts/",
+    "jev/",
+    ".github/",
+    "docs/",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "prek.toml",
+    "ruff.toml",
+    ".gitignore",
+    ".gitattributes",
 )
-_RUNTIME_TOP_LEVEL = ("LICENSE", "README.md")
 
 # Tracked files under a runtime directory that the release tree omits on
 # purpose. Glob-matched against the repo-relative path; keep this list short
@@ -100,12 +109,7 @@ RELEASE_DENYLIST = (
 
 def is_runtime_path(rel: str) -> bool:
     """Does this repo-relative tracked path belong in an install?"""
-    if rel in _RUNTIME_TOP_LEVEL or rel.startswith(_RUNTIME_PREFIXES):
-        return True
-    # Everything under a skill directory is runtime unless denylisted, so a
-    # subtree added later fails here instead of being silently dropped.
-    parts = rel.split("/")
-    return len(parts) >= 3 and parts[0] == "skills"  # noqa: PLR2004
+    return not rel.startswith(NON_RUNTIME_TOP_LEVEL)
 
 
 def tracked_runtime_files() -> list[str]:
@@ -153,13 +157,9 @@ _PATH_LIKE = re.compile(r"^[\w.@~+-]+(?:/[\w.@~+-]+)*\.(?:" + "|".join(_CITED_EX
 
 def cited_relative_paths(text: str) -> set[str]:
     """Relative file paths a reader of this Markdown is pointed at."""
-    found = {m.group(1) for m in _MD_LINK.finditer(text)}
+    found = {m.group(1).split("#", 1)[0] for m in _MD_LINK.finditer(text)}
     found |= {m.group(1).strip() for m in _BACKTICKED.finditer(text)}
-    return {
-        p
-        for p in found
-        if _PATH_LIKE.match(p) and not p.startswith(("/", "#", "http://", "https://"))
-    }
+    return {p for p in found if p and _PATH_LIKE.match(p)}
 
 
 def test_the_citation_scan_finds_the_citations_that_are_there():
@@ -195,3 +195,37 @@ NAMED_IN_FIXED_LIST = (
     "instruments/check_record.py",
     "skills/hypothesis-driven-analysis/SKILL.md",
 )
+
+
+@pytest.mark.parametrize(
+    "rel",
+    ["commands/foo.md", "agents/reviewer.md", "hooks/new_hook.py", "skills/x/references/a.md"],
+)
+def test_an_unlisted_top_level_dir_is_runtime_by_default(rel):
+    assert is_runtime_path(rel)
+
+
+@pytest.mark.parametrize(
+    "rel",
+    [
+        "scripts/x.py",
+        "jev/grade.py",
+        ".github/workflows/prek.yml",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "prek.toml",
+        "ruff.toml",
+        ".gitignore",
+        ".gitattributes",
+    ],
+)
+def test_development_paths_are_not_runtime(rel):
+    assert not is_runtime_path(rel)
+
+
+def test_anchored_link_targets_are_cited():
+    assert cited_relative_paths("see [x](references/foo.md#section)") == {"references/foo.md"}
+
+
+def test_url_and_absolute_targets_are_not_cited():
+    assert cited_relative_paths("[a](https://x.y/z.md) [b](/abs/c.md) [c](#frag)") == set()
