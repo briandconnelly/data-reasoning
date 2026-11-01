@@ -964,7 +964,9 @@ def anchored_hypothesis_ids(final: str) -> set[str]:
     missingness anchor in any cell.
 
     Reads the rows `_scan_conclusion_body` itself processes (its `rows`
-    collector); a row counts only when its first cell is exactly an id.
+    collector); a row counts only when its first cell is exactly an id after
+    `normalize_key`, so `**H2**` and `h2` both count. Ids are returned
+    casefolded (`h2`).
     Fail-closed parse cases are `conclusion_units`' job, so this returns an empty
     set when there is not exactly one Conclusion.
     """
@@ -974,9 +976,10 @@ def anchored_hypothesis_ids(final: str) -> set[str]:
     rows: list[list[str]] = []
     _scan_conclusion_body(bodies[0], rows)
     return {
-        cells[0].strip()
+        key
         for cells in rows
-        if re.fullmatch(r"H\d+", cells[0].strip()) and any(_c3a_has_anchor(c) for c in cells)
+        if re.fullmatch(r"h\d+", key := normalize_key(cells[0]))
+        and any(_c3a_has_anchor(c) for c in cells)
     }
 
 
@@ -997,7 +1000,7 @@ def _c3a_unit_fires(
     # The returned has_anchor is the unit's OWN anchor only: a named anchored id
     # licenses this unit to fire and never feeds the anaphora chain (#47 review).
     has_anchor = _c3a_has_anchor(unit)
-    named_anchor = not anchored_ids.isdisjoint(re.findall(r"\bH\d+\b", unit))
+    named_anchor = not anchored_ids.isdisjoint(i.casefold() for i in re.findall(r"\bH\d+\b", unit))
     if not _c3a_has_direction(unit) or _c3a_suppressed(unit):
         return False, has_anchor
     if has_anchor or named_anchor or (_C3A_ANAPHOR.search(unit) and prev_had_anchor):

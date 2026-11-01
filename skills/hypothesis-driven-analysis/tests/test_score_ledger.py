@@ -1393,7 +1393,19 @@ def test_c3a_named_id_does_not_feed_anaphora_chain():
 
 
 def test_anchored_hypothesis_ids_reads_the_conclusion_table():
-    assert sl.anchored_hypothesis_ids(concl("- x\n" + S15_PRE_TABLE)) == {"H2"}
+    assert sl.anchored_hypothesis_ids(concl("- x\n" + S15_PRE_TABLE)) == {"h2"}
+
+
+@pytest.mark.parametrize("table_id", ["**H2**", "h2"])
+def test_c3a_known_positive_survives_a_normalized_table_id(table_id):
+    table = S15_PRE_TABLE.replace("| H2 |", f"| {table_id} |")
+    assert sl.anchored_hypothesis_ids(concl("- x\n" + table)) == {"h2"}
+    body = (
+        "- Best supported: H3. H2 makes Assist look better than it should on means,"
+        " not on the median.\n" + table
+    )
+    f = sl.check_c3a(concl(body))
+    assert any(m.startswith("C3a:") and "look better than it should" in m for m in f)
 
 
 # --------------------------------------------------------------------------- #
