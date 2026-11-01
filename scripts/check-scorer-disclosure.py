@@ -77,8 +77,18 @@ def missing_scorer(paths: list[Path], since: date = SINCE) -> list[Path]:
     return out
 
 
+def default_record_paths() -> list[Path]:
+    """Run records in both skill trees: shipped `skills/` and `.agents/skills/`."""
+    return sorted(
+        {
+            *REPO.glob("skills/*/tests/runs/*.md"),
+            *REPO.glob(".agents/skills/*/tests/runs/*.md"),
+        }
+    )
+
+
 def main(argv: list[str]) -> int:
-    paths = [Path(a) for a in argv] or sorted(REPO.glob("skills/*/tests/runs/*.md"))
+    paths = [Path(a) for a in argv] or default_record_paths()
     bad = missing_scorer(paths)
     for p in bad:
         label = "UNDATED RUN RECORD" if record_date(p) is None else "MISSING SCORER"
