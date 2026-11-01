@@ -22,6 +22,7 @@ ALLOW = [
     ".agents/plugins/marketplace.json",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "hooks/hooks.json",
     "hooks/check_record_hook.py",
     "hooks/check_record_hook.sh",
