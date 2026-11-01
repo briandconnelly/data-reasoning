@@ -234,6 +234,9 @@ def test_url_and_absolute_targets_are_not_cited():
 REPOSITORY_ONLY_SEGMENTS = {"tests", "scripts", "jev", ".superpowers"}
 REPOSITORY_ONLY_FILES = {"AGENTS.md"}
 PLACEHOLDERS = {"NNN-slug.md", "ledger.md", "exploration-log.md", "deploys/2026-07-07.log"}
+# Names that are not pointers into this tree: a note deleted before it was
+# ever tracked, and a script that belongs to the external skill-creator plugin.
+NOT_A_POINTER = {"potential-new-features.md", "run_eval.py"}
 
 
 def _repository_only_allowed(md_rel: Path) -> bool:
@@ -249,7 +252,7 @@ def dangling_citations(out: Path) -> list[str]:
             candidates = [md.parent / cited, out / cited, out / "skills" / cited]
             if skill_root:
                 candidates.append(skill_root / cited)
-            if any(c.exists() for c in candidates) or cited in PLACEHOLDERS:
+            if any(c.exists() for c in candidates) or cited in PLACEHOLDERS | NOT_A_POINTER:
                 continue
             parts = set(Path(cited).parts)
             if _repository_only_allowed(rel) and (
