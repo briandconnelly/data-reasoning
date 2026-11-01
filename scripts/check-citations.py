@@ -16,7 +16,8 @@ noise:
    attributed* to a markdown file must appear in that file. This is the
    replacement for rule 1: a quote is a citation that reports its own staleness.
    Attribution means the filename sits within ATTRIBUTION_WINDOW characters of
-   the quote — ``SKILL.md's "…"``, ``SKILL.md — "…"``, ``"…" (SKILL.md)``. A
+   the quote — ``SKILL.md's "…"``, ``SKILL.md — "…"``, ``"…" (SKILL.md)``.
+   The filename may be path-qualified (``tests/runs/x.md — "…"``). A
    file merely mentioned elsewhere on the line is not an attribution: prose
    quotes run output and prompt text beside a filename all the time, and
    checking those would flag ordinary writing.
@@ -91,7 +92,9 @@ ATTRIBUTION_WINDOW = 24
 LINE_CITATION = re.compile(
     r"(?<![\w/.-])([\w.-]+\.md)(?:\s+lines?\s+|:)(\d+)(?:[-–]\d+)?\b"  # noqa: RUF001
 )
-MD_MENTION = re.compile(r"(?<![\w/.-])([\w.-]+\.md)(?:@([0-9a-f]{7,40}))?\b")
+# The name may be path-qualified (`tests/runs/x.md`); resolve() walks up
+# trying `directory / name`, so a qualified name resolves once captured.
+MD_MENTION = re.compile(r"(?<![\w.-])((?:[\w.-]+/)*[\w.-]+\.md)(?:@([0-9a-f]{7,40}))?\b")
 QUOTED = re.compile(rf'"([^"]{{{MIN_QUOTE},}})"')
 
 # A quote may be reflowed or re-punctuated between the citing prose and the

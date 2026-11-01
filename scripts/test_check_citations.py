@@ -331,3 +331,28 @@ class TestShallowDetection:
     def test_outside_any_repository_falls_back_without_raising(self, tmp_path, monkeypatch):
         monkeypatch.setattr(cc, "REPO_ROOT", tmp_path)
         assert cc.shallow() is False
+
+
+def _run_record(repo: Path) -> None:
+    (repo / "skill" / "tests" / "runs" / "2026-01-01-r.md").write_text(f"{SENTENCE}\n")
+
+
+def test_path_qualified_attributed_quote_that_matches_passes(repo):
+    _run_record(repo)
+    text = f'tests/runs/2026-01-01-r.md\'s "{SENTENCE}" holds.'
+    assert cc.check(write(repo, text)) == []
+
+
+def test_path_qualified_attributed_quote_that_does_not_match_is_flagged(repo):
+    _run_record(repo)
+    stale = "An absent record proves the event did not happen, which is what we assumed."
+    violations = cc.check(write(repo, f'tests/runs/2026-01-01-r.md\'s "{stale}" holds.'))
+    assert len(violations) == 1
+    assert "does not appear there" in violations[0]
+
+
+def test_path_qualified_unresolvable_name_with_a_quote_is_flagged(repo):
+    stale = "An absent record proves the event did not happen, which is what we assumed."
+    violations = cc.check(write(repo, f'nope/dir/x.md\'s "{stale}" holds.'))
+    assert len(violations) == 1
+    assert "does not resolve" in violations[0]
