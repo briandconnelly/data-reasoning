@@ -1341,6 +1341,57 @@ def test_c3a_unknown_does_not_suppress_a_contradictory_direction():
 
 
 # --------------------------------------------------------------------------- #
+# C3a: "look better/worse than it should" and anchor inheritance from a named
+# hypothesis's Conclusion-table row (#47)
+# --------------------------------------------------------------------------- #
+S15_PRE_TABLE = (
+    "- Per-hypothesis summary:\n\n"
+    "  | id | claim | status | basis |\n"
+    "  | --- | --- | --- | --- |\n"
+    "  | H2 | data-artifact | UNRESOLVED | T2 CONSISTENT: missing rows concentrate in Assist"
+    " and in sev1; source semantics UNKNOWN |\n"
+    "  | H3 | descriptive | UNRESOLVED | best supported for the headline (T3) |\n"
+)
+
+
+def test_c3a_known_positive_s15_pre_look_better_than_it_should():
+    body = (
+        "- Best supported: H3. H2 makes Assist look better than it should on means,"
+        " not on the median.\n" + S15_PRE_TABLE
+    )
+    f = sl.check_c3a(concl(body))
+    assert any(m.startswith("C3a:") and "look better than it should" in m for m in f)
+
+
+def test_c3a_look_better_without_an_anchored_hypothesis_does_not_fire():
+    body = "- H3 makes the headline look better than it should.\n" + S15_PRE_TABLE
+    assert not any(m.startswith("C3a:") for m in sl.check_c3a(concl(body)))
+
+
+def test_c3a_conditional_look_better_is_suppressed():
+    body = (
+        "- If the absent rows are still open, H2 makes Assist look better than it should.\n"
+        + S15_PRE_TABLE
+    )
+    assert not any(m.startswith("C3a:") for m in sl.check_c3a(concl(body)))
+
+
+@pytest.mark.parametrize(
+    "unit",
+    [
+        "The missing rows make the estimate look better than it should.",
+        "Absent records make the comparison look worse than it should.",
+    ],
+)
+def test_c3a_look_predicate_with_own_anchor(unit):
+    assert any("C3a" in m for m in sl.check_c3a(concl("- " + unit)))
+
+
+def test_anchored_hypothesis_ids_reads_the_conclusion_table():
+    assert sl.anchored_hypothesis_ids(concl("- x\n" + S15_PRE_TABLE)) == {"H2"}
+
+
+# --------------------------------------------------------------------------- #
 # C3a hardening (#77 critical review) — negation, composition, treating-as,
 # `, and`, and leading-concessive cases (battery 7/10/13/15/16)
 # --------------------------------------------------------------------------- #
