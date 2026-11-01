@@ -229,3 +229,46 @@ def test_anchored_link_targets_are_cited():
 
 def test_url_and_absolute_targets_are_not_cited():
     assert cited_relative_paths("[a](https://x.y/z.md) [b](/abs/c.md) [c](#frag)") == set()
+
+
+REPOSITORY_ONLY_SEGMENTS = {"tests", "scripts", "jev", ".superpowers"}
+REPOSITORY_ONLY_FILES = {"AGENTS.md"}
+PLACEHOLDERS = {"NNN-slug.md", "ledger.md", "exploration-log.md", "deploys/2026-07-07.log"}
+
+
+def _repository_only_allowed(md_rel: Path) -> bool:
+    return md_rel == Path("README.md") or "decisions" in md_rel.parts
+
+
+def dangling_citations(out: Path) -> list[str]:
+    dangling = []
+    for md in sorted(out.rglob("*.md")):
+        rel = md.relative_to(out)
+        skill_root = out / "skills" / rel.parts[1] if rel.parts[:1] == ("skills",) else None
+        for cited in sorted(cited_relative_paths(md.read_text())):
+            candidates = [md.parent / cited, out / cited, out / "skills" / cited]
+            if skill_root:
+                candidates.append(skill_root / cited)
+            if any(c.exists() for c in candidates) or cited in PLACEHOLDERS:
+                continue
+            parts = set(Path(cited).parts)
+            if _repository_only_allowed(rel) and (
+                parts & REPOSITORY_ONLY_SEGMENTS or cited in REPOSITORY_ONLY_FILES
+            ):
+                continue
+            dangling.append(f"{rel} -> {cited}")
+    return dangling
+
+
+def test_the_dangle_scan_can_see_a_planted_dangle(tmp_path):
+    out = tmp_path / "release"
+    assert build(out).returncode == 0
+    (out / "skills" / "decision-analysis" / "references" / "zz.md").write_text("see `nope/x.md`\n")
+    assert "skills/decision-analysis/references/zz.md -> nope/x.md" in dangling_citations(out)
+
+
+def test_no_shipped_markdown_cites_a_path_missing_from_the_release_tree(tmp_path):
+    out = tmp_path / "release"
+    assert build(out).returncode == 0
+    dangling = dangling_citations(out)
+    assert not dangling, f"citations that dangle in a release install: {dangling}"

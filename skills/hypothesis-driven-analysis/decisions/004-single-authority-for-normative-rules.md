@@ -14,7 +14,7 @@ Where does a normative rule live?
 The cost is that two statements of one rule diverge silently, and nothing fails when they do — the prose still reads correctly on both sides.
 
 *Single authority.* Adopted, and stated for the repo in `AGENTS.md`, because divergence is not hypothetical here.
-`subagent-briefs.md` had already drifted before anyone looked: its summary narrowed "did not adequately test" to "untested" and dropped the outside-evidence exception, which is the same drift #103 was filed about, reproduced in miniature by the file that was supposed to be summarizing the fix.
+`references/subagent-briefs.md` had already drifted before anyone looked: its summary narrowed "did not adequately test" to "untested" and dropped the outside-evidence exception, which is the same drift #103 was filed about, reproduced in miniature by the file that was supposed to be summarizing the fix.
 
 ## What settled it
 

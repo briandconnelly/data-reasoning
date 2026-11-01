@@ -26,3 +26,4 @@ Issue #103 was one rule living in two places until the two disagreed, and a deci
 The reasoning belongs here; the rule belongs where the pointer says.
 
 The line is genuinely fine, and this repo has already been on the wrong side of it: the first draft of these files stated their rules operationally, which an external review caught in the same pull request that introduced the pointer rule.
+Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.

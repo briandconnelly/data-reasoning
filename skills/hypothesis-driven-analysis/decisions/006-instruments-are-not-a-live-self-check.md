@@ -4,15 +4,15 @@ Decided 2026-08-08.
 
 ## Question
 
-An audit found that live agents are never told the instruments exist: no agent-read prose mentions `score_ledger.py` or `check_prereg.py`, so every machine check runs at scoring time, against runs already finished.
+An audit found that live agents are never told the instruments exist: no agent-read prose mentions `tests/score_ledger.py` or `tests/check_prereg.py`, so every machine check runs at scoring time, against runs already finished.
 Enforcement on a live investigation is therefore prose alone.
 
-The audit's proposed remedy was to have SKILL.md direct the agent to run `score_ledger.py` against its own ledger before concluding.
+The audit's proposed remedy was to have SKILL.md direct the agent to run `tests/score_ledger.py` against its own ledger before concluding.
 That would add live enforcement and, the argument went, relieve the pressure to keep strengthening prose that keeps failing — the repo's own lesson from issue #77 → C3 being that a repeatedly-failing prose rule belongs in an instrument.
 
 ## Positions
 
-*Point the agent at `score_ledger.py`.* Attractive: the skill ships as a directory, so `tests/` travels with it; the checks already exist; and it converts scoring-time discipline into live discipline for free.
+*Point the agent at `tests/score_ledger.py`.* Attractive: the skill ships as a directory, so `tests/` travels with it; the checks already exist; and it converts scoring-time discipline into live discipline for free.
 
 *Point the agent at nothing; keep enforcement at scoring time.* The status quo, which leaves the gap the audit names.
 
@@ -21,7 +21,7 @@ That would add live enforcement and, the argument went, relieve the pressure to 
 ## What settled it
 
 The first position is not merely imperfect, it is unsafe, and the scorer says so itself.
-`score_ledger.py`'s SCOPE header states that it scores ledgers from scenarios whose ground truth contains *no legitimate causal refutation*, that C1 is not a general ledger invariant, and that running C1 against a should-refute scenario "would fail correct work and teach analysts never to conclude anything — the top regression risk this revision is trying to avoid."
+`tests/score_ledger.py`'s SCOPE header states that it scores ledgers from scenarios whose ground truth contains *no legitimate causal refutation*, that C1 is not a general ledger invariant, and that running C1 against a should-refute scenario "would fail correct work and teach analysts never to conclude anything — the top regression risk this revision is trying to avoid."
 The skill explicitly permits refuting a causal hypothesis on independent evidence, and the worked example in `references/ledger-template.md` does exactly that twice.
 
 So an agent told to run this scorer on its own ledger and satisfy it would be told, on any investigation that legitimately refutes a causal hypothesis, to downgrade a correct `REFUTED` to `UNRESOLVED`.
@@ -39,7 +39,7 @@ Adding any such instruction to SKILL.md is an agent-facing wording change and ow
 ## Reopening condition
 
 A fixture-neutral structural validator exists as a public, dependency-free CLI with its own tests, and the SKILL.md sentence pointing at it has been preregistered and measured on the cells its placement reaches.
-Or: someone demonstrates a structural-only mode of `score_ledger.py` that cannot reach C1–C4 without their caller attestations, which would make the cheap version of the first position safe after all.
+Or: someone demonstrates a structural-only mode of `tests/score_ledger.py` that cannot reach C1–C4 without their caller attestations, which would make the cheap version of the first position safe after all.
 
 ## Where the rule lives
 
@@ -58,7 +58,7 @@ No such arm has run.)*
 
 *(Extended 2026-09-15: an external review reproduced four records that validated clean while missing most of their required fields — a decision record with `Done.` under every heading, a VoI record of one verdict line, an identification review of a question and a handoff — because the validator checked headings and closed vocabularies but, outside the ledger's tables, no slots.
 This record's scope already named "the canonical Problem fields present and filled", so the omission was a gap inside the declared scope, not a widening of it.
-`check_record.py` now carries a required-slot table per record kind, labels taken byte-for-byte from the shipped templates and held there by a parity test; a completed record missing or blanking one is a finding.
+`instruments/check_record.py` now carries a required-slot table per record kind, labels taken byte-for-byte from the shipped templates and held there by a parity test; a completed record missing or blanking one is a finding.
 The same review found that one `pending` slot suspends every completeness finding across the record, with no mode in which completeness is demanded.
 The suspension stays, because the skills mandate writing the template before filling it and the hook runs on every write; `--final` is the new completed-record mode, in which template state no longer suspends and is itself a finding.
 Nothing points the agent at `--final` yet: that sentence is agent-read prose and owes an arm under decisions/001 before it ships, on exactly the terms this record already set for the deferred SKILL.md pointer.

@@ -55,7 +55,7 @@ With no wording shipped the disagreement decides nothing today; it is the first 
 
 Any of: a scored arm on `mini` or `direct`, on any model the suite runs, that settles a claim or reports a figure on the wrong rows with the fault discoverable from the data it was given; a fixture whose fault a no-skill baseline misses and which the draft's pointer demonstrably reaches; or a decision to score the Outcome cell's single label, preregistered as such.
 Scenario 22's twelve scored arms, across four cells, stand as the regression check for that reopening.
-The draft to start from, and the two review passes it survived, are in `tests/runs/artifacts/2026-09-20-cheap-route-validity/` (`draft-wording.patch`, `design-review.md`).
+The draft to start from, and the two review passes it survived, are in `tests/runs/artifacts/2026-09-20-cheap-route-validity/` (`draft-wording.patch`, `tests/runs/artifacts/2026-09-20-cheap-route-validity/design-review.md`).
 
 ## Where the rule lives
 
