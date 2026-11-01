@@ -1,165 +1,51 @@
 # data-reasoning
 
-A Claude Code and Codex plugin for reasoning from data: structured exploration that generates honest leads, hypothesis-driven investigation that adjudicates them, causal identification review that turns a dead end into a reviewed, assumption-bounded design, and decision analysis that turns unresolved evidence into a defensible act-wait-or-collect verdict.
+A plugin for Claude Code and Codex that helps your agent explore data, investigate explanations, review causal claims, and weigh decisions under uncertainty.
+Use it for questions like "What's in this dataset?", "Why did signups drop?", or "Should we ship or wait?".
+It provides four skills:
 
-## Skills
-
-| Skill | What it covers |
+| Skill | What it does |
 | --- | --- |
-| [exploratory-data-analysis](skills/exploratory-data-analysis/) | Structured exploratory data analysis — orient before interpreting, count every look, consolidate ranked leads with their search context, and hand adjudication to hypothesis-driven-analysis. |
-| [hypothesis-driven-analysis](skills/hypothesis-driven-analysis/) | Guide empirical investigations with PPDAC and the scientific method — competing hypotheses, preregistered predictions, adequate tests, and a precommitted stop rule. |
-| [causal-identification-review](skills/causal-identification-review/) | Review whether a design — proposed, claimed, or still to be found — identifies a causal effect and on what assumptions, with candidate designs, breakable identifying assumptions, probes run against them, and an evidence-bounded disposition that never certifies. |
-| [decision-analysis](skills/decision-analysis/) | Decide under uncertainty — a framed choice, provenance-classed odds-form updates, robustness sweeps with crossover statements, value-of-information for collect-more options, and an evidence-bounded verdict that never authorizes execution. |
+| [exploratory-data-analysis](skills/exploratory-data-analysis/) | Orient before interpreting, count every look, and report promising patterns with the search that found them. |
+| [hypothesis-driven-analysis](skills/hypothesis-driven-analysis/) | Test competing explanations with preregistered predictions, adequate tests, and a precommitted stop rule. |
+| [causal-identification-review](skills/causal-identification-review/) | Review whether a design identifies a causal effect, on which assumptions, and how each could break. |
+| [decision-analysis](skills/decision-analysis/) | Weigh two actions under one binary uncertainty and recommend acting, waiting, or collecting more evidence. |
 
-Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work; `causal-identification-review` is the constructive continuation when adjudication concludes nothing identifies the effect, or when a claimed design needs its identifying assumptions checked before anyone trusts it.
-`decision-analysis` is the constructive continuation when a decision hangs on what an investigation left `UNRESOLVED`: it consumes ledgers and review records as evidence, and its verdicts recommend without authorizing.
-All four skills carry the same authorization gate; its text lives once in `scripts/shared-sections/authorization-gate.md` and is rendered into each skill by `scripts/check-shared-sections.py`, which fails when a rendered copy drifts or is hidden.
-Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.
+Start with whichever skill fits your question; each knows when to hand off to another.
+None of them overclaims: exploration never confirms a hypothesis, a review never certifies a design, and a verdict never authorizes execution.
+A bundled hook checks the structure of records written through the host's file tools; see [Record validation](docs/record-validation.md) for coverage.
+Claude Code users can also choose the optional `Data Answer` output style for answer-first responses.
 
-The pairing is a design claim, not a measured one.
-Who scored each measured result, and what an unlabelled record is presumed to be, is disclosed per `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § Who scored it.
-`hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).
-`exploratory-data-analysis` has measured description-trigger arms only (`skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md`, `skills/exploratory-data-analysis/tests/runs/2026-08-11-t14-trigger.md`, and the repaired rerun; the lift is recorded in `skills/exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md`); its behavior scenarios in `tests/scenarios.md` are authored and unrun.
-No run has yet exercised a handoff between the two.
-Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against the then two-skill shipped surface plus a `systematic-debugging` stand-in, not the four skills that now ship.
-`causal-identification-review`'s description has n=1 trigger cells (CS1, CS2, CS6a) against a three-skill catalog; `decision-analysis`'s has none.
-Routing between all four skills rests on zero arms run against the full catalog — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds every description until that changes.
-Treat the routing between them, and the handoff itself, as unverified.
-`causal-identification-review`'s measurement wave 1 (n=1 per cell) was scored on 2026-08-09 and then partly reopened the same day: CS4 and CS7 moved to "redesign and re-measure" and owe fresh arms before the wave is complete (`skills/causal-identification-review/tests/scenarios.md` § "Global verdict table", addendum).
-`decision-analysis`'s original scenarios remain unrun (`skills/decision-analysis/tests/scenarios.md`); focused VoI wording checks are recorded in `skills/decision-analysis/tests/runs/2026-09-04-voi-pricing.md`, with no observed behavioral lift over the old wording for the archived input snapshots.
-Treat its routing and its premium as unmeasured.
+## Install
 
-Three pieces of evidence are owed and not started, named here so the gap is not mistaken for an oversight (external review, 2026-09-15):
-
-- An end-to-end integration suite for the shipped four-skill workflow, on both hosts: a direct answer that loads no skill, exploration handing a lead to adjudication, adjudication handing a dead end to identification review, and an `UNRESOLVED` ledger entering a decision record.
-  Every arm run so far exercises one skill in isolation; none shows an agent choosing the right skill, keeping the evidence boundary across a handoff, or finishing the user's task.
-- A frozen representative suite kept alongside the adversarial catalogs.
-  The catalogs' rule that a baseline already passing means the scenario is too easy finds failures; it cannot estimate practical benefit, because ordinary tasks a baseline already handles still pay the skill's context and ceremony.
-  The representative suite keeps such tasks, and scores accuracy, unnecessary ceremony, latency, and total context cost.
-- Measured simplification experiments: the checkers below preserve wording and provenance, but nothing yet establishes whether each accumulated rule still earns its context cost.
-
-The skill wording this remediation changed was measured on 2026-09-15 on the cells that reach it, with a baseline arm, a pre-edit arm, and a post-edit arm per cell (`skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave-prereg.md` § Results).
-Two sentences reached behavior — the estimation route's data-validity inheritance, and (after one revision and a second wave) the profile route's rule that a record names each change with its date; the exploration degraded mode's Frame-lite naming did not change behavior at n=1 and stays as a clarification carrying no measured claim; the decision-analysis degraded mode for a missing prior and its verdict-precedence paragraph each failed a preregistered condition and were withdrawn, so the review's finding 7 and A2 remain owed.
-The run records say which is which, with the owner's decision on each.
-
-The measured premiums above count the procedure, not the prose: loading a skill has a fixed context cost the scenario arms do not meter.
-As of 2026-09-15, after the remediation's final state (`wc -w skills/*/SKILL.md skills/*/references/*.md`): `hypothesis-driven-analysis` is 6,419 words plus a 3,180-word ledger template and a 700-word subagent brief; `decision-analysis` is 3,227 plus an 897-word template (the template grew by its slot notes); `causal-identification-review` is 2,440 plus 492; `exploratory-data-analysis` is 2,540 plus 843.
-Co-loading two skills — the designed handoff case — pays the verbatim authorization gate (~350 words) and a near-duplicate costly-collection section once per skill loaded.
-Reducing that duplication means extracting the shared contract, which edits `hypothesis-driven-analysis` and is deferred on the terms in `skills/exploratory-data-analysis/decisions/001-shared-gate-authority.md` § Consequences.
-
-## Output style
-
-The plugin ships one optional output style, `Data Answer` (`output-styles/data-answer.md`): an analyst persona that answers data questions answer-first, with a short standing bar on reporting numbers you have not checked.
-The file is the contract; this section does not restate it.
-
-It supplies presentation and answer hygiene, not analysis method.
-The skills decide what an answer must disclose and what a report must contain; the style yields to a skill's report format, its ordering, and its placement rules wherever one applies.
-
-It adds no record-keeping to HDA's ceremony-free `direct` route, but it does shape a direct answer — a source-and-freshness footer, an offer of the query.
-Whether the split between the two holds under a real run is untested; treat it as a design claim, like the routing and handoffs above.
-
-Select it through `/config` → Output style.
-It sets `force-for-plugin: false`, so installing the plugin never changes the active style on its own, and `keep-coding-instructions: true`, so the default coding guidance stays in place for the code an analysis has to write.
-
-Output styles are a Claude Code feature.
-Codex has no equivalent, so a Codex install gets the four skills and no style.
-
-## Live record validation
-
-Both hosts get a PostToolUse hook (`hooks/hooks.json`, declared in both plugin manifests) that runs `instruments/check_record.py` on a record file the agent writes through the host's file tools and feeds structural findings back to the agent.
-What the validator may and may not check is owned by `skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md`.
-The write paths covered are exactly these: Claude Code's `Write` and `Edit` tools, which name the file in `tool_input.file_path`, and Codex's `apply_patch`, whose `Write|Edit` matcher alias hands the hook the patch text in `tool_input.command`.
-A record created by a shell command — a heredoc, a redirect, a script — is on neither path and is not validated; nothing in this plugin parses shell commands for file writes.
-For Codex hook activation and verification, see [Verify a Codex install](#verify-a-codex-install).
-The hook needs `python3` on the host's `PATH`.
-Without it, a record write is reported as not validated and every other write stays silent; the shell fallback classifies a file by its title line alone, exactly as the Python hook does, and needs `sh`, `sed`, `head`, `grep`, `awk`, and `cat`.
-A record whose path contains a double quote cannot be sniffed without Python and is skipped.
-Without it, an `apply_patch` payload is handled by sniffing each `.md` file the patch names on disk and by scanning the patch text itself for a record title, so both a new record and a title-free edit to an existing one are reported as not validated, while a file the patch names that is not on disk is skipped.
-The hook runs the validator's default mode, in which a record still carrying template placeholders or `pending` slots is in progress and owes no completeness findings; `check_record.py --final <record>` is the completed-record mode, in which every required slot, every required section, and every cell of a required section's table must be filled -- except a Tests row left `NOT_TESTED`, whose evidence may stay `pending`.
-No skill yet tells the agent to run `--final` before delivering a record: that pointer is agent-read prose and owes measured arms first, on the terms in the decision record above.
-
-For a record written through the shell, or an explicit completed-record check, run the validator directly from the installed plugin directory:
-
-```bash
-python3 /absolute/path/to/data-reasoning/instruments/check_record.py /absolute/path/to/record.md
-python3 /absolute/path/to/data-reasoning/instruments/check_record.py --final /absolute/path/to/record.md
-```
-
-These commands provide structural validation, not a review of the analysis or evidence.
-
-## Installation
-
-The default branch, `main`, holds only the runtime tree, rebuilt by CI on every push to `dev`, so an install never downloads the evidence archive.
-This repository is its own plugin marketplace; the plugin is also listed in [briandconnelly-plugins](https://github.com/briandconnelly/briandconnelly-plugins).
-
-### Claude Code
+Claude Code:
 
 ```
 /plugin marketplace add briandconnelly/data-reasoning
 /plugin install data-reasoning@data-reasoning
 ```
 
-### Codex
+Codex:
 
 ```bash
 codex plugin marketplace add briandconnelly/data-reasoning
 codex plugin add data-reasoning@data-reasoning
 ```
 
-Start a new Codex session after installation so the bundled skills are available.
+Start a new Codex session after installing, then follow [Installing](docs/installing.md) to trust and verify the hook.
+The plugin is also listed in [briandconnelly-plugins](https://github.com/briandconnelly/briandconnelly-plugins).
 
-Continue with [Verify a Codex install](#verify-a-codex-install) before relying on automatic validation.
+## Learn more
 
-### Verify a Codex install
-
-Codex runs a plugin hook only after the user has reviewed and trusted its definition: open `/hooks`, select the data-reasoning hook, and review/trust it.
-Repeat that review if Codex reports changed hook definitions after an update.
-
-Use the actual installed plugin root below, not a source checkout; a loaded skill's path is `<plugin-root>/skills/<skill-name>/SKILL.md`.
-The install checker needs Python 3.11 or newer and executes the installed hook command against a temporary invalid record, which it removes afterward.
-
-```bash
-python3 /absolute/path/to/data-reasoning/instruments/check_install.py
-```
-
-A pass checks the discoverable skill layout and direct hook execution only; it cannot establish that Codex trusts or invokes the hook.
-For the live test, ask Codex:
-
-> Use `apply_patch` to create a new temporary Markdown file in this workspace containing `# Decision Record: hook probe`, then `## Verdict`, then `- Verdict: optimal`, with blank lines between them.
-> Report whether the tool response automatically includes data-reasoning structural findings, then remove the temporary file.
-> Do not invoke the hook script manually for this test.
-
-The expected feedback includes the invalid `optimal` verdict and missing sections.
-A successful file write with no findings is not a successful hook test; check `/hooks` and retry in a new session.
-For writes outside the hook's coverage, see [Live record validation](#live-record-validation).
-
-### Recover an install containing test skills
-
-The advertised data-reasoning skills should be the four listed in [Skills](#skills).
-An extra `data-reasoning:s18-analytics` comes from a development fixture: a full source checkout was installed instead of the runtime release tree.
-The release builder excludes fixtures, and the install checker reports nested discoverable skills.
-For an older install without that checker, run the current source checkout's `instruments/check_install.py` with the installed plugin root as its argument.
-
-Remove the old install, then reinstall using the [Codex installation commands](#codex), start a new session, and repeat [verification](#verify-a-codex-install).
-For a plugin installed from a configured marketplace, remove that marketplace by its actual name with `codex plugin marketplace remove <marketplace-name>`.
-For the default personal marketplace, remove the plugin with `codex plugin remove data-reasoning@<marketplace-name>`.
-Do not delete or edit individual cached fixture files: the source package determines what returns on the next install.
-
-For local development installs, build a runtime tree first and register that directory as the marketplace:
-
-```bash
-python3 scripts/build-release-tree.py /absolute/path/to/data-reasoning-runtime
-python3 /absolute/path/to/data-reasoning-runtime/instruments/check_install.py
-codex plugin marketplace add /absolute/path/to/data-reasoning-runtime
-codex plugin add data-reasoning@data-reasoning
-```
-
-Use a fresh output directory or one previously created by this builder.
-Resolve an existing marketplace registration as described above before registering a different source with the same name.
+- [Installing](docs/installing.md): verifying a Codex install and recovering one that carries test skills.
+- [Record validation](docs/record-validation.md): what the hook checks, which writes it covers, and how to run the validator by hand.
+- [Output style](docs/output-style.md): what `Data Answer` adds and how to select it.
+- [Evidence status](docs/evidence-status.md): what has been measured, what has not, and what each skill costs in context.
 
 ## Development
 
-Development happens on the `dev` branch, which carries the test suites, fixtures, and archived runs; see `AGENTS.md` for the branch rules.
+Development happens on the `dev` branch, which carries the test suites, fixtures, and archived runs; `main` holds only the runtime tree that installs fetch.
+See `AGENTS.md` for the branch rules.
 All gates run through [prek](https://github.com/j178/prek):
 
 ```bash

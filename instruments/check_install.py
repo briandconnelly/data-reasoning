@@ -79,10 +79,10 @@ def main() -> int:
     for finding in findings:
         print(finding)
     if findings:
-        print("Use the runtime release package; see README Installation for recovery.")
+        print("Use the runtime release package; see docs/installing.md for recovery.")
         return 1
     print("PASS: skill discovery surface and direct hook execution.")
-    print("Host activation/trust was NOT tested; use the live edit probe in README Installation.")
+    print("Host activation/trust was NOT tested; use the live edit probe in docs/installing.md.")
     return 0
 
 

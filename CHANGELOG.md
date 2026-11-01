@@ -6,6 +6,10 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Changed
+
+- The README is a short introduction; install verification, record validation, the output style, and evidence status moved to pages under `docs/`, which ship with the plugin.
+
 ## [0.3.0] - 2026-11-01
 
 ### Added
