@@ -27,10 +27,18 @@ def record_date(path: Path) -> date | None:
 
 
 def missing_scorer(paths: list[Path], since: date = SINCE) -> list[Path]:
+    """Records that must carry a Scorer line and do not.
+
+    An undated record (no leading ``YYYY-MM-DD``) is always an offender: it
+    cannot be shown to predate the cutoff, so it is never silently skipped.
+    """
     out = []
     for p in paths:
         d = record_date(p)
-        if d is None or d < since:
+        if d is None:
+            out.append(p)
+            continue
+        if d < since:
             continue
         if not SCORER_LINE.search(p.read_text(encoding="utf-8")):
             out.append(p)
@@ -41,7 +49,8 @@ def main(argv: list[str]) -> int:
     paths = [Path(a) for a in argv] or sorted(REPO.glob("skills/*/tests/runs/*.md"))
     bad = missing_scorer(paths)
     for p in bad:
-        print(f"MISSING SCORER: {p}")
+        label = "UNDATED RUN RECORD" if record_date(p) is None else "MISSING SCORER"
+        print(f"{label}: {p}")
     return 1 if bad else 0
 
 

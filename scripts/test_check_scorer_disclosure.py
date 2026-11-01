@@ -36,6 +36,18 @@ def test_old_record_without_scorer_line_is_exempt(tmp_path):
     assert csd.missing_scorer([p]) == []
 
 
+def test_undated_record_is_flagged(tmp_path):
+    p = tmp_path / "t15-trigger.md"
+    p.write_text("# T15\n")
+    assert csd.missing_scorer([p]) == [p]
+
+
+def test_record_dated_exactly_on_the_cutoff_is_checked(tmp_path):
+    p = tmp_path / "2026-11-01-x.md"
+    p.write_text("# X\n")
+    assert csd.missing_scorer([p]) == [p]
+
+
 def test_the_real_tree_passes():
     result = subprocess.run([sys.executable, str(SCRIPT)], check=False, capture_output=True)
     assert result.returncode == 0
