@@ -11,3 +11,5 @@ Each record states the context, the decision, and the consequences accepted with
 - [006-description-freeze-until-measured.md](006-description-freeze-until-measured.md) — the four routing descriptions are frozen at their 2026-08-18 baselines against unmeasured change.
 - [007-measurement-claim-binding.md](007-measurement-claim-binding.md) — description-measurement claims are bound to registry evidence; the record owns the convention and `scripts/check-measurement-claims.py` enforces it.
 - [008-general-ancestry-rule-deferred.md](008-general-ancestry-rule-deferred.md) — the general ancestry rule #20 sketched is deferred: non-description claims are common but unstructured, and 007 has not yet earned the extension; reopening conditions named.
+
+Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.

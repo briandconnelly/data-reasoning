@@ -28,3 +28,4 @@ This decisions log follows the same pointer rule as `skills/hypothesis-driven-an
 The owning file for every operable rule these records name is `skills/causal-identification-review/SKILL.md`.
 That file now exists.
 Each record's "Where the rule lives" pointer was written before it did, naming it as the future home rather than a live one; those per-decision pointers are historical and are left as written — see each numbered record's own "(to be written; this record predates it)" note.
+Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.

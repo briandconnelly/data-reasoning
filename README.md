@@ -14,10 +14,12 @@ A Claude Code and Codex plugin for reasoning from data: structured exploration t
 Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work; `causal-identification-review` is the constructive continuation when adjudication concludes nothing identifies the effect, or when a claimed design needs its identifying assumptions checked before anyone trusts it.
 `decision-analysis` is the constructive continuation when a decision hangs on what an investigation left `UNRESOLVED`: it consumes ledgers and review records as evidence, and its verdicts recommend without authorizing.
 All four skills carry the same authorization gate; its text lives once in `scripts/shared-sections/authorization-gate.md` and is rendered into each skill by `scripts/check-shared-sections.py`, which fails when a rendered copy drifts or is hidden.
+Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.
 
 The pairing is a design claim, not a measured one.
+Who scored each measured result, and what an unlabelled record is presumed to be, is disclosed per `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § Who scored it.
 `hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).
-`exploratory-data-analysis` has measured description-trigger arms only (`skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md`, `2026-08-11-t14-trigger.md`, and the repaired rerun; the lift is recorded in `skills/exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md`); its behavior scenarios in `tests/scenarios.md` are authored and unrun.
+`exploratory-data-analysis` has measured description-trigger arms only (`skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md`, `skills/exploratory-data-analysis/tests/runs/2026-08-11-t14-trigger.md`, and the repaired rerun; the lift is recorded in `skills/exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md`); its behavior scenarios in `tests/scenarios.md` are authored and unrun.
 No run has yet exercised a handoff between the two.
 Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against the then two-skill shipped surface plus a `systematic-debugging` stand-in, not the four skills that now ship.
 `causal-identification-review`'s description has n=1 trigger cells (CS1, CS2, CS6a) against a three-skill catalog; `decision-analysis`'s has none.
