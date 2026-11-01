@@ -1,6 +1,7 @@
 """The scorer-disclosure checker must flag new run records lacking a Scorer line."""
 
 import importlib.util
+import re
 import subprocess
 import sys
 from datetime import date
@@ -71,3 +72,19 @@ def test_scorer_line_after_the_first_table_does_not_count(tmp_path):
 def test_the_real_tree_passes():
     result = subprocess.run([sys.executable, str(SCRIPT)], check=False, capture_output=True)
     assert result.returncode == 0
+
+
+def test_default_record_paths_include_agents_skills():
+    paths = [p.relative_to(csd.REPO).as_posix() for p in csd.default_record_paths()]
+    assert any(p.startswith(".agents/skills/") for p in paths)
+    assert any(p.startswith("skills/") for p in paths)
+
+
+def test_hook_regex_matches_both_trees():
+    text = (csd.REPO / "prek.toml").read_text()
+    line = next(ln for ln in text.splitlines() if 'id = "check-scorer-disclosure"' in ln)
+    raw = re.search(r'files = "((?:[^"\\]|\\.)*)"', line).group(1)
+    pattern = re.compile(raw.replace("\\\\", "\\"))
+    assert pattern.search(".agents/skills/x/tests/runs/2026-11-02-r.md")
+    assert pattern.search("skills/x/tests/runs/2026-11-02-r.md")
+    assert not pattern.search("skills/x/tests/runs/artifacts/2026-11-02-r.md")
