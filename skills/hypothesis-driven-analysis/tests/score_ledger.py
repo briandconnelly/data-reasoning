@@ -881,11 +881,17 @@ def conclusion_units(final: str) -> tuple[list[str | _AnaphoraBreak], list[str]]
     return units, fails
 
 
-def _scan_conclusion_body(body: str) -> tuple[list[str | _AnaphoraBreak], list[str]]:
+def _scan_conclusion_body(
+    body: str, rows: list[list[str]] | None = None
+) -> tuple[list[str | _AnaphoraBreak], list[str]]:
     """The line scan of `conclusion_units`: one Conclusion body -> ordered claim
     units plus row-local parse fails. Extracted so both functions stay within the
     statement budget; the table / orphan / anaphora semantics are documented on
     `conclusion_units`.
+
+    When `rows` is given, the unescaped cells of every table row the scan
+    processes are appended to it, so `anchored_hypothesis_ids` reads exactly the
+    rows this scan reads rather than re-parsing the table (#47).
     """
     units: list[str | _AnaphoraBreak] = []
     fails: list[str] = []
@@ -908,6 +914,8 @@ def _scan_conclusion_body(body: str) -> tuple[list[str | _AnaphoraBreak], list[s
         if m:
             flush()
             cells = [unescape_cell(c) for c in CELL_SPLIT.split(m.group("cells"))]
+            if rows is not None:
+                rows.append(cells)
             basis_idx, row_units = _conclusion_row_units(cells, basis_idx, not in_table)
             in_table = True
             units.extend(row_units)
@@ -955,23 +963,21 @@ def anchored_hypothesis_ids(final: str) -> set[str]:
     """Hypothesis ids (`H2`) whose own Conclusion-table row carries a qualified
     missingness anchor in any cell.
 
-    Uses the same row parse as `_scan_conclusion_body` (`ROW`, `CELL_SPLIT`,
-    `unescape_cell`); a row counts only when its first cell is exactly an id.
+    Reads the rows `_scan_conclusion_body` itself processes (its `rows`
+    collector); a row counts only when its first cell is exactly an id.
     Fail-closed parse cases are `conclusion_units`' job, so this returns an empty
     set when there is not exactly one Conclusion.
     """
     bodies = section_bodies(final, "Conclusion")
     if len(bodies) != 1:
         return set()
-    ids: set[str] = set()
-    for line in bodies[0].splitlines():
-        m = ROW.match(line)
-        if not m:
-            continue
-        cells = [unescape_cell(c).strip() for c in CELL_SPLIT.split(m.group("cells"))]
-        if re.fullmatch(r"H\d+", cells[0]) and any(_c3a_has_anchor(c) for c in cells):
-            ids.add(cells[0])
-    return ids
+    rows: list[list[str]] = []
+    _scan_conclusion_body(bodies[0], rows)
+    return {
+        cells[0].strip()
+        for cells in rows
+        if re.fullmatch(r"H\d+", cells[0].strip()) and any(_c3a_has_anchor(c) for c in cells)
+    }
 
 
 def _c3a_unit_fires(
@@ -988,12 +994,13 @@ def _c3a_unit_fires(
     `check_c3b` can apply the identical per-unit test to a completeness
     bullet's own reason text (B1).
     """
-    has_anchor = _c3a_has_anchor(unit) or bool(
-        anchored_ids and anchored_ids.intersection(re.findall(r"\bH\d+\b", unit))
-    )
+    # The returned has_anchor is the unit's OWN anchor only: a named anchored id
+    # licenses this unit to fire and never feeds the anaphora chain (#47 review).
+    has_anchor = _c3a_has_anchor(unit)
+    named_anchor = not anchored_ids.isdisjoint(re.findall(r"\bH\d+\b", unit))
     if not _c3a_has_direction(unit) or _c3a_suppressed(unit):
         return False, has_anchor
-    if has_anchor or (_C3A_ANAPHOR.search(unit) and prev_had_anchor):
+    if has_anchor or named_anchor or (_C3A_ANAPHOR.search(unit) and prev_had_anchor):
         return True, has_anchor
     return False, has_anchor
 

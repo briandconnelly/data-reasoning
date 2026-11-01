@@ -1387,6 +1387,11 @@ def test_c3a_look_predicate_with_own_anchor(unit):
     assert any("C3a" in m for m in sl.check_c3a(concl("- " + unit)))
 
 
+def test_c3a_named_id_does_not_feed_anaphora_chain():
+    body = "- H3 beats H2. This makes the headline look better than it should.\n" + S15_PRE_TABLE
+    assert not any(m.startswith("C3a:") for m in sl.check_c3a(concl(body)))
+
+
 def test_anchored_hypothesis_ids_reads_the_conclusion_table():
     assert sl.anchored_hypothesis_ids(concl("- x\n" + S15_PRE_TABLE)) == {"H2"}
 
