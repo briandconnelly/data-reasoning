@@ -226,6 +226,10 @@ LEDGER = re.compile(r"ledger\.md")
         ("python3 - <<E\nif a > ledger.md: pass\nE", None),
         ("cat > ledger.md <<'E'\nx > y\nE", "ledger.md"),
         ("python3 - <<E\\nif a > ledger.md: pass\\nE", None),
+        ('echo "note > ledger.md"', None),
+        ("echo 'see > ledger.md later'", None),
+        ("grep -c x data.csv # > ledger.md", None),
+        ("cat > \"ledger.md\" <<'E'\nx\nE", "ledger.md"),
     ],
 )
 def test_shell_redirect_target(cmd: str, target: str | None) -> None:

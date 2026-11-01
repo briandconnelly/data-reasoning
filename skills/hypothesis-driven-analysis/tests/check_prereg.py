@@ -186,22 +186,58 @@ _VERSION_SUFFIX = re.compile(r"\d+(?:\.\d+)*$")
 _REDIRECT = re.compile(r"(?<![<>\d=-])>{1,2}\s*(?:[\"']([^\"']+)[\"']|([^\s\"'|;&<>]+))")
 
 
+def _mask_quotes_and_comment(line: str) -> str:
+    """``line`` with quoted interiors and any unquoted ``#`` comment blanked.
+
+    Index-for-index: every masked character becomes one ``x`` (quote interiors)
+    or one space (the comment), so a match's span on the masked text is the
+    same span on ``line``. The quote characters themselves are kept.
+    """
+    out: list[str] = []
+    quote: str | None = None
+    for i, ch in enumerate(line):
+        if quote is not None:
+            if ch == quote:
+                quote = None
+                out.append(ch)
+            else:
+                out.append("x")
+        elif ch in "\"'":
+            quote = ch
+            out.append(ch)
+        elif ch == "#" and (i == 0 or line[i - 1].isspace()):
+            out.append(" " * (len(line) - i))
+            break
+        else:
+            out.append(ch)
+    return "".join(out)
+
+
 def shell_redirect_target(command: str) -> str | None:
-    """The unquoted target of the first ``>``/``>>`` output redirect, or None.
+    """The target of the first unquoted ``>``/``>>`` output redirect, or None.
 
     Recovers ``ledger.md`` from ``cat > ledger.md <<'E'`` so a heredoc-written
     ledger counts as the ledger write. ``tee`` and interpreter-mediated writes
     (``python3 - <<'E' ... open('ledger.md', 'w')``) are out of reach on
     purpose: they stay candidates named in the UNVERIFIABLE message, never
     writes. A heuristic, not a shell parser.
+
+    Before searching, the interiors of single- and double-quoted spans and
+    everything from an unquoted word-initial ``#`` onward are masked, so a
+    ``>`` inside a string (``echo "a > ledger.md"``) or a comment
+    (``cmd # > ledger.md``) is not a redirect. The masking keeps positions,
+    and the target is read from the original text at the match's span, so a
+    quoted target (``> "my ledger.md"``) is still recovered.
     """
     # Only the first line: a heredoc body (``if a > b:``) is not shell. The
     # literal two-char ``\\n`` is extract_evidence.py's flattened newline.
     first_line = re.split(r"\n|\\n", command, maxsplit=1)[0]
-    match = _REDIRECT.search(first_line)
+    match = _REDIRECT.search(_mask_quotes_and_comment(first_line))
     if match is None:
         return None
-    return match.group(1) or match.group(2)
+    group = 1 if match.group(1) is not None else 2
+    start, end = match.span(group)
+    return first_line[start:end]
 
 
 def _looks_like_script_path(token: str) -> bool:
