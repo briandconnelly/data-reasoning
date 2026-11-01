@@ -11,7 +11,7 @@ file in `tool_input.file_path`. Codex routes file edits through `apply_patch`
 and hands the hook the patch text in `tool_input.command`, so the paths are
 read off its `*** Add File:` / `*** Update File:` / `*** Move to:` lines and
 resolved against the payload's `cwd`. A record created by a shell command is
-covered by neither shape and is not validated; README § Live record validation
+covered by neither shape and is not validated; `docs/record-validation.md`
 says so.
 
 Whether this hook's output is agent-read prose, and what it therefore owes,
