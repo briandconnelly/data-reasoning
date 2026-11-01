@@ -240,7 +240,7 @@ NOT_A_POINTER = {"potential-new-features.md", "run_eval.py"}
 
 
 def _repository_only_allowed(md_rel: Path) -> bool:
-    return md_rel == Path("README.md") or "decisions" in md_rel.parts
+    return md_rel in (Path("README.md"), Path("CHANGELOG.md")) or "decisions" in md_rel.parts
 
 
 def dangling_citations(out: Path) -> list[str]:

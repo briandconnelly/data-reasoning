@@ -7,3 +7,5 @@
 - Branch from `dev` and open pull requests against `dev` (`gh pr create --base dev`).
   `main` is the runtime tree that `.github/workflows/publish-runtime.yml` builds from `dev`; never commit to it or target it.
   GitHub closes issues from `Fixes #N` only on merges into the default branch, which is `main`, so close an issue by hand once its fix merges into `dev`
+- `CHANGELOG.md` records every user-visible change under `## [Unreleased]`, in the pull request that makes it; dev-only changes (tests, scripts, evidence) stay out of it.
+  A release moves that section under a new version heading, bumps `version` in both plugin manifests, and tags `v<version>` on `dev`
