@@ -3,6 +3,12 @@
 
 skills/hypothesis-driven-analysis/tests/PROTOCOL.md § Who scored it owns the
 rule; this script only enforces it.
+
+A record passes only when a visible `Scorer:` line (not inside a ``` / ~~~
+fence or an HTML comment) appears in its preamble, before the first table
+line (one starting with `|`). That is necessary, not sufficient, for
+PROTOCOL's "directly under its date line": placement relative to the date
+line is not checked.
 """
 
 import re
@@ -12,7 +18,8 @@ from pathlib import Path
 
 SINCE = date(2026, 11, 1)
 DATE_PREFIX = re.compile(r"^(\d{4})-(\d{2})-(\d{2})")
-SCORER_LINE = re.compile(r"^Scorer: \S", re.MULTILINE)
+SCORER_LINE = re.compile(r"^Scorer: \S")
+ONE_LINE_COMMENT = re.compile(r"^\s*(<!--.*?-->\s*)+$")
 REPO = Path(__file__).resolve().parent.parent
 
 
@@ -24,6 +31,31 @@ def record_date(path: Path) -> date | None:
         return date(*map(int, m.groups()))
     except ValueError:
         return None
+
+
+def has_preamble_scorer(text: str) -> bool:
+    """A visible `Scorer:` line appears before the first table line."""
+    fenced = commented = False
+    for line in text.splitlines():
+        if commented:
+            commented = "-->" not in line
+            continue
+        if line.startswith(("```", "~~~")):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        if line.startswith("|"):
+            return False
+        if ONE_LINE_COMMENT.match(line):
+            continue
+        opened = line.rfind("<!--")
+        if opened != -1 and "-->" not in line[opened:]:
+            commented = True
+            continue
+        if SCORER_LINE.match(line):
+            return True
+    return False
 
 
 def missing_scorer(paths: list[Path], since: date = SINCE) -> list[Path]:
@@ -40,7 +72,7 @@ def missing_scorer(paths: list[Path], since: date = SINCE) -> list[Path]:
             continue
         if d < since:
             continue
-        if not SCORER_LINE.search(p.read_text(encoding="utf-8")):
+        if not has_preamble_scorer(p.read_text(encoding="utf-8")):
             out.append(p)
     return out
 

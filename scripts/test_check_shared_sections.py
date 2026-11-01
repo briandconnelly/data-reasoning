@@ -170,6 +170,20 @@ def test_section_with_a_commented_body_line_is_refused():
         css.extract_section(text, heading)
 
 
+def test_section_with_a_one_line_comment_body_line_is_refused():
+    heading = "## Data Rules"
+    text = f"{heading}\n\nvisible\n<!-- mandatory rule -->\n\n## Other\n"
+    with pytest.raises(ValueError, match="section body is hidden"):
+        css.extract_section(text, heading)
+
+
+def test_inline_code_showing_a_comment_is_not_hidden():
+    heading = "## Data Rules"
+    text = f"{heading}\n\nThe token `<!-- x -->` is documented.\n\n## Other\n"
+    block = css.extract_section(text, heading)
+    assert "The token `<!-- x -->` is documented." in block
+
+
 def test_update_refuses_a_hidden_body(tmp_path, capsys):
     fake = make_fake_repo(tmp_path)
     skill_md = fake / "skills" / "decision-analysis" / "SKILL.md"

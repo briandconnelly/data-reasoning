@@ -82,6 +82,7 @@ FAULT_CODE = 2
 
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 BACKTICK_RUN = re.compile(r"`+")
+ONE_LINE_COMMENT = re.compile(r"<!--.*?-->")
 
 
 def _opens_fence(line: str, m) -> bool:
@@ -172,8 +173,22 @@ def visible_indices(lines: list[str]) -> Iterator[int]:
 
 
 def comment_hidden_indices(lines: list[str]) -> set[int]:
-    """Indices of the lines hidden inside an HTML comment (fences excluded)."""
-    return {i for i, state in _scan(lines) if state == "comment"}
+    """Indices of the lines hidden inside an HTML comment (fences excluded).
+
+    Also counts a non-blank visible line made up wholly of complete one-line
+    comments (`<!-- ... -->`, outside inline code): a reader sees nothing of
+    it. `_scan` keeps such lines visible on purpose (gate markers), so this
+    widening applies only here, to snapshot bodies.
+    """
+    hidden = set()
+    for i, state in _scan(lines):
+        if state == "comment" or (
+            state == "visible"
+            and lines[i].strip()
+            and not ONE_LINE_COMMENT.sub("", _shadow(lines[i])).strip()
+        ):
+            hidden.add(i)
+    return hidden
 
 
 def extract_section(text: str, heading: str) -> str:
