@@ -17,6 +17,7 @@ All four skills carry the same authorization gate; its text lives once in `scrip
 Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.
 
 The pairing is a design claim, not a measured one.
+Every "measured" result below was scored by an agent session unless its run record names a person; the rule and its evidence are in `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § Who scored it.
 `hypothesis-driven-analysis` has an archived scenario suite behind it (`skills/hypothesis-driven-analysis/tests/`).
 `exploratory-data-analysis` has measured description-trigger arms only (`skills/exploratory-data-analysis/tests/runs/2026-08-11-t13-trigger.md`, `skills/exploratory-data-analysis/tests/runs/2026-08-11-t14-trigger.md`, and the repaired rerun; the lift is recorded in `skills/exploratory-data-analysis/decisions/005-generic-speech-acts-claimed.md`); its behavior scenarios in `tests/scenarios.md` are authored and unrun.
 No run has yet exercised a handoff between the two.

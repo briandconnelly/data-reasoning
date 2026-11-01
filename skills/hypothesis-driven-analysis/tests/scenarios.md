@@ -918,7 +918,7 @@ All six rows rest on evidence with little room for judgment — a deploy timesta
 No fixture in the suite tests a legitimate-but-subtle causal refutation, which is exactly the case where an over-cautious rule would bite and a flagrant case cannot reveal.
 
 **What is and is not closed.**
-The final review's blocking finding — zero post-edit measurement of whether legitimate refutation still lands — is closed: it was measured, once, by a human reading the six rows above.
+The final review's blocking finding — zero post-edit measurement of whether legitimate refutation still lands — is closed: it was measured, once, by the dispatching agent session reading the six rows above (corrected 2026-11-01: this sentence said "a human"; the record was written by the agent bot account in df83a8f and no person is named as having read the rows).
 The open item calling for a scenario whose assertions require a causal hypothesis to end `REFUTED` is not closed by this wave; the two should not be conflated.
 
 ### Fifth wave, 2026-07-17 — the routing table run for real
