@@ -62,7 +62,7 @@ This record's scope already named "the canonical Problem fields present and fill
 The same review found that one `pending` slot suspends every completeness finding across the record, with no mode in which completeness is demanded.
 The suspension stays, because the skills mandate writing the template before filling it and the hook runs on every write; `--final` is the new completed-record mode, in which template state no longer suspends and is itself a finding.
 Nothing points the agent at `--final` yet: that sentence is agent-read prose and owes an arm under decisions/001 before it ships, on exactly the terms this record already set for the deferred SKILL.md pointer.
-The hook also now reads Codex's `apply_patch` payload; README § Live record validation names the write paths covered and the one — shell commands — that is not.)*
+The hook also now reads Codex's `apply_patch` payload; `docs/record-validation.md` names the write paths covered and the one — shell commands — that is not.)*
 
 ## Rules this record adds (2026-08-22)
 
