@@ -133,6 +133,13 @@ STATUSES = {"REFUTED", "UNRESOLVED"}
 OUTCOMES = {"NOT_TESTED", "CONSISTENT", "CONTRADICTED", "NON_DISCRIMINATING"}
 DISPOSITIONS = {"identified-if", "assumption-contradicted", "unresolved", "not-constructible"}
 ROUTES = {"review", "construct", "bound"}
+ASSESSMENTS = {
+    "contradicted",
+    "not-contradicted",
+    "non-discriminating",
+    "not-run",
+    "not-testable-here",
+}
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 
@@ -485,6 +492,45 @@ def _normalize(value: str) -> str:
     return value.strip().strip("`*").strip()
 
 
+# SKILL.md § Profile Route fills "Frame-lite", not Frame: a profile record's
+# frame heading is `## Frame` or `## Frame-lite`, optionally annotated, and
+# Frame-lite owes no Stop rule because its budget doubles as the stop rule.
+FRAME_HEADING = re.compile(r"^## Frame(-lite)?(?=$|\s)", re.M)
+FRAME_LITE_SLOTS = ["Scope", "Effort budget"]
+
+
+def _frame_heading(body: str) -> str:
+    """The exploration record's actual frame heading line, or `## Frame`
+    when none is present (so the missing-section finding names the
+    canonical one)."""
+    m = FRAME_HEADING.search(body)
+    if m is None:
+        return "## Frame"
+    return body[m.start() : body.find("\n", m.start())].rstrip()
+
+
+def _required_sections(body: str, kind: str) -> list[str]:
+    headings = REQUIRED_SECTIONS[kind]
+    if kind != "exploration":
+        return headings
+    return [_frame_heading(body) if h == "## Frame" else h for h in headings]
+
+
+def _required_slots(body: str, kind: str) -> dict[str, list[str]]:
+    slots = REQUIRED_SLOTS.get(kind, {})
+    if kind != "exploration":
+        return slots
+    frame = _frame_heading(body)
+    lite = frame.startswith("## Frame-lite")
+    out = {}
+    for heading, labels in slots.items():
+        if heading == "## Frame":
+            out[frame] = FRAME_LITE_SLOTS if lite else labels
+        else:
+            out[heading] = labels
+    return out
+
+
 HEADER_ALIASES = {
     # The shipped ledger template's header for the column the checks call
     # `necessary prediction` (references/ledger-template.md § Hypotheses).
@@ -652,7 +698,7 @@ def _check_labels(section: str, heading: str, labels, final: bool, findings: lis
 
 
 def _check_slots(body: str, kind: str, final: bool, findings: list[str]) -> None:
-    for heading, labels in REQUIRED_SLOTS.get(kind, {}).items():
+    for heading, labels in _required_slots(body, kind).items():
         section = _section(body, heading)
         if not section.strip():
             continue  # the missing/empty-section finding already covers it
@@ -688,7 +734,7 @@ def _nested_span(section: str, label: str) -> str | None:
 NESTED_TABLE_COLUMNS = {
     "Consequences": [],
     "Evidence": ["item", "lr", "provenance", "source, reference class, conditioning"],
-    "Assumption probes": ["assumption", "probe", "result"],
+    "Assumption probes": ["assumption", "probe", "assessment", "evidence or reason"],
     "Threat register": ["threat", "probe", "result"],
 }
 NESTED_TABLE_MIN_WIDTH = {"Consequences": 3}
@@ -838,7 +884,11 @@ def _check_review_route_blocks(body: str, final: bool, findings: list[str]) -> N
             section = _section(body, h)
             _check_labels(section, h, DESIGN_SLOTS, final, findings)
             _check_nested_list(section, h, "Identifying assumptions", final, findings)
-            _check_nested_table(section, h, "Assumption probes", final, findings)
+            disposition = _slot_value(section, "Disposition") or ""
+            # SKILL.md per-route procedure: a design that cannot run has
+            # nothing to probe, so its assumptions owe no assessed rows.
+            if _leading_token(disposition, DISPOSITIONS) != "not-constructible":
+                _check_nested_table(section, h, "Assumption probes", final, findings)
             _check_nested_table(section, h, "Threat register", final, findings)
     elif token == "bound":
         bound = _section(body, "## Bound")
@@ -846,6 +896,24 @@ def _check_review_route_blocks(body: str, final: bool, findings: list[str]) -> N
             findings.append("route 'bound': required section missing: ## Bound")
         else:
             _check_labels(bound, "## Bound", BOUND_SLOTS, final, findings)
+
+
+def _check_assessments(section: str, heading: str, findings: list[str]) -> None:
+    """Every assessment cell of a Design block's probes table begins with a
+    value from the closed set (SKILL.md per-route procedure); a cell still
+    in template state is left to the table's own fill check."""
+    span = _nested_span(section, "Assumption probes")
+    if span is None:
+        return
+    for value in _column(_table_rows(span), "assessment"):
+        if _unfilled(value):
+            continue
+        if _leading_token(value, ASSESSMENTS) is None:
+            findings.append(
+                f"{heading}: assessment {_normalize(value)!r} does not begin with a value "
+                f"from the closed set {sorted(ASSESSMENTS)} — 'valid' and 'certified' are "
+                f"not assessments"
+            )
 
 
 def _in_progress(body: str) -> bool:
@@ -858,7 +926,8 @@ def _in_progress(body: str) -> bool:
         return True
     kind = detect(body) or ""
     return any(
-        SECTION_PENDING.match(_section(body, h).strip()) for h in REQUIRED_SECTIONS.get(kind, [])
+        SECTION_PENDING.match(_section(body, h).strip())
+        for h in (_required_sections(body, kind) if kind else [])
     )
 
 
@@ -972,7 +1041,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
         findings.append("unterminated code fence: completeness past it was not checked")
 
     if not in_progress:
-        for heading in REQUIRED_SECTIONS[kind]:
+        for heading in _required_sections(body, kind):
             if ("\n" + heading + "\n") not in body:
                 findings.append(f"required section missing: {heading}")
                 continue
@@ -1036,6 +1105,10 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             findings.append("Conclusion: per-hypothesis table has no data rows")
 
     elif kind == "review":
+        # Vocabulary, like every closed set here, is checked whatever the
+        # record's fill state and whatever the design's disposition.
+        for h in re.findall(r"^## Design: .*$", body, re.M):
+            _check_assessments(_section(body, h.rstrip()), h.rstrip(), findings)
         for line in body.splitlines():
             stripped = _unemphasize(line.strip())
             if stripped.startswith(("- Disposition:", "- Dispositions:")):

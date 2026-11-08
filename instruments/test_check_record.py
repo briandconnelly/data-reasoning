@@ -215,12 +215,12 @@ GOOD_REVIEW = """\
 
 - Design: difference-in-differences, pilot depots vs the rest
 - Identifying assumptions:
-  - throughput at pilot and non-pilot depots would have moved in parallel absent the pilot
+  - A1: throughput at pilot and non-pilot depots would have moved in parallel absent the pilot
 - Assumption probes:
 
-  | assumption | probe | result |
-  | --- | --- | --- |
-  | parallel trends | pre-period slope comparison | slopes within 0.2 |
+  | assumption | probe | assessment | evidence or reason |
+  | --- | --- | --- | --- |
+  | A1 | pre-period slope comparison | not-contradicted | slopes within 0.2; blind to small violations |
 
 - Data requirements: weekly throughput per depot, 12 pre-weeks
 - Threat register:
@@ -584,7 +584,8 @@ REVIEW_SKELETON = (
     "- Causal question, restated as a counterfactual contrast: c\n- Estimand: e\n"
     "- Assignment mechanism as stated: UNSTATED\n- Route: {route}\n\n"
     "## Design: d\n\n- Design: d\n- Identifying assumptions:\n  - a\n- Assumption probes:\n\n"
-    "  | assumption | probe | result |\n  | --- | --- | --- |\n  | a | p | r |\n\n"
+    "  | assumption | probe | assessment | evidence or reason |\n"
+    "  | --- | --- | --- | --- |\n  | a | p | not-run | r |\n\n"
     "- Data requirements: dr\n- Threat register:\n\n"
     "  | threat | probe | result |\n  | --- | --- | --- |\n  | t | p | r |\n\n"
     "- Disposition: {disp}\n\n"
@@ -1137,9 +1138,12 @@ def test_design_block_of_only_a_disposition_is_incomplete():
 
 def test_design_nested_structures_must_have_content():
     rec = GOOD_REVIEW.replace(
-        "  - throughput at pilot and non-pilot depots would have moved in parallel absent the pilot\n",
+        "  - A1: throughput at pilot and non-pilot depots would have moved in parallel absent the pilot\n",
         "",
-    ).replace("  | parallel trends | pre-period slope comparison | slopes within 0.2 |\n", "")
+    ).replace(
+        "  | A1 | pre-period slope comparison | not-contradicted | slopes within 0.2; blind to small violations |\n",
+        "",
+    )
     findings = cr.check(rec, final=True)
     assert any("'- Identifying assumptions:' has no items under it" in f for f in findings)
     assert any("'- Assumption probes:' has no table rows under it" in f for f in findings)
@@ -1190,7 +1194,7 @@ def test_final_mode_rejects_empty_and_formatted_pending_values():
     assert any("Conclusion: cell still unfilled: ''" in f for f in cr.check(rec, final=True))
     rec = GOOD_LEDGER.replace("| CONSISTENT |", "| |")
     assert any("Tests: cell still unfilled: ''" in f for f in cr.check(rec, final=True))
-    rec = GOOD_REVIEW.replace("| slopes within 0.2 |", "| |")
+    rec = GOOD_REVIEW.replace("| slopes within 0.2; blind to small violations |", "| |")
     assert any(
         "'- Assumption probes:' row 1 cell still unfilled: ''" in f
         for f in cr.check(rec, final=True)
@@ -1457,3 +1461,126 @@ def test_verdict_coupling_is_decision_only():
     # a VoI record carries no decide slots; the new checks must not fire on it
     voi = "# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: upper-bound-only\n"
     assert not any("robust" in f or "dominated" in f for f in cr.check(voi))
+
+
+# Issue #61: the validator demanded a `result` column the shipped review
+# template never had, and never read the `assessment` column it does have.
+
+
+def test_review_template_probes_columns_are_accepted():
+    assert cr.check(GOOD_REVIEW) == []
+    assert cr.check(GOOD_REVIEW, final=True) == []
+
+
+def test_review_probes_table_with_old_result_column_is_caught():
+    bad = GOOD_REVIEW.replace(
+        "| assumption | probe | assessment | evidence or reason |",
+        "| assumption | probe | result | note |",
+    )
+    assert any("'assessment' column" in f for f in cr.check(bad)), cr.check(bad)
+
+
+def test_certifying_assessment_is_caught():
+    bad = GOOD_REVIEW.replace("| not-contradicted |", "| certified |")
+    findings = cr.check(bad)
+    assert any("assessment 'certified'" in f for f in findings), findings
+
+
+def test_annotated_assessment_is_accepted():
+    ok = GOOD_REVIEW.replace("| not-contradicted |", "| not-run — budget ended first |")
+    assert cr.check(ok) == []
+
+
+def test_unfilled_assessment_is_quiet_in_progress_and_caught_final():
+    rec = GOOD_REVIEW.replace("| not-contradicted |", "| <value> |")
+    assert not any("assessment" in f for f in cr.check(rec))
+    assert any("unfilled" in f for f in cr.check(rec, final=True))
+
+
+def test_not_constructible_design_owes_no_probe_rows():
+    rec = GOOD_REVIEW.replace(
+        "- Disposition: identified-if — parallel pre-trends; probe attached",
+        "- Disposition: not-constructible — no pre-period exists",
+    ).replace(
+        """  | assumption | probe | assessment | evidence or reason |
+  | --- | --- | --- | --- |
+  | A1 | pre-period slope comparison | not-contradicted | slopes within 0.2; blind to small violations |
+""",
+        "",
+    )
+    assert cr.check(rec, final=True) == [], cr.check(rec, final=True)
+
+
+# Issue #62: SKILL.md § Profile Route fills Frame-lite, but the validator
+# required the heading `## Frame` byte for byte and the Stop rule slot a
+# profile does not carry (its budget doubles as its stop rule).
+
+PROFILE_LOG = """\
+# Exploration: account 42 profile
+
+## Frame-lite (entity profile)
+
+- Scope: account 42 (id 42), billing and events tables, 2026
+- Effort budget: 10 queries
+
+## Orientation record
+
+| id | Origin (file, query, system) | Acquired | Notes |
+| --- | --- | --- | --- |
+| S1 | billing.events | 2026-11-08 | export |
+
+- Schema and grain: one row per invoice
+- Quality: no duplicates
+- Coverage: unverifiable: no independent denominator
+- Absence semantics: S1: UNKNOWN — nothing outside the account's rows discriminates
+- Instrument caveats: none known
+"""
+
+
+def test_profile_log_with_frame_lite_heading_passes():
+    assert cr.detect(PROFILE_LOG) == "exploration"
+    assert cr.check(PROFILE_LOG) == []
+    assert cr.check(PROFILE_LOG, final=True) == []
+
+
+def test_bare_frame_lite_heading_passes_too():
+    assert cr.check(PROFILE_LOG.replace("## Frame-lite (entity profile)", "## Frame-lite")) == []
+
+
+def test_frame_lite_still_owes_scope_and_budget():
+    findings = cr.check(PROFILE_LOG.replace("- Effort budget: 10 queries\n", ""))
+    assert any("'- Effort budget:' slot is missing" in f for f in findings), findings
+
+
+def test_full_frame_still_owes_stop_rule():
+    rec = PROFILE_LOG.replace("## Frame-lite (entity profile)", "## Frame")
+    assert any("'- Stop rule:' slot is missing" in f for f in cr.check(rec))
+
+
+def test_exploration_without_any_frame_heading_is_caught():
+    rec = PROFILE_LOG.replace("## Frame-lite (entity profile)", "## Framing")
+    assert any("required section missing: ## Frame" in f for f in cr.check(rec))
+
+
+# Codex review of this branch: two gaps in the first cut.
+
+
+def test_annotated_full_frame_heading_still_owes_stop_rule():
+    rec = PROFILE_LOG.replace("## Frame-lite (entity profile)", "## Frame (explore route)")
+    assert any("'- Stop rule:' slot is missing" in f for f in cr.check(rec)), cr.check(rec)
+
+
+def test_assessment_vocabulary_is_checked_on_in_progress_records():
+    rec = GOOD_REVIEW.replace("| not-contradicted |", "| certified |").replace(
+        "- Data requirements: weekly throughput per depot, 12 pre-weeks",
+        "- Data requirements: pending",
+    )
+    assert any("assessment 'certified'" in f for f in cr.check(rec)), cr.check(rec)
+
+
+def test_assessment_vocabulary_is_checked_on_not_constructible_designs():
+    rec = GOOD_REVIEW.replace("| not-contradicted |", "| certified |").replace(
+        "- Disposition: identified-if — parallel pre-trends; probe attached",
+        "- Disposition: not-constructible — no pre-period exists",
+    )
+    assert any("assessment 'certified'" in f for f in cr.check(rec, final=True))
