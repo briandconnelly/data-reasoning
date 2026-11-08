@@ -14,6 +14,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 ### Changed
 
 - Decision analysis: § Numeric Policy now carries one ordered verdict rule (`dominated`, then the loss cap, then `prior-sensitive`, then `loss-sensitive`, then `robust`), treats only `user-elicited` and `externally-sourced` losses as belief-grade, and records a rounded elicited loss at its nominal value with analyst-chosen endpoints as `sensitivity-only`; § The Decide Route's verdict bullets point there. Both checkers enforce the paired sentinels, the loss cap, and per-axis flip tests.
+- The evidence-status page reports per-scenario measurement status: one table per skill covering every catalog scenario, with the wording each was measured against, whether that wording ships, and the result; it no longer calls the exploration and decision-analysis catalogs unrun, records the 2026-11-08 settlement of the missing-prior and verdict-precedence debts, and refreshes the context-cost word counts (#68).
 - The README is a short introduction; install verification, record validation, the output style, and evidence status moved to pages under `docs/`, which ship with the plugin.
 
 ### Fixed
