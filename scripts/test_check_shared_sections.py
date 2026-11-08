@@ -443,3 +443,47 @@ def test_a_hidden_authority_fails_both_check_and_render(tmp_path, capsys, prefix
     assert css.GATE_AUTHORITY in err
     for skill, text in before.items():
         assert (fake / "skills" / skill / "SKILL.md").read_text(encoding="utf-8") == text, skill
+
+
+# --- every rendered section, not only the gate ---------------------------
+
+
+def test_every_rendered_section_matches_its_authority_verbatim():
+    for name, authority_rel, _decision in css.RENDERED:
+        authority = (REPO / authority_rel).read_text(encoding="utf-8")
+        for skill in css.GATE_CARRIERS:
+            text = (REPO / "skills" / skill / "SKILL.md").read_text(encoding="utf-8")
+            assert css.extract_marked(text, name) == authority, (name, skill)
+
+
+def test_record_delivery_section_names_the_final_mode():
+    authority = (REPO / "scripts/shared-sections/record-delivery.md").read_text(encoding="utf-8")
+    assert "--final" in authority
+    assert "not validated" in authority
+
+
+def test_drift_in_a_second_rendered_section_is_reported(tmp_path, capsys):
+    for rel in ("scripts/shared-sections", "skills"):
+        shutil.copytree(REPO / rel, tmp_path / rel, ignore=shutil.ignore_patterns("tests"))
+    skill_md = tmp_path / "skills/decision-analysis/SKILL.md"
+    text = skill_md.read_text(encoding="utf-8")
+    skill_md.write_text(
+        css.replace_marked(text, "record-delivery", "A hand edit.\n"), encoding="utf-8"
+    )
+    assert css.run_gate(tmp_path, render=False) == css.DRIFT_CODE
+    assert "'record-delivery'" in capsys.readouterr().err
+
+
+def test_render_writes_nothing_when_a_later_authority_is_faulty(tmp_path):
+    """Codex review of #74: with two rendered sections, a fenced second
+    authority must not leave the first already rendered into the carriers."""
+    for rel in ("scripts/shared-sections", "skills"):
+        shutil.copytree(REPO / rel, tmp_path / rel, ignore=shutil.ignore_patterns("tests"))
+    gate = tmp_path / "scripts/shared-sections/authorization-gate.md"
+    gate.write_text(gate.read_text(encoding="utf-8") + "An added gate line.\n", encoding="utf-8")
+    rd = tmp_path / "scripts/shared-sections/record-delivery.md"
+    rd.write_text("```\n" + rd.read_text(encoding="utf-8") + "```\n", encoding="utf-8")
+    before = {s: (tmp_path / "skills" / s / "SKILL.md").read_bytes() for s in css.GATE_CARRIERS}
+    assert css.run_gate(tmp_path, render=True) == css.FAULT_CODE
+    after = {s: (tmp_path / "skills" / s / "SKILL.md").read_bytes() for s in css.GATE_CARRIERS}
+    assert before == after

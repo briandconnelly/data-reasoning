@@ -1,0 +1,24 @@
+East
+ wk 1 median t 178.7
+ wk 2 median t 182.3
+ wk 3 median t 179.3
+ wk 4 median t 181.1
+ wk 5 median t 178.3
+ wk 6 median t 180.4
+ pre slope sec/day -0.021
+  pre median t 180.0 mean AOV 44.96 mean vol 543.0
+  post2w median t 179.9 mean AOV 45.01 mean vol 541.8
+  late median t 180.4 mean AOV 44.09 mean vol 555.7
+  last2preweeks median t 179.9
+West
+ wk 1 median t 206.3
+ wk 2 median t 204.1
+ wk 3 median t 198.1
+ wk 4 median t 194.7
+ wk 5 median t 191.6
+ wk 6 median t 187.4
+ pre slope sec/day -0.534
+  pre median t 196.6 mean AOV 44.94 mean vol 590.1
+  post2w median t 146.3 mean AOV 53.62 mean vol 591.3
+  late median t 146.7 mean AOV 54.64 mean vol 609.8
+  last2preweeks median t 189.1

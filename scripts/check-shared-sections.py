@@ -73,6 +73,18 @@ GATE_CARRIERS = [
 GATE_DECISION = (
     "skills/hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md"
 )
+# Every rendered shared section: (marker name, authority file, decision
+# record). All are carried by GATE_CARRIERS. The gate was the first; the
+# record-delivery check is the second (issue #63), and it ships only once its
+# measurement arms have run (decision 006).
+RENDERED = [
+    (GATE_NAME, GATE_AUTHORITY, GATE_DECISION),
+    (
+        "record-delivery",
+        "scripts/shared-sections/record-delivery.md",
+        "skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md",
+    ),
+]
 
 # Exit codes: 1 is drift a maintainer resolves by editing; 2 is a fault the
 # checker cannot act on at all (a bad argument, an unreadable file, a marker
@@ -291,14 +303,37 @@ def run(repo: Path, update: frozenset[str]) -> int:
 
 
 def run_gate(repo: Path, render: bool) -> int:
-    """Check (or, with `render`, rewrite) every carrier's authorization gate.
+    """Check (or, with `render`, rewrite) every rendered shared section in
+    every carrier. Returns the worst code any section produced: 0 when every
+    carrier matches every authority, 1 on drift, 2 on a structural fault."""
+    # Two phases, so a fault in the second section cannot leave the first
+    # already rendered: every authority and carrier is checked before any
+    # carrier is written (the same rule run_rendered applies within a section).
+    if render:
+        for spec in RENDERED:
+            if run_rendered(repo, False, spec, quiet=True) == FAULT_CODE:
+                return FAULT_CODE
+    worst = 0
+    for spec in RENDERED:
+        code = run_rendered(repo, render, spec)
+        if code == FAULT_CODE:
+            return code
+        worst = max(worst, code)
+    return worst
+
+
+def run_rendered(
+    repo: Path, render: bool, spec: tuple[str, str, str], *, quiet: bool = False
+) -> int:
+    """Check (or, with `render`, rewrite) one rendered section in every carrier.
 
     Returns 0 when every carrier matches the authority, 1 on drift, and 2 when
     the authority itself is unreadable or hidden, or a carrier's marker pair is
     missing, duplicated, or hidden -- structural faults the checker cannot
     resolve on its own.
     """
-    authority_path = repo / GATE_AUTHORITY
+    name, authority_rel, decision = spec
+    authority_path = repo / authority_rel
     try:
         authority = authority_path.read_text(encoding="utf-8")
     except OSError as exc:
@@ -317,7 +352,7 @@ def run_gate(repo: Path, render: bool) -> int:
     if hidden:
         print(
             f"ERROR: {authority_path}: line {hidden[0] + 1} is hidden from a reader "
-            f"(inside a code fence or an HTML comment); the gate must be instruction, "
+            f"(inside a code fence or an HTML comment); the section must be instruction, "
             f"not sample text.",
             file=sys.stderr,
         )
@@ -330,7 +365,7 @@ def run_gate(repo: Path, render: bool) -> int:
         skill_md = repo / "skills" / skill / "SKILL.md"
         try:
             text = skill_md.read_text(encoding="utf-8")
-            block = extract_marked(text, GATE_NAME)
+            block = extract_marked(text, name)
         except (OSError, ValueError) as exc:
             print(f"ERROR: {skill_md}: {exc}", file=sys.stderr)
             return FAULT_CODE
@@ -340,14 +375,16 @@ def run_gate(repo: Path, render: bool) -> int:
         if block == authority:
             continue
         if render:
-            skill_md.write_text(replace_marked(text, GATE_NAME, authority), encoding="utf-8")
+            skill_md.write_text(replace_marked(text, name, authority), encoding="utf-8")
             continue
         failures += 1
+        if quiet:
+            continue
         print(
-            f"DRIFT: {skill}/SKILL.md authorization gate differs from {GATE_AUTHORITY}.\n"
-            f"  The gate text has one home; edit that file, then run "
+            f"DRIFT: {skill}/SKILL.md shared section {name!r} differs from {authority_rel}.\n"
+            f"  The text has one home; edit that file, then run "
             f"scripts/check-shared-sections.py --render.\n"
-            f"  See {GATE_DECISION}.",
+            f"  See {decision}.",
             file=sys.stderr,
         )
     return DRIFT_CODE if failures else 0
@@ -369,7 +406,7 @@ def main() -> int:
     mode.add_argument(
         "--render",
         action="store_true",
-        help="write the authorization-gate authority into every carrier's SKILL.md",
+        help="write every rendered shared section's authority into every carrier's SKILL.md",
     )
     args = parser.parse_args()
     repo_root = Path(__file__).resolve().parents[1]

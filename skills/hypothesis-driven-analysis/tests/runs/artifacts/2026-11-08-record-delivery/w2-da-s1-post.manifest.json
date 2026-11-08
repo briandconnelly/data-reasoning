@@ -1,0 +1,164 @@
+{
+  "name": "w2-da-s1-post",
+  "started_utc": "2026-11-08T19:08:06.412394+00:00",
+  "duration_s": 88.6,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "e3aafd10-daf3-4ae8-b51d-29cbc0c2892d",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "e97df45d3974edb98c789519873acb590c2957bca97150d08ccf6ea529c174fd",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "c73f7974c831042f536a93e5e43bf980e7260b5497b160621a82b529404f205d"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "62459670dde7b94235707a4c649faed376f5596abbc77a2dea3650608d35e60a"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "ce658faa6fef81b68444009f2c5af3ce9ceb6fe304c2df04e7eb717d39c66573",
+  "jsonl_sha256": "059c5f2f0be16f276a06d3823eb0648400c8a627e6690b5ad6e2fc83565c131b",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "6399e034a03f8032f72ef7c4b30067cb43330a15464a514afbe4e393588c0752"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release carrying the connection-pool change\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship the release on Friday vs hold the release one week\\n- Decision owner: the user's release owner (the user, bdc)\\n- Reversibility: a hold costs one week and is undone by shipping next week; a shipped real regression reaches users until detected and rolled back, which the user prices at about ten times a needless hold\\n- Dea"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968 && python3 -I instruments/check_record.py --final work/decision-record.md\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work && sed -i 's/^- Prior odds: .*/- Prior odds: none needed/; s/^- Posterior odds: .*/- Posterior odds: none needed/' decision-record.md && sed -i 's/Prior odds are sensitivity-only because no one has elicited them/No prior is held: none is elicited or sourced, so the prior and posterior belief slots read none needed and the prior enters only as the swept sensitivity-only class (posterior across the sweep spans 0.05\\u201340)/' decision-record.md && cd .. && python3 -I instruments/check_record.py --fin"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Edit",
+      "input": "{\"replace_all\": false, \"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"old_string\": \"- Prior odds: 0.05\\u20131 \\u2014 provenance: sensitivity-only\", \"new_string\": \"- Prior odds: none needed\"}"
+    },
+    {
+      "ordinal": 8,
+      "tool": "Edit",
+      "input": "{\"replace_all\": false, \"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"old_string\": \"- Posterior odds: 0.05\\u201340\", \"new_string\": \"- Posterior odds: none needed\"}"
+    },
+    {
+      "ordinal": 9,
+      "tool": "Edit",
+      "input": "{\"replace_all\": false, \"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"old_string\": \"Prior odds are sensitivity-only because no one has elicited them\", \"new_string\": \"No prior is held: none is elicited or sourced, so the prior and posterior belief slots read none needed and the prior enters only as the swept sensitivity-only class (posterior across the sweep spans 0.05\\u201340)\"}"
+    },
+    {
+      "ordinal": 10,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968 && python3 -I instruments/check_record.py --final work/decision-record.md; echo exit $?\"}"
+    },
+    {
+      "ordinal": 11,
+      "tool": "Edit",
+      "input": "{\"replace_all\": false, \"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"old_string\": \"- Prior odds: none needed\", \"new_string\": \"- Prior odds: 0.05\\u20131 \\u2014 provenance: sensitivity-only\"}"
+    },
+    {
+      "ordinal": 12,
+      "tool": "Edit",
+      "input": "{\"replace_all\": false, \"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"old_string\": \"- Posterior odds: none needed\", \"new_string\": \"- Posterior odds: 0.05\\u201340\"}"
+    },
+    {
+      "ordinal": 13,
+      "tool": "Edit",
+      "input": "{\"replace_all\": false, \"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md\", \"old_string\": \"No prior is held: none is elicited or sourced, so the prior and posterior belief slots read none needed and the prior enters only as the swept sensitivity-only class (posterior across the sweep spans 0.05\\u201340)\", \"new_string\": \"No prior is held: none is elicited or sourced, so the prior odds are a sensitivity-only sweep, not a belief\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 80985,
+    "cache_read_input_tokens": 568083,
+    "output_tokens": 9959,
+    "output_tokens_details": {
+      "thinking_tokens": 4922
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 80985,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1122,
+        "cache_read_input_tokens": 83582,
+        "cache_creation_input_tokens": 1280,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1280
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.4803743,
+    "duration_ms": 88163,
+    "num_turns": 14
+  },
+  "result_text": "**I can't make the call for you, but the evidence leans toward holding.** The decision record's verdict is `prior-sensitive`, so the judgment goes back to you. Ship wins only if you are already very sure the gap is a measurement artifact.\n\n**Why it leans hold**\n- **The gap is real in the metrics.** Canary p95 is 468 ms against 411 ms for control, a 57 ms gap against a 40 ms noise band, and every canary host is above every control host.\n- **That gap can't tell a real regression from a measurement artifact.** It comes from the same pipeline the artifact explanation (H2, an exporter sampling change) questions. The test that would separate the two needs the raw canary access logs, and those weren't restored in time.\n- **Past rollouts give weak support for a real regression.** In 20 past canary rollouts, the gap showed up in 9 of 10 real regressions and 2 of 10 non-regressions. That is a likelihood ratio of 4.5. With only 10 per group, I used a range of 1 to 40, and 1 means the gap tells you nothing.\n- **Those 20 rollouts are not a base rate.** They were quota-drawn, so they can't tell you how often a gap turns out real.\n- **I put the prior in as a sweep, not a belief.** Nobody has elicited one, so I tried prior odds from 0.05 to 1 that the regression is real.\n- **The cost ratio sets the bar.** Your \"roughly ten times\" gives a hold threshold of posterior odds of 0.1. I swept the loss ratio from 5 to 20.\n\n**Where it flips to ship**\n- If the gap carries no information (likelihood ratio 1), ship wins only if your odds that the regression is real are below 0.1, which is a probability of about 9%.\n- At the point likelihood ratio of 4.5, the flip is at prior odds of about 0.022, or about 2%.\n- A loss ratio of 5 doubles those flip points and a ratio of 20 halves them.\n\nIf you would put the chance of a real regression above roughly 10%, the evidence favors holding.\n\n**Validator finding**\nThe structural validator reports one finding, which I left unfixed. It rejects a `sensitivity-only` prior in the Evidence block. It also allows `none needed` only for a `dominated` verdict. I have no elicited or sourced prior, and I didn't relabel anything to clear it, so the record is not validator-clean.\n\n**What would settle it**\nRestoring the raw canary access logs would settle it. A flat raw-log p95 would point to the artifact explanation, and a matching gap would confirm a real regression. Either result would move the answer well past the flip points above.\n\n**Two caveats**\n- **Logs may be gone.** The logs have 7-day retention, and today's date (2026-11-08) is long after the ledger's 2026-09-12 freeze. If this is the same freeze, check the restore status first.\n- **Attribution is unproven.** Even a real gap is not shown to be caused by the pool change. The canary hosts were a fixed rotation chosen independently of traffic, but no causal review covers that.\n\nNothing here authorizes shipping, holding, or pulling the logs.\n\nThe record is at `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-w2-da-s1-post-umkkj968/work/decision-record.md`."
+}

@@ -117,6 +117,25 @@ def stage_skill(skill: str, ref: str | None, dest: Path) -> Path:
     return target
 
 
+def stage_instruments(ref: str | None, dest: Path) -> Path:
+    """Copy the plugin-level validator into `dest/instruments/`, from the
+    working tree or from a git ref, so a staged skill's record-delivery
+    section resolves `<plugin-root>/instruments/check_record.py` exactly as
+    an install does. Staged for every arm, baseline included, so the three
+    arms differ only in the skill text."""
+    target = dest / "instruments"
+    target.mkdir(parents=True)
+    rel = "instruments/check_record.py"
+    if ref is None:
+        shutil.copy2(REPO / rel, target / "check_record.py")
+    else:
+        blob = subprocess.run(
+            ["git", "-C", str(REPO), "show", f"{ref}:{rel}"], capture_output=True, check=True
+        ).stdout
+        (target / "check_record.py").write_bytes(blob)
+    return target
+
+
 def scan(jsonl: Path) -> dict:
     model = ""
     session = ""
@@ -219,6 +238,13 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
     ap.add_argument("--prompt-file", required=True, type=Path)
     ap.add_argument("--skill", default=None, help="skill directory name for a skill arm")
     ap.add_argument("--skill-ref", default=None, help="git ref to stage the skill from")
+    ap.add_argument(
+        "--instruments-from",
+        choices=["skill-ref", "working-tree"],
+        default="skill-ref",
+        help="where the staged validator comes from: the skill's ref (default) or the "
+        "working tree, so pre and post arms can share one validator while the skill differs",
+    )
     ap.add_argument("--fixture", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--model", default="sonnet")
@@ -248,6 +274,8 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
     scratch = root / "work"
     scratch.mkdir()
     staged_skill = stage_skill(args.skill, args.skill_ref, root / "skills") if args.skill else None
+    instruments_ref = None if args.instruments_from == "working-tree" else args.skill_ref
+    staged_instruments = stage_instruments(instruments_ref, root)
 
     skill_lines = ""
     if staged_skill:
@@ -320,6 +348,7 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
         "skill": args.skill,
         "skill_ref": args.skill_ref or "working-tree",
         "skill_files_sha256": hash_tree(staged_skill) if staged_skill else None,
+        "instruments_sha256": hash_tree(staged_instruments),
         "fixture": str(args.fixture),
         "fixture_files_sha256": hash_tree(staged_fixture),
         "prompt_sha256": sha256_bytes(prompt.encode()),

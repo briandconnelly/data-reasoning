@@ -1,0 +1,100 @@
+{
+  "name": "cs3-baseline",
+  "started_utc": "2026-11-08T18:04:59.941575+00:00",
+  "duration_s": 33.5,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "d855c239-9982-458b-9a8e-f3b790693648",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "instruments_sha256": {
+    "instruments/check_record.py": "62459670dde7b94235707a4c649faed376f5596abbc77a2dea3650608d35e60a"
+  },
+  "fixture": "skills/causal-identification-review/tests/fixtures/cs3-rollout",
+  "fixture_files_sha256": {
+    "cs3-rollout/daily.csv": "2ec789701a65c8a11e642ece48c0587c2d1c80754a212f91d1911ca4708e878f",
+    "cs3-rollout/data_notes.md": "e72062d7851558fc788cb72d8df0e78e19ab91da11f888eb8980007ba5e51912",
+    "cs3-rollout/promotions.log": "bb8017b6af27203bb9ea067e0f813f2a17746c2c755efa6a6ee543d7eb8bc579",
+    "cs3-rollout/targeting_note.md": "4b6e7afa08d5c4601485cdeeea0ee4e63614cfd7ce0805ed4a630a3a834b9565",
+    "cs3-rollout/ux_cleanup_note.md": "6c444cf848d84fddb12808b8f65c18a03efc26cc2d4ce265aa1f79b7bb919a3f"
+  },
+  "prompt_sha256": "5888a43e0b0ef44724b93a9e77a046b7667bd3cfd1d4b28b76da5e31807b4571",
+  "jsonl_sha256": "33795b01f78ad1b4f9e02efb83ac48a99cfe209ba515a9b23279d2831dcaf42f",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9",
+  "files_written": [
+    "a.py"
+  ],
+  "files_written_sha256": {
+    "a.py": "b50dbcee660b7f2b0be1ff64b7cd94bbfbc1ba2de20df567ddf430abe84096a3"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9/data/cs3-rollout/ && ls -la && head -n 5 * | cut -c1-400\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9/data/cs3-rollout/ && cat targeting_note.md; mkdir -p ../../work; cat > ../../work/a.py <<'E'\\nimport csv,statistics as s,sys\\nr=list(csv.DictReader(open('daily.csv')))\\ndef w(reg,a,b,k='completion_time_seconds'):\\n    v=[float(x[k]) for x in r if x['region']==reg and a<=x['date']<=b]\\n    return round(s.median(v),2),len(v)\\nP=[('pre6wk','2026-02-01','2026-03-14'),('pre last2wk','2026-03-01','2026-03-14'),('pre first2wk','2026-02-01','2026-02-14'),('post2wk','2026-03-15','2026-03-28'),('post all','2026-03"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 60219,
+    "cache_read_input_tokens": 74971,
+    "output_tokens": 2601,
+    "output_tokens_details": {
+      "thinking_tokens": 356
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 60219,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1855,
+        "cache_read_input_tokens": 63079,
+        "cache_creation_input_tokens": 1051,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1051
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2743951,
+    "duration_ms": 32484,
+    "num_turns": 3
+  },
+  "result_text": "**No, this comparison doesn't identify the flow's causal effect.** West's median completion time did fall, but several things changed in West at the same time or before.\n\n**What the data show** (daily medians, `daily.csv`):\n\n| | East | West |\n|---|---|---|\n| Pre-rollout, 6 weeks (Feb 1 \u2013 Mar 14) | 180.0 s | 196.6 s |\n| Last 2 pre-rollout weeks (Mar 1\u201314) | 179.9 s | 189.1 s |\n| Post-rollout, 2 weeks (Mar 15\u201328) | 179.9 s | 146.3 s |\n\n- **Raw drop:** West fell about 50 s against the 6-week pre-period. East was flat, so a naive difference-in-differences also gives about \u221250 s.\n- **West was already improving before rollout.** Weekly medians were 206 \u2192 204 \u2192 198 \u2192 195 s over the first four weeks of February, and the last two pre-weeks sit at 189 s. That is roughly 3\u20134 s per week.\n- **Trend-adjusted estimate:** If that trend simply continued, West would have been around 180 s in the post window. That would put the effect nearer \u221235 s than \u221250 s. This is a rough illustration, not an estimate I'd defend.\n\n**Why the \u221250 s is not causal**\n1. **The UX cleanup in West** (`ux_cleanup_note.md`). A shipping-step form reordering rolled out gradually across the pre-period and kept improving West's completion time. East never got it. So West and East were not on parallel trends, and the East comparison can't remove this. Using the pre-period as the baseline also overstates the effect, because the cleanup's gains were still accruing.\n2. **The West promotion launched on the same day** (`promotions.log`). A region-wide price promotion started 2026-03-15, and West's median order value jumped from about 45 to 54 (East stayed at about 45). The promotion may have changed who checks out, or how fast. The flow and the promotion are perfectly collinear in time and place, and the data can't separate them.\n3. **West was chosen because it was the worst region** (`targeting_note.md`). It had 184 abandonment complaints against East's 97 in the prior quarter. Selecting on a bad outcome invites regression to the mean and gives different baseline dynamics. West started about 16 s slower than East, and its improvement may partly be catching up.\n4. **The window is short.** Two weeks post-rollout can't show whether the effect is durable or just novelty. The data run to Apr 11, so there are 4 weeks of post data available.\n\n**What would need to be true for a causal reading**\n- West would have followed a path without the new flow that can be predicted from East plus West's own trend. That means parallel trends once the cleanup is accounted for.\n- The promotion would have no effect on completion time, or its effect could be separated out.\n- No other West-only change would coincide with Mar 15.\n- Completion time would be measured the same way in both regions and periods.\n\n**What to check before trusting a number**\n- **Ship dates:** Get the exact dates and per-day or per-cohort exposure for the cleanup, so it can be modelled explicitly. Check whether it had finished ramping before Mar 15.\n- **Pre-trends:** Test them formally, for example with an event study over the 6 pre-weeks plus all 4 post-weeks. A significant West-vs-East pre-trend means the plain difference-in-differences fails.\n- **Promotion mechanism:** Look at whether completion time moved with order value or volume. Volume changed little (about 595 before, about 595 after). Check for a shift in order mix or customer mix.\n- **Distributions and mix:** Look at more than the median, since mix shifts can move it. Segment by device, new vs returning customer, and basket size.\n- **Placebo and robustness tests:** Run fake rollout dates in the pre-period and compare against other regions if any exist. A synthetic control built from other regions would be better than a single East comparison.\n- **Durability:** Use the full post-window (through Apr 11) to see whether the effect persists.\n- **Best fix, if feasible:** Randomise the flow within West (user- or session-level holdout). That separates it from the promotion, the cleanup and the region selection. Failing that, a staggered rollout to East, since East is still on the old flow, would give a clean second comparison.\n\n**For the Q2 review:** I'd write it up as \"completion time in West fell about 50 s after rollout, but this is confounded by a concurrent UX cleanup and a same-day promotion\". A defensible range, if one is needed, is \"somewhere between about 0 and 50 s of improvement\". I would not report a causal effect yet.\n\nI wrote my working script to `work/a.py`."
+}

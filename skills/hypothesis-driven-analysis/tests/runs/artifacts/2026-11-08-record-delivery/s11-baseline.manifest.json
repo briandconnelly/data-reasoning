@@ -1,0 +1,101 @@
+{
+  "name": "s11-baseline",
+  "started_utc": "2026-11-08T18:05:27.850698+00:00",
+  "duration_s": 29.6,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "be673eaa-8940-4570-b4b8-160580ef160a",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "instruments_sha256": {
+    "instruments/check_record.py": "62459670dde7b94235707a4c649faed376f5596abbc77a2dea3650608d35e60a"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s11-mini",
+  "fixture_files_sha256": {
+    "s11-mini/checkout_latency.csv": "eea96d9793a56153d23f7412a1cebbba2ac0fb2eadd0acb4f1b9a41650a8523c"
+  },
+  "prompt_sha256": "484ade4f5ed6ac25d7ddf806524971fd33386e879504fd69d19b1a2ae1245ba3",
+  "jsonl_sha256": "282f85f89598f01b53db0ac0194114c0c7b36972d5d3d87d519b69c80685be2e",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-baseline-v0t79kx1",
+  "files_written": [
+    "a.py"
+  ],
+  "files_written_sha256": {
+    "a.py": "14df04f8c7511954ed5e5f44987ed7e269b5d2f74d5b5f47afa02270f76515e7"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-baseline-v0t79kx1/data/s11-mini; wc -l checkout_latency.csv; head -5 checkout_latency.csv; tail -3 checkout_latency.csv\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-baseline-v0t79kx1/work; cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-baseline-v0t79kx1/work; cat > a.py <<'E'\\nimport pandas as pd,sys\\nd=pd.read_csv(sys.argv[1]);print(d.isna().sum().to_dict(),d.request_id.duplicated().sum(),d.latency_ms.describe())\\nd['t']=pd.to_datetime(d.timestamp,errors='coerce');print(d.t.min(),d.t.max(),d.t.dt.date.value_counts().to_dict())\\nl=d.latency_ms.dropna()\\nprint('p95 linear',l.quantile(.95),'nearest-rank',sorted(l)[int(-(-0.95*len(l)//1))-1],'max',l.max(),'n>500',(l>5"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-baseline-v0t79kx1/work; cat > a.py <<'E'\\nimport csv,sys,math,collections\\nr=list(csv.DictReader(open(sys.argv[1])))\\nprint(len(r),len({x['request_id'] for x in r}))\\nbad=[x for x in r if not x['latency_ms'].strip()];print('missing',len(bad))\\nv=[(x['timestamp'],float(x['latency_ms'])) for x in r if x['latency_ms'].strip()]\\nprint(collections.Counter(t[:10] for t,_ in v), v[0][0],v[-1][0])\\nl=sorted(y for _,y in v);n=len(l)\\nprint('nearest-rank p95',l[math.ceil(.95*n)-1],'linear',l[int(.95*(n-1))]+(.95*(n-1)%1)*(l[int(.95"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 60383,
+    "cache_read_input_tokens": 137426,
+    "output_tokens": 1954,
+    "output_tokens_details": {
+      "thinking_tokens": 51
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 60383,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 543,
+        "cache_read_input_tokens": 63150,
+        "cache_creation_input_tokens": 1249,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1249
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2748306,
+    "duration_ms": 28739,
+    "num_turns": 4
+  },
+  "result_text": "**The claim is not supported by this data.** Checkout p95 latency on 2026-07-15 was about 392 ms, below 500 ms. The data only covers 00:00\u201319:59 UTC, though, so I can't rule out a breach in the last four hours of the day.\n\n- **Daily p95:** 392.2 ms. Nearest-rank and linear interpolation give the same value.\n- **Hourly p95:** the highest hour was 15:00 at 460 ms. The other 19 hours were between 321 and 437 ms, so no single hour reached 500 ms either.\n- **Individual slow requests:** 14 of the 1,200 requests (about 1.2%) were over 500 ms, and the maximum was 708.7 ms (19:29). The claim may come from someone looking at max or outlier values rather than p95.\n- **Data quality:** the file has 1,200 unique request IDs, one per minute, with no missing values and no other dates.\n\n**Coverage gap:** the last timestamp is 19:59Z, so 20:00\u201323:59 is missing. Those hours would need an unusually bad stretch to lift the full-day p95 above 500 ms. That would take the slowest 5% of the day's requests being over 500 ms, and only 1.2% are so far. Rerun on the full day's export if you need a definitive answer.\n\n**Timezone:** I treated \"yesterday\" as 2026-07-15 UTC, as the timestamps are in UTC.\n\nThe script is `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-baseline-v0t79kx1/work/a.py`."
+}

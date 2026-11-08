@@ -142,6 +142,17 @@ Minimize collection: pull what the probes need, not what the source offers.
 Redact secrets and personal data.
 Record provenance for every source, including the source of every assignment-mechanism quote.
 
+## Record Delivery
+
+<!-- shared: record-delivery -->
+Before delivering a conclusion, report, or handoff backed by a full investigation ledger, exploration log, identification review, decision record, or VoI record that you wrote or updated as a file, run the plugin's structural validator in its completed-record mode against the record's final saved contents: `python3 "<plugin-root>/instruments/check_record.py" --final "<record-path>"`, where `<plugin-root>` is the directory that holds the `skills/` folder this SKILL.md sits in (the file's path is `<plugin-root>/skills/<skill-name>/SKILL.md`, resolved through any symlink), so `instruments/` is a sibling of `skills/`, not inside it.
+Fix each finding on the terms the owning skill and its template set — a dated amendment where they require one, never a rewrite of preregistered text or of an evidence-backed status — then rerun; report any finding that remains as a limitation beside the conclusion.
+Never change a number, a provenance class, or a sentinel only to clear a finding: a sentinel belongs to the verdict the skill assigns it to, and a finding you cannot fix on the skill's terms is a limitation to report, not a line to rewrite.
+A clean result is structural evidence only, never a claim that the analysis is right.
+When the validator, `python3`, or the ability to run a command is unavailable, report the record as not validated and name the reason; install nothing and claim no clean pass.
+Mini ledgers, estimation records, and collection plans carry no validator signature and owe no run.
+<!-- /shared: record-delivery -->
+
 ## Non-Goals
 
 - Teaching or executing estimator mechanics: no how-to, no code, and no standard-error guidance for difference-in-differences, regression discontinuity, synthetic control, or instrumental variables — naming one as a candidate design and reviewing its assumptions is this skill's work; teaching or running it is not.

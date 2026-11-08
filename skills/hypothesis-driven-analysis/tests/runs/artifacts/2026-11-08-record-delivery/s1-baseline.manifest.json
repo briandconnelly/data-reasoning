@@ -1,0 +1,110 @@
+{
+  "name": "s1-baseline",
+  "started_utc": "2026-11-08T18:04:59.761478+00:00",
+  "duration_s": 36.4,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "6a7ce5ab-ef40-422c-868e-180fc9665e10",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "instruments_sha256": {
+    "instruments/check_record.py": "62459670dde7b94235707a4c649faed376f5596abbc77a2dea3650608d35e60a"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s1-conversion",
+  "fixture_files_sha256": {
+    "s1-conversion/deploys.log": "9f2a5b80677a1b2bf82b91c21ddc4ad0e5f1ffc9f8e4618cb95de633022451c7",
+    "s1-conversion/orders.csv": "39486b25560ac523af351bf4376d1fe9e4c8d2c267c63b95e7e9fa7b1ada1ddc",
+    "s1-conversion/sessions.csv": "77970b8484c3733fd1950fddef83314d9faafe8b564bd719e58c70e5a1faf494"
+  },
+  "prompt_sha256": "5eb7dea9d0e41a09b41be9c43456ef4eef1e83af204e3c11bd96999dbead9ba1",
+  "jsonl_sha256": "1dda69ec50106b196d03eb63f77a910385b0f7b861b7469a1bf77eb489121cd6",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s1-baseline-zzzx7wrm",
+  "files_written": [
+    "a.py",
+    "b.py"
+  ],
+  "files_written_sha256": {
+    "a.py": "fc350208a54c48521f9b9575c14f514a1981987ee54127356b4e0b84986e296c",
+    "b.py": "c2c9c69a542e7bc2f3c1626b4837aba30f2822f19450f82711ee97448b92da63"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s1-baseline-zzzx7wrm/data/s1-conversion/; cat deploys.log | head -50; head -3 orders.csv sessions.csv; wc -l *.csv\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s1-baseline-zzzx7wrm/work; cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s1-baseline-zzzx7wrm/work/a.py <<'E'\\nimport pandas as pd,sys\\nd=sys.argv[1]\\ns=pd.read_csv(d+'/sessions.csv',parse_dates=['timestamp']);o=pd.read_csv(d+'/orders.csv',parse_dates=['timestamp'])\\ns['wk']=s.timestamp.dt.to_period('W');o['wk']=o.timestamp.dt.to_period('W')\\ns['ck']=s.checkout_reached=='yes'\\nprint(s.timestamp.min(),s.timestamp.max(),s.checkout_reached.unique())\\nprint(pd.DataFrame({'sess':s.groupby('wk').size(),'ck':s.gro"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s1-baseline-zzzx7wrm/work; cat > a.py <<'E'\\nimport csv,sys,datetime as D\\nfrom collections import Counter,defaultdict\\nd=sys.argv[1]\\ndef wk(t):\\n    x=D.date.fromisoformat(t[:10]);return x-D.timedelta(days=x.weekday())\\nS=list(csv.DictReader(open(d+'/sessions.csv')));O=list(csv.DictReader(open(d+'/orders.csv')))\\nprint(S[0]['timestamp'],S[-1]['timestamp'],Counter(r['checkout_reached'] for r in S))\\nn=Counter();c=Counter();o=Counter()\\nfor r in S:\\n    w=wk(r['timestamp']);n[w]+=1;c[w]+=r['checkout_reached']=='yes'\\nfor r in"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s1-baseline-zzzx7wrm/work; cat > b.py <<'E'\\nimport csv\\nfrom collections import Counter\\nd='../data/s1-conversion'\\nS=list(csv.DictReader(open(d+'/sessions.csv')));O=list(csv.DictReader(open(d+'/orders.csv')))\\nc=Counter()\\nfor r in S:\\n    c[(r['timestamp'][:10],r['landing_page'],r['device'],'n')]+=1\\n    c[(r['timestamp'][:10],r['landing_page'],r['device'],'k')]+=r['checkout_reached']=='yes'\\nfor k in sorted(c):\\n    if k[3]=='n' and k[0]>='2026-06-07':print(k[:3],c[k],c[k[:3]+('k',)])\\nv=Counter((r['timestamp'][:10],r['cl"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 63235,
+    "cache_read_input_tokens": 202955,
+    "output_tokens": 3633,
+    "output_tokens_details": {
+      "thinking_tokens": 448
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 63235,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1322,
+        "cache_read_input_tokens": 65092,
+        "cache_creation_input_tokens": 2091,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2091
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.30958549999999996,
+    "duration_ms": 35722,
+    "num_turns": 5
+  },
+  "result_text": "**Conversion didn't drop because of a deploy or a broken checkout. The week-of-6/8 traffic was diluted by a new low-intent landing page, `/lp/summer-sale`.** Orders per day stayed flat while sessions rose.\n\n**Numbers** (orders \u00f7 sessions, Mon\u2013Sun weeks):\n\n| | Week of 6/1 | Week of 6/8 |\n|---|---|---|\n| Sessions | 4,200 | 4,971 |\n| Reached checkout | 131 (3.12%) | 125 (2.51%) |\n| Orders | 131 | 137 |\n\n- **Cause:** `/lp/summer-sale` has no sessions at all in the week of 6/1. Starting 6/8 it brings about 150\u2013160 sessions a day, 1,053 in total. Only 6 of them (0.6%) reached checkout.\n- **Everything else is flat:**\n  - `/home` reached checkout 2.7% of the time in both weeks.\n  - `/product` was 3.9% and then 3.8%.\n  - Excluding summer-sale, week-two checkout reach is 119 of 3,918 sessions, or about 3.04%, close to week one's 3.12%.\n- **Orders did not fall.** Daily orders ran 17\u201323 in both weeks. Raw order counts went from 131 to 137.\n- **Desktop looks worse (3.4% to 2.2%), but that's the same effect.** Summer-sale traffic is about 45% desktop, and it converts poorly. Mobile was flat (2.9% to 2.8%).\n\n**Deploys:** I found no evidence they caused it.\n- Orders on `3.4.1` start on 6/10, but daily orders and checkout reach don't change after that.\n- v3.3.9 (6/3, copy tweaks) and v3.4.2 (6/12, logging only) show no effect either.\n- The `3.4.1` release is logged at 14:00Z on 6/10, but the first `3.4.1` order is at 08:32Z. The log time and the client rollout don't line up, so the log may be in a different timezone or the rollout started early.\n\n**Data quirks to check:**\n- On 6/13 and 6/14, orders exceed checkout-reached sessions (23 vs 17 and 17 vs 11). Mobile `/home` and `/product` sessions also drop by about 40% on those days.\n- Possible causes are a session-tracking gap or a client-side logging change. v3.4.2 was \"logging only\" and went out on 6/12, which could be related.\n- Because of this, the session-based conversion for the week of 6/8 is slightly unreliable. This is why order-based conversion (2.76%) is higher than checkout-based conversion (2.51%) for that week.\n- Orders don't carry a landing page, so I can't give an order-level conversion for summer-sale. The checkout-reach comparison is the best available.\n\n**Suggested next steps:**\n- Treat 2.5% as a mix effect, not a regression.\n- Report conversion with `/lp/summer-sale` split out.\n- Check what the campaign driving that page is optimizing for.\n- Have someone look at the 6/13\u20136/14 session logging.\n\nScripts are in `work/` (`a.py` and `b.py`)."
+}

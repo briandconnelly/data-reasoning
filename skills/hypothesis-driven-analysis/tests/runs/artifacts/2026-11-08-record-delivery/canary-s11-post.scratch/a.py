@@ -1,0 +1,15 @@
+import pandas as pd, numpy as np, sys
+d=pd.read_csv(sys.argv[1]); print(d.dtypes); print(d.isna().sum().to_dict(), d.request_id.duplicated().sum())
+d['t']=pd.to_datetime(d.timestamp,utc=True,errors='coerce'); print(d.t.isna().sum(), d.t.min(), d.t.max())
+print(d.timestamp.str.len().value_counts().head())
+print(d.latency_ms.describe())
+y=d[(d.t>='2026-07-15')&(d.t<'2026-07-16')].drop_duplicates('request_id')
+print(len(y)); print(y.groupby(y.t.dt.hour).size().to_dict())
+print(d.groupby(d.t.dt.date).size())
+x=np.sort(y.latency_ms.dropna().values); n=len(x)
+print('p95',np.percentile(x,95),'p95 lower-nearest',x[int(np.ceil(.95*n))-1])
+from scipy.stats import binom
+lo=int(binom.ppf(.025,n,.95)); hi=int(binom.ppf(.975,n,.95)); print('CI95 order-stat',x[max(lo-1,0)],x[min(hi,n-1)])
+print('frac>500',(x>500).mean(),(x>500).sum())
+rng=np.random.default_rng(0); b=[np.percentile(rng.choice(x,n),95) for _ in range(2000)]; print('boot',np.percentile(b,[2.5,97.5]))
+for h,g in y.groupby(y.t.dt.hour): print(h,len(g),round(np.percentile(g.latency_ms,95),1))

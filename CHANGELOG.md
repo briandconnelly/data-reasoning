@@ -9,10 +9,12 @@ The version is the `version` field of the plugin manifests; installs track the `
 ### Added
 
 - Decision analysis: a record form for a decision with no supported prior — Prior odds and Posterior odds read `none supported — see Robustness`, supported likelihood ratios stay in the Evidence table, an unquantified item is a paired `none supported` row with its reason, and the sweep in Robustness does the arithmetic (#41). Measured on DA-S1, DA-S1x and DA-S3 at n=1 per cell.
+- Every skill carries a § Record Delivery section telling the agent to run `check_record.py --final` on a completed record before delivering it, fix findings on the skill's own terms or report them as limitations, and report an unavailable validator as not validated (#63). Rendered from `scripts/shared-sections/record-delivery.md`; measured 2026-11-08 at n=1 per cell on one model (four completed-record cells, a control, and a no-`python3` variant).
 
 ### Changed
 
 - Decision analysis: § Numeric Policy now carries one ordered verdict rule (`dominated`, then the loss cap, then `prior-sensitive`, then `loss-sensitive`, then `robust`), treats only `user-elicited` and `externally-sourced` losses as belief-grade, and records a rounded elicited loss at its nominal value with analyst-chosen endpoints as `sensitivity-only`; § The Decide Route's verdict bullets point there. Both checkers enforce the paired sentinels, the loss cap, and per-axis flip tests.
+- The README is a short introduction; install verification, record validation, the output style, and evidence status moved to pages under `docs/`, which ship with the plugin.
 
 ### Fixed
 
@@ -21,10 +23,6 @@ The version is the `version` field of the plugin manifests; installs track the `
 - Decision analysis: the record validator now enforces the Numeric Policy's provenance rules — every provenance mention comes from the closed class set, `sensitivity-only` may not appear in Evidence and update, a `robust` verdict's losses must be `user-elicited` or `externally-sourced`, and a `dominated` verdict's belief slots read `none needed` (#60).
 - The record validator accepts the identification-review template's probes table (`assessment` and `evidence or reason` columns, not `result`), checks the assessment vocabulary as a closed set, and asks no probe rows of a `not-constructible` design (#61).
 - The record validator accepts an exploration log headed `## Frame-lite` for the profile route and asks it for scope and budget only, as SKILL.md § Profile Route prescribes (#62).
-
-### Changed
-
-- The README is a short introduction; install verification, record validation, the output style, and evidence status moved to pages under `docs/`, which ship with the plugin.
 
 ## [0.3.0] - 2026-11-01
 

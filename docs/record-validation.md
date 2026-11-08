@@ -20,7 +20,7 @@ Without Python, an `apply_patch` payload is handled by sniffing each `.md` file 
 
 The hook runs the validator's default mode, in which a record still carrying template placeholders or `pending` slots is in progress and owes no completeness findings.
 `check_record.py --final <record>` is the completed-record mode, in which every required slot, every required section, and every cell of a required section's table must be filled, except a Tests row left `NOT_TESTED`, whose evidence may stay `pending`.
-No skill yet tells the agent to run `--final` before delivering a record: that pointer is agent-read prose and owes measured arms first, on the terms in decision record 006 cited at the top of this page.
+Each skill's § Record Delivery tells the agent to run `--final` on a completed record before delivering it and to report remaining findings as limitations; that section is rendered from `scripts/shared-sections/record-delivery.md` and was measured on 2026-11-08 at n=1 per cell on one model (`skills/hypothesis-driven-analysis/tests/runs/2026-11-08-record-delivery-wave.md`: post arms ran the check on all four completed-record cells where pre arms ran it on none), on the terms in decision record 006.
 
 ## Running the validator by hand
 
