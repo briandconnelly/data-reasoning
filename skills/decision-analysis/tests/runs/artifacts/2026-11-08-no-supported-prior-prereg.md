@@ -19,7 +19,7 @@ A checker defect found during scoring pauses interpretation, is fixed with a tes
 ## Arms
 
 Three arms per scored cell: **baseline** (no skill), **pre** (the skill at `dev` `992b866`, `--skill-ref 992b866`), **post** (this working tree).
-Every arm, baseline included, stages this branch's `instruments/check_record.py` (`--instruments-from working-tree`), so the three differ only in the skill text.
+No arm stages a validator: this branch is cut from `dev`, whose skills carry no section pointing at `instruments/check_record.py`, and `run_arm.py` here has no staging option (that harness change lives on the #74 branch); the three arms differ only in the skill text, and the scorer runs both checkers on every delivered record. (Amended 2026-11-08 before any scored arm was read: the first draft said every arm stages the validator, which this branch's harness cannot do; the four pre arms launched with that flag exited on an argument error and were relaunched without it.)
 DA-S1's baseline from today's record-delivery wave (`.../2026-11-08-record-delivery/da-s1-baseline.*`, same prompt, same fixture, same model) is reused rather than rerun; DA-S3 and DA-S8 get fresh baselines; DA-S1x gets pre and post only (its baseline question is DA-S1's).
 The attribution question is **pre versus post** on the added assertions; baseline answers whether the skill is needed on the cell.
 
