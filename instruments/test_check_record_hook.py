@@ -566,3 +566,48 @@ def test_shell_and_python_agree_on_the_title_sniff(tmp_path):
         f.write_text(text)
         shell = run_command_without_python({"tool_input": {"file_path": str(f)}}, case_dir)
         assert shell.returncode == (2 if hook_module.looks_like_record(str(f)) else 0), name
+
+
+# Issue #64: with neither CLAUDE_PLUGIN_ROOT nor PLUGIN_ROOT set, the wrapper
+# exec'd `python3 /hooks/check_record_hook.py` and crashed on every write.
+# The wrapper now derives the plugin root from its own location, so a
+# direct invocation behaves exactly like a hosted one.
+
+WRAPPER = REPO / "hooks" / "check_record_hook.sh"
+
+
+def run_wrapper_without_root(payload: dict) -> subprocess.CompletedProcess:
+    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_PLUGIN_ROOT", "PLUGIN_ROOT")}
+    return subprocess.run(
+        ["sh", str(WRAPPER)],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+
+
+def test_wrapper_without_root_env_still_validates_a_record(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(SIGNATURE_RECORD)
+    r = run_wrapper_without_root({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2
+    assert "structural findings" in r.stderr
+    assert "can't open file" not in r.stderr
+
+
+def test_wrapper_without_root_env_is_silent_on_a_non_record(tmp_path):
+    f = tmp_path / "notes.md"
+    f.write_text("# Meeting notes\n")
+    r = run_wrapper_without_root({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_wrapper_without_root_env_is_silent_on_source(tmp_path):
+    f = tmp_path / "main.py"
+    f.write_text("print('hi')\n")
+    r = run_wrapper_without_root({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr

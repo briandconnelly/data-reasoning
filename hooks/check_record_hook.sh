@@ -2,12 +2,20 @@
 # PostToolUse entry point. With python3 available, defer to the Python hook.
 # Without it, do the same record sniff in shell so a record write is reported
 # as not validated (never silently passed) and every other write stays silent.
-# Claude Code sets CLAUDE_PLUGIN_ROOT; Codex sets PLUGIN_ROOT.
+# Claude Code sets CLAUDE_PLUGIN_ROOT; Codex sets PLUGIN_ROOT. When neither
+# is set -- a direct or third-party invocation -- the plugin root is this
+# script's grandparent directory, and it is exported so the Python hook
+# finds the validator the same way (issue #64: an empty root made every
+# write exec `python3 /hooks/check_record_hook.py` and fail).
 # Failure semantics: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md
 root="${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT:-}}"
+if [ -z "$root" ]; then
+  root=$(cd "$(dirname "$0")/.." 2>/dev/null && pwd) || root=""
+  [ -n "$root" ] && export CLAUDE_PLUGIN_ROOT="$root"
+fi
 # Mirrors FRONTMATTER_SCAN_BYTES in hooks/check_record_hook.py.
 FRONTMATTER_SCAN_BYTES=65536
-if command -v python3 >/dev/null 2>&1; then
+if command -v python3 >/dev/null 2>&1 && [ -f "${root}/hooks/check_record_hook.py" ]; then
   exec python3 "${root}/hooks/check_record_hook.py"
 fi
 # Print a file's document title: the first non-blank line after an optional
