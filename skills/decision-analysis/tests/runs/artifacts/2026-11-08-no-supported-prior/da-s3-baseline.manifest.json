@@ -1,0 +1,86 @@
+{
+  "name": "da-s3-baseline",
+  "started_utc": "2026-11-08T19:55:50.535313+00:00",
+  "duration_s": 22.6,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "973fa851-5cea-4849-b403-41c3c033f95f",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "ee24055e551c2e0872c1b345112a7f7183828fa66d066b8f1e985d69b87f0c49",
+  "jsonl_sha256": "f4cee3c10e0f5227d99354f35b33e696abc8add247f61aaa54b1fba9a7035fb1",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s3-baseline-kqb9dhha",
+  "files_written": [],
+  "files_written_sha256": {},
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s3-baseline-kqb9dhha/data/da-s1-ledger/ledger.md\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 60295,
+    "cache_read_input_tokens": 11893,
+    "output_tokens": 1296,
+    "output_tokens_details": {
+      "thinking_tokens": 375
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 60295,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1175,
+        "cache_read_input_tokens": 6745,
+        "cache_creation_input_tokens": 57600,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 57600
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.2553373,
+    "duration_ms": 22025,
+    "num_turns": 2
+  },
+  "result_text": "**Hold.** Don't ship the 2026-09-12 release with the pool change until the raw access logs are restored and checked.\n\n**What the ledger supports**\n- **The gap is real in the metrics.** Canary p95 averages 468 ms against 411 ms for control, a 57 ms gap that clears the 40 ms noise band. Every canary host is above every control host.\n- **The comparison is fair.** The canary hosts came from a fixed rotation chosen before the change, independent of traffic or latency. Control hosts served the same load-balanced traffic. So selection bias doesn't explain the gap.\n- **Whether users felt it is unresolved.** The one alternative explanation is that the canary exporter changed its sampling on 09-09. That test (T2, recomputing p95 from raw access logs) never ran, because the logs weren't restored. H2 is untested, not refuted. The canary/control contrast comes from the same pipeline H2 questions, so it can't rule H2 out.\n\n**Why hold rather than ship**\n- The only evidence about served latency points to a roughly 14% p95 regression on checkout. The only thing arguing against it is an untested hypothesis.\n- The costs are lopsided. Holding costs a delay while the logs are restored. Shipping a real checkout regression to all hosts costs much more and is harder to undo.\n\n**What not to lean on**\n- T3 (past rollouts) shouldn't count toward shipping or holding. Its 10 real and 10 non-real cases were picked to fixed quotas, so it can't tell you how often a gap like this turns out to be a real regression. T3 was also added after T1 came back.\n- The 1-minute-window p95 can hide sub-window spikes. That makes the measured numbers less reliable in either direction.\n\n**What would change the call**\n- Ship if the restored canary logs show a flat raw p95. That would confirm an exporter artifact.\n- Keep holding, and look at the pool change itself, if the raw p95 shows the same gap.\n- The ledger says logs are kept for 7 days, so the 09-09 logs may already be gone. Today is 2026-11-08, well past 09-09 and 09-12. If the restore can't be done, run a fresh canary with the exporter config pinned and compare raw logs against the exporter's numbers on the same hosts.\n\nI used only the ledger. I didn't open the evidence CSVs, so none of the figures above were re-checked against the raw data."
+}

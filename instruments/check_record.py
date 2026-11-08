@@ -154,6 +154,10 @@ PROVENANCE = {
     "sensitivity-only",
 }
 LOSS_PROVENANCE_FOR_ROBUST = {"user-elicited", "externally-sourced"}
+# The no-supported-prior form (decision-analysis SKILL.md § Numeric Policy;
+# spellings in the template's § Slot notes).
+NO_PRIOR_SENTINEL = "none supported — see Robustness"
+NO_LR_SENTINEL = "none supported"
 PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([A-Za-z][A-Za-z-]*)`?")
 # Belief slots a `dominated` verdict leaves at the template's sentinel.
 DOMINATED_NONE_NEEDED = (
@@ -968,18 +972,53 @@ def _check_provenance_vocab(body: str, findings: list[str]) -> None:
                         f"{sorted(PROVENANCE)}"
                     )
     evidence = _section(body, "## Evidence and update")
-    for cell in _column(_table_rows(evidence), "provenance"):
-        cls = _normalize(cell)
-        if cls and not _unfilled(cls) and cls not in PROVENANCE:
-            findings.append(
-                f"## Evidence and update: provenance {cls!r} is not in the closed set "
-                f"{sorted(PROVENANCE)}"
-            )
+    _check_no_prior_form(evidence, findings)
     if "sensitivity-only" in evidence:
         findings.append(
             "## Evidence and update: sensitivity-only provenance may not appear here; "
             "it belongs in Robustness (SKILL.md § Numeric Policy)"
         )
+
+
+def _check_no_prior_form(evidence: str, findings: list[str]) -> None:
+    """The no-supported-prior form's pairings: an unquantified evidence row
+    carries the sentinel in both its LR and provenance cells with a reason
+    beside it, and the belief-slot sentinel fills Prior odds and Posterior
+    odds together. Other provenance cells are checked against the closed set."""
+    rows = _table_rows(evidence)
+    lr_cells = _column(rows, "lr")
+    source_cells = _column(rows, "source, reference class, conditioning")
+    for i, cell in enumerate(_column(rows, "provenance")):
+        cls = _normalize(cell)
+        if cls == NO_LR_SENTINEL or (
+            i < len(lr_cells) and _normalize(lr_cells[i]) == NO_LR_SENTINEL
+        ):
+            lr = _normalize(lr_cells[i]) if i < len(lr_cells) else ""
+            if not (cls == NO_LR_SENTINEL and lr == NO_LR_SENTINEL):
+                findings.append(
+                    f"## Evidence and update: row {i + 1}: {NO_LR_SENTINEL!r} fills the LR and "
+                    f"provenance cells together, or neither"
+                )
+            if i < len(source_cells) and not _normalize(source_cells[i]):
+                findings.append(
+                    f"## Evidence and update: row {i + 1}: an unquantified item carries its "
+                    f"reason in the source cell"
+                )
+            continue
+        if cls and not _unfilled(cls) and cls not in PROVENANCE:
+            findings.append(
+                f"## Evidence and update: provenance {cls!r} is not in the closed set "
+                f"{sorted(PROVENANCE)}"
+            )
+    prior = _slot_value(evidence, "Prior odds")
+    posterior = _slot_value(evidence, "Posterior odds")
+    if prior is not None and posterior is not None:
+        pr, po = _normalize(prior) == NO_PRIOR_SENTINEL, _normalize(posterior) == NO_PRIOR_SENTINEL
+        if pr != po:
+            findings.append(
+                f"## Evidence and update: {NO_PRIOR_SENTINEL!r} fills Prior odds and Posterior "
+                f"odds together, or neither"
+            )
 
 
 def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None:
@@ -991,6 +1030,15 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
         return
     verdict = _leading_token(verdict_value, DECIDE_VERDICTS)
     if verdict == "robust":
+        rows = _table_rows(_section(body, "## Evidence and update"))
+        lrs = [_normalize(c) for c in _column(rows, "lr")]
+        if lrs and all(v == NO_LR_SENTINEL for v in lrs):
+            findings.append(
+                "## Verdict: robust with every evidence row in the missing-ratio form; no "
+                "quantitative update is supported, so hypothetical inputs alone cannot reach "
+                "robust (SKILL.md § Numeric Policy)"
+            )
+    if verdict in ("robust", "prior-sensitive"):
         slots = (("## Decision frame", "Loss ratio"), ("## Robustness", "Loss range swept"))
         for heading, label in slots:
             value = _slot_value(_section(body, heading), label)
@@ -999,9 +1047,9 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
             provs = PROVENANCE_MENTION.findall(value)
             if len(provs) != 1 or provs[0] not in LOSS_PROVENANCE_FOR_ROBUST:
                 findings.append(
-                    f"{heading}: a robust verdict requires '- {label}:' to carry exactly one "
-                    f"provenance from {sorted(LOSS_PROVENANCE_FOR_ROBUST)}; found {value!r} "
-                    f"(SKILL.md § Numeric Policy)"
+                    f"{heading}: a {verdict} verdict requires '- {label}:' to carry exactly one "
+                    f"provenance from {sorted(LOSS_PROVENANCE_FOR_ROBUST)}; any other class caps "
+                    f"the verdict at loss-sensitive; found {value!r} (SKILL.md § Numeric Policy)"
                 )
     elif verdict == "dominated":
         for heading, label in DOMINATED_NONE_NEEDED:

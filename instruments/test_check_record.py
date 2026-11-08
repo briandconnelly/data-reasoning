@@ -293,7 +293,7 @@ GOOD_DECISION = """\
 ## Robustness
 
 - Prior class swept: 1:3 to 3:1
-- Loss range swept: 1 to 5
+- Loss range swept: 1 to 5 — provenance: user-elicited
 - Crossover: none within swept class
 
 ## Verdict
@@ -1372,7 +1372,8 @@ def _robust_decision(loss_prov: str, swept_prov: str) -> str:
             f"- Loss ratio: 3 — provenance: {loss_prov}",
         )
         .replace(
-            "- Loss range swept: 1 to 5", f"- Loss range swept: 1 to 5 — provenance: {swept_prov}"
+            "- Loss range swept: 1 to 5 — provenance: user-elicited",
+            f"- Loss range swept: 1 to 5 — provenance: {swept_prov}",
         )
         .replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
         .replace("- Recommended action: returned to owner", "- Recommended action: ship")
@@ -1383,6 +1384,60 @@ def test_robust_verdict_with_sensitivity_only_losses_is_caught():
     findings = cr.check(_robust_decision("sensitivity-only", "sensitivity-only"), final=True)
     assert any("robust" in f and "Loss ratio" in f for f in findings), findings
     assert any("robust" in f and "Loss range swept" in f for f in findings), findings
+
+
+def test_prior_sensitive_verdict_with_sensitivity_only_losses_is_caught():
+    """Issue #41: any non-belief-grade loss class caps the verdict at loss-sensitive."""
+    rec = GOOD_DECISION.replace(
+        "- Loss ratio: 3 — provenance: user-elicited",
+        "- Loss ratio: 3 — provenance: sensitivity-only",
+    )
+    assert any("prior-sensitive" in f and "Loss ratio" in f for f in cr.check(rec))
+    ok = rec.replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: loss-sensitive")
+    assert not any("Loss ratio" in f for f in cr.check(ok))
+
+
+NO_PRIOR_DECISION = (
+    GOOD_DECISION.replace(
+        "- Prior odds: 1:1 — provenance: user-elicited",
+        "- Prior odds: none supported — see Robustness",
+    )
+    .replace("- Posterior odds: 2:1", "- Posterior odds: none supported — see Robustness")
+    .replace(
+        "- Prior class swept: 1:3 to 3:1",
+        "- Prior class swept: 1:3 to 3:1 — provenance: sensitivity-only",
+    )
+)
+
+
+def test_no_supported_prior_form_passes():
+    assert cr.check(NO_PRIOR_DECISION) == []
+    assert cr.check(NO_PRIOR_DECISION, final=True) == []
+
+
+def test_no_prior_sentinel_must_fill_both_belief_slots():
+    half = NO_PRIOR_DECISION.replace(
+        "- Posterior odds: none supported — see Robustness", "- Posterior odds: 2:1"
+    )
+    assert any("together, or neither" in f for f in cr.check(half))
+
+
+def test_unquantified_evidence_row_is_a_paired_sentinel_with_a_reason():
+    ok = GOOD_DECISION.replace(
+        "| T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+        "| T2 untested | none supported | none supported | T2 never ran; raw logs not restored |",
+    )
+    assert cr.check(ok) == []
+    half = GOOD_DECISION.replace(
+        "| T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+        "| T2 untested | 1 | none supported | T2 never ran |",
+    )
+    assert any("together, or neither" in f for f in cr.check(half))
+    no_reason = GOOD_DECISION.replace(
+        "| T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+        "| T2 untested | none supported | none supported | |",
+    )
+    assert any("reason in the source cell" in f for f in cr.check(no_reason))
 
 
 def test_robust_verdict_with_elicited_losses_passes():
@@ -1584,3 +1639,17 @@ def test_assessment_vocabulary_is_checked_on_not_constructible_designs():
         "- Disposition: not-constructible — no pre-period exists",
     )
     assert any("assessment 'certified'" in f for f in cr.check(rec, final=True))
+
+
+def test_robust_with_only_missing_ratio_rows_is_caught():
+    """Codex review of #77: the sentinels opened a structural route to robust
+    with no supported quantitative input."""
+    rec = (
+        NO_PRIOR_DECISION.replace(
+            "| T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+            "| T1 untested | none supported | none supported | never ran |",
+        )
+        .replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
+        .replace("- Recommended action: returned to owner", "- Recommended action: ship")
+    )
+    assert any("cannot reach robust" in f for f in cr.check(rec, final=True))

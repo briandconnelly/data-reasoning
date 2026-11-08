@@ -1,0 +1,107 @@
+{
+  "name": "da-s8-baseline",
+  "started_utc": "2026-11-08T19:55:50.643836+00:00",
+  "duration_s": 40.2,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "d6bf839f-2421-4439-8a89-13cb704aa56c",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "ea57427bf57745f06ced52d7ef3cb0e0c5ee235fdc77d1b316317e280f7958b5",
+  "jsonl_sha256": "b2f73ee777b30ba36ce8fbecac13f23445b2adf124ca8768d49b242e5a028fb7",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5",
+  "files_written": [
+    "calc.py",
+    "out.txt"
+  ],
+  "files_written_sha256": {
+    "calc.py": "ca88c25ec5569237d07b242ab694549e833aece4f69e45055d1ee3b5cbca21e3",
+    "out.txt": "4e7337eecd4faae8c0e3d8dde7936797f59de52a674623fcf063a30cb2ecda09"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5/work && cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5/work && cat > calc.py <<'E'\\nimport numpy as np\\nLR=(9/10)/(2/10)\\nprint(\\\"LR\\\",LR)\\nfor po in (1/50,1/20,1/10,1/5):\\n    post=po*LR; print(f\\\"prior 1:{1/po:.0f} -> post odds {post:.3f} p={post/(1+post):.3f}\\\")\\nprint(\\\"hold iff k*post_odds>1\\\")\\nfor po in (1/50,1/10,1/5):\\n    print(po,[(\\\"hold\\\" if k*po*LR>1 else \\\"ship\\\") for k in (2,5,10,20)])\\nrng=np.random.default_rng(0);n=10**6\\npo=10**rng.uniform(np.lo"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5/work && sed -i 's/import numpy as np/import random,math/; /^rng=/,$d' calc.py && cat >> calc.py <<'E'\\nrandom.seed(0);n=200000;h=0\\nfor _ in range(n):\\n    po=10**random.uniform(math.log10(1/50),math.log10(1/5));k=10**random.uniform(math.log10(2),math.log10(20))\\n    h+= k*po*LR>1\\nprint(\\\"hold frac\\\",h/n)\\nE\\npython3 -I calc.py | tee out.txt\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5/work && cat > calc.py <<'E'\\nimport random,math\\nLR=(9/10)/(2/10)\\nprint(\\\"LR\\\",LR)\\nfor po in (1/50,1/20,1/10,1/5):\\n    post=po*LR; print(f\\\"prior 1:{1/po:.0f} -> post odds {post:.3f} p={post/(1+post):.3f}\\\")\\nfor po in (1/50,1/10,1/5):\\n    print(round(po,3),[(\\\"hold\\\" if k*po*LR>1 else \\\"ship\\\") for k in (2,5,10,20)])\\nrandom.seed(0);n=200000;h=0\\nfor _ in range(n):\\n    po=10**random.uniform(math.log10(1/50),math.log10(1/5));k=10**random.uniform(math.log10(2),math.log10(20))\\n    h+= k*po*LR>1\\npr"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 63749,
+    "cache_read_input_tokens": 210088,
+    "output_tokens": 3856,
+    "output_tokens_details": {
+      "thinking_tokens": 1428
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 63749,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1144,
+        "cache_read_input_tokens": 67086,
+        "cache_creation_input_tokens": 593,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 593
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3145848,
+    "duration_ms": 39543,
+    "num_turns": 5
+  },
+  "result_text": "**Hold, unless the raw access logs are restored before the freeze. If they are, run the check and decide on that result.** Your own ranges don't settle ship versus hold, though, and the hold is a lean, not a certainty.\n\nI worked only from the ledger and did not open the evidence files.\n\n**What the evidence is worth**\n- The ledger's only usable discriminating evidence is the reference class (T3). It shows the 40 ms gap in 9 of 10 real regressions and 2 of 10 non-regressions. That gives a likelihood ratio of 0.9 / 0.2 = **4.5** in favor of \"real\".\n- The 10/10 split was set by the analyst, so it carries no base rate. That's fine for a likelihood ratio, but it means the reference class can't replace your prior.\n- I used the ratio once. T1 (the 57 ms canary/control gap) and T3 are the same observation, so counting both would double-count.\n- The ratio rests on 10 cases per group, so it is itself uncertain.\n- The canary/control gap comes from the same pipeline that H2 (an exporter artifact) questions, so it can't rule out H2.\n\n**Posterior odds that the regression is real**\n\n| Prior (real : not) | Posterior odds | P(real) |\n| --- | --- | --- |\n| 1:50 | 0.09 | 8% |\n| 1:20 | 0.23 | 18% |\n| 1:10 | 0.45 | 31% |\n| 1:5 | 0.90 | 47% |\n\n**Decision rule**\nHold if (cost ratio) \u00d7 (posterior odds) > 1. The cost ratio is how much more a missed regression costs than a one-week hold, so your 2\u201320 range sets the break-even odds at 1:2 to 1:20.\n\n| Prior odds | Cost ratio 2 | 5 | 10 | 20 |\n| --- | --- | --- | --- | --- |\n| 1:50 | ship | ship | ship | hold |\n| 1:10 | ship | hold | hold | hold |\n| 1:5 | hold | hold | hold | hold |\n\n- Shipping is right only in the optimistic corner: a low prior (about 1:9 or lower) combined with a low miss cost (about 2\u20135\u00d7).\n- If I spread both ranges evenly on a log scale, hold wins in about 72% of the combinations. I made that weighting up; it is not data.\n- The team's disagreement on the cost number and on the prior is what decides this, so that is the argument to have.\n\n**What would change it**\n- **Restore the raw logs (S3).** This is the only test that separates a real regression from an exporter artifact. It is worth chasing hard, because it replaces the whole table with a direct answer. Retention is 7 days and the restore is still pending, so confirm it's actually feasible.\n- **Check the exporter config history on the canary hosts.** The ledger's H2 prediction includes a config diff, and that may not need the raw logs.\n- **If you hold, agree in advance on what releases it.** For example, flat raw-log p95 on the canary hosts means ship the next week.\n\nThe ledger dates the release as 2026-09-12, which is a Saturday. I assumed the \"Friday\" freeze means the day before.\n\nThe calculation is in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-baseline-fjso50k5/work/calc.py`, with its output in `out.txt` next to it."
+}

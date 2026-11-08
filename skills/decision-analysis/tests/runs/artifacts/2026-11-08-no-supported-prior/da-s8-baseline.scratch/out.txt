@@ -1,0 +1,9 @@
+LR 4.5
+prior 1:50 -> post odds 0.090 p=0.083
+prior 1:20 -> post odds 0.225 p=0.184
+prior 1:10 -> post odds 0.450 p=0.310
+prior 1:5 -> post odds 0.900 p=0.474
+0.02 ['ship', 'ship', 'ship', 'hold']
+0.1 ['ship', 'hold', 'hold', 'hold']
+0.2 ['hold', 'hold', 'hold', 'hold']
+hold frac 0.72267
