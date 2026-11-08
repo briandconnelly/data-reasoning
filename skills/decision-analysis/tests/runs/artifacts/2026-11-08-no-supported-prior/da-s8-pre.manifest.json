@@ -1,0 +1,116 @@
+{
+  "name": "da-s8-pre",
+  "started_utc": "2026-11-08T19:56:35.545342+00:00",
+  "duration_s": 60.4,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "423c0eb7-294c-4e7c-b8bb-e682b5da24b6",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "992b866",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "018acc020763d5efa45c1a11d3fc3e7d5a4fcb16941eb279802437aa69fdf5cc",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "c73f7974c831042f536a93e5e43bf980e7260b5497b160621a82b529404f205d"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "8b38b637836fec13cfb3d9f3f533aedd85c93171b71ce79487c5e56a0641a8d8",
+  "jsonl_sha256": "0b9f090955784358b02fd3d4596452e0175bd89b47c618d5133e449100b0a3de",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-xu6jotmb",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "61d13f7ca1f598dbc69750dc2f28afe571dbfeef9290ff8a6c40d7c9b73e6fd6"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-xu6jotmb/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-xu6jotmb/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-xu6jotmb/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-xu6jotmb/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release given an unresolved checkout p95 regression\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship vs hold\\n- Decision owner: the release owner (not named in the request or ledger)\\n- Reversibility: hold costs one week of delay; the cost of undoing a shipped real regression is not stated in the ledger or request\\n- Deadline or forcing event: release freeze Friday\\n- Consequences:\\n\\n  | | real regression true | rea"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 75900,
+    "cache_read_input_tokens": 155996,
+    "output_tokens": 6604,
+    "output_tokens_details": {
+      "thinking_tokens": 3372
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 75900,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1138,
+        "cache_read_input_tokens": 74519,
+        "cache_creation_input_tokens": 5199,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 5199
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3852556,
+    "duration_ms": 59763,
+    "num_turns": 5
+  },
+  "result_text": "**I can't give you a single answer. The evidence plus your own ranges don't settle ship versus hold, so the call goes back to the release owner.** The verdict is `prior-sensitive`, and it is also loss-sensitive.\n\nThe full record is at `work/decision-record.md`.\n\n**The update**\n- The only usable evidence is that the canary/control gap was above 40 ms (57 ms observed).\n- In your reference class of 20 past rollouts, the gap appeared in 9 of 10 real regressions and 2 of 10 non-regressions. That gives a likelihood ratio of 4.5.\n- I did not use the 10/10 split as a base rate, because the ledger says those strata were quota-drawn.\n- Neither UNRESOLVED status counts as evidence by itself.\n- Your prior odds of 0.02\u20130.2 (1:50 to 1:5) become posterior odds of 0.09\u20130.9.\n\n**The decision rule**\n- Hold if prior odds \u00d7 4.5 \u00d7 loss ratio L > 1, which simplifies to prior odds \u00d7 L > 0.222.\n- The cost of a miss relative to a needless hold is L, in your range of 2 to 20.\n\n**Where the answer flips**\n\n| Loss ratio L | Prior odds at which ship becomes the better call |\n| --- | --- |\n| 2 | below 0.111 (1:9) |\n| 5 | below 0.044 |\n| 10 | below 0.022 |\n| 11.1 or more | never within your prior range, so hold |\n| 20 | below 0.0111, outside your range, so hold |\n\n- If your prior is 1:5, hold wins at every loss ratio you gave.\n- If your prior is 1:50, ship wins unless the miss cost is above about 11 times a hold.\n- Ship wins only in the low-prior, low-loss corner, roughly 28% of the log-scaled grid. That figure describes the sweep, not a belief.\n\n**How fragile the likelihood ratio is.** With only 10 rollouts per stratum, a conservative range for the ratio is about 1.2\u201317 (Wilson 95% intervals). At the low end, ship wins over much more of the grid. At the high end, hold wins almost everywhere.\n\n**What would move it**\n- The decisive input is T2, the raw access-log p95 on the canary hosts. It is the only test that separates a real regression from an exporter artifact. The restore request was still pending when the ledger closed on 2026-09-10.\n- If T2 can run before the freeze, it would move the decision far more than any prior or loss number you could agree on. A hold costs one unit, so waiting on it is cheap.\n- Pricing that restore properly would need a separate value-of-information record, which I haven't done.\n- If T2 can't run in time, the loss ratio and prior are what's left to argue about. Hold is the safer default unless the team believes both the prior is below about 1:9 and a miss costs only about 2 times a hold.\n\n**Assumptions to check**\n- The release owner isn't named in the request or ledger.\n- The ledger doesn't say what undoing a shipped regression costs. I treated that as folded into L.\n- The ratio assumes this rollout resembles the 20 past ones.\n- The past gaps came from the same metrics pipeline that H2 questions.\n- The ledger is as of 2026-09-10 and I haven't seen anything newer.\n\nThis is a recommendation framework only. It doesn't authorize shipping, holding, or pulling the logs."
+}

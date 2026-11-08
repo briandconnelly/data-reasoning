@@ -685,13 +685,10 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                     f"computed prior-odds interval [{pf_lo:g}, {pf_hi:g}]"
                 )
         elif verdict == "loss-sensitive" and belief_losses:
-            if prior_flip:
-                failures.append(
-                    "loss-sensitive verdict, but varying the prior flips the action at the "
-                    f"stated losses (computed [{pf_lo:g}, {pf_hi:g}] meets the swept class); "
-                    "the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
-                )
-            elif lf is None or not loss_flip:
+            # When both axes flip, either sensitive label is accepted: the
+            # precedence between them is owed (issue #41, attempt 2 withdrew
+            # the double-flip clause on the DA-S8 measurement).
+            if lf is None or not loss_flip:
                 failures.append(
                     "loss-sensitive verdict, but the computed loss-ratio crossover "
                     + (f"[{lf[0]:g}, {lf[1]:g}] " if lf else "")

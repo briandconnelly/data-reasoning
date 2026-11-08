@@ -1070,19 +1070,26 @@ def test_loss_sensitive_crossover_must_be_the_computed_loss_flip():
     assert any("does not fall in the computed loss-ratio interval" in f for f in check(bad))
 
 
-def test_double_flip_is_prior_sensitive_not_loss_sensitive():
+def test_double_flip_accepts_either_sensitive_label_with_its_own_crossover():
     # class 0.01-1.0 meets the prior flip [0.02, 0.033]; losses 1-20 meet the loss flip.
+    # The precedence between the two labels is owed (issue #41); each label is
+    # accepted with the crossover of its own axis, and robust is not.
     rec = replace_once(
         _loss_only_flip("prior-sensitive", "flips at prior odds 0.03", "returned to owner"),
         "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
         "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
     )
     assert check(rec) == []
-    bad = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: loss-sensitive")
-    bad = replace_once(
-        bad, "- Crossover: flips at prior odds 0.03", "- Crossover: flips at loss ratio 1"
+    alt = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: loss-sensitive")
+    alt = replace_once(
+        alt, "- Crossover: flips at prior odds 0.03", "- Crossover: flips at loss ratio 1"
     )
-    assert any("the ordered rule gives prior-sensitive" in f for f in check(bad))
+    assert check(alt) == []
+    bad = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: robust")
+    bad = replace_once(
+        bad, "- Recommended action: returned to owner", "- Recommended action: hold one week"
+    )
+    assert any("lies inside" in f for f in check(bad))
 
 
 def test_rounded_crossover_at_the_tolerance_edge_is_accepted():
