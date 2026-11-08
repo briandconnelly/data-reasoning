@@ -87,12 +87,27 @@ Every prior, likelihood ratio, loss, threshold, and signal-model number carries 
 A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), and the voi route's bounds under § The VoI Route — never in Evidence and update as an update, and never reported as a probability the analysis holds.
 An `externally-sourced` or `estimated-from-data-in-hand` likelihood ratio names its source, reference class, and conditioning set; a number that cannot name them is `sensitivity-only`, whatever it looks like.
 
-Priors are robustness-first: the analysis may posit reference or skeptical priors as `sensitivity-only`, and a `robust` verdict requires the same action to be preferred across the entire stated prior class; otherwise the verdict is `prior-sensitive` with the crossover reported and the judgment handed back to the decision owner.
-Elicitation refines the prior class; it never gates the sensitivity analysis.
+Priors are robustness-first: the analysis may posit reference or skeptical priors as `sensitivity-only`, and elicitation refines the prior class; it never gates the sensitivity analysis.
+When no supported prior exists — none `user-elicited`, `externally-sourced`, or `estimated-from-data-in-hand` — Evidence and update carries no belief update: Prior odds and Posterior odds take the template's missing-support form, each supported likelihood ratio stays in the Evidence table with its provenance, source, reference class, and conditioning, and an item with no supportable ratio takes the template's missing-ratio form with the reason in its source cell.
+Robustness then does the work: apply the supported likelihood ratios across the declared `sensitivity-only` prior class and report the conditional posterior-odds range and the crossovers.
+An unquantified evidence item supplies no numeric update and is never given a likelihood ratio of 1.
+When no supported likelihood ratio remains, the record says that no quantitative update is supported; hypothetical inputs alone never reach `robust`.
 
 Losses are not like priors: missing decision-relevant preferences — losses, thresholds, risk constraints — gate an unconditional recommendation, because robustness across priors says nothing when a different loss ratio reverses the decision.
-A `robust` verdict therefore requires losses whose provenance is `user-elicited` or `externally-sourced`, unless one action dominates under every state, which is `dominated` and needs no probabilities at all.
-With `sensitivity-only` losses the verdict is at most `loss-sensitive`: report the loss-ratio crossover and return the judgment to the owner.
+Belief-grade losses are `user-elicited` or `externally-sourced`; any other class on Loss ratio or Loss range swept caps the verdict at `loss-sensitive`.
+A rounded elicited loss ("roughly ten") is recorded at its nominal value as `user-elicited` with the rounding stated in Conditions; a rounding word supplies no range endpoints, and endpoints the analyst chooses are `sensitivity-only` unless the decision owner or an external source supplies or confirms them.
+
+Verdict selection is one ordered rule, and the first clause that applies governs:
+
+- `dominated` when one action wins under every state; no probabilities are needed, and the belief slots take the template's `none needed`.
+- `loss-sensitive` when Loss ratio or Loss range swept carries any class but a belief-grade one; report the loss-ratio crossover and return the judgment to the owner.
+- `prior-sensitive` when, at the stated losses, varying the prior across the stated class changes the preferred action — whether or not varying the losses would change it too; the Crossover slot carries the prior-odds crossover, and a loss crossover goes in Conditions with the prior it was computed at.
+- `loss-sensitive` when, across the stated prior, varying the losses across the stated range changes the preferred action; the Crossover slot carries the loss-ratio crossover, with the prior it was computed at in Conditions.
+- `robust` otherwise: one action is preferred throughout the stated prior class and loss range, under belief-grade losses; the conditions are part of the verdict, not a footnote.
+
+A tie counts as a flip.
+v1 sweeps the prior class and the loss range only: a likelihood ratio stated as a range is carried through the posterior range and named in Conditions, never swept on its own.
+Under `prior-sensitive` and `loss-sensitive` the judgment returns to the decision owner; under `robust` and `dominated` the record names the action.
 
 Evidence items multiplied together state why they are conditionally independent given each state, or are combined into one item; sequential multiplication of unconditional likelihood ratios double-counts shared evidence.
 
@@ -117,18 +132,14 @@ A posterior over a causal claim is causal wording, and an `identified-if` dispos
 **Evidence and update.**
 Odds-form arithmetic, fully shown: prior odds, then one likelihood-ratio line per evidence item, then posterior odds — each prior and likelihood ratio with its provenance class, ranges rather than points wherever the source does not pin a point, per § Numeric Policy.
 Posterior odds carry no provenance class of their own: they are derived, and their warrant is recomputability from the lines above.
+When no supported prior exists, this block takes the missing-support form § Numeric Policy describes, and the arithmetic moves to Robustness.
 
 **Robustness.**
 The prior class and loss range actually swept, and the crossover statements: at what prior, or what loss ratio, the preferred action flips.
 This block is the skill's signature output, and it is where `sensitivity-only` numbers live.
 
 **Verdict.**
-The verdict set is closed, and every value is evidence-bounded:
-
-- `robust` — one action is preferred across the entire stated prior class and loss range; the conditions are part of the verdict, not a footnote.
-- `prior-sensitive` — the preferred action flips within the prior class; the crossover is reported and the judgment returns to the decision owner.
-- `loss-sensitive` — the preferred action flips within the loss range, or the losses are `sensitivity-only`; the crossover is reported and the judgment returns to the decision owner.
-- `dominated` — one action wins under every state; no probabilities are needed, and the record's belief slots say `none needed`.
+The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `dominated` — and which value a record takes is settled by § Numeric Policy's ordered rule, which this block records and does not restate.
 
 The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive` and `loss-sensitive` it reads `returned to owner`, because the crossover, not the record, locates the choice.
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).

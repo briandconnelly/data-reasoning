@@ -854,30 +854,59 @@ def test_robust_with_a_flip_point_not_matching_the_arithmetic_fails():
     assert any("robust verdict requires Crossover" in f for f in check(bad))
 
 
-def test_robust_flip_point_may_span_the_swept_loss_range():
-    # loss range 5-20 implies thresholds 0.05-0.2; with LR 3-5 the flip spans [0.01, 0.0667]
+def test_robust_may_name_the_prior_flip_point_outside_the_class():
+    # Issue #41 (2026-11-08): flips are read per axis with the other axis at its
+    # stated value. Threshold 0.1 with LR 3-5 puts the prior-odds flip at
+    # [0.02, 0.0333], outside the swept class 0.25-1.0; a robust record may
+    # name a point in that interval.
     ok = replace_once(
+        VALID_DECIDE,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.03",
+    )
+    assert check(ok) == []
+
+
+def test_robust_cannot_name_a_flip_point_the_stated_losses_do_not_give():
+    # 0.06 was the old joint-interval reading (losses 5-20 folded into the
+    # threshold); under the per-axis rule it is not the prior-odds flip point.
+    bad = replace_once(
         VALID_DECIDE,
         "- Crossover: none within swept class",
         "- Crossover: flips at prior odds 0.06",
     )
-    assert check(ok) == []
+    assert any("robust verdict requires Crossover" in f for f in check(bad))
 
 
 # Final review 2026-09-15: the accepted crossover interval and the intersection
 # gate must be the same interval, and every stated number must lie in it.
 
 
-def test_robust_with_swept_losses_that_pull_the_flip_into_the_class_fails():
-    # losses 5-20 imply thresholds 0.05-0.2; with LR 3-5 the flip spans [0.01, 0.0667],
-    # which overlaps a swept prior class of 0.05-1.0 -- not robust.
+def test_robust_with_a_loss_flip_across_the_stated_prior_fails():
+    # Prior class 0.05-1.0 with LR 3-5 puts the loss-ratio flip at
+    # [1/(1.0*5), 1/(0.05*3)] = [0.2, 6.67], which meets the swept losses 5-20:
+    # varying the losses flips the action, so the record is not robust.
     bad = replace_once(
         VALID_DECIDE,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Prior odds: 0.05–1.0 — provenance: externally-sourced",
+    )
+    bad = replace_once(bad, "- Posterior odds: 0.75–5.0", "- Posterior odds: 0.15–5.0")
+    bad = replace_once(
+        bad,
         "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
         "- Prior class swept: 0.05–1.0 — provenance: sensitivity-only",
     )
+    assert any("lies inside the swept loss range" in f for f in check(bad))
+
+
+def test_robust_with_a_prior_flip_at_the_stated_losses_fails():
+    # Threshold 0.1 with LR 3-5 puts the prior-odds flip at [0.02, 0.0333];
+    # a swept class reaching down to 0.01 contains it.
     bad = replace_once(
-        bad, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.06"
+        VALID_DECIDE,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–0.25 — provenance: sensitivity-only",
     )
     assert any("lies inside the swept prior class" in f for f in check(bad))
 
@@ -908,3 +937,149 @@ def test_crossover_grammar_accepts_the_stated_forms():
             VALID_DECIDE, "- Crossover: none within swept class", f"- Crossover: {value}"
         )
         assert check(ok) == [], value
+
+
+# --- Issue #41: the no-supported-prior form, the loss cap, and the ordered
+# verdict rule (SKILL.md § Numeric Policy, 2026-11-08) -------------------
+
+NO_PRIOR = replace_once(
+    replace_once(
+        VALID_DECIDE,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Prior odds: none supported — see Robustness",
+    ),
+    "- Posterior odds: 0.75–5.0",
+    "- Posterior odds: none supported — see Robustness",
+)
+
+
+def test_no_supported_prior_form_with_supported_lr_passes():
+    # swept class 0.25-1.0, LR 3-5, threshold 0.1: no prior flip ([0.02, 0.033]);
+    # loss flip over the class: [0.2, 1.33] vs 5-20: none -- robust stands.
+    assert check(NO_PRIOR) == []
+
+
+def test_no_prior_sentinel_must_fill_both_slots():
+    half = replace_once(
+        NO_PRIOR, "- Posterior odds: none supported — see Robustness", "- Posterior odds: 0.75–5.0"
+    )
+    assert any("must read the same sentinel" in f for f in check(half))
+
+
+def test_no_prior_sentinel_must_be_bare():
+    bad = replace_once(
+        NO_PRIOR,
+        "- Prior odds: none supported — see Robustness",
+        "- Prior odds: none supported — see Robustness (no base rate exists)",
+    )
+    assert any("must appear bare" in f for f in check(bad))
+
+
+def test_unquantified_evidence_row_is_a_paired_sentinel_with_a_reason():
+    ok = replace_once(
+        NO_PRIOR,
+        "| repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "| repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |\n"
+        "  | T2 raw logs | none supported | none supported | T2 never ran; logs not restored |",
+    )
+    assert check(ok) == []
+    half = ok.replace("| none supported | none supported |", "| 1 | none supported |")
+    assert any("together" in f for f in check(half))
+    no_reason = ok.replace(
+        "| none supported | none supported | T2 never ran; logs not restored |",
+        "| none supported | none supported | |",
+    )
+    assert any("reason in the source cell" in f for f in check(no_reason))
+
+
+def test_no_supported_lr_cannot_reach_robust():
+    bad = replace_once(
+        NO_PRIOR,
+        "| repro on staging | 3–5 | estimated-from-data-in-hand | staging run 2026-08-08, same build |",
+        "| repro on staging | none supported | none supported | no reproducible source for a ratio |",
+    )
+    assert any("hypothetical inputs alone cannot reach robust" in f for f in check(bad))
+    ok = replace_once(bad, "- Verdict: robust", "- Verdict: prior-sensitive")
+    ok = replace_once(
+        ok, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    ok = replace_once(
+        ok, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.1"
+    )
+    assert not any("robust" in f for f in check(ok)), check(ok)
+
+
+def test_sensitivity_only_losses_cap_prior_sensitive():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Loss ratio: 10 — provenance: user-elicited",
+        "- Loss ratio: 10 — provenance: sensitivity-only",
+    )
+    bad = replace_once(bad, "- Verdict: robust", "- Verdict: prior-sensitive")
+    bad = replace_once(
+        bad, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    bad = replace_once(
+        bad, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.03"
+    )
+    assert any("caps the verdict at loss-sensitive" in f for f in check(bad))
+
+
+def test_estimated_losses_are_not_belief_grade():
+    bad = replace_once(
+        VALID_DECIDE,
+        "- Loss ratio: 10 — provenance: user-elicited",
+        "- Loss ratio: 10 — provenance: estimated-from-data-in-hand",
+    )
+    assert any("caps the verdict at loss-sensitive" in f for f in check(bad))
+
+
+def _loss_only_flip(verdict: str, crossover: str, action: str) -> str:
+    # Prior 0.25-1.0, LR 3-5: loss flip at [0.2, 1.33]; swept losses 1-20 meet it;
+    # the prior flip [0.02, 0.033] does not meet the class 0.25-1.0.
+    rec = replace_once(
+        VALID_DECIDE,
+        "- Loss range swept: 5–20 — provenance: user-elicited",
+        "- Loss range swept: 1–20 — provenance: user-elicited",
+    )
+    rec = replace_once(rec, "- Verdict: robust", f"- Verdict: {verdict}")
+    rec = replace_once(
+        rec, "- Recommended action: hold one week", f"- Recommended action: {action}"
+    )
+    return replace_once(rec, "- Crossover: none within swept class", f"- Crossover: {crossover}")
+
+
+def test_loss_only_flip_is_loss_sensitive():
+    assert (
+        check(_loss_only_flip("loss-sensitive", "flips at loss ratio 1", "returned to owner")) == []
+    )
+    assert any(
+        "lies inside the swept loss range" in f
+        for f in check(_loss_only_flip("robust", "none within swept class", "hold one week"))
+    )
+    assert any(
+        "does not intersect the swept prior class" in f
+        for f in check(
+            _loss_only_flip("prior-sensitive", "flips at prior odds 0.03", "returned to owner")
+        )
+    )
+
+
+def test_loss_sensitive_crossover_must_be_the_computed_loss_flip():
+    bad = _loss_only_flip("loss-sensitive", "flips at loss ratio 999", "returned to owner")
+    assert any("does not fall in the computed loss-ratio interval" in f for f in check(bad))
+
+
+def test_double_flip_is_prior_sensitive_not_loss_sensitive():
+    # class 0.01-1.0 meets the prior flip [0.02, 0.033]; losses 1-20 meet the loss flip.
+    rec = replace_once(
+        _loss_only_flip("prior-sensitive", "flips at prior odds 0.03", "returned to owner"),
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+    )
+    assert check(rec) == []
+    bad = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: loss-sensitive")
+    bad = replace_once(
+        bad, "- Crossover: flips at prior odds 0.03", "- Crossover: flips at loss ratio 1"
+    )
+    assert any("the ordered rule gives prior-sensitive" in f for f in check(bad))

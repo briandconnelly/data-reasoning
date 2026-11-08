@@ -29,8 +29,10 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
   A worked example or slot note for a rounded elicited loss is a wording change owing its own arm.
 - **Withdrawn 2026-09-15:** the § Verdict precedence paragraph for a double flip landed on row 3 at wave 3 (the post arm read the elicited prior as probabilities and failed DA-S8.2, which the pre arm passes) and was dropped per the preregistration; the external review's A2 — one verdict slot, two applicable sensitivity labels — is owed.
   Every skill arm, pre and post, chose `prior-sensitive` in that case, so the remedy may be a clarification whose measurement needs an assertion that settles how "odds … 1 in N" is read.
+  **Attempt 2, 2026-11-08:** the precedence lives in § Numeric Policy's ordered rule (prior flip at stated losses outranks loss flip; the Crossover slot carries the prior-odds flip, Conditions the loss flip); the DA-S8 prompt states odds explicitly; same preregistration as above.
 - **Withdrawn 2026-09-15:** the no-defensible-prior degraded mode measured in DA-S1 landed on the preregistration's row 6 (its own condition that `robust` needs belief-grade losses was not met by any skill arm) and was dropped from the branch per that preregistration's amendment 2; the external review's finding 7 — a record form for missing quantitative evidence — is owed.
   A future attempt owes a `loss-sensitive` path for a no-prior record with `sensitivity-only` losses, which the withdrawn checker branch lacked, and its own preregistered arms.
+  **Attempt 2, 2026-11-08:** § Numeric Policy now carries the no-supported-prior form, the rounded-loss rule, and one ordered verdict rule with the loss cap; both checkers carry the paired sentinels and the per-axis flip tests; preregistered in `runs/artifacts/2026-11-08-no-supported-prior-prereg.md` (DA-S1, DA-S1x exact-loss control, DA-S3, DA-S8).
 - Debt surfaced 2026-09-15 (wave 2): a `prior-sensitive` record must state two crossovers and the template's Crossover slot has one line; the DA-S8 post arm wrote both as prose and the checker read the wrong number.
 
 ## Scenarios
@@ -102,14 +104,15 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 
 ### DA-S8 — both sensitivities fire (precedence)
 
-**Prompt:** "Here's our investigation ledger (`tests/fixtures/da-s1-ledger/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Going in, we'd put the odds that it's a real regression somewhere between 1 in 50 and 1 in 5. Missing a real regression costs us somewhere between 2 and 20 times what a needless one-week hold costs — the team can't agree on the number. Release freeze is Friday. Should we ship or hold?"
+**Prompt:** "Here's our investigation ledger (`tests/fixtures/da-s1-ledger/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Going in, we'd put the prior odds that it's a real regression (real : not real) somewhere between 1:50 and 1:5. Missing a real regression costs us somewhere between 2 and 20 times what a needless one-week hold costs — the team can't agree on the number. Release freeze is Friday. Should we ship or hold?"
+(Reworded 2026-11-08: the first form said "odds … 1 in 50 and 1 in 5", which reads as probabilities 1/50–1/5, odds 0.0204–0.25, as readily as odds 0.02–0.2; the arms split on it and DA-S8.2 could not be scored. The prompt now states odds explicitly.)
 **Fixture:** `da-s1-ledger` — DA-S1's ledger; its reference class supplies one sourced LR (4.5).
 **Expected:** decide route; with prior odds 0.02–0.2 and LR 4.5 the posterior spans 0.09–0.9, and with a loss ratio of 2–20 the threshold spans 0.05–0.5, so the preferred action flips inside the prior class and inside the loss range at once.
 Added 2026-09-15 for the § Verdict precedence rule (both sensitivities fire → `prior-sensitive`, loss crossover in Conditions); DA-S3 cannot measure it, because a record with no supported inputs reaches a sensitive verdict through the degraded mode and the loss rule without touching the precedence paragraph.
 
 - [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
 - [ ] Prior odds and loss ratio carry the user-elicited ranges; the LR 4.5 row names `reference_class.csv`, the 20-rollout stratified class, and the 40 ms gap condition; posterior odds recompute (0.09–0.9).
-- [ ] Robustness reports both crossovers: the prior odds at which the action flips for a given loss ratio, and the loss ratio at which it flips for a given prior.
-- [ ] Verdict is `prior-sensitive`, not `loss-sensitive`; Robustness states both the prior and the loss crossover; Recommended action reads `returned to owner`.
-  (Revised 2026-09-15 with § Verdict: the first form also required the loss crossover in Conditions, which one of two post arms and the pre arm did not do; see `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 3.)
+- [ ] The record reports both crossovers: the Crossover slot carries the prior-odds flip at the stated losses (0.011–0.111 across a loss ratio of 2–20 with LR 4.5), and Conditions carries the loss-ratio flip with the prior it was computed at (11.1 at prior odds 0.02).
+- [ ] Verdict is `prior-sensitive`, not `loss-sensitive`; Recommended action reads `returned to owner`.
+  (Revised 2026-09-15 with § Verdict: the first form also required the loss crossover in Conditions, which one of two post arms and the pre arm did not do; see `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 3. Revised again 2026-11-08 with § Numeric Policy's ordered rule, which names which crossover the slot carries.)
 - [ ] Baseline expectation: picks a point estimate from each range and recommends unconditionally.
