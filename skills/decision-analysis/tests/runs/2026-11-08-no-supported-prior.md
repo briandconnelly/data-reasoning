@@ -65,6 +65,20 @@ Working tree at the rerun: `7b8005f`. Pre arms are unchanged (no changed sentenc
 - **Ordered verdict rule with the double-flip precedence (DA-S8): a clarification carrying no measured lift.** Pre passes S8.A under the explicit-odds prompt; the first post arm failed the checker on form (both crossovers as prose in the one Crossover slot) and the slot-placement sentences it followed were withdrawn; under the final wording the post arm passes. Both arms chose `prior-sensitive`, which is what the rule says; the "unnecessary" row describes this cell, and the rule stays as the one home of verdict selection rather than being removed, because the alternative is the two-homes state the review found. Issue #41's second item is settled by this rule at the clarification grade, not as a measured improvement.
 - DA-S8's prompt reword (explicit odds) stays: the pre arm under it read 1:50–1:5 as 0.02–0.2 where the 2026-09-15 arms split.
 
+## Second Codex review (amicus, read-only), after the fixes above
+
+Six further findings, each reproduced against the checker before acting; all upheld and fixed, and every archived scored record was rescored under the final checker (every post record still passes both checkers; every pre record still fails):
+
+1. *A joint-only reversal had no valid verdict.* Resolved in § Numeric Policy: the prior flip is read over the stated losses and every loss in the stated range — a product of positive factors is monotone in each, so a reversal anywhere in the class × range is a prior flip — and `loss-sensitive` is for a prior class that cannot flip. The checker's prior-flip interval spans the stated threshold and 1/L over the swept losses.
+2. *Ties at a sweep boundary.* Comparisons are inclusive within the relative tolerance; a point range cannot flip.
+3. *Rounding tolerance leaked across endpoints.* Each stated endpoint is checked against both bounds with its own tolerance.
+4. *An unstated threshold switched the sweep checks off.* The stated loss ratio supplies the threshold (§ Numeric Policy sentence added).
+5. *The structural checker let `robust` through with every evidence row in the missing-ratio form.* It now reports that.
+6. *Axis validation skipped robust and loss-capped records.* Applied on every path; bare numbers stay accepted.
+
+Catalog: DA-S8.3's "the other crossover goes in Conditions" clause was removed; where the second crossover goes stays unprescribed (debt below).
+Side effect of (6): the excluded DA-S3 canary's Crossover (`flips at prior odds 0.22` under `loss-sensitive`) now fails the axis rule; the scored DA-S3 post arm wrote `flips at loss ratio 0.22` and passes.
+
 ## Debt this wave leaves
 
 - Where the second crossover goes when both axes flip: the first DA-S8 post arm wrote both into the one Crossover slot; the final-wording arm put one bare value there and the other in Conditions without being told to. A placement sentence owes its own arm if anyone writes one.

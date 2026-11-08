@@ -1029,6 +1029,15 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
     if verdict_value is None or _unfilled(verdict_value):
         return
     verdict = _leading_token(verdict_value, DECIDE_VERDICTS)
+    if verdict == "robust":
+        rows = _table_rows(_section(body, "## Evidence and update"))
+        lrs = [_normalize(c) for c in _column(rows, "lr")]
+        if lrs and all(v == NO_LR_SENTINEL for v in lrs):
+            findings.append(
+                "## Verdict: robust with every evidence row in the missing-ratio form; no "
+                "quantitative update is supported, so hypothetical inputs alone cannot reach "
+                "robust (SKILL.md § Numeric Policy)"
+            )
     if verdict in ("robust", "prior-sensitive"):
         slots = (("## Decision frame", "Loss ratio"), ("## Robustness", "Loss range swept"))
         for heading, label in slots:

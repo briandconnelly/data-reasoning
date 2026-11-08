@@ -112,7 +112,7 @@ Added 2026-09-15 for the § Verdict precedence rule (both sensitivities fire →
 
 - [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
 - [ ] Prior odds and loss ratio carry the user-elicited ranges; the LR 4.5 row names `reference_class.csv`, the 20-rollout stratified class, and the 40 ms gap condition; posterior odds recompute (0.09–0.9).
-- [ ] The record reports both crossovers: the prior-odds flip at the stated losses (0.011–0.111 across a loss ratio of 2–20 with LR 4.5) and the loss-ratio flip at the stated prior (11.1 at prior odds 0.02); the Crossover slot takes one bare value or range and the other crossover goes in Conditions.
+- [ ] The record reports both crossovers: the prior-odds flip at the stated losses (0.011–0.111 across a loss ratio of 2–20 with LR 4.5) and the loss-ratio flip at the stated prior (11.1 at prior odds 0.02); the Crossover slot takes one bare value or range; where the other is stated is not prescribed.
 - [ ] Verdict is `prior-sensitive`, not `loss-sensitive`; Recommended action reads `returned to owner`.
   (Revised 2026-09-15 with § Verdict: the first form also required the loss crossover in Conditions, which one of two post arms and the pre arm did not do; see `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 3. Revised 2026-11-08 to the slot's one-value form; see `runs/2026-11-08-no-supported-prior.md`.)
 - [ ] Baseline expectation: picks a point estimate from each range and recommends unconditionally.

@@ -1639,3 +1639,17 @@ def test_assessment_vocabulary_is_checked_on_not_constructible_designs():
         "- Disposition: not-constructible — no pre-period exists",
     )
     assert any("assessment 'certified'" in f for f in cr.check(rec, final=True))
+
+
+def test_robust_with_only_missing_ratio_rows_is_caught():
+    """Codex review of #77: the sentinels opened a structural route to robust
+    with no supported quantitative input."""
+    rec = (
+        NO_PRIOR_DECISION.replace(
+            "| T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |",
+            "| T1 untested | none supported | none supported | never ran |",
+        )
+        .replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
+        .replace("- Recommended action: returned to owner", "- Recommended action: ship")
+    )
+    assert any("cannot reach robust" in f for f in cr.check(rec, final=True))
