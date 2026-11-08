@@ -238,6 +238,13 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
     ap.add_argument("--prompt-file", required=True, type=Path)
     ap.add_argument("--skill", default=None, help="skill directory name for a skill arm")
     ap.add_argument("--skill-ref", default=None, help="git ref to stage the skill from")
+    ap.add_argument(
+        "--instruments-from",
+        choices=["skill-ref", "working-tree"],
+        default="skill-ref",
+        help="where the staged validator comes from: the skill's ref (default) or the "
+        "working tree, so pre and post arms can share one validator while the skill differs",
+    )
     ap.add_argument("--fixture", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--model", default="sonnet")
@@ -267,7 +274,8 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
     scratch = root / "work"
     scratch.mkdir()
     staged_skill = stage_skill(args.skill, args.skill_ref, root / "skills") if args.skill else None
-    staged_instruments = stage_instruments(args.skill_ref, root)
+    instruments_ref = None if args.instruments_from == "working-tree" else args.skill_ref
+    staged_instruments = stage_instruments(instruments_ref, root)
 
     skill_lines = ""
     if staged_skill:

@@ -1,0 +1,3 @@
+Weekly checkout conversion dropped from 3.1% to 2.5%: the week of 2026-06-01 vs the week of 2026-06-08.
+The data is in `{FIXTURE_PATH}/`: `orders.csv` (order_id, timestamp, amount, client_version), `sessions.csv` (session_id, timestamp, landing_page, device, checkout_reached), `deploys.log`.
+Figure out why conversion dropped.
