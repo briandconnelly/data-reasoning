@@ -1,0 +1,120 @@
+{
+  "name": "canary-s21d1-posttrunc",
+  "started_utc": "2026-11-08T23:26:53.273867+00:00",
+  "duration_s": 63.7,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "424abfa6-9c7d-4fc7-ba35-9550f43edfa4",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "99135bc",
+  "skill_md_override": {
+    "path": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-binding-rules-hoist/post-SKILL.prefix5000.md",
+    "sha256": "9bcdf0a4af6c088918533c9b1850aab22a01519ac2b77efdb258f3e3854c6e43"
+  },
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "9bcdf0a4af6c088918533c9b1850aab22a01519ac2b77efdb258f3e3854c6e43",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "f99b771e209395d2b18829da481b9f1d13e6302aaf357bc6f3042c761960781a",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "eb34ddb850b63cf95e1fc91142d003ea902ef33475552e90b6e57b41c2910913",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d1-nondiscriminating.md",
+  "fixture_files_sha256": {
+    "d1-nondiscriminating.md": "98d1c1fd8ec3f36f810495eb22831eb24fb8b5b13b5a4ea39bb5eba845cf5072"
+  },
+  "prompt_sha256": "eefab54e55ff059b5dd3111bd1508d6c0afffd7680167eac53beab60f6bf26f4",
+  "jsonl_sha256": "5861af454bcbdca2f7efce5f0c600d5b1bad64cb7b09d0428f48afda535601e6",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d1-posttrunc-zsu9p1uo",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "3358219b6bd39f3e4a24ccd64d09973c81fd5913f15ec713f717d6978747e3d4"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d1-posttrunc-zsu9p1uo/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d1-posttrunc-zsu9p1uo/data/d1-nondiscriminating.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d1-posttrunc-zsu9p1uo/work/answer.md\", \"content\": \"H2 STATUS: UNRESOLVED\\n\\nGOVERNING SKILL TEXT: \\\"Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly.\\\" \\\"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\\\"\\n\\nREASONING: The only test of H2 is T2, and its latest effective outcome in the ledger is NON_DISCRIMIN"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 71237,
+    "cache_read_input_tokens": 85304,
+    "output_tokens": 1669,
+    "output_tokens_details": {
+      "thinking_tokens": 117
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 71237,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 650,
+        "cache_read_input_tokens": 73405,
+        "cache_creation_input_tokens": 863,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 863
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3101804,
+    "duration_ms": 62721,
+    "num_turns": 4
+  },
+  "result_text": "H2 STATUS: UNRESOLVED\n\nGOVERNING SKILL TEXT: \"Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly.\" \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n\nREASONING: The only test of H2 is T2, and its latest effective outcome in the ledger is NON_DISCRIMINATING. The reconciliation is settled: the worker queried 2026-06-09 and 2026-06-11, not the preregistered 06-10 vs 06-11. So the necessary prediction (flat gateway p95 between 06-10 and 06-11) was never tested.\n\nThe worker's own \"CONTRADICTED\" label and its +1.6% reading are superseded by the reconciled outcome. They don't count as a failed necessary prediction under an adequate test.\n\nThe preregistered detection-limit argument shows the metric could discriminate if the right days were read. It doesn't make the wrong-day test adequate. REFUTED needs the necessary prediction to fail under an adequate test, and that hasn't happened, so the closed status set gives UNRESOLVED.\n\nThe budget is spent and further metered queries aren't authorized, so I can't re-test 06-10 here. The 06-10 vs 06-11 comparison remains untested. If a decision hangs on this UNRESOLVED set, the report should name `decision-analysis` (when installed).\n\nI only read SKILL.md and the packet. The SKILL.md file cuts off partway through the Data section, but the rules I relied on are in its Binding rules section. The answer is written to `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d1-posttrunc-zsu9p1uo/work/answer.md`."
+}

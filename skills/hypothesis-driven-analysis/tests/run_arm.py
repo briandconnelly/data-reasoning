@@ -27,6 +27,9 @@ Archived per arm under --out: `<name>.prompt.txt`, `<name>.command.json`,
 `<name>.manifest.json`, and a copy of everything the arm wrote to its scratch
 directory under `<name>.scratch/`. A pre-edit arm stages the skill from a git
 ref (`--skill-ref main`) so the same harness measures old and new wording.
+`--skill-md <file>` swaps the staged SKILL.md for another file -- a truncated
+prefix, for an arm approximating what survives context compaction -- and the
+manifest records that file's path and sha256 beside the staged tree's hashes.
 
     uv run skills/hypothesis-driven-analysis/tests/run_arm.py \
         --name s9-post --prompt-file prompts/s9.txt \
@@ -245,6 +248,13 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
         help="where the staged validator comes from: the skill's ref (default) or the "
         "working tree, so pre and post arms can share one validator while the skill differs",
     )
+    ap.add_argument(
+        "--skill-md",
+        default=None,
+        type=Path,
+        help="replace the staged SKILL.md with this file (a prefix-only approximation arm); "
+        "the rest of the skill directory is staged as usual",
+    )
     ap.add_argument("--fixture", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--model", default="sonnet")
@@ -274,6 +284,10 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
     scratch = root / "work"
     scratch.mkdir()
     staged_skill = stage_skill(args.skill, args.skill_ref, root / "skills") if args.skill else None
+    if args.skill_md is not None:
+        if staged_skill is None:
+            sys.exit("--skill-md needs --skill")
+        shutil.copyfile(args.skill_md, staged_skill / "SKILL.md")
     instruments_ref = None if args.instruments_from == "working-tree" else args.skill_ref
     staged_instruments = stage_instruments(instruments_ref, root)
 
@@ -347,6 +361,11 @@ def main() -> int:  # noqa: PLR0915 -- one linear pass: stage, run, archive
         "tools_at_startup": info["init_tools"],
         "skill": args.skill,
         "skill_ref": args.skill_ref or "working-tree",
+        "skill_md_override": (
+            {"path": str(args.skill_md), "sha256": sha256_bytes(args.skill_md.read_bytes())}
+            if args.skill_md is not None
+            else None
+        ),
         "skill_files_sha256": hash_tree(staged_skill) if staged_skill else None,
         "instruments_sha256": hash_tree(staged_instruments),
         "fixture": str(args.fixture),

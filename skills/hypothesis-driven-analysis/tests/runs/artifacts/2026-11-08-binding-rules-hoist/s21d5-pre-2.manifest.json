@@ -1,0 +1,117 @@
+{
+  "name": "s21d5-pre-2",
+  "started_utc": "2026-11-08T23:30:53.364223+00:00",
+  "duration_s": 217.5,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "bd6e5bf6-cf2d-4506-933c-d2c3440ea56b",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "692fd31",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "858f9f422ab89c6c723ca34296a2a544d396e302efa559aa6ec019192142e76c",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d5-unrepeatable.md",
+  "fixture_files_sha256": {
+    "d5-unrepeatable.md": "fcf3c42793ad05dbd6495060a146d5f10f4219c964ea4ecf82d1cb4a035aefff"
+  },
+  "prompt_sha256": "b2f0c24d72c4ea9e40945ed385a00e47fb2517538f80e2aa613912782a691aea",
+  "jsonl_sha256": "efd17df242a06d15bf1022eac1ed349e491f85b883dd5dc408bc274661343729",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d5-pre-2-wy_zoo5b",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "536c5255a3f10cbb5dfc9dec5a979a1d1216000454bfb47409f9f2979d23bad3"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d5-pre-2-wy_zoo5b/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d5-pre-2-wy_zoo5b/data/d5-unrepeatable.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d5-pre-2-wy_zoo5b/work/answer.md\", \"content\": \"H2 STATUS: REFUTED\\n\\nGOVERNING SKILL TEXT: \\\"Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly.\\\" / \\\"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\\\" / \\\"'Unverified' is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 26690,
+    "cache_read_input_tokens": 46316,
+    "output_tokens": 2193,
+    "output_tokens_details": {
+      "thinking_tokens": 466
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26690,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 678,
+        "cache_read_input_tokens": 30474,
+        "cache_creation_input_tokens": 1364,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1364
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.1333336,
+    "duration_ms": 213432,
+    "num_turns": 4
+  },
+  "result_text": "H2 STATUS: REFUTED\n\nGOVERNING SKILL TEXT: \"Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly.\" / \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\" / \"'Unverified' is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with the limitation recorded beside it.\" / \"Do not reach for `NON_DISCRIMINATING` here either \u2014 it says a test could not discriminate, not that you doubt a return which, if honest, discriminated fine.\"\n\nREASONING: H2's necessary prediction was that a flat gateway p95 (<10% relative) between 06-10 and 06-11 would refute it. T2's latest effective outcome is CONTRADICTED. The return shows p95 going from 24.1 to 25.0 ms, which is +3.7%, so the necessary prediction failed.\n\nThe test was adequate. The daily row is a complete census, and the 0.1 ms detection limit (about 0.4% relative) is far below the predicted >20% rise. A rise of that size could not have been hidden.\n\nThe unverified-return limitation sits beside the outcome, as the skill prescribes. It doesn't change the outcome and doesn't turn it into `NON_DISCRIMINATING`. It does mean the REFUTED status rests on an unverified worker return, so it shouldn't be treated as established or action-ready. No further metered queries are authorized, so that limitation stays open.\n\nThe prediction tested is a mechanism prediction (gateway latency), not an unidentified exposure\u2013outcome contrast. The caveat that would leave a causal hypothesis `UNRESOLVED` therefore doesn't apply.\n\nI saved this to `answer.md` in the work directory."
+}

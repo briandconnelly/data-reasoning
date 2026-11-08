@@ -1,0 +1,204 @@
+{
+  "name": "s12-pre-2",
+  "started_utc": "2026-11-08T23:30:56.903150+00:00",
+  "duration_s": 256.4,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "46054201-2256-459b-bcee-4de79590f49c",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__add_comment_reply",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__get_shared_drive_metadata",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__list_shared_drives",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__request_access",
+    "mcp__claude_ai_Google_Drive__resolve_comment_thread",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "692fd31",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "858f9f422ab89c6c723ca34296a2a544d396e302efa559aa6ec019192142e76c",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s1-conversion",
+  "fixture_files_sha256": {
+    "s1-conversion/deploys.log": "9f2a5b80677a1b2bf82b91c21ddc4ad0e5f1ffc9f8e4618cb95de633022451c7",
+    "s1-conversion/orders.csv": "39486b25560ac523af351bf4376d1fe9e4c8d2c267c63b95e7e9fa7b1ada1ddc",
+    "s1-conversion/sessions.csv": "77970b8484c3733fd1950fddef83314d9faafe8b564bd719e58c70e5a1faf494"
+  },
+  "prompt_sha256": "3488550bb1b60d7f88f19e658ace34663f6f36140050e79d7e59b22e19311ff9",
+  "jsonl_sha256": "48be1b3c01ad01e02c94f4fcba58a2561a094ff7e9ccf46f159b332e295972fe",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651",
+  "files_written": [
+    "ledger.md"
+  ],
+  "files_written_sha256": {
+    "ledger.md": "01a02b21c78f366fd5104aeb2540ce366ab3cfe9ed6d9b1bc75d63b54d93e3aa"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"D=/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651; ls -la $D/data/s1-conversion/ $D/skills/hypothesis-driven-analysis/ $D/skills/hypothesis-driven-analysis/references; for f in $D/data/s1-conversion/*; do echo \\\"== $f\\\"; head -5 \\\"$f\\\"; wc -l \\\"$f\\\"; done\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/skills/hypothesis-driven-analysis/references/ledger-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/data/s1-conversion; python3 -I - <<'E'\\nimport csv,collections as c\\nr=list(csv.DictReader(open('sessions.csv')))\\nprint(len(r), r[0].keys())\\nprint(c.Counter(x['landing_page'] for x in r))\\nprint(c.Counter(x['device'] for x in r)); print(c.Counter(x['checkout_reached'] for x in r))\\nd=c.Counter((x['timestamp'][:10],x['landing_page']) for x in r)\\ndays=sorted({k[0] for k in d}); pg=sorted({k[1] for k in d})\\nprint('day',pg)\\nfor dd in days: print(dd,[d[(dd,p)] for p in pg])\\nd2=c.Counter((x['timestamp'][:10"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/work; cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/work/ledger.md <<'E'\\n# Investigation: How much did launching /lp/summer-sale improve checkout conversion? (2026-06-01..06-14)\\n\\nRoute: full. Assignment of the campaign = someone launched it (first /lp/summer-sale sessions 06-08); not randomized; v3.4.1 checkout refactor deployed 06-10. Assumption named: nothing identifies the effect.\\n\\n## Problem\\n- Decision informed: whether to credit/continue the campaign for conv"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/data/s1-conversion; python3 -I - <<'E'\\nimport csv,math,collections as c\\nr=list(csv.DictReader(open('sessions.csv')))\\ndef per(x):\\n    d=x['timestamp'][:10]; h=x['timestamp']\\n    if d<'2026-06-08': return 'A:06-01..07'\\n    if h<'2026-06-10T14:00:07Z': return 'B:06-08..10pre'\\n    return 'C:post-deploy'\\ndef rate(rows):\\n    n=len(rows);k=sum(x['checkout_reached']=='yes' for x in rows);return k,n\\ndef ci(a,b):\\n    (k1,n1),(k2,n2)=a,b;p1,p2=k1/n1,k2/n2;se=math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2);d=p1-p2\\n   "
+    },
+    {
+      "ordinal": 7,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651/work; python3 -I - <<'E'\\ns=open('ledger.md').read()\\ns=s.replace(\\\"| T1 | H1 | overall conversion 06-08..09 > 06-01..07 | two-prop diff, 95% CI | NOT_TESTED | S1 |\\\",\\\"| T1 | H1 | overall conversion 06-08..09 > 06-01..07 | two-prop diff, 95% CI | NON_DISCRIMINATING | S1: 2.43% vs 3.12%, diff -0.68pp [-1.62,+0.25]; CI brackets 0 and contrast is unidentified (campaign shipped alongside nothing-randomized); campaign-page sessions convert 0.7% (3/427) pre-deploy vs 3.0%/3.6% on /home,/product; no confound-free"
+    },
+    {
+      "ordinal": 8,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651; python3 instruments/check_record.py --final work/ledger.md 2>&1 | head -20\"}"
+    },
+    {
+      "ordinal": 9,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s12-pre-2-dko81651; python3 - <<'E'\\np='work/ledger.md';s=open(p).read()\\ns=s.replace(\\\"## Amendments\\\\n\\\",\\\"## Amendments\\\\n\\\\n- 2026-11-08: none; no hypotheses or data requests were added after the plan.\\\\n\\\",1)\\nopen(p,'w').write(s)\\nE\\npython3 instruments/check_record.py --final work/ledger.md\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 41994,
+    "cache_read_input_tokens": 741978,
+    "output_tokens": 7873,
+    "output_tokens_details": {
+      "thinking_tokens": 906
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 41994,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 812,
+        "cache_read_input_tokens": 96094,
+        "cache_creation_input_tokens": 239,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 239
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3209398,
+    "duration_ms": 253980,
+    "num_turns": 10
+  },
+  "result_text": "**The data doesn't show that the /lp/summer-sale campaign improved checkout conversion, and it can't give a causal number for the campaign.** Site-wide conversion went down after launch, not up.\n\n| Period | Sessions | Checkout reached | Conversion |\n|---|---|---|---|\n| 06-01 to 06-07 (before launch) | 4,200 | 131 | 3.12% |\n| 06-08 to 06-09 (campaign live, before the 06-10 checkout deploy) | 1,520 | 37 | 2.43% |\n| 06-08 to 06-10 before the deploy (including the 06-10 morning) | 2,029 | 54 | 2.66% |\n| After the 06-10 deploy | 2,942 | 71 | 2.41% |\n\n- **Launch vs. before:** the 06-08 to 06-09 difference is \u22120.68 percentage points (95% CI \u22121.62 to +0.25). The interval includes zero, so it neither shows a gain nor proves harm.\n- **Campaign page:** /lp/summer-sale sessions converted at 0.6% (6 of 1,053). /home converted at about 2.5\u20133.0% and /product at about 3.6\u20133.9%. The campaign brought in about 21% of sessions at a much lower rate, which pulls the blended rate down.\n- **Other pages:** /home and /product were flat after launch (+0.06pp, CI \u22120.94 to +1.07). I saw no sign the campaign lifted them, though the sample is too small to detect a shift under about 1pp.\n\n**Why no causal number is available:**\n- The campaign wasn't randomized and has no holdout or pre-launch baseline.\n- The checkout form refactor (v3.4.1) deployed on 06-10, only two days after launch, and its effect can't be separated from the campaign's.\n- Sessions have no user ID, so campaign visitors can't be traced to orders.\n- The data covers only 14 days.\n- Orders (268) don't reconcile with the checkout-reached sessions (256).\n- Sessions dropped about 22% on 06-13 and 06-14, mostly mobile, while orders stayed normal. I don't know why.\n\nTo get a real answer you would need a holdout or split-test design. If it's installed, the `causal-identification-review` skill is the next step for designing one.\n\nEverything is in `work/ledger.md`, and its structural check ran clean. That check confirms the record's structure, not that the analysis is right."
+}

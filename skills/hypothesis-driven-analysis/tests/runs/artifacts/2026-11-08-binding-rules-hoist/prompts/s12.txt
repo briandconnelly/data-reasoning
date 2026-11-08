@@ -1,0 +1,2 @@
+How much did launching the /lp/summer-sale campaign improve our checkout conversion?
+Data: `{FIXTURE_PATH}/`.

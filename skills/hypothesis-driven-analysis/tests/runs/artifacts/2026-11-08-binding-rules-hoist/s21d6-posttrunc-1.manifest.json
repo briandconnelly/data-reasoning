@@ -1,0 +1,120 @@
+{
+  "name": "s21d6-posttrunc-1",
+  "started_utc": "2026-11-08T23:30:57.966448+00:00",
+  "duration_s": 217.5,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "8857fbdc-d74e-4ddb-bdbe-4ae830a0d269",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "99135bc",
+  "skill_md_override": {
+    "path": "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-binding-rules-hoist/post-SKILL.prefix5000.md",
+    "sha256": "9bcdf0a4af6c088918533c9b1850aab22a01519ac2b77efdb258f3e3854c6e43"
+  },
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "9bcdf0a4af6c088918533c9b1850aab22a01519ac2b77efdb258f3e3854c6e43",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "f99b771e209395d2b18829da481b9f1d13e6302aaf357bc6f3042c761960781a",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "eb34ddb850b63cf95e1fc91142d003ea902ef33475552e90b6e57b41c2910913",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d6-support-conflict.md",
+  "fixture_files_sha256": {
+    "d6-support-conflict.md": "80b3e912a4f9598b6668b94bc0a62ba88d17367c16f04dd68101934ecd1f8567"
+  },
+  "prompt_sha256": "d7ee3c560aedfcdf028227b7016c0fc5880d4af5c517f262197c914c1a3cb081",
+  "jsonl_sha256": "a684067711fa61920122819de45129d11be65b0265fe15a601caaf62ff095911",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d6-posttrunc-1-ijx_l3pb",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "61c68b9fd9472b6964a47ecbdcd706b29a03c59cb566ee58d4ebf56562b58df3"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d6-posttrunc-1-ijx_l3pb/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d6-posttrunc-1-ijx_l3pb/data/d6-support-conflict.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d6-posttrunc-1-ijx_l3pb/work/answer.md\", \"content\": \"H2 STATUS: UNRESOLVED\\n\\nBEST SUPPORTED: No. H2 may not be reported as best supported. It is not REFUTED, but the bar's second clause is not met. The only CONSISTENT outcome is T2, and T2 rests on an unverified worker return: Command 1 asks for `--day 2026-06-10` but the quoted output reads `day=2026-06-09`, and nothing resolves which record is wrong. That outcome can't be counted as a CONSISTENT outcome from a test that discriminates H2. H1 and H3 are REFUTED, so no riva"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 76328,
+    "cache_read_input_tokens": 87638,
+    "output_tokens": 2801,
+    "output_tokens_details": {
+      "thinking_tokens": 539
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 76328,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 903,
+        "cache_read_input_tokens": 75740,
+        "cache_creation_input_tokens": 1745,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1745
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.34209779999999995,
+    "duration_ms": 215385,
+    "num_turns": 4
+  },
+  "result_text": "H2 is UNRESOLVED, and it can't be reported as best supported. I wrote this to `work/answer.md` in the working-files directory.\n\nH2 STATUS: UNRESOLVED\n\nBEST SUPPORTED: No. H2 is not REFUTED, but the bar's second clause fails. The only CONSISTENT outcome is T2, and it rests on an unverified worker return. Command 1 asks for `--day 2026-06-10`, but the quoted output reads `day=2026-06-09`, and nothing resolves which record is wrong. That outcome can't count as a discriminating CONSISTENT outcome. H1 and H3 are REFUTED, so no rival competes, but that doesn't supply the missing support.\n\nGOVERNING SKILL TEXT:\n- \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n- \"`SUPPORTED` is not a status; \"best supported\" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.\"\n- \"**Stop with limits** otherwise: report what is known and what cannot be determined from the available data \u2014 \"can't tell from this data\" is a valid conclusion.\"\n\nREASONING:\n- **Status:** H2's necessary prediction is that gateway p95 stays flat (<10% relative) from 2026-06-10 to 2026-06-11. T2 did not fail it, so nothing refutes H2 and the closed status set leaves UNRESOLVED.\n- **Why not best supported:** The validity note says a real reading would discriminate, because the 0.1ms resolution is far below a 20% rise. That assumes the reading is the one requested. Here the baseline is labelled 2026-06-09, so the +26.8% rise may not be the 06-10 to 06-11 change the prediction names.\n- **Stop rule:** Collection is closed, so the rule gives stop with limits. It can't be determined from this data whether gateway latency rose in the preregistered window.\n- **What could change it:** A re-run of the 06-10 baseline, if later authorized, is the specific test that could change this.\n- **Next step:** If a decision hangs on H2, `decision-analysis` is the continuation, when installed.\n- **Wording:** Any causal wording would also need a design that identifies the effect, and none is present.\n\nThe `SKILL.md` I could read ends mid-sentence at line 221, in the Data section. I derived this from the Binding rules, which are fully visible, and did not see the Conclusion section."
+}

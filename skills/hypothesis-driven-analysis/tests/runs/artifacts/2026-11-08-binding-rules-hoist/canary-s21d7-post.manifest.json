@@ -1,0 +1,117 @@
+{
+  "name": "canary-s21d7-post",
+  "started_utc": "2026-11-08T23:26:53.290533+00:00",
+  "duration_s": 65.8,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "044919fd-b99f-49ce-82c1-1eea8cf4743a",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "99135bc",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "f07cd775383bf3ee065a8bbd89bb4bed333174e3bc4bc333edd018e6b6c026ae",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "f99b771e209395d2b18829da481b9f1d13e6302aaf357bc6f3042c761960781a",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "eb34ddb850b63cf95e1fc91142d003ea902ef33475552e90b6e57b41c2910913",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d7-support-clean.md",
+  "fixture_files_sha256": {
+    "d7-support-clean.md": "d77cce43c5a6313c9ab5f0da7d9a45493a8ae2a00a8a99e8e26d03b401b5ef3d"
+  },
+  "prompt_sha256": "c4aab798631d8d768fe395021b2aa70db8b33af116f58ff409ec50eb909a5da1",
+  "jsonl_sha256": "eff3a9152a7d0f49de7d2cbd9046403bd271634bcfb6afffd25272b1fa81f8bc",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d7-post-a32j1_5y",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "3e52f11487d67bc7c5887b4e4f5553159ec0e49121b3b5a0669c177cea6c8a64"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d7-post-a32j1_5y/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d7-post-a32j1_5y/data/d7-support-clean.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d7-post-a32j1_5y/work && cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d7-post-a32j1_5y/work/answer.md <<'EOF'\\nH2 STATUS: UNRESOLVED\\n\\nBEST SUPPORTED: Yes, as basis text only (never in the status cell), and with a limitation attached. H2 is not REFUTED. T2 is a CONSISTENT outcome from a test that discriminates H2 from the named rivals: the data is a census, and the 0.4% detection limit is far below the >20% rise H2 predicts. The only rivals, H1 and H3, are REFUTED on clean returns, so "
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 78358,
+    "cache_read_input_tokens": 91677,
+    "output_tokens": 2748,
+    "output_tokens_details": {
+      "thinking_tokens": 464
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 78358,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 925,
+        "cache_read_input_tokens": 79783,
+        "cache_creation_input_tokens": 1596,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1596
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3500917,
+    "duration_ms": 64733,
+    "num_turns": 4
+  },
+  "result_text": "H2 STATUS: UNRESOLVED\n\nBEST SUPPORTED: Yes, but only as basis text, never in the status cell. H2 is not REFUTED, and T2 is a CONSISTENT outcome from a test that discriminates it. T2 reads a complete census, and the 0.4% detection limit is far below the >20% rise H2 predicts. H1 and H3 are both REFUTED on clean returns, so no unrefuted rival explains the observations equally well. The T2 result rests on an unverified worker return. It may not be treated as established or action-ready. It must be worded as an association, not a cause, because no design identifies one.\n\nGOVERNING SKILL TEXT:\n- \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n- \"`SUPPORTED` is not a status; \"best supported\" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.\"\n- \"Record the fault as a limitation and treat the outcome as resting on an unverified return, however plausible the innocent reading; that limitation reaches the conclusion, where it bars treating the result as established or action-ready.\"\n- \"\"Unverified\" is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with the limitation recorded beside it.\"\n\nREASONING: H2's necessary prediction was that a flat gateway p95 (<10% relative) would refute it. T2 shows p95 rising from 24.1 to 31.2 ms (+29.5%), so that prediction did not fail and H2 cannot be REFUTED. The status set is closed, so the status is UNRESOLVED. \"Unverified\" is a limitation rather than a fourth outcome, so T2's Outcome cell stays CONSISTENT. The free check found no fault, and the preregistered detection limit shows the test discriminates. The \"best supported\" bar is therefore cleared. The unverified-return limitation does not change the status, but it bars presenting H2 as established or action-ready. The metered budget is spent and a re-pull is not authorized, so the limitation stays open and goes beside the conclusion. If a decision hangs on H2, `decision-analysis` is the named continuation.\n\nI wrote this to `answer.md` in the work directory (`/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d7-post-a32j1_5y/work`)."
+}

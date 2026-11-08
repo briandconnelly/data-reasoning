@@ -1,0 +1,127 @@
+{
+  "name": "canary-s11-post",
+  "started_utc": "2026-11-08T23:26:53.272089+00:00",
+  "duration_s": 81.2,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "a7b45c36-6874-48d2-a0b8-bf47f857131a",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "99135bc",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "f07cd775383bf3ee065a8bbd89bb4bed333174e3bc4bc333edd018e6b6c026ae",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "f99b771e209395d2b18829da481b9f1d13e6302aaf357bc6f3042c761960781a",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "eb34ddb850b63cf95e1fc91142d003ea902ef33475552e90b6e57b41c2910913",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s11-mini",
+  "fixture_files_sha256": {
+    "s11-mini/checkout_latency.csv": "eea96d9793a56153d23f7412a1cebbba2ac0fb2eadd0acb4f1b9a41650a8523c"
+  },
+  "prompt_sha256": "9ec709ac0d20b6b441b5dd1c91e3dc09315d76d8e4cf0c796079ea5b47a7736e",
+  "jsonl_sha256": "1365405ba1da4fef67a335f7810c2210fa2445590eeaeb33df1aebccaac5a874",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv",
+  "files_written": [
+    "ledger.md"
+  ],
+  "files_written_sha256": {
+    "ledger.md": "3e7fe416553107ee10f681980b4d8f030d60b6905736d683ff1158de2470a7f1"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv/skills/hypothesis-driven-analysis/references/ledger-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv/data/s11-mini; wc -l checkout_latency.csv; head -3 checkout_latency.csv; tail -2 checkout_latency.csv\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"W=/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv/work; mkdir -p $W\\ncat > $W/ledger.md <<'EOF'\\n# Mini ledger (preregistered before computing p95)\\nClaim: checkout p95 latency exceeded 500ms on 2026-07-15 (p95 of per-request latency_ms, whole day, UTC timestamps).\\nPrediction: holds -> p95 > 500; fails -> p95 <= 500. Interval: 95% order-statistic/bootstrap CI around p95 committed in advance.\\nProbes: (1) coverage by hour (expected 60 rows/hr, 24 hr); (2) p95 + CI; (3) max, count >500, hourly p95.\\nStop condition: CI entirely on one side of 500 over c"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"W=/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv/work\\ncat >> $W/ledger.md <<'EOF'\\n\\n## Results\\nCoverage: 1200 rows, 1200 unique ids, exactly 60/hr for hours 00-19 UTC; hours 20-23 have ZERO rows (4h absent, unexplained). One row/min -> likely a sample, not all requests.\\nCovered period p95 = 392.2ms (95% bootstrap CI 374.9-409.4); median 200; max 708.7; 14/1200 (1.2%) >500ms. Hourly p95 max 460.2 (hr 15) - never >500.\\nOutcome: CONTRADICTED for 00:00-19:59 UTC (500 is far outside CI). Not adequate for hours 20-23.\\nSensitivity: for full-day p95 >5"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 83628,
+    "cache_read_input_tokens": 259820,
+    "output_tokens": 2860,
+    "output_tokens_details": {
+      "thinking_tokens": 352
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 83628,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 668,
+        "cache_read_input_tokens": 86258,
+        "cache_creation_input_tokens": 724,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 724
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.389114,
+    "duration_ms": 80033,
+    "num_turns": 6
+  },
+  "result_text": "**The data doesn't support the claim, but it only covers part of the day.** Checkout p95 was about 392 ms for 2026-07-15 00:00\u201319:59 UTC, well under 500 ms.\n\n- **Overall p95:** 392.2 ms, with a 95% bootstrap interval of 375\u2013409 ms. 500 ms is far outside that interval.\n- **Hourly p95:** never above 500 ms. The highest hour was 15:00 at 460 ms.\n- **Spikes:** 14 of 1,200 requests (1.2%) exceeded 500 ms, and the maximum was 709 ms. A person looking at individual slow requests could have mistaken those for a p95 breach, but they are well short of the 5% needed to move the p95.\n- **Missing hours:** the file has no rows at all for 20:00\u201323:59 UTC. Every hour from 00:00 to 19:59 has exactly 60 rows, one per minute, so the file may be a sample rather than every request. I have no way to tell why the last four hours are absent.\n- **How much the gap matters:** for the full-day p95 to pass 500 ms, about 24% of the missing hours' requests would need to be slower than 500 ms. That is far above the 1.2% seen in the rest of the day, so it is unlikely, but I can't rule it out. An incident late in the evening would produce exactly that.\n- **Timezone:** I assumed \"yesterday\" means the UTC date in the timestamps. If it means a local day, the window shifts and the gap matters differently.\n\nTo fully close this out, check the 20:00\u201323:59 UTC window in the raw logs or monitoring. Without it, \"not supported by the data we have\" is the strongest honest answer.\n\nThe working notes are in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s11-post-6uw9gwjv/work/ledger.md`. I treated this as a single claim with no competing explanations, so I used the skill's lightweight route."
+}

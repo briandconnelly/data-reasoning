@@ -1,0 +1,2 @@
+We ran variants A and B of the signup page for two weeks, randomly assigning each visitor to one of them; `{FIXTURE_PATH}` has variant, visits, and signups per day.
+Is B better than A, and by how much?

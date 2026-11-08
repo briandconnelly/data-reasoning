@@ -1,0 +1,197 @@
+{
+  "name": "s11-pre-1",
+  "started_utc": "2026-11-08T23:30:57.836672+00:00",
+  "duration_s": 208.0,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "5586f851-be7e-4789-9171-d8a419bd2da5",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Claude_Docs__batch",
+    "mcp__claude_ai_Claude_Docs__create",
+    "mcp__claude_ai_Claude_Docs__delete",
+    "mcp__claude_ai_Claude_Docs__export",
+    "mcp__claude_ai_Claude_Docs__guide",
+    "mcp__claude_ai_Claude_Docs__query",
+    "mcp__claude_ai_Claude_Docs__read",
+    "mcp__claude_ai_Claude_Docs__update",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__add_comment_reply",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__get_shared_drive_metadata",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__list_shared_drives",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__request_access",
+    "mcp__claude_ai_Google_Drive__resolve_comment_thread",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "692fd31",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "858f9f422ab89c6c723ca34296a2a544d396e302efa559aa6ec019192142e76c",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s11-mini",
+  "fixture_files_sha256": {
+    "s11-mini/checkout_latency.csv": "eea96d9793a56153d23f7412a1cebbba2ac0fb2eadd0acb4f1b9a41650a8523c"
+  },
+  "prompt_sha256": "77014b24864216f1dd26da0cf25c7ab7d3cfa0d322636b72f026d9e2184561da",
+  "jsonl_sha256": "52f7ddf95c28516f13944835526f6f1aaac0b15f5ecc19b68462e8bedf7fdd62",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl",
+  "files_written": [
+    "analysis.txt",
+    "mini-ledger.md"
+  ],
+  "files_written_sha256": {
+    "analysis.txt": "8e1e57c29bdf765706169592e7a3e2c63708cb80665a10613549a757c6f7460d",
+    "mini-ledger.md": "87e9e0d7f4d0b524abc91696ed2776b3117a114b2b787d25cdfaf17b3da91fde"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl; python3 -I - <<'E'\\nimport csv,datetime as d,collections\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nprint(len(r),r[0],r[-1])\\nc=collections.Counter(x['timestamp'][:10] for x in r);print(sorted(c.items()))\\nbad=[x for x in r if not x['latency_ms'].strip()];print('blank',len(bad))\\nids=collections.Counter(x['request_id'] for x in r);print('dupid',sum(v>1 for v in ids.values()))\\nE\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl; mkdir -p work; python3 -I - <<'E' | tee work/analysis.txt\\nimport csv,collections,random\\nimport math\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nv=sorted(float(x['latency_ms']) for x in r)\\nn=len(v)\\ndef p95(a):\\n    a=sorted(a);return a[math.ceil(.95*len(a))-1]\\nprint('n',n,'min',v[0],'max',v[-1],'p95',p95(v))\\nimport numpy as np\\nprint('np p95 linear',np.percentile(v,95))\\nrandom.seed(1)\\nbs=sorted(p95(random.choices(v,k=n)) for _ in range(5000))\\nprint('boot95',bs[125],bs[4874]"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl; python3 -I - <<'E' | tee work/analysis.txt\\nimport csv,collections,random,math\\nfrom math import comb\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nv=sorted(float(x['latency_ms']) for x in r);n=len(v)\\ndef p95(a):\\n    a=sorted(a);return a[math.ceil(.95*len(a))-1]\\nprint('p95',p95(v))\\nrandom.seed(1)\\nbs=sorted(p95(random.choices(v,k=n)) for _ in range(5000))\\nprint('boot95',bs[125],bs[4874])\\ndef cdf(k):return sum(comb(n,i)*.95**i*.05**(n-i) for i in range(k+1))\\nlo=max(k for k in r"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl; python3 -I - <<'E' | tee -a work/analysis.txt\\nimport csv,collections,math\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nh=collections.defaultdict(list)\\nfor x in r:h[x['timestamp'][11:13]].append(float(x['latency_ms']))\\nv=sorted(float(x['latency_ms']) for x in r)\\nprint('>500',sum(x>500 for x in v),v[-6:])\\nfor k in sorted(h):\\n    a=sorted(h[k]);print(k,len(a),a[math.ceil(.95*len(a))-1],a[-1])\\nE\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-1-_7f2mwjl; cat > work/mini-ledger.md <<'E'\\n# Mini ledger\\nClaim: checkout p95 latency exceeded 500 ms on 2026-07-15 (day-level p95, all requests).\\nPrediction (necessary): the day's p95 > 500 ms; refuted if the 95% interval for p95 lies below 500.\\nProbes: day p95 (nearest-rank) + 95% bootstrap CI (5000 resamples, seed 1); hourly p95; coverage check.\\nOutcome: p95 = 392.2 ms, 95% CI [374.7, 409.4] -> CONTRADICTED (discriminating: 500 is far outside the CI). Only 14/1200 (1.2%) requests >500 ms; max 708.7.\\nHourly p9"
+    }
+  ],
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 23149,
+    "cache_read_input_tokens": 509434,
+    "output_tokens": 3038,
+    "output_tokens_details": {
+      "thinking_tokens": 85
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23149,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 524,
+        "cache_read_input_tokens": 79437,
+        "cache_creation_input_tokens": 489,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 489
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.1739474,
+    "duration_ms": 205872,
+    "num_turns": 7
+  },
+  "result_text": "**The claim isn't supported by this data.** Checkout p95 latency for 2026-07-15 was about **392 ms**, well under 500 ms.\n\n- **Day p95:** 392.2 ms across all 1,200 requests. The 95% bootstrap interval is 374.7\u2013409.4 ms, so 500 ms is far outside it.\n- **Tail:** only 14 of 1,200 requests (1.2%) took longer than 500 ms. The slowest was 708.7 ms. A p95 above 500 ms would need at least 5% of requests over that line.\n- **Hourly p95:** the highest was 460.1 ms (15:00 hour, 60 requests), and no hour exceeded 500 ms.\n- **Possible source of the claim:** some individual requests did exceed 500 ms, including 658 ms at 06:xx, 702 ms at 17:xx and 709 ms at 19:xx. Someone may have looked at the max rather than the p95.\n\n**Limits**\n- The file covers only 00:00\u201319:59, with exactly 60 requests every hour and nothing after 20:00. I can't tell whether the export was cut off or the data stops there. If the last four hours were bad, they aren't in this file. I'd say \"not true for the data we have\" rather than \"not true for the whole day.\"\n- I took the timestamps as UTC. If \"yesterday\" means a local-time day, the window would be different.\n\nI used the lightweight route for a single claim with no rival explanation. The ledger is at `work/mini-ledger.md` and the raw output is in `work/analysis.txt`, both in the work directory."
+}
