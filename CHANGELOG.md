@@ -6,6 +6,14 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Added
+
+- Decision analysis: a record form for a decision with no supported prior — Prior odds and Posterior odds read `none supported — see Robustness`, supported likelihood ratios stay in the Evidence table, an unquantified item is a paired `none supported` row with its reason, and the sweep in Robustness does the arithmetic (#41). Measured on DA-S1, DA-S1x and DA-S3 at n=1 per cell.
+
+### Changed
+
+- Decision analysis: § Numeric Policy now carries one ordered verdict rule (`dominated`, then the loss cap, then `prior-sensitive`, then `loss-sensitive`, then `robust`), treats only `user-elicited` and `externally-sourced` losses as belief-grade, and records a rounded elicited loss at its nominal value with analyst-chosen endpoints as `sensitivity-only`; § The Decide Route's verdict bullets point there. Both checkers enforce the paired sentinels, the loss cap, and per-axis flip tests.
+
 ### Fixed
 
 - The hook's shell wrapper derives the plugin root from its own location when neither `CLAUDE_PLUGIN_ROOT` nor `PLUGIN_ROOT` is set, instead of failing on every write, and a not-validated report names the actual reason: no `python3`, or no Python hook at the resolved root (#64).
