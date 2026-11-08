@@ -1353,3 +1353,107 @@ def test_an_unindented_sibling_bullet_still_ends_a_slot_value():
         "- Coverage matrix:",
     )
     assert any("required slot 'Coverage matrix' is empty" in f for f in cr.check(rec))
+
+
+# Issue #60: the decision skill's Numeric Policy couples verdicts to the
+# provenance of the numbers behind them. Provenance is a closed vocabulary and
+# the coupling is a structural rule (SKILL.md § Numeric Policy), both inside
+# the scope decisions/006 names, so the shipped validator checks them.
+
+
+def _robust_decision(loss_prov: str, swept_prov: str) -> str:
+    return (
+        GOOD_DECISION.replace(
+            "- Loss ratio: 3 — provenance: user-elicited",
+            f"- Loss ratio: 3 — provenance: {loss_prov}",
+        )
+        .replace(
+            "- Loss range swept: 1 to 5", f"- Loss range swept: 1 to 5 — provenance: {swept_prov}"
+        )
+        .replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
+        .replace("- Recommended action: returned to owner", "- Recommended action: ship")
+    )
+
+
+def test_robust_verdict_with_sensitivity_only_losses_is_caught():
+    findings = cr.check(_robust_decision("sensitivity-only", "sensitivity-only"), final=True)
+    assert any("robust" in f and "Loss ratio" in f for f in findings), findings
+    assert any("robust" in f and "Loss range swept" in f for f in findings), findings
+
+
+def test_robust_verdict_with_elicited_losses_passes():
+    assert cr.check(_robust_decision("user-elicited", "externally-sourced"), final=True) == []
+
+
+def test_robust_verdict_with_estimated_losses_is_caught():
+    # estimated-from-data-in-hand is a real class but not belief-grade for losses
+    findings = cr.check(_robust_decision("estimated-from-data-in-hand", "user-elicited"))
+    assert any("robust" in f and "Loss ratio" in f for f in findings), findings
+
+
+def test_robust_verdict_with_unfilled_loss_provenance_is_quiet_in_progress():
+    rec = _robust_decision("<class>", "<class>")
+    assert not any("robust" in f for f in cr.check(rec))
+    assert any("robust" in f for f in cr.check(rec, final=True))
+
+
+def test_robust_verdict_with_no_loss_provenance_is_caught():
+    rec = _robust_decision("user-elicited", "user-elicited").replace(
+        "- Loss ratio: 3 — provenance: user-elicited", "- Loss ratio: 3"
+    )
+    findings = cr.check(rec)
+    assert any("robust" in f and "Loss ratio" in f for f in findings), findings
+
+
+def test_sensitivity_only_in_evidence_and_update_is_caught():
+    bad = GOOD_DECISION.replace(
+        "- Prior odds: 1:1 — provenance: user-elicited",
+        "- Prior odds: 1:1 — provenance: sensitivity-only",
+    )
+    assert any("sensitivity-only" in f and "Evidence and update" in f for f in cr.check(bad))
+    bad_cell = GOOD_DECISION.replace(
+        "| T1 consistent | 2 | estimated-from-data-in-hand |",
+        "| T1 consistent | 2 | sensitivity-only |",
+    )
+    assert any("sensitivity-only" in f for f in cr.check(bad_cell))
+
+
+def test_sensitivity_only_in_robustness_is_fine():
+    ok = GOOD_DECISION.replace(
+        "- Prior class swept: 1:3 to 3:1",
+        "- Prior class swept: 1:3 to 3:1 — provenance: sensitivity-only",
+    )
+    assert cr.check(ok) == []
+
+
+def test_unknown_provenance_class_is_caught():
+    bad = GOOD_DECISION.replace(
+        "- Loss ratio: 3 — provenance: user-elicited", "- Loss ratio: 3 — provenance: derived"
+    )
+    assert any("provenance 'derived'" in f for f in cr.check(bad)), cr.check(bad)
+    bad_cell = GOOD_DECISION.replace(
+        "| T1 consistent | 2 | estimated-from-data-in-hand |", "| T1 consistent | 2 | guessed |"
+    )
+    assert any("provenance 'guessed'" in f for f in cr.check(bad_cell))
+
+
+def test_dominated_verdict_requires_none_needed_belief_slots():
+    dom = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: dominated"
+    ).replace("- Recommended action: returned to owner", "- Recommended action: ship")
+    findings = cr.check(dom)
+    for label in ("Prior odds", "Posterior odds", "Prior class swept", "Crossover"):
+        assert any("dominated" in f and label in f for f in findings), (label, findings)
+    ok = (
+        dom.replace("- Prior odds: 1:1 — provenance: user-elicited", "- Prior odds: none needed")
+        .replace("- Posterior odds: 2:1", "- Posterior odds: none needed")
+        .replace("- Prior class swept: 1:3 to 3:1", "- Prior class swept: none needed")
+        .replace("- Crossover: none within swept class", "- Crossover: none needed")
+    )
+    assert cr.check(ok, final=True) == []
+
+
+def test_verdict_coupling_is_decision_only():
+    # a VoI record carries no decide slots; the new checks must not fire on it
+    voi = "# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: upper-bound-only\n"
+    assert not any("robust" in f or "dominated" in f for f in cr.check(voi))
