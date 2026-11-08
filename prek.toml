@@ -141,5 +141,12 @@ hooks = [
   # CI: the live tests skip without TYPESAFE_API_KEY, and a skip is not a pass,
   # so a question change is run with the key by hand.
   { id = "jev-tests", name = "jev: the optional second-scorer tooling's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q jev", files = "^(jev/.*|instruments/check_record\\.py|scripts/frontmatter-descriptions/.*|skills/[^/]+/tests/scenarios\\.md)$", pass_filenames = false },
+  # Issue #67: four SKILL.md links pointed at blob/main/.../tests/, which the
+  # runtime tree on main never carries. The checker builds the release tree with
+  # scripts/build-release-tree.py itself and checks every repository link in
+  # what ships, so the files regex watches every release-tree input plus docs/
+  # and CHANGELOG.md, and the builder: a change to what ships can orphan a link.
+  { id = "check-shipped-urls", name = "release: repository links in shipped files resolve at their ref", language = "python", language_version = "python3", entry = "python scripts/check-shipped-urls.py", files = "^(scripts/(build-release-tree|check-shipped-urls)\\.py|hooks/.*|\\.claude-plugin/.*|\\.codex-plugin/.*|\\.agents/.*|instruments/.*|output-styles/.*|skills/.*|docs/.*|LICENSE|README\\.md|CHANGELOG\\.md)$", pass_filenames = false },
+  { id = "shipped-urls-tests", name = "release: the shipped-link checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q scripts/test_check_shipped_urls.py", files = "^scripts/(build-release-tree|check-shipped-urls|test_check_shipped_urls)\\.py$", pass_filenames = false },
   { id = "release-tree-tests", name = "scripts: the release-tree builder's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q scripts/test_build_release_tree.py", files = "^(scripts/(build-release-tree|test_build_release_tree)\\.py|hooks/.*|\\.claude-plugin/.*|\\.codex-plugin/.*|\\.agents/.*|instruments/.*|output-styles/.*|skills/.*|LICENSE|README\\.md)$", pass_filenames = false },
 ]
