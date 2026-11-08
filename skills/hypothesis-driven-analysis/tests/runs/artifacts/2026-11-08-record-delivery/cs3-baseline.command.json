@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nThe user's request:\n\n\"We rolled out the new checkout flow to the West region on 2026-03-15, after six weeks running the old flow in both regions.\nEast region stayed on the old flow throughout.\nMedian checkout completion time in West fell from the pre-rollout weeks to the two weeks after, and the team wants this written up as the flow's causal effect on completion time for the Q2 review.\nDoes this comparison identify the flow's causal effect?\nIf not, say what would need to be true, and what would need checking, before anyone could trust a causal number here.\nData: /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9/data/cs3-rollout/.\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-cs3-baseline-6mqba3j9"
+  ]
+}

@@ -66,7 +66,7 @@ The hook also now reads Codex's `apply_patch` payload; `docs/record-validation.m
 
 *(Extended 2026-11-08: the deferred SKILL.md pointer at `--final` is written, as a shared section rendered into all four skills from `scripts/shared-sections/record-delivery.md` (issue #63).
 It names the five record kinds that carry a validator signature, requires findings to be fixed on the owning skill's own terms or reported as limitations, and requires an unavailable validator to be reported as not validated.
-It is agent-read prose and ships as measured only on the terms this record set: the preregistration is `tests/runs/artifacts/2026-11-08-record-delivery-prereg.md`, and until its arms have run the section's effect is unmeasured.)*
+It is agent-read prose and ships as measured only on the terms this record set: the preregistration is `tests/runs/artifacts/2026-11-08-record-delivery-prereg.md`, and its arms ran the same day: `tests/runs/2026-11-08-record-delivery-wave.md` records post arms running the check on all four completed-record cells where pre arms ran it on none, no laundering under the tightened wording, and the remaining reachable cells as debt.)*
 
 ## Rules this record adds (2026-08-22)
 

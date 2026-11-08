@@ -1,0 +1,134 @@
+{
+  "name": "da-s1-post",
+  "started_utc": "2026-11-08T18:05:28.169891+00:00",
+  "duration_s": 72.0,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "6abf7c2d-5668-4bcd-8f4b-7b58a71a3171",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "working-tree",
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "59ee4917e656cfe44c01e3a2365ceb47c0df23d9ca8e5d79e3a5f9856c64f788",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "c73f7974c831042f536a93e5e43bf980e7260b5497b160621a82b529404f205d"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "62459670dde7b94235707a4c649faed376f5596abbc77a2dea3650608d35e60a"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "2ec2c0c89cfb44ae7e08d01556df6e15c49a9f9491ca17b873d638b76b065fc6",
+  "jsonl_sha256": "6c3c9a80dcb475fdee49b8a7dca1829922af4f4b30ba9ca36987a058ac63f558",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "17596be8faffa482817f38a19c6714d320a5d7255d48bb58ca00e9156714f285"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/skills/ /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/skills/instruments 2>&1; mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/work\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/instruments 2>&1 | head\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the 2026-09-12 release carrying the connection-pool change\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship vs hold\\n- Decision owner: the release owner for the 2026-09-12 release (the user's team)\\n- Reversibility: hold costs a one-week delay and is undone by shipping next week; ship exposes users to the regression until it is detected and rolled back\\n- Deadline or forcing event: release freeze Friday\\n- Consequences:\\n\\n  | | c"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /tmp && python3 -I /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/instruments/check_record.py --final /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/work/decision-record.md\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 76637,
+    "cache_read_input_tokens": 314029,
+    "output_tokens": 7027,
+    "output_tokens_details": {
+      "thinking_tokens": 3540
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 76637,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1491,
+        "cache_read_input_tokens": 78670,
+        "cache_creation_input_tokens": 1844,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1844
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.4082449,
+    "duration_ms": 71201,
+    "num_turns": 8
+  },
+  "result_text": "The validator flagged one thing. I put the prior odds in the Evidence block, and the skill only allows `sensitivity-only` numbers in the Robustness block. No user-elicited or external base rate exists, so I can't relabel the prior without making up its source. I'm leaving it as is and will report it as a limitation. I'll write the report now.\n\n**Recommendation: lean hold. The skill's formal verdict is `prior-sensitive`, so the call goes back to you.**\n\nThe ledger can't settle ship versus hold by itself. The answer depends on how likely you thought a real regression was before you saw the gap.\n\n**How I got there** (record: `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-post-a3y8wgmd/work/decision-record.md`)\n- **Question:** is canary checkout p95 genuinely higher than control? H1 is \"yes, in served latency\". The alternative covers the exporter-artifact explanation (H2) and any explanation nobody named. The ledger's two UNRESOLVED statuses carry no likelihood information, so I didn't turn them into numbers.\n- **Losses:** your 10-to-1 figure gives a loss of 10 for shipping a real regression and 1 for a needless hold. Hold wins when the odds of a real regression exceed 0.1, which is about 9%.\n- **Evidence:** the 57 ms gap (T1) scored against past rollouts (T3) gives a likelihood ratio of 4.5. The gap appeared in 9 of 10 real regressions and 2 of 10 non-regressions.\n- **Weak point in that ratio:** it rests on 10 rollouts per group, so it is imprecise. The ledger notes those groups were quota-drawn, so they say nothing about base rates. That is why I needed a prior.\n- **Crossover:** hold wins if your prior odds of a real regression, before seeing the gap, were above about 0.022 (roughly 2.2%). Across loss ratios from 5 to 20, the flip point moves between 0.011 and 0.044. I swept priors from 1% to 50%, so the 1% end does flip to ship.\n- **Reading:** unless you were already confident (over 97%) that this pool change was harmless, the evidence points to hold.\n- **If the 4.5 ratio is too high:** if the true ratio were nearer 2, the flip point rises to a prior of about 5%.\n\n**What would resolve it**\n- The raw access logs (S3) are the only thing that separates a real regression from an exporter artifact. The ledger says they are retained 7 days, with the restore request pending.\n- If the restore can land before Friday, it is worth chasing. It is the one thing that could turn this into a clear ship or hold. I haven't priced it because no restore cost or delay was given.\n- Restoring the logs is an action that needs your authorization. I haven't attempted it.\n\n**Limitations**\n- **Validator finding:** the validator rejected the record, so it is not clean. The prior is `sensitivity-only`, and the skill only lets such numbers sit in Robustness, but the template puts the prior in the Evidence block.\n- **Dates:** the ledger's dates are in September, and the logs' 7-day retention would have lapsed long before today's date of 2026-11-08. I couldn't check the restore status, so please confirm the logs are still obtainable.\n- **Scope:** the record covers ship versus hold on this one question and doesn't say what caused the gap if it is real. I did not open the evidence CSVs and relied on the ledger's summaries."
+}

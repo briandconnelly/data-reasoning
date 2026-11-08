@@ -9,7 +9,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 ### Added
 
 - Decision analysis: a record form for a decision with no supported prior — Prior odds and Posterior odds read `none supported — see Robustness`, supported likelihood ratios stay in the Evidence table, an unquantified item is a paired `none supported` row with its reason, and the sweep in Robustness does the arithmetic (#41). Measured on DA-S1, DA-S1x and DA-S3 at n=1 per cell.
-- Every skill carries a § Record Delivery section telling the agent to run `check_record.py --final` on a completed record before delivering it, fix findings on the skill's own terms or report them as limitations, and report an unavailable validator as not validated (#63). Rendered from `scripts/shared-sections/record-delivery.md`; its behavioral effect is unmeasured until the preregistered arms run.
+- Every skill carries a § Record Delivery section telling the agent to run `check_record.py --final` on a completed record before delivering it, fix findings on the skill's own terms or report them as limitations, and report an unavailable validator as not validated (#63). Rendered from `scripts/shared-sections/record-delivery.md`; measured 2026-11-08 at n=1 per cell on one model (four completed-record cells, a control, and a no-`python3` variant).
 
 ### Changed
 

@@ -1,0 +1,97 @@
+{
+  "name": "b10-baseline",
+  "started_utc": "2026-11-08T18:04:59.813074+00:00",
+  "duration_s": 23.7,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "86e753cb-7b97-45ea-9137-5d25dda288f2",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_files_sha256": null,
+  "instruments_sha256": {
+    "instruments/check_record.py": "62459670dde7b94235707a4c649faed376f5596abbc77a2dea3650608d35e60a"
+  },
+  "fixture": "skills/exploratory-data-analysis/tests/fixtures/b10-entity",
+  "fixture_files_sha256": {
+    "b10-entity/README.md": "98c8a86a0a7cab5fff3feec86f46a3c5b07209f8c3723c344e7b31ae01172fe8",
+    "b10-entity/accounts.csv": "b9d87e0004f1fd11ec0674796966fdacd6cf333144d59efa7dca125a3c9f173a",
+    "b10-entity/billing.csv": "110bcaed192f8fa31da3391605c78c83c64d18ebe8d16bfc7dc1255042286b20",
+    "b10-entity/contract_status.csv": "e7dc74203cfa5a350bf7cdebc5da1fa4d4689129012ee2bec1333af5e7be34a9",
+    "b10-entity/plan_changes.csv": "bcb6ecb2e2c77e7e0a86d7325ad533f96fe6cd768258dc60d4b3104db9409987",
+    "b10-entity/tickets.csv": "e0ec4290cef9ebdfaf39c66d8336641aac02669db16f7235b2e4ca1469458541"
+  },
+  "prompt_sha256": "be9c5881acabaac8fef6a84d6de2d2e1779dc57fea512673393b2564754360d4",
+  "jsonl_sha256": "5a27d3a122fef287576b6ea837d55c282b79fa93026d496cd190fb7c26a0aac5",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-b10-baseline-xxc0i9v6",
+  "files_written": [],
+  "files_written_sha256": {},
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-b10-baseline-xxc0i9v6/data/b10-entity/ && ls -la && wc -c *\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-b10-baseline-xxc0i9v6/data/b10-entity/ && for f in README.md accounts.csv billing.csv contract_status.csv plan_changes.csv tickets.csv; do echo \\\"=== $f\\\"; cat $f; done\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 60764,
+    "cache_read_input_tokens": 74400,
+    "output_tokens": 1737,
+    "output_tokens_details": {
+      "thinking_tokens": 358
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 60764,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1442,
+        "cache_read_input_tokens": 62508,
+        "cache_creation_input_tokens": 2308,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2308
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.267878,
+    "duration_ms": 23023,
+    "num_turns": 3
+  },
+  "result_text": "Northgate Clinic is one customer under two account IDs. It was ACC-1042 through 2026-03-31 and became ACC-1077, \"Northgate Health Partners (formerly Northgate Clinic)\", on 2026-04-01. I combined the two. The only link between them is the \"formerly\" in the account name, so I'm assuming that is the same customer.\n\n**Plan and pricing**\n- It moved from `standard` to `enterprise-annual` effective 2026-03-01, and the plan stayed the same after the rename.\n- The effective rate per billed unit fell from $0.42 on standard to $0.31 on enterprise-annual (e.g. 1,840 units for $772.80, then 1,910 units for $592.10).\n\n**Billing**\n\n| Month | Account | Plan | Volume | Amount |\n|---|---|---|---|---|\n| Jan | 1042 | standard | 1,840 | $772.80 |\n| Feb | 1042 | no billing row | | |\n| Mar | 1042 | enterprise-annual | 1,910 | $592.10 |\n| Apr | 1077 | enterprise-annual | 1,120 | $347.20 |\n| May | 1077 | enterprise-annual | 1,085 | $336.35 |\n| Jun | 1077 | no billing row | | |\n\n- Billed volume was about 1,840\u20131,910 in Jan and Mar and about 1,085\u20131,120 in Apr and May, so it dropped roughly 40% after the rename.\n- The cause isn't in the data. It could be a real usage drop, a change in how volume is counted, or part of the usage moving elsewhere.\n- Billed revenue fell from $772.80 in January to about $340 a month in April and May.\n\n**Contract status**\n- Status was active in Jan, paused in Feb, active in Mar, and active in Apr and May under the new ID.\n- The Feb pause matches the missing Feb bill.\n- There is no status row for June.\n\n**Support tickets (6 total)**\n- Under ACC-1042:\n  - T-5033, a feature request opened 01-08.\n  - T-5034, a feature request opened 03-11.\n  - T-5035, an integration ticket opened 03-26.\n- Under ACC-1077:\n  - T-5036 and T-5037, both billing questions, opened 04-01 and 04-04. These came right after the rename and plan change, so they may be about the new billing.\n  - T-5038, an outage report opened 05-25.\n- There were no tickets in June or February.\n\n**What the data can't tell you**\n- **June:** there is no billing or contract-status row for ACC-1077. I can't tell whether the account churned, billing was late, or the extract is incomplete, so check that before calling it churn.\n- **Reason for the pause:** the data doesn't say why it paused in February.\n- **Whether ACC-1077 is a clean continuation:** it may be a rebrand or a merger. The name changed to \"Health Partners\", which could mean a wider entity, and the volume drop is unexplained.\n- **Who gets the history:** if you query by account ID alone, ACC-1042 looks like it ended after March and ACC-1077 looks new. Any churn or new-logo count built on IDs would be wrong for this customer.\n\nI didn't write any working files, since this only needed reading the six small files."
+}
