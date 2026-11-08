@@ -11,6 +11,42 @@ Expect it to cost more tokens than an unstructured investigation, not fewer — 
 It may pay for itself where collection is expensive enough that fishing expeditions and re-pulls dominate the bill — paid APIs, slow warehouse queries, large remote logs — but treat that as the claim it is: a metered fixture now exists (scenario S14 in that catalog), but no paired baseline-vs-skill run has measured whether the ceremony saves more than it costs there, so the saving remains unmeasured rather than shown.
 That trade is what Routing resolves: ceremony is selected by the inferential shape of the answer, never by what the data costs to collect.
 
+## Binding rules
+
+These rules bind every full-route conclusion; § Conclusion applies them.
+
+Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly.
+The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.
+"Necessary" is not decided at conclusion time — every hypothesis in the table declares at Plan time the one prediction that must hold if it is true, and only that prediction's failure can refute it.
+
+Precedence when tests disagree:
+
+- an adequate test failing the necessary prediction makes the hypothesis `REFUTED`, and no number of `CONSISTENT` outcomes on other predictions changes that;
+- a `CONTRADICTED` outcome on any non-necessary prediction never refutes;
+- two adequate tests of the *same* necessary prediction that disagree leave the hypothesis `UNRESOLVED` until you reconcile them — record the disagreement rather than averaging it away.
+
+A data-artifact hypothesis is never `REFUTED` on a validity check that did not probe coverage and missingness.
+
+`SUPPORTED` is not a status; "best supported" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.
+The per-hypothesis summary table repeats each row's Plan-time claim class in its `claim` column unchanged, and fills its `status` column with `REFUTED` or `UNRESOLVED` alone: "best supported" is basis text, so it goes in the `basis` cell, never the `status` cell, and a claim class is never invented or relabelled here to house an outcome.
+
+Apply the precommitted stop rule:
+
+- **Conclude** when the success criterion is met and no named unresolved alternative could reverse the answer.
+- **Iterate** (return to Plan) only when a specific, available test could change the answer within the remaining budget.
+- **Stop with limits** otherwise: report what is known and what cannot be determined from the available data — "can't tell from this data" is a valid conclusion.
+  When the conclusion is that nothing identifies the effect, the report names `causal-identification-review` (when installed) as the constructive continuation — the design that would identify the effect, and what that design assumes, is that skill's work to produce.
+  When a decision hangs on an `UNRESOLVED` set, the report names `decision-analysis` (when installed) as the constructive continuation — whether any action is defensible across that uncertainty, and where the answer flips, is that skill's work to produce.
+
+Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.
+Controlling the intervention is not identifying its effect — you can own a global rollout end to end and still have no idea what would have happened without it, because time, concurrent changes, seasonality, and selection all moved too.
+Observational adjustment does not clear the bar either: temporal ordering and controlling for the confounders you happened to measure say nothing about unmeasured confounding, selection, or interference.
+A quasi-experimental design clears the bar only through an identification review ending `identified-if` with its probes run — the review names the assumptions the causal wording then carries as conditions.
+Absent such a design, associative language is mandatory and the limitations name which of those threats remain open.
+Do not invent numeric confidence values.
+A `decision-analysis` record's provenance-classed numbers are that skill's outputs under its own numeric policy, not confidence values invented here.
+Report the answer first, then the per-hypothesis evidence summary, then limitations, then a pointer to the ledger when a durable artifact exists.
+
 ## Routing
 
 Routes are precedence-ordered; take the first that matches.
@@ -164,7 +200,7 @@ A residual reported as unattributed is a valid conclusion; only naming its cause
 For each, preregister a discriminating prediction — what would be observed if it is true AND what would be observed if it is false — and identify its cheapest adequate discriminating test.
 State each explanation as an account of the named effect — "the deploy caused the 09:10 step", not "the deploy regressed the cache layer" — because refutation acts only at the scope the claim names: an earlier step refutes the deploy as that step's cause while saying nothing about other deploy defects, and a claim broader than its necessary prediction cannot be refuted by it.
 Label each hypothesis with its claim class — exactly one of `causal`, `descriptive` (a `descriptive` row also names its estimand), or `data-artifact` — in the ledger's `claim` column: those three are the only classes the machine check reads, so a drifted value like `statistical` or `associative` fails it.
-`associative` is not a claim class; it is how a *conclusion* is worded when no design identifies a cause (see Conclusion), so a non-causal explanation is `descriptive` or `data-artifact`, never `associative` or `correlational`.
+`associative` is not a claim class; it is how a *conclusion* is worded when no design identifies a cause (see § Binding rules), so a non-causal explanation is `descriptive` or `data-artifact`, never `associative` or `correlational`.
 Perform a mandatory data-validity check: how was the data collected, what does it cover, what instrument failures are known.
 A schema audit is not this check — nulls, duplicates, and type drift cannot detect a row that is simply absent.
 Build a coverage matrix at the grain your analysis actually uses: every time bucket you compare, crossed with every segment that appears in a denominator, a contrast, or a hypothesis, plus the population rate of each field you rely on at that same crossed grain.
@@ -271,9 +307,7 @@ Spot-verify the evidence behind the leading explanation and the strongest rival.
 
 ### Conclusion
 
-Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly.
-The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.
-"Necessary" is not decided at conclusion time — every hypothesis in the table declares at Plan time the one prediction that must hold if it is true, and only that prediction's failure can refute it.
+Status derivation and the closed status set are stated in § Binding rules.
 A prediction that merely *would be nice* for the hypothesis cannot refute it, however cleanly it fails.
 An exposure–outcome contrast from a design that does not identify the causal contrast cannot by itself mark that causal hypothesis `REFUTED`: that test leaves it `UNRESOLVED`, because a co-exposure pushing the other way could mask a real effect.
 Independent evidence can still refute it when that evidence falsifies a preregistered necessary prediction without relying on the unidentified contrast — an artifact that inflates the wrong week cannot explain a drop, and that refutation stands.
@@ -288,39 +322,22 @@ A necessary prediction must follow across every variant the hypothesis's Plan-ti
 Either derive a prediction every permitted variant shares, or register the narrower variant as its own row, dated before the outcome is read, and refute only that — leaving the broader claim `UNRESOLVED`.
 A hypothesis so elastic that no falsifiable prediction holds across its variants is the unfalsifiable case above: it belongs in limitations, not parked in the table.
 
-Precedence when tests disagree:
+Precedence when tests disagree is stated in § Binding rules.
+The rule for refuting a `data-artifact` hypothesis is stated in § Binding rules.
 
-- an adequate test failing the necessary prediction makes the hypothesis `REFUTED`, and no number of `CONSISTENT` outcomes on other predictions changes that;
-- a `CONTRADICTED` outcome on any non-necessary prediction never refutes;
-- two adequate tests of the *same* necessary prediction that disagree leave the hypothesis `UNRESOLVED` until you reconcile them — record the disagreement rather than averaging it away.
-
-A data-artifact hypothesis is never `REFUTED` on a validity check that did not probe coverage and missingness.
-
-`SUPPORTED` is not a status; "best supported" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.
-The per-hypothesis summary table repeats each row's Plan-time claim class in its `claim` column unchanged, and fills its `status` column with `REFUTED` or `UNRESOLVED` alone: "best supported" is basis text, so it goes in the `basis` cell, never the `status` cell, and a claim class is never invented or relabelled here to house an outcome.
+The "best supported" bar and the summary-table rule are stated in § Binding rules.
 A `retrospective` hypothesis clears that bar only on evidence that did not inform it — a held-out slice, a later window, a source you had not looked at, or a new measurement.
 Such evidence need not come from a different system: a slice of the same source you had not seen when you framed the hypothesis qualifies, because what disqualifies evidence here is having already shaped the guess, not sharing an origin with it.
 Re-running a fresh statistic over the same records you were already staring at is a new query, not new evidence: it changes the order of operations, not what those records can tell you.
 If no evidence that did not inform it exists, the hypothesis stays exploratory and is reported as an open possibility, never as the answer.
 If two explanations both clear the bar, report both rather than picking one.
 A residual attributed to a cause that never entered the table is "best supported" language with no row behind it: report an untested residual as unattributed — see Plan — rather than naming its cause.
-Apply the precommitted stop rule:
-
-- **Conclude** when the success criterion is met and no named unresolved alternative could reverse the answer.
-- **Iterate** (return to Plan) only when a specific, available test could change the answer within the remaining budget.
-- **Stop with limits** otherwise: report what is known and what cannot be determined from the available data — "can't tell from this data" is a valid conclusion.
-  When the conclusion is that nothing identifies the effect, the report names `causal-identification-review` (when installed) as the constructive continuation — the design that would identify the effect, and what that design assumes, is that skill's work to produce.
-  When a decision hangs on an `UNRESOLVED` set, the report names `decision-analysis` (when installed) as the constructive continuation — whether any action is defensible across that uncertainty, and where the answer flips, is that skill's work to produce.
+Apply the precommitted stop rule stated in § Binding rules.
 
 Multiple contributing explanations are allowed; do not force a single winner.
-Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.
-Controlling the intervention is not identifying its effect — you can own a global rollout end to end and still have no idea what would have happened without it, because time, concurrent changes, seasonality, and selection all moved too.
-Observational adjustment does not clear the bar either: temporal ordering and controlling for the confounders you happened to measure say nothing about unmeasured confounding, selection, or interference.
-A quasi-experimental design clears the bar only through an identification review ending `identified-if` with its probes run — the review names the assumptions the causal wording then carries as conditions.
-Absent such a design, associative language is mandatory and the limitations name which of those threats remain open.
-Do not invent numeric confidence values.
-A `decision-analysis` record's provenance-classed numbers are that skill's outputs under its own numeric policy, not confidence values invented here.
-Report the answer first, then the per-hypothesis evidence summary, then limitations, then a pointer to the ledger when a durable artifact exists.
+Causal wording is governed by the bar stated in § Binding rules.
+The numeric-confidence rule is stated in § Binding rules.
+Report in the order § Binding rules states.
 
 ## Estimation Route
 
