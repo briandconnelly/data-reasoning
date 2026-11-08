@@ -6,6 +6,21 @@ This page covers what comes after them.
 The default branch, `main`, holds only the runtime tree, rebuilt by CI on every push to `dev`, so an install never downloads the evidence archive.
 This repository is its own plugin marketplace.
 
+## Invoke a skill explicitly
+
+A skill loads automatically only when the host routes your request to it, and that routing depends on how you phrase the ask.
+For `exploratory-data-analysis`, automatic routing was measured only against a reduced catalog, not the four shipped skills.
+In that run, asks phrased "Profile ..." loaded the skill 30/30 times, "Give me a rundown on ..." 23/30, "Give me an overview of ..." 21/30, and "Tell me about ..." 8/30.
+The run's per-invocation results are in `skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-fresh/results.jsonl` on the `dev` branch ([pinned copy](https://github.com/briandconnelly/data-reasoning/blob/5fc87dca1358ef41173924ad0ce1ecb9ef35a4f3/skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-fresh/results.jsonl)), which an install does not carry.
+
+To make sure a skill loads, invoke it explicitly:
+
+- Claude Code: run `/data-reasoning:exploratory-data-analysis` followed by your request, or ask for the `exploratory-data-analysis` skill by name.
+- Codex: mention the skill as `$exploratory-data-analysis` in your request, as in "Use `$exploratory-data-analysis` to explore this dataset".
+
+For the other three skills, use the same forms with that skill's name.
+How often an explicit invocation leads to a completed analysis has not been measured on either host.
+
 ## Verify a Codex install
 
 Codex runs a plugin hook only after the user has reviewed and trusted its definition: open `/hooks`, select the data-reasoning hook, and review/trust it.

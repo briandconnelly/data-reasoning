@@ -16,6 +16,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 - Decision analysis: § Numeric Policy now carries one ordered verdict rule (`dominated`, then the loss cap, then `prior-sensitive`, then `loss-sensitive`, then `robust`), treats only `user-elicited` and `externally-sourced` losses as belief-grade, and records a rounded elicited loss at its nominal value with analyst-chosen endpoints as `sensitivity-only`; § The Decide Route's verdict bullets point there. Both checkers enforce the paired sentinels, the loss cap, and per-axis flip tests.
 - The output style page names both ways to select `Data Answer` — `/output-style data-reasoning:Data Answer` and `/config` → Output style — and records that output styles are supported, not deprecated, in current Claude Code (#70).
 - The README is a short introduction; install verification, record validation, the output style, and evidence status moved to pages under `docs/`, which ship with the plugin.
+- [Installing](docs/installing.md) now explains how to invoke a skill explicitly in Claude Code and Codex, and reports that automatic routing for `exploratory-data-analysis` was measured only against a reduced catalog, where "Tell me about ..." asks loaded it 8/30 times; explicit invocation itself is unmeasured (#65).
 
 ### Fixed
 
