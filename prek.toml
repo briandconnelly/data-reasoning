@@ -11,15 +11,18 @@ minimum_prek_version = "0.3.0"
 # it rather than naming skills/ (`.agents/skills/*/tests/runs/` holds run
 # records too). Keep the two in sync: nothing fails if they drift.
 # Manifest-pinned fixtures are excluded on the same grounds.
+# docs/evidence/ holds evidence that is not a skill's (the output style has no
+# tests/ tree): its manifests pin transcript and fixture SHA-256s the same way,
+# so it carries the same exclude in every hook that does.
 # Shared-section goldens are also byte-frozen (exact extracts from SKILL.md
 # sections), so they are excluded from the same three hooks.
 
 [[repos]]
 repo = "builtin"
 hooks = [
-  { id = "trailing-whitespace", exclude = '^((.*/)?tests/runs/.*|skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json|scripts/shared-sections/.*)$' },
-  { id = "end-of-file-fixer", exclude = '^((.*/)?tests/runs/.*|skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json|scripts/shared-sections/.*)$' },
-  { id = "mixed-line-ending", exclude = '^((.*/)?tests/runs/.*|skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json|scripts/shared-sections/.*)$' },
+  { id = "trailing-whitespace", exclude = '^((.*/)?tests/runs/.*|docs/evidence/.*|skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json|scripts/shared-sections/.*)$' },
+  { id = "end-of-file-fixer", exclude = '^((.*/)?tests/runs/.*|docs/evidence/.*|skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json|scripts/shared-sections/.*)$' },
+  { id = "mixed-line-ending", exclude = '^((.*/)?tests/runs/.*|docs/evidence/.*|skills/exploratory-data-analysis/tests/eval/canary-fixture-2026-08-11\.json|scripts/shared-sections/.*)$' },
   { id = "check-merge-conflict" },
   { id = "check-added-large-files" },
   { id = "check-yaml" },
@@ -31,10 +34,11 @@ repo = "https://github.com/astral-sh/ruff-pre-commit"
 rev = "v0.15.21"
 # Arms write Python into tests/runs/artifacts/*.scratch/; those files are
 # frozen evidence whose sha256 the arm's manifest records, so the ruff hooks
-# carry the same tests/runs exclude as the byte-mutating builtins above.
+# carry the same tests/runs and docs/evidence exclude as the byte-mutating
+# builtins above.
 hooks = [
-  { id = "ruff-check", args = ["--fix"], exclude = '^(.*/)?tests/runs/.*$' },
-  { id = "ruff-format", exclude = '^(.*/)?tests/runs/.*$' },
+  { id = "ruff-check", args = ["--fix"], exclude = '^((.*/)?tests/runs/.*|docs/evidence/.*)$' },
+  { id = "ruff-format", exclude = '^((.*/)?tests/runs/.*|docs/evidence/.*)$' },
 ]
 
 [[repos]]

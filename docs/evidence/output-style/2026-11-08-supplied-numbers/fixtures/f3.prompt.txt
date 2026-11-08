@@ -1,0 +1,1 @@
+I had a worker pull this for me; its return is at {FIXTURE_PATH}/worker-return.md. How many active subscriptions did we have at the end of October, and what share were on the pro plan?

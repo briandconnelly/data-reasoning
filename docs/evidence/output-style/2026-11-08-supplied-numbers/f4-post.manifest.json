@@ -1,0 +1,106 @@
+{
+  "name": "f4-post",
+  "fixture": "f4",
+  "started_utc": "2026-11-08T22:59:41.677283+00:00",
+  "duration_s": 24.7,
+  "exit_code": 0,
+  "claude_version": "2.1.319",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "bb7acbdf-0ea9-417e-9348-0f6203869f64",
+  "output_style_at_startup": "data-reasoning:Data Answer",
+  "plugins_at_startup": [
+    {
+      "name": "data-reasoning",
+      "path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f4-post-ehop4g5o/plugin",
+      "source": "data-reasoning@inline",
+      "version": "0.3.0"
+    },
+    {
+      "name": "cc-plugin-agents-md",
+      "path": "builtin",
+      "source": "cc-plugin-agents-md@builtin"
+    },
+    {
+      "name": "cc-plugin-telemetry",
+      "path": "builtin",
+      "source": "cc-plugin-telemetry@builtin"
+    },
+    {
+      "name": "cc-plugin-privacy",
+      "path": "builtin",
+      "source": "cc-plugin-privacy@builtin"
+    },
+    {
+      "name": "cc-plugin-plugin-authoring",
+      "path": "builtin",
+      "source": "cc-plugin-plugin-authoring@builtin"
+    }
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "mcp_servers_at_startup": [],
+  "style_ref": "8e4e1aa",
+  "style_sha256": "f4f59db32a8647933a7e44b56c8c272bc7c05a12c094d23ba8521a2c75d380a3",
+  "fixture_files_sha256": {
+    "README.txt": "6f86a5b9ab34bfcee2a81926dc155637ec4a2323928cf02275b1dce723923afb"
+  },
+  "prompt_sha256": "2c3dc7afab57bc06be1be3f71ca15741fa537c6d398390f7a954d7d58c04f0a4",
+  "jsonl_sha256": "004701a582ac3dc5ac37ca18d30eb3aaf13768f87bae4a57d16b97a2ebbcb63e",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f4-post-ehop4g5o",
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "ls -la /private/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f4-post-ehop4g5o/work /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f4-post-ehop4g5o/data; which psql sqlite3 duckdb bq snowsql"
+      }
+    },
+    {
+      "tool": "Bash",
+      "input": {
+        "command": "cat /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f4-post-ehop4g5o/data/README.txt"
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 5888,
+    "cache_read_input_tokens": 24546,
+    "output_tokens": 726,
+    "output_tokens_details": {
+      "thinking_tokens": 37
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5888,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 384,
+        "cache_read_input_tokens": 10300,
+        "cache_creation_input_tokens": 161,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 161
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.0332786,
+  "result_text": "I can't give you October order revenue yet. I couldn't reach any data to run the query against. The only file in the data directory is a README that says no data is supplied. There is no `sales.orders` table in either working directory, and I found no database connection. I don't have a number and won't estimate one.\n\nTo get an answer, I need one of these:\n- A database file I can query, such as SQLite or DuckDB.\n- An export of `sales.orders`, such as CSV or Parquet.\n- Connection details for the warehouse that holds it.\n\nBefore you run it yourself, check two things in the query:\n- **Date window:** `ordered_at` is bounded to 2026-10-01 through 2026-10-31, which is correct for October. If the column is a timestamp with a time zone, the boundaries use the session's time zone. Confirm that matches how finance defines the month.\n- **Status filter:** `status = 'completed'` excludes refunded, cancelled and partially refunded orders. Check the distinct `status` values to confirm \"completed\" is the right definition of revenue. Also check that `amount_usd` is already net of refunds, discounts and tax.\n\nIf you send the data, I'll run it and check that it returns the right rows."
+}

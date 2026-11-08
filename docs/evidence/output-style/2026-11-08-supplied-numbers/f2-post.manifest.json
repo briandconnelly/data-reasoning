@@ -1,0 +1,100 @@
+{
+  "name": "f2-post",
+  "fixture": "f2",
+  "started_utc": "2026-11-08T22:59:41.677622+00:00",
+  "duration_s": 26.8,
+  "exit_code": 0,
+  "claude_version": "2.1.319",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "fa7fd6b5-c79c-475f-9a36-13e7b458793b",
+  "output_style_at_startup": "data-reasoning:Data Answer",
+  "plugins_at_startup": [
+    {
+      "name": "data-reasoning",
+      "path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f2-post-51qmjv_f/plugin",
+      "source": "data-reasoning@inline",
+      "version": "0.3.0"
+    },
+    {
+      "name": "cc-plugin-agents-md",
+      "path": "builtin",
+      "source": "cc-plugin-agents-md@builtin"
+    },
+    {
+      "name": "cc-plugin-telemetry",
+      "path": "builtin",
+      "source": "cc-plugin-telemetry@builtin"
+    },
+    {
+      "name": "cc-plugin-privacy",
+      "path": "builtin",
+      "source": "cc-plugin-privacy@builtin"
+    },
+    {
+      "name": "cc-plugin-plugin-authoring",
+      "path": "builtin",
+      "source": "cc-plugin-plugin-authoring@builtin"
+    }
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "mcp_servers_at_startup": [],
+  "style_ref": "8e4e1aa",
+  "style_sha256": "f4f59db32a8647933a7e44b56c8c272bc7c05a12c094d23ba8521a2c75d380a3",
+  "fixture_files_sha256": {
+    "worker-return.md": "949924dc2dadf396132fad521de2c6f748b4d5cd9a153e35781d7344abb7fbb6"
+  },
+  "prompt_sha256": "a2de48ca395533537a593151c570923643f33758a9b39b5c831a986da6772952",
+  "jsonl_sha256": "3be919159fa2ef515b01fad5c4c5dbb5810ccd2238c98ef152c68d89a1e642fe",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f2-post-51qmjv_f",
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "tool": "Read",
+      "input": {
+        "file_path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f2-post-51qmjv_f/data/worker-return.md"
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 5592,
+    "cache_read_input_tokens": 14236,
+    "output_tokens": 804,
+    "output_tokens_details": {
+      "thinking_tokens": 237
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5592,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 695,
+        "cache_read_input_tokens": 9663,
+        "cache_creation_input_tokens": 502,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 502
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.0318396,
+  "result_text": "About 55,161 subscriptions were active at the end of October 2026, and 23.4% of them (12,884) were on the pro plan. These are the worker's figures, which I haven't re-run or verified against the warehouse.\n\n- The plan counts are basic 41,210, pro 12,884 and enterprise 1,067. They sum to the stated total of 55,161, and 12,884 / 55,161 is 23.36%.\n- The count is per subscription, not per customer. A customer with two subscriptions counts twice.\n- **The query may undercount.** It filters on `status = 'active'`, which is probably the subscription's current status, not its status on Oct 31. A subscription that was live on Oct 31 and was cancelled in November would have a non-active status and would be left out. The end-date condition already handles the point-in-time logic, so the status filter is likely redundant and may bias the total low. The pro share could shift too, if cancellations skew by plan.\n- The date filter `started_at <= '2026-10-31'` also drops anything that started during the day on Oct 31, if `started_at` is a timestamp.\n\nI couldn't check either issue because I only have the worker's output, not warehouse access. Re-running without the `status` filter, and with `started_at < '2026-11-01'`, would settle both.\n\nSource: worker return, `billing.subscriptions`, nightly load completed 2026-11-01 02:14 UTC."
+}

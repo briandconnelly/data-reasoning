@@ -28,6 +28,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 - The record validator accepts an exploration log headed `## Frame-lite` for the profile route and asks it for scope and budget only, as SKILL.md § Profile Route prescribes (#62).
 - The record validator and hook recognize a profile-route exploration log titled `# Entity profile:` or `# Exploration (…):`, instead of passing it over as not a record (#76).
 - The scenario-catalog link in each skill's introduction resolves: it pointed at `main`, which carries no `tests/` paths, and now pins a `dev` commit that holds the catalog (#67).
+- The `Data Answer` output style no longer bars a number the user pasted or a worker returned: it separates a number the agent produced from one it was given, lets a given number be reported only with its source named, requires every check the material in hand allows, and requires the answer to say which checks could not be performed and why (#69).
 
 ## [0.3.0] - 2026-11-01
 

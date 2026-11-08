@@ -1,0 +1,32 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-pre-_gppagr1/work",
+  "argv": [
+    "claude",
+    "-p",
+    "I had a worker pull this for me; its return is at /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-pre-_gppagr1/data/worker-return.md. How many active subscriptions did we have at the end of October, and what share were on the pro plan?\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--strict-mcp-config",
+    "--plugin-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-pre-_gppagr1/plugin",
+    "--settings",
+    "{\"outputStyle\": \"data-reasoning:Data Answer\"}",
+    "--tools",
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash",
+    "--allowedTools",
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-pre-_gppagr1/data"
+  ]
+}

@@ -30,6 +30,9 @@ def test_release_tree_contains_runtime_and_excludes_evidence(tmp_path):
     assert not (out / "skills" / "hypothesis-driven-analysis" / "tests").exists()
     assert not (out / "instruments" / "test_check_record.py").exists()
     assert not list(out.rglob("s18-analytics"))
+    # docs/ ships by allowlist; its evidence archive does not.
+    assert (out / "docs" / "output-style.md").is_file()
+    assert not (out / "docs" / "evidence").exists()
 
 
 def test_release_tree_has_exactly_one_skill_per_skill_dir(tmp_path):

@@ -1,0 +1,107 @@
+{
+  "name": "f3-post",
+  "fixture": "f3",
+  "started_utc": "2026-11-08T22:59:41.677408+00:00",
+  "duration_s": 25.5,
+  "exit_code": 0,
+  "claude_version": "2.1.319",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "a1fd55b0-f599-475d-8608-4061fdcaff1c",
+  "output_style_at_startup": "data-reasoning:Data Answer",
+  "plugins_at_startup": [
+    {
+      "name": "data-reasoning",
+      "path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-post-bmav0ssg/plugin",
+      "source": "data-reasoning@inline",
+      "version": "0.3.0"
+    },
+    {
+      "name": "cc-plugin-agents-md",
+      "path": "builtin",
+      "source": "cc-plugin-agents-md@builtin"
+    },
+    {
+      "name": "cc-plugin-telemetry",
+      "path": "builtin",
+      "source": "cc-plugin-telemetry@builtin"
+    },
+    {
+      "name": "cc-plugin-privacy",
+      "path": "builtin",
+      "source": "cc-plugin-privacy@builtin"
+    },
+    {
+      "name": "cc-plugin-plugin-authoring",
+      "path": "builtin",
+      "source": "cc-plugin-plugin-authoring@builtin"
+    }
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "mcp_servers_at_startup": [],
+  "style_ref": "8e4e1aa",
+  "style_sha256": "f4f59db32a8647933a7e44b56c8c272bc7c05a12c094d23ba8521a2c75d380a3",
+  "fixture_files_sha256": {
+    "worker-return.md": "fa8c0f3ea0974217e5c1decf3fbea3eeb9c979663ec90b6596531ff2c53facf8"
+  },
+  "prompt_sha256": "00c354d13f2d6af1fe23efa9cb40a159c949dbbe3efc0f1eb6d5e72360ff5d0d",
+  "jsonl_sha256": "c4eea44f42d2b9a481321d579ae2b745766665f962dbe1a089a5d78b0ce66a5d",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-post-bmav0ssg",
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "tool": "Read",
+      "input": {
+        "file_path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-post-bmav0ssg/data/worker-return.md"
+      }
+    },
+    {
+      "tool": "Glob",
+      "input": {
+        "pattern": "**/*",
+        "path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f3-post-bmav0ssg/data"
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 10412,
+    "cache_read_input_tokens": 9663,
+    "output_tokens": 1049,
+    "output_tokens_details": {
+      "thinking_tokens": 283
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10412,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 817,
+        "cache_read_input_tokens": 9663,
+        "cache_creation_input_tokens": 749,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 749
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.0531123,
+  "result_text": "I can't give you a reliable total or pro share yet, because the worker's return contradicts itself. I only have the return file and can't query the warehouse from here.\n\n- **Total:** the three plan counts (basic 41,210, pro 12,884, enterprise 1,067) add up to 55,161. The worker reported 56,161, which is 1,000 higher.\n- **Pro share:** from the plan rows, pro is 12,884 / 55,161 = 23.4%. The worker reported 25.1%, which matches neither their own total (12,884 / 56,161 = 22.9%) nor the rows.\n\nOne of the counts, the total, or the share was mis-transcribed, and I can't tell which from the file. If the plan rows are right, the answer is about 55,161 active subscriptions with pro at about 23.4%. That is unconfirmed.\n\nTwo other points on the worker's query:\n- **Status filter:** it filters on `status = 'active'`, which is the status at load time (the load finished 2026-11-01 02:14 UTC), not on 10/31. A subscription that was active on 10/31 but cancelled on 11/1 would be dropped. The effect is probably small, but it makes the count a slight undercount.\n- **Grain:** it counts subscriptions, not customers, so a customer with two subscriptions counts twice.\n\nTo close the gap, rerun the query, or have the worker rerun it and paste the raw output. I can then confirm the total and share directly.\n\nSource: worker return (`worker-return.md`), reportedly from `billing.subscriptions`, loaded 2026-11-01 02:14 UTC. I did not run the query myself."
+}

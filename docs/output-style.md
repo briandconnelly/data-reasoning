@@ -1,6 +1,6 @@
 # Output style
 
-The plugin ships one optional output style, `Data Answer` (`output-styles/data-answer.md`): an analyst persona that answers data questions answer-first, with a short standing bar on reporting numbers you have not checked.
+The plugin ships one optional output style, `Data Answer` (`output-styles/data-answer.md`): an analyst persona that answers data questions answer-first, with a short standing bar on where a reported number came from and which checks it passed.
 The file is the contract; this page does not restate it.
 
 It supplies presentation and answer hygiene, not analysis method.
