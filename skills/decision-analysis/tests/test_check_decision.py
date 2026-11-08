@@ -1070,26 +1070,95 @@ def test_loss_sensitive_crossover_must_be_the_computed_loss_flip():
     assert any("does not fall in the computed loss-ratio interval" in f for f in check(bad))
 
 
-def test_double_flip_accepts_either_sensitive_label_with_its_own_crossover():
+def test_double_flip_is_prior_sensitive_not_loss_sensitive():
     # class 0.01-1.0 meets the prior flip [0.02, 0.033]; losses 1-20 meet the loss flip.
-    # The precedence between the two labels is owed (issue #41); each label is
-    # accepted with the crossover of its own axis, and robust is not.
+    # The ordered rule gives prior-sensitive (both DA-S8 arms chose it; measured
+    # 2026-11-08 as a clarification with no lift).
     rec = replace_once(
         _loss_only_flip("prior-sensitive", "flips at prior odds 0.03", "returned to owner"),
         "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
         "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
     )
     assert check(rec) == []
-    alt = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: loss-sensitive")
-    alt = replace_once(
-        alt, "- Crossover: flips at prior odds 0.03", "- Crossover: flips at loss ratio 1"
-    )
-    assert check(alt) == []
-    bad = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: robust")
+    bad = replace_once(rec, "- Verdict: prior-sensitive", "- Verdict: loss-sensitive")
     bad = replace_once(
-        bad, "- Recommended action: returned to owner", "- Recommended action: hold one week"
+        bad, "- Crossover: flips at prior odds 0.03", "- Crossover: flips at loss ratio 1"
     )
-    assert any("lies inside" in f for f in check(bad))
+    assert any("the ordered rule gives prior-sensitive" in f for f in check(bad))
+
+
+def _sweep(rec: str, prior: str, posterior: str, cls: str, losses: str) -> str:
+    rec = replace_once(rec, "- Prior odds: 0.25–1.0 — provenance: externally-sourced", prior)
+    rec = replace_once(rec, "- Posterior odds: 0.75–5.0", posterior)
+    rec = replace_once(rec, "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only", cls)
+    return replace_once(rec, "- Loss range swept: 5–20 — provenance: user-elicited", losses)
+
+
+def test_robust_rejects_a_reversal_between_sweep_corners():
+    """Codex review of #77: supported prior 1, LR 4.5, swept priors 0.05-1 and
+    losses 2-20 pass both per-axis tests yet prior * LR * loss runs from 0.45
+    to 90 across the corners."""
+    rec = replace_once(VALID_DECIDE, "| repro on staging | 3–5 |", "| repro on staging | 4.5 |")
+    rec = _sweep(
+        rec,
+        "- Prior odds: 1 — provenance: externally-sourced",
+        "- Posterior odds: 4.5",
+        "- Prior class swept: 0.05–1 — provenance: sensitivity-only",
+        "- Loss range swept: 2–20 — provenance: user-elicited",
+    )
+    assert any("reverses between corners" in f for f in check(rec)), check(rec)
+
+
+def test_a_point_loss_range_cannot_flip():
+    # Archived DA-S1 post shape (Codex review of #77): a swept loss range of
+    # 10-10 must not read as a loss flip, so the record cannot be loss-sensitive.
+    rec = _sweep(
+        VALID_DECIDE,
+        "- Prior odds: 0.01–1.0 — provenance: externally-sourced",
+        "- Posterior odds: 0.03–5.0",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+        "- Loss range swept: 10–10 — provenance: user-elicited",
+    )
+    rec = replace_once(rec, "- Verdict: robust", "- Verdict: loss-sensitive")
+    rec = replace_once(
+        rec, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    rec = replace_once(
+        rec, "- Crossover: none within swept class", "- Crossover: flips at loss ratio 10"
+    )
+    assert any("the ordered rule gives prior-sensitive" in f for f in check(rec)), check(rec)
+
+
+def test_crossover_axis_must_match_the_verdict():
+    rec = _loss_only_flip("loss-sensitive", "flips at prior odds 1", "returned to owner")
+    assert any("names a loss ratio" in f for f in check(rec))
+
+
+def test_rounding_tolerance_is_per_endpoint():
+    """Codex review of #77: '0.02-0.027000' (stated with an en dash) must not borrow the coarse
+    endpoint's tolerance for the fine one (computed flip 0.0222)."""
+    rec = replace_once(VALID_DECIDE, "| repro on staging | 3–5 |", "| repro on staging | 4.5 |")
+    rec = _sweep(
+        rec,
+        "- Prior odds: 0.25–1.0 — provenance: externally-sourced",
+        "- Posterior odds: 1.125–4.5",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+        "- Loss range swept: 10–10 — provenance: user-elicited",
+    )
+    rec = replace_once(rec, "- Verdict: robust", "- Verdict: prior-sensitive")
+    rec = replace_once(
+        rec, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    bad = replace_once(
+        rec,
+        "- Crossover: none within swept class",
+        "- Crossover: flips at prior odds 0.02–0.027000",
+    )
+    assert any("does not fall in the computed prior-odds interval" in f for f in check(bad))
+    ok = replace_once(
+        rec, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.02"
+    )
+    assert check(ok) == [], check(ok)  # a two-decimal rounding of 0.0222
 
 
 def test_rounded_crossover_at_the_tolerance_edge_is_accepted():

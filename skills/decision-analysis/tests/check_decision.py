@@ -222,13 +222,24 @@ _CELL_SPLIT = re.compile(r"(?<!\\)\|")
 # "prior odds 0.02-0.03", "0.025". Signs, reversed ranges, and prose around
 # the number are not a crossover statement.
 _CROSSOVER_PREFIX = re.compile(r"^(?:flips at\s+)?(?:prior odds\s+|loss ratio\s+)?", re.I)
+_CROSSOVER_AXIS = re.compile(r"^(?:flips at\s+)?(prior odds|loss ratio)\b", re.I)
 
 
-def _rounding_tolerance(text: str) -> float:
-    """Half a unit in the last decimal place of the least precise number in
-    `text`; 0 when it carries no number."""
+def _crossover_axis(text: str) -> str | None:
+    """The quantity a stated crossover names, `prior odds` or `loss ratio`,
+    or None when it names neither."""
+    m = _CROSSOVER_AXIS.match(text.strip())
+    return m.group(1).lower() if m else None
+
+
+def _rounding_tolerances(text: str) -> tuple[float, float]:
+    """Half a unit in the last decimal place of the first and of the last
+    number in `text` (the stated low and high endpoints); (0, 0) when it
+    carries no number."""
     places = [len(m.group(1)) if m.group(1) else 0 for m in re.finditer(r"\d+(?:\.(\d+))?", text)]
-    return 0.5 * 10 ** (-min(places)) if places else 0.0
+    if not places:
+        return (0.0, 0.0)
+    return (0.5 * 10 ** (-places[0]), 0.5 * 10 ** (-places[-1]))
 
 
 def _crossover_value(text: str) -> tuple[float, float] | None:
@@ -626,8 +637,10 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         # compared with the swept loss range; with no supported prior the
         # swept class stands in for the stated prior.
         pf_lo, pf_hi = threshold[0] / lr_product[1], threshold[1] / lr_product[0]
-        prior_flip = pf_lo <= swept[1] * (1 + _REL_TOLERANCE) and pf_hi >= swept[0] * (
-            1 - _REL_TOLERANCE
+        prior_flip = (
+            swept[0] < swept[1]
+            and pf_lo <= swept[1] * (1 + _REL_TOLERANCE)
+            and pf_hi >= swept[0] * (1 - _REL_TOLERANCE)
         )
         loss_swept = parse_range(_bare(field(robustness, "Loss range swept:") or ""))
         stated_prior = prior or swept
@@ -635,22 +648,36 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
         lf = None
         if loss_swept and loss_swept[0] > 0 and stated_prior[0] > 0:
             lf = (1 / (stated_prior[1] * lr_product[1]), 1 / (stated_prior[0] * lr_product[0]))
-            loss_flip = lf[0] <= loss_swept[1] * (1 + _REL_TOLERANCE) and lf[1] >= loss_swept[0] * (
-                1 - _REL_TOLERANCE
+            loss_flip = (
+                loss_swept[0] < loss_swept[1]
+                and lf[0] <= loss_swept[1] * (1 + _REL_TOLERANCE)
+                and lf[1] >= loss_swept[0] * (1 - _REL_TOLERANCE)
             )
+        # Robust means one action at every point of the class and the range
+        # taken together (SKILL.md § Numeric Policy): hold wins where
+        # prior * LR * L > 1, so a sign change of (prior * LR * L - 1) across
+        # the corners is a reversal the per-axis tests can miss.
+        joint_reversal = False
+        if loss_swept and loss_swept[0] > 0:
+            corners = [p * lr * loss for p in swept for lr in lr_product for loss in loss_swept]
+            joint_reversal = min(corners) < 1 < max(corners)
         stated = _crossover_value(crossover_text)
         # A stated crossover is a rounded figure: 0.022 for 0.02222. Accept it
         # when every stated number lies in the computed interval widened by
         # the larger of the relative tolerance and half a unit in the stated
         # number's last decimal place.
-        rounding = _rounding_tolerance(crossover_text)
+        round_lo, round_hi = _rounding_tolerances(crossover_text)
+        axis = _crossover_axis(crossover_text)
 
         def _within(interval: tuple[float, float]) -> bool:
             if stated is None:
                 return False
-            lo = min(interval[0] * (1 - _REL_TOLERANCE), interval[0] - rounding)
-            hi = max(interval[1] * (1 + _REL_TOLERANCE), interval[1] + rounding)
+            lo = min(interval[0] * (1 - _REL_TOLERANCE), interval[0] - round_lo)
+            hi = max(interval[1] * (1 + _REL_TOLERANCE), interval[1] + round_hi)
             return lo <= stated[0] and stated[1] <= hi
+
+        def _axis_matches(expected: str) -> bool:
+            return axis is None or axis == expected
 
         if verdict == "robust":
             if prior_flip:
@@ -662,6 +689,12 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                 failures.append(
                     f"robust verdict, but the computed loss-ratio crossover "
                     f"[{lf[0]:g}, {lf[1]:g}] lies inside the swept loss range"
+                )
+            if joint_reversal and not (prior_flip or loss_flip):
+                failures.append(
+                    "robust verdict, but the preferred action reverses between corners of the "
+                    "swept prior class and loss range taken together (prior * LR * loss "
+                    "crosses 1)"
                 )
             # § Robustness asks for the crossover statement, so a robust record
             # may name the flip point outside the swept class -- every number
@@ -679,16 +712,29 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                     "prior-sensitive verdict, but the computed prior-odds crossover "
                     f"[{pf_lo:g}, {pf_hi:g}] does not intersect the swept prior class"
                 )
+            elif not _axis_matches("prior odds"):
+                failures.append(
+                    "a prior-sensitive verdict's Crossover names prior odds; "
+                    f"found {crossover_text!r}"
+                )
             elif not _within((pf_lo, pf_hi)):
                 failures.append(
                     f"prior-sensitive crossover {crossover_text!r} does not fall in the "
                     f"computed prior-odds interval [{pf_lo:g}, {pf_hi:g}]"
                 )
         elif verdict == "loss-sensitive" and belief_losses:
-            # When both axes flip, either sensitive label is accepted: the
-            # precedence between them is owed (issue #41, attempt 2 withdrew
-            # the double-flip clause on the DA-S8 measurement).
-            if lf is None or not loss_flip:
+            if prior_flip:
+                failures.append(
+                    "loss-sensitive verdict, but varying the prior flips the action at the "
+                    f"stated losses (computed [{pf_lo:g}, {pf_hi:g}] meets the swept class); "
+                    "the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
+                )
+            elif not _axis_matches("loss ratio"):
+                failures.append(
+                    "a loss-sensitive verdict's Crossover names a loss ratio; "
+                    f"found {crossover_text!r}"
+                )
+            elif lf is None or not loss_flip:
                 failures.append(
                     "loss-sensitive verdict, but the computed loss-ratio crossover "
                     + (f"[{lf[0]:g}, {lf[1]:g}] " if lf else "")

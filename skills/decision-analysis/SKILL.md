@@ -101,13 +101,13 @@ Verdict selection is one ordered rule, and the first clause that applies governs
 
 - `dominated` when one action wins under every state; no probabilities are needed, and the belief slots take the template's `none needed`.
 - `loss-sensitive` when Loss ratio or Loss range swept carries any class but a belief-grade one; report the loss-ratio crossover and return the judgment to the owner.
-- `prior-sensitive` when, at the stated losses, varying the prior across the stated class changes the preferred action; report the prior-odds crossover.
+- `prior-sensitive` when, at the stated losses, varying the prior across the stated class changes the preferred action — whether or not varying the losses would change it too; report the prior-odds crossover.
 - `loss-sensitive` when, across the stated prior, varying the losses across the stated range changes the preferred action; report the loss-ratio crossover.
-- `robust` otherwise: one action is preferred throughout the stated prior class and loss range, under belief-grade losses; the conditions are part of the verdict, not a footnote.
+- `robust` otherwise: one action is preferred at every point of the stated prior class and loss range taken together, under belief-grade losses; the conditions are part of the verdict, not a footnote.
 
-A tie counts as a flip, and a record where both the prior and the losses flip the action reports both crossovers.
+A tie counts as a flip; a range that is a single point cannot flip.
+A record where both the prior and the losses flip the action reports both crossovers.
 v1 sweeps the prior class and the loss range only: a likelihood ratio stated as a range is carried through the posterior range and named in Conditions, never swept on its own.
-Under `prior-sensitive` and `loss-sensitive` the judgment returns to the decision owner; under `robust` and `dominated` the record names the action.
 
 Evidence items multiplied together state why they are conditionally independent given each state, or are combined into one item; sequential multiplication of unconditional likelihood ratios double-counts shared evidence.
 
