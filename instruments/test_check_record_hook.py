@@ -566,3 +566,124 @@ def test_shell_and_python_agree_on_the_title_sniff(tmp_path):
         f.write_text(text)
         shell = run_command_without_python({"tool_input": {"file_path": str(f)}}, case_dir)
         assert shell.returncode == (2 if hook_module.looks_like_record(str(f)) else 0), name
+
+
+# Issue #64: with neither CLAUDE_PLUGIN_ROOT nor PLUGIN_ROOT set, the wrapper
+# exec'd `python3 /hooks/check_record_hook.py` and crashed on every write.
+# The wrapper now derives the plugin root from its own location, so a
+# direct invocation behaves exactly like a hosted one.
+
+WRAPPER = REPO / "hooks" / "check_record_hook.sh"
+
+
+def run_wrapper_without_root(payload: dict) -> subprocess.CompletedProcess:
+    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_PLUGIN_ROOT", "PLUGIN_ROOT")}
+    return subprocess.run(
+        ["sh", str(WRAPPER)],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+
+
+def test_wrapper_without_root_env_still_validates_a_record(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(SIGNATURE_RECORD)
+    r = run_wrapper_without_root({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2
+    assert "structural findings" in r.stderr
+    assert "can't open file" not in r.stderr
+
+
+def test_wrapper_without_root_env_is_silent_on_a_non_record(tmp_path):
+    f = tmp_path / "notes.md"
+    f.write_text("# Meeting notes\n")
+    r = run_wrapper_without_root({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_wrapper_without_root_env_is_silent_on_source(tmp_path):
+    f = tmp_path / "main.py"
+    f.write_text("print('hi')\n")
+    r = run_wrapper_without_root({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_wrapper_relative_invocation_with_cdpath_still_validates(tmp_path):
+    """Codex review: `cd` echoes its destination when CDPATH is set, which
+    corrupted the derived root."""
+    f = tmp_path / "record.md"
+    f.write_text(SIGNATURE_RECORD)
+    env = {k: v for k, v in os.environ.items() if k not in ("CLAUDE_PLUGIN_ROOT", "PLUGIN_ROOT")}
+    env["CDPATH"] = "."
+    r = subprocess.run(
+        ["sh", "hooks/check_record_hook.sh"],
+        input=json.dumps({"tool_input": {"file_path": str(f)}}),
+        capture_output=True,
+        text=True,
+        env=env,
+        cwd=REPO,
+        check=False,
+    )
+    assert r.returncode == 2
+    assert "structural findings" in r.stderr
+
+
+def run_wrapper_minimal(
+    payload: dict, tmp_path: Path, env_extra: dict
+) -> subprocess.CompletedProcess:
+    """Direct invocation with the documented fallback utility set only."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir(exist_ok=True)
+    for tool in ("sh", "sed", "head", "grep", "awk", "cat"):
+        real = shutil.which(tool)
+        assert real, tool
+        (bin_dir / tool).symlink_to(real)
+    env = {"PATH": str(bin_dir), **env_extra}
+    return subprocess.run(
+        [str(bin_dir / "sh"), str(WRAPPER)],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+
+
+def test_wrapper_without_root_env_and_without_python_reports_not_validated(tmp_path):
+    f = tmp_path / "record.md"
+    f.write_text(SIGNATURE_RECORD)
+    r = run_wrapper_minimal({"tool_input": {"file_path": str(f)}}, tmp_path, {})
+    assert r.returncode == 2
+    assert "not validated (python3 is not on PATH)" in r.stderr
+
+
+def test_wrapper_without_root_env_and_without_python_is_silent_on_a_non_record(tmp_path):
+    f = tmp_path / "README.md"
+    f.write_text("# Readme\n")
+    r = run_wrapper_minimal({"tool_input": {"file_path": str(f)}}, tmp_path, {})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
+def test_missing_python_hook_is_reported_as_missing_hook_not_missing_python(tmp_path):
+    """Codex review: a root with no hook file fell into the shell path and
+    blamed python3, which decision 006's structural-facts rule forbids."""
+    f = tmp_path / "record.md"
+    f.write_text(SIGNATURE_RECORD)
+    r = subprocess.run(
+        ["sh", str(WRAPPER)],
+        input=json.dumps({"tool_input": {"file_path": str(f)}}),
+        capture_output=True,
+        text=True,
+        env={**os.environ, "CLAUDE_PLUGIN_ROOT": "/does-not-exist"},
+        check=False,
+    )
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+    assert "Python hook is missing" in r.stderr
+    assert "python3 is not on PATH" not in r.stderr
