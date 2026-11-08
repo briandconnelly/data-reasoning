@@ -1,0 +1,2 @@
+Someone claims our checkout p95 latency exceeded 500ms yesterday (2026-07-15). Is that claim true?
+Data: {FIXTURE_PATH}/checkout_latency.csv (timestamp, request_id, latency_ms).
