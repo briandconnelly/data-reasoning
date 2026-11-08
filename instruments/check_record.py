@@ -521,10 +521,11 @@ def _required_slots(body: str, kind: str) -> dict[str, list[str]]:
     if kind != "exploration":
         return slots
     frame = _frame_heading(body)
+    lite = frame.startswith("## Frame-lite")
     out = {}
     for heading, labels in slots.items():
         if heading == "## Frame":
-            out[frame] = labels if frame == "## Frame" else FRAME_LITE_SLOTS
+            out[frame] = FRAME_LITE_SLOTS if lite else labels
         else:
             out[heading] = labels
     return out
@@ -888,7 +889,6 @@ def _check_review_route_blocks(body: str, final: bool, findings: list[str]) -> N
             # nothing to probe, so its assumptions owe no assessed rows.
             if _leading_token(disposition, DISPOSITIONS) != "not-constructible":
                 _check_nested_table(section, h, "Assumption probes", final, findings)
-                _check_assessments(section, h, findings)
             _check_nested_table(section, h, "Threat register", final, findings)
     elif token == "bound":
         bound = _section(body, "## Bound")
@@ -1105,6 +1105,10 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             findings.append("Conclusion: per-hypothesis table has no data rows")
 
     elif kind == "review":
+        # Vocabulary, like every closed set here, is checked whatever the
+        # record's fill state and whatever the design's disposition.
+        for h in re.findall(r"^## Design: .*$", body, re.M):
+            _check_assessments(_section(body, h.rstrip()), h.rstrip(), findings)
         for line in body.splitlines():
             stripped = _unemphasize(line.strip())
             if stripped.startswith(("- Disposition:", "- Dispositions:")):

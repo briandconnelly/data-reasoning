@@ -1558,3 +1558,27 @@ def test_full_frame_still_owes_stop_rule():
 def test_exploration_without_any_frame_heading_is_caught():
     rec = PROFILE_LOG.replace("## Frame-lite (entity profile)", "## Framing")
     assert any("required section missing: ## Frame" in f for f in cr.check(rec))
+
+
+# Codex review of this branch: two gaps in the first cut.
+
+
+def test_annotated_full_frame_heading_still_owes_stop_rule():
+    rec = PROFILE_LOG.replace("## Frame-lite (entity profile)", "## Frame (explore route)")
+    assert any("'- Stop rule:' slot is missing" in f for f in cr.check(rec)), cr.check(rec)
+
+
+def test_assessment_vocabulary_is_checked_on_in_progress_records():
+    rec = GOOD_REVIEW.replace("| not-contradicted |", "| certified |").replace(
+        "- Data requirements: weekly throughput per depot, 12 pre-weeks",
+        "- Data requirements: pending",
+    )
+    assert any("assessment 'certified'" in f for f in cr.check(rec)), cr.check(rec)
+
+
+def test_assessment_vocabulary_is_checked_on_not_constructible_designs():
+    rec = GOOD_REVIEW.replace("| not-contradicted |", "| certified |").replace(
+        "- Disposition: identified-if — parallel pre-trends; probe attached",
+        "- Disposition: not-constructible — no pre-period exists",
+    )
+    assert any("assessment 'certified'" in f for f in cr.check(rec, final=True))
