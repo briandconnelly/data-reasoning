@@ -1653,3 +1653,32 @@ def test_robust_with_only_missing_ratio_rows_is_caught():
         .replace("- Recommended action: returned to owner", "- Recommended action: ship")
     )
     assert any("cannot reach robust" in f for f in cr.check(rec, final=True))
+
+
+# DA-S1 probe, 2026-11-08: an arm cleared a sensitivity-only finding by
+# writing `none needed` into Prior odds and Posterior odds under a `robust`
+# verdict. The sentinel belongs to `dominated` alone (template § Slot notes).
+
+
+def test_none_needed_belief_slot_under_robust_is_caught():
+    rec = (
+        GOOD_DECISION.replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
+        .replace("- Recommended action: returned to owner", "- Recommended action: ship")
+        .replace("- Prior odds: 1:1 — provenance: user-elicited", "- Prior odds: none needed")
+        .replace("- Posterior odds: 2:1", "- Posterior odds: none needed")
+        .replace(
+            "- Loss range swept: 1 to 5", "- Loss range swept: 1 to 5 — provenance: user-elicited"
+        )
+    )
+    findings = cr.check(rec)
+    assert any("Prior odds" in f and "none needed" in f and "dominated" in f for f in findings), (
+        findings
+    )
+    assert any("Posterior odds" in f and "none needed" in f for f in findings), findings
+
+
+def test_none_needed_belief_slot_under_prior_sensitive_is_caught():
+    rec = GOOD_DECISION.replace(
+        "- Prior class swept: 1:3 to 3:1", "- Prior class swept: none needed"
+    )
+    assert any("Prior class swept" in f and "none needed" in f for f in cr.check(rec))

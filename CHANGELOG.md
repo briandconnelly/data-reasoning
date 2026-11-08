@@ -16,6 +16,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Fixed
 
+- Decision analysis: a belief slot reading `none needed` under any verdict but `dominated` is a validator finding, so the sentinel cannot be used to clear a provenance finding on a `robust` record (seen in the 2026-11-08 DA-S1 probe).
 - The hook's shell wrapper derives the plugin root from its own location when neither `CLAUDE_PLUGIN_ROOT` nor `PLUGIN_ROOT` is set, instead of failing on every write, and a not-validated report names the actual reason: no `python3`, or no Python hook at the resolved root (#64).
 - Decision analysis: the record validator now enforces the Numeric Policy's provenance rules — every provenance mention comes from the closed class set, `sensitivity-only` may not appear in Evidence and update, a `robust` verdict's losses must be `user-elicited` or `externally-sourced`, and a `dominated` verdict's belief slots read `none needed` (#60).
 - The record validator accepts the identification-review template's probes table (`assessment` and `evidence or reason` columns, not `result`), checks the assessment vocabulary as a closed set, and asks no probe rows of a `not-constructible` design (#61).

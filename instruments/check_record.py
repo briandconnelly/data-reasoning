@@ -1022,45 +1022,69 @@ def _check_no_prior_form(evidence: str, findings: list[str]) -> None:
 
 
 def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None:
-    """A `robust` verdict's losses carry belief-grade provenance; a
-    `dominated` verdict's belief slots read `none needed`. A slot still in
+    """A `robust` or `prior-sensitive` verdict's losses carry belief-grade
+    provenance; a `dominated` verdict's belief slots read `none needed`, and no
+    other verdict's do; `robust` needs a supported ratio. A slot still in
     template state is skipped outside final mode, like every other slot."""
     verdict_value = _slot_value(_section(body, "## Verdict"), "Verdict")
     if verdict_value is None or _unfilled(verdict_value):
         return
     verdict = _leading_token(verdict_value, DECIDE_VERDICTS)
+    if verdict is None:
+        return
     if verdict == "robust":
-        rows = _table_rows(_section(body, "## Evidence and update"))
-        lrs = [_normalize(c) for c in _column(rows, "lr")]
-        if lrs and all(v == NO_LR_SENTINEL for v in lrs):
-            findings.append(
-                "## Verdict: robust with every evidence row in the missing-ratio form; no "
-                "quantitative update is supported, so hypothetical inputs alone cannot reach "
-                "robust (SKILL.md § Numeric Policy)"
-            )
+        _check_robust_has_a_supported_ratio(body, findings)
     if verdict in ("robust", "prior-sensitive"):
-        slots = (("## Decision frame", "Loss ratio"), ("## Robustness", "Loss range swept"))
-        for heading, label in slots:
-            value = _slot_value(_section(body, heading), label)
-            if value is None or (not final and _unfilled(value)):
-                continue  # a missing slot is already its own finding
-            provs = PROVENANCE_MENTION.findall(value)
-            if len(provs) != 1 or provs[0] not in LOSS_PROVENANCE_FOR_ROBUST:
-                findings.append(
-                    f"{heading}: a {verdict} verdict requires '- {label}:' to carry exactly one "
-                    f"provenance from {sorted(LOSS_PROVENANCE_FOR_ROBUST)}; any other class caps "
-                    f"the verdict at loss-sensitive; found {value!r} (SKILL.md § Numeric Policy)"
-                )
-    elif verdict == "dominated":
-        for heading, label in DOMINATED_NONE_NEEDED:
-            value = _slot_value(_section(body, heading), label)
-            if value is None or (not final and _unfilled(value)):
+        _check_belief_grade_losses(body, verdict, final, findings)
+    _check_none_needed_slots(body, verdict, final, findings)
+
+
+def _check_robust_has_a_supported_ratio(body: str, findings: list[str]) -> None:
+    rows = _table_rows(_section(body, "## Evidence and update"))
+    lrs = [_normalize(c) for c in _column(rows, "lr")]
+    if lrs and all(v == NO_LR_SENTINEL for v in lrs):
+        findings.append(
+            "## Verdict: robust with every evidence row in the missing-ratio form; no "
+            "quantitative update is supported, so hypothetical inputs alone cannot reach "
+            "robust (SKILL.md § Numeric Policy)"
+        )
+
+
+def _check_belief_grade_losses(body: str, verdict: str, final: bool, findings: list[str]) -> None:
+    slots = (("## Decision frame", "Loss ratio"), ("## Robustness", "Loss range swept"))
+    for heading, label in slots:
+        value = _slot_value(_section(body, heading), label)
+        if value is None or (not final and _unfilled(value)):
+            continue  # a missing slot is already its own finding
+        provs = PROVENANCE_MENTION.findall(value)
+        if len(provs) != 1 or provs[0] not in LOSS_PROVENANCE_FOR_ROBUST:
+            findings.append(
+                f"{heading}: a {verdict} verdict requires '- {label}:' to carry exactly one "
+                f"provenance from {sorted(LOSS_PROVENANCE_FOR_ROBUST)}; any other class caps "
+                f"the verdict at loss-sensitive; found {value!r} (SKILL.md § Numeric Policy)"
+            )
+
+
+def _check_none_needed_slots(body: str, verdict: str, final: bool, findings: list[str]) -> None:
+    """`none needed` fills the belief slots under `dominated` and nowhere else."""
+    for heading, label in DOMINATED_NONE_NEEDED:
+        value = _slot_value(_section(body, heading), label)
+        if value is None:
+            continue
+        is_sentinel = _normalize(value) == "none needed"
+        if verdict == "dominated":
+            if (not final and _unfilled(value)) or is_sentinel:
                 continue
-            if _normalize(value) != "none needed":
-                findings.append(
-                    f"{heading}: a dominated verdict requires '- {label}:' to read exactly "
-                    f"'none needed'; found {value!r} (SKILL.md § The Decide Route)"
-                )
+            findings.append(
+                f"{heading}: a dominated verdict requires '- {label}:' to read exactly "
+                f"'none needed'; found {value!r} (SKILL.md § The Decide Route)"
+            )
+        elif is_sentinel:
+            findings.append(
+                f"{heading}: '- {label}:' reads 'none needed', which only a dominated "
+                f"verdict licenses; this record's verdict is {verdict!r} "
+                f"(SKILL.md § The Decide Route)"
+            )
 
 
 def _check_decision_provenance(body: str, final: bool, findings: list[str]) -> None:
