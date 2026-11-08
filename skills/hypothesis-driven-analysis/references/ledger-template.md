@@ -31,7 +31,7 @@ Every row must carry one.
 What a necessary prediction must be able to do, the scope at which refutation acts, and the disposition of a row whose prediction cannot fail are governed by SKILL.md's Plan and Conclusion sections, the single authority; read them there rather than from any summary here.
 Each row declares its claim as `causal`, `descriptive`, or `data-artifact`, and a descriptive row names the estimand its prediction is about.
 A `data-artifact` row claims the records themselves are wrong — missing, miscounted, mis-instrumented.
-The claim column is what the status rules read, and those rules — including what each class can and cannot be `REFUTED` by — live in SKILL.md's Binding rules and Conclusion sections, which are the single authority.
+The claim column is what the status rules read, and those rules — including what each class can and cannot be `REFUTED` by — live in SKILL.md's Conclusion section, which is the single authority.
 Read them there; this template deliberately does not summarize them, because a rule kept in two places is how the disposition of a faulted worker return drifted into a contradiction (issue #103).
 
 Hypotheses added after seeing data get the label `retrospective` in the id column (e.g. `H4 (retrospective)`).

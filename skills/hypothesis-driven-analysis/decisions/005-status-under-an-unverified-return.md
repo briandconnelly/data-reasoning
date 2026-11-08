@@ -65,9 +65,6 @@ Recording that plainly is the point: this record would be worth little if it pre
 SKILL.md, in the sentences the arms themselves quoted: the Analysis section's disposition of a return whose execution records conflict, and the Conclusion section's closed status set.
 Nothing was added, because the reading follows from those two and agents draw it.
 
-*(Extended 2026-11-08: the closed status set moved verbatim from § Conclusion to § Binding rules near the top of SKILL.md (issue #66), and § Conclusion now points at it; the sentence the arms quoted is unchanged.
-See `tests/runs/2026-11-08-binding-rules-hoist-wave.md`.)*
-
 An earlier draft of this record claimed there was "no owning file to point at". That was wrong, and it inverted the finding: the whole result is that the existing text *does* produce the reading, so the existing text owns it and this file points at it like any other.
 
 ## Known gaps
