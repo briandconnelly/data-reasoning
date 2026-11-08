@@ -10,12 +10,24 @@
 # Failure semantics: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md
 root="${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT:-}}"
 if [ -z "$root" ]; then
-  root=$(cd "$(dirname "$0")/.." 2>/dev/null && pwd) || root=""
+  # Parameter expansion, not dirname: the fallback utility set below has no
+  # dirname. CDPATH is cleared so `cd` prints nothing into the substitution.
+  case "$0" in
+    (*/*) here="${0%/*}" ;;
+    (*) here="." ;;
+  esac
+  root=$(CDPATH= cd "$here/.." 2>/dev/null && pwd) || root=""
   [ -n "$root" ] && export CLAUDE_PLUGIN_ROOT="$root"
 fi
 # Mirrors FRONTMATTER_SCAN_BYTES in hooks/check_record_hook.py.
 FRONTMATTER_SCAN_BYTES=65536
-if command -v python3 >/dev/null 2>&1 && [ -f "${root}/hooks/check_record_hook.py" ]; then
+# Why the shell path runs instead of the Python hook; printed with every
+# not-validated report so the message states the fact, not a guess.
+if ! command -v python3 >/dev/null 2>&1; then
+  reason="python3 is not on PATH"
+elif [ ! -f "${root}/hooks/check_record_hook.py" ]; then
+  reason="the Python hook is missing from the plugin install at '${root}'"
+else
   exec python3 "${root}/hooks/check_record_hook.py"
 fi
 # Print a file's document title: the first non-blank line after an optional
@@ -81,7 +93,7 @@ if [ -z "$file_path" ]; then
   # the first record it finds comes back through the substitution.
   hit=$(printf '%s\n' "$paths" | first_record_path "$cwd")
   if [ -n "$hit" ]; then
-    printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$hit" >&2
+    printf 'data-reasoning: the record at %s was not validated (%s).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$hit" "$reason" >&2
     exit 2
   fi
   # A record title inside the patch text counts only as an added line
@@ -95,7 +107,7 @@ if [ -z "$file_path" ]; then
   command=$(printf '%s' "$payload" | grep -o -E '"command"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -n 1 | sed 's/^"command"[[:space:]]*:[[:space:]]*"//; s/"$//')
   if printf '%s' "$command" | sed 's/\\n\*\*\* /\
 *** /g' | grep -E '^\*\*\* (Add File|Update File|Move to): [^\\]*\.md\\n' | grep -q -E '\\n\+# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
-    printf 'data-reasoning: a record written by apply_patch was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' >&2
+    printf 'data-reasoning: a record written by apply_patch was not validated (%s).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$reason" >&2
     exit 2
   fi
   exit 0
@@ -106,7 +118,7 @@ case "$file_path" in
 esac
 [ -r "$file_path" ] || exit 0
 if has_record_title "$file_path"; then
-  printf 'data-reasoning: the record at %s was not validated (python3 is not on PATH).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$file_path" >&2
+  printf 'data-reasoning: the record at %s was not validated (%s).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$file_path" "$reason" >&2
   exit 2
 fi
 exit 0
