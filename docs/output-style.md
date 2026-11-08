@@ -9,8 +9,13 @@ The skills decide what an answer must disclose and what a report must contain; t
 It adds no record-keeping to hypothesis-driven-analysis's ceremony-free `direct` route, but it does shape a direct answer: a source-and-freshness footer, an offer of the query.
 Whether the split between the two holds under a real run is untested; treat it as a design claim, like the routing and handoffs in [Evidence status](evidence-status.md).
 
-Select it through `/config` → Output style.
+Select it with `/output-style data-reasoning:Data Answer`, or through `/config` → Output style.
+A plugin style is namespaced by its plugin, so the bare name `Data Answer` is rejected as unknown.
 It sets `force-for-plugin: false`, so installing the plugin never changes the active style on its own, and `keep-coding-instructions: true`, so the default coding guidance stays in place for the code an analysis has to write.
 
 Output styles are a Claude Code feature.
 Codex has no equivalent, so a Codex install gets the four skills and no style.
+
+As of 2026-11-08, output styles are a supported Claude Code feature, not a deprecated one.
+Claude Code deprecated output styles in 2.0.30 and un-deprecated them in 2.0.32; it deprecated the `/output-style` command in 2.1.73 in favour of `/config` and restored it as `/output-style [name]` in 2.1.269.
+Sources: the upstream [changelog](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) and the [output styles documentation](https://code.claude.com/docs/en/output-styles), which documents both selection paths and plugin-shipped styles.
