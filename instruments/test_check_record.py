@@ -1461,6 +1461,8 @@ def test_verdict_coupling_is_decision_only():
     # a VoI record carries no decide slots; the new checks must not fire on it
     voi = "# VoI Record: x\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: upper-bound-only\n"
     assert not any("robust" in f or "dominated" in f for f in cr.check(voi))
+
+
 # Issue #61: the validator demanded a `result` column the shipped review
 # template never had, and never read the `assessment` column it does have.
 
