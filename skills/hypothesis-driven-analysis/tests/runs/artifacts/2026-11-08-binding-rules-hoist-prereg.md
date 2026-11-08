@@ -230,3 +230,12 @@ Three findings, all upheld and applied above before this file was first committe
 1. *A mixed prefix improvement had no verdict* (one pre-trunc arm passing, both post-trunc passing: rows 4, 8, and 9 all silent). Fixed by defining *beat* in row 9, restating row 8 on pass counts, and adding row 8a, a single bounded extension that ends in ship or decline.
 2. *BR.best and BR.status omitted parts of B9 and B10* (the "no unrefuted rival explains … equally well" limb; the unchanged claim column). Both are now scored, and every approximation assertion is scored on every arm.
 3. *Canaries validated output shape, not rationale; truncated d6 could credit generic conservatism.* Canaries now pass only for the reason under test, and d6's approximation arms are informational, excluded from the ship and decline rows.
+
+## Amendment 1 — after the canaries, before any scored arm (2026-11-08)
+
+All thirteen canaries reached their decision point for the reason under test; no cell was dropped.
+`canary-s1-posttrunc` concluded in prose with no per-hypothesis status anywhere, which BR.status as written would pass vacuously.
+That is a scoring gap, not a fixture fault: B10 and B24 both require a per-hypothesis summary, so a run that assigns no status has not applied them.
+**BR.status now fails when the ledger and the report assign no per-hypothesis status at all.**
+This is fixed before any scored pre/post or post-trunc arm ran, and it applies to every arm, pre and post, truncated or not.
+The six pre-trunc arms ran before this amendment (their scratch files were not yet read for S1) and are scored under it too; the wave record discloses that ordering.
