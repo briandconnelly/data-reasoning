@@ -136,6 +136,26 @@ ROUTES = {"review", "construct", "bound"}
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 
+# The decision skill's provenance classes (SKILL.md § Numeric Policy), and
+# the two that count as belief-grade for losses: a `robust` verdict needs
+# losses someone actually stated, because robustness across priors says
+# nothing when a hypothetical loss ratio reverses the decision.
+PROVENANCE = {
+    "user-elicited",
+    "externally-sourced",
+    "estimated-from-data-in-hand",
+    "sensitivity-only",
+}
+LOSS_PROVENANCE_FOR_ROBUST = {"user-elicited", "externally-sourced"}
+PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([A-Za-z][A-Za-z-]*)`?")
+# Belief slots a `dominated` verdict leaves at the template's sentinel.
+DOMINATED_NONE_NEEDED = (
+    ("## Evidence and update", "Prior odds"),
+    ("## Evidence and update", "Posterior odds"),
+    ("## Robustness", "Prior class swept"),
+    ("## Robustness", "Crossover"),
+)
+
 # A template placeholder is `<` + a letter + text without `<`, `>`, `=` + `>`.
 # Inequalities (`< 1.5`, `<5%`) start with a space or digit; HTML attributes
 # carry `=`; bare HTML tags are excluded by name below, and a Markdown
@@ -863,6 +883,76 @@ def _check_claim(value: str, where: str, findings: list[str], final: bool = Fals
     )
 
 
+def _check_provenance_vocab(body: str, findings: list[str]) -> None:
+    """Every `provenance:` mention on a decide slot, and every provenance
+    cell of the Evidence table, names a class from the closed set; and
+    `sensitivity-only` never appears in Evidence and update."""
+    for heading in ("## Decision frame", "## Evidence and update", "## Robustness"):
+        section = _section(body, heading)
+        for line in section.splitlines():
+            if not line.strip().startswith(("- ", "|")):
+                continue
+            for cls in PROVENANCE_MENTION.findall(_unemphasize(line.strip())):
+                if cls not in PROVENANCE:
+                    findings.append(
+                        f"{heading}: provenance {cls!r} is not in the closed set "
+                        f"{sorted(PROVENANCE)}"
+                    )
+    evidence = _section(body, "## Evidence and update")
+    for cell in _column(_table_rows(evidence), "provenance"):
+        cls = _normalize(cell)
+        if cls and not _unfilled(cls) and cls not in PROVENANCE:
+            findings.append(
+                f"## Evidence and update: provenance {cls!r} is not in the closed set "
+                f"{sorted(PROVENANCE)}"
+            )
+    if "sensitivity-only" in evidence:
+        findings.append(
+            "## Evidence and update: sensitivity-only provenance may not appear here; "
+            "it belongs in Robustness (SKILL.md § Numeric Policy)"
+        )
+
+
+def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None:
+    """A `robust` verdict's losses carry belief-grade provenance; a
+    `dominated` verdict's belief slots read `none needed`. A slot still in
+    template state is skipped outside final mode, like every other slot."""
+    verdict_value = _slot_value(_section(body, "## Verdict"), "Verdict")
+    if verdict_value is None or _unfilled(verdict_value):
+        return
+    verdict = _leading_token(verdict_value, DECIDE_VERDICTS)
+    if verdict == "robust":
+        slots = (("## Decision frame", "Loss ratio"), ("## Robustness", "Loss range swept"))
+        for heading, label in slots:
+            value = _slot_value(_section(body, heading), label)
+            if value is None or (not final and _unfilled(value)):
+                continue  # a missing slot is already its own finding
+            provs = PROVENANCE_MENTION.findall(value)
+            if len(provs) != 1 or provs[0] not in LOSS_PROVENANCE_FOR_ROBUST:
+                findings.append(
+                    f"{heading}: a robust verdict requires '- {label}:' to carry exactly one "
+                    f"provenance from {sorted(LOSS_PROVENANCE_FOR_ROBUST)}; found {value!r} "
+                    f"(SKILL.md § Numeric Policy)"
+                )
+    elif verdict == "dominated":
+        for heading, label in DOMINATED_NONE_NEEDED:
+            value = _slot_value(_section(body, heading), label)
+            if value is None or (not final and _unfilled(value)):
+                continue
+            if _normalize(value) != "none needed":
+                findings.append(
+                    f"{heading}: a dominated verdict requires '- {label}:' to read exactly "
+                    f"'none needed'; found {value!r} (SKILL.md § The Decide Route)"
+                )
+
+
+def _check_decision_provenance(body: str, final: bool, findings: list[str]) -> None:
+    """Numeric Policy, structurally (issue #60): the provenance vocabulary and
+    the verdict-to-provenance coupling SKILL.md § Numeric Policy states."""
+    _check_provenance_vocab(body, findings)
+    _check_verdict_coupling(body, final, findings)
+
+
 def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR0915 -- one findings pass per record kind
     """Findings for one record. `final` is the completed-record mode: template
     state no longer suspends completeness and is itself a finding."""
@@ -981,6 +1071,8 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
                         f"verdict {_normalize(value)!r} does not begin with a value "
                         f"from the closed set {sorted(allowed)}"
                     )
+        if kind == "decision":
+            _check_decision_provenance(body, final, findings)
 
     return findings
 

@@ -6,6 +6,10 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Fixed
+
+- Decision analysis: the record validator now enforces the Numeric Policy's provenance rules — every provenance mention comes from the closed class set, `sensitivity-only` may not appear in Evidence and update, a `robust` verdict's losses must be `user-elicited` or `externally-sourced`, and a `dominated` verdict's belief slots read `none needed` (#60).
+
 ### Changed
 
 - The README is a short introduction; install verification, record validation, the output style, and evidence status moved to pages under `docs/`, which ship with the plugin.
