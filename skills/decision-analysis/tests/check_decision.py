@@ -224,6 +224,13 @@ _CELL_SPLIT = re.compile(r"(?<!\\)\|")
 _CROSSOVER_PREFIX = re.compile(r"^(?:flips at\s+)?(?:prior odds\s+|loss ratio\s+)?", re.I)
 
 
+def _rounding_tolerance(text: str) -> float:
+    """Half a unit in the last decimal place of the least precise number in
+    `text`; 0 when it carries no number."""
+    places = [len(m.group(1)) if m.group(1) else 0 for m in re.finditer(r"\d+(?:\.(\d+))?", text)]
+    return 0.5 * 10 ** (-min(places)) if places else 0.0
+
+
 def _crossover_value(text: str) -> tuple[float, float] | None:
     body = _CROSSOVER_PREFIX.sub("", text.strip(), count=1)
     if not body or body[0] in "-+":
@@ -632,12 +639,18 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                 1 - _REL_TOLERANCE
             )
         stated = _crossover_value(crossover_text)
+        # A stated crossover is a rounded figure: 0.022 for 0.02222. Accept it
+        # when every stated number lies in the computed interval widened by
+        # the larger of the relative tolerance and half a unit in the stated
+        # number's last decimal place.
+        rounding = _rounding_tolerance(crossover_text)
 
         def _within(interval: tuple[float, float]) -> bool:
-            return stated is not None and (
-                interval[0] * (1 - _REL_TOLERANCE) <= stated[0]
-                and stated[1] <= interval[1] * (1 + _REL_TOLERANCE)
-            )
+            if stated is None:
+                return False
+            lo = min(interval[0] * (1 - _REL_TOLERANCE), interval[0] - rounding)
+            hi = max(interval[1] * (1 + _REL_TOLERANCE), interval[1] + rounding)
+            return lo <= stated[0] and stated[1] <= hi
 
         if verdict == "robust":
             if prior_flip:

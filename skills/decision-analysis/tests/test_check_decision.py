@@ -1083,3 +1083,32 @@ def test_double_flip_is_prior_sensitive_not_loss_sensitive():
         bad, "- Crossover: flips at prior odds 0.03", "- Crossover: flips at loss ratio 1"
     )
     assert any("the ordered rule gives prior-sensitive" in f for f in check(bad))
+
+
+def test_rounded_crossover_at_the_tolerance_edge_is_accepted():
+    """2026-11-08 canaries: 0.022 stated for a computed 0.02222 sat exactly on
+    the 1% edge and was rejected; a stated figure is a rounded one."""
+    rec = replace_once(
+        VALID_DECIDE,
+        "- Prior class swept: 0.25–1.0 — provenance: sensitivity-only",
+        "- Prior class swept: 0.01–1.0 — provenance: sensitivity-only",
+    )
+    rec = replace_once(
+        rec,
+        "- Loss range swept: 5–20 — provenance: user-elicited",
+        "- Loss range swept: 10–10 — provenance: user-elicited",
+    )
+    rec = replace_once(rec, "| repro on staging | 3–5 |", "| repro on staging | 4.5 |")
+    rec = replace_once(rec, "- Posterior odds: 0.75–5.0", "- Posterior odds: 1.125–4.5")
+    rec = replace_once(rec, "- Verdict: robust", "- Verdict: prior-sensitive")
+    rec = replace_once(
+        rec, "- Recommended action: hold one week", "- Recommended action: returned to owner"
+    )
+    ok = replace_once(
+        rec, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.022"
+    )
+    assert check(ok) == [], check(ok)
+    bad = replace_once(
+        rec, "- Crossover: none within swept class", "- Crossover: flips at prior odds 0.03"
+    )
+    assert any("does not fall in the computed prior-odds interval" in f for f in check(bad))
