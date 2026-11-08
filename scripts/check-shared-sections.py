@@ -306,16 +306,25 @@ def run_gate(repo: Path, render: bool) -> int:
     """Check (or, with `render`, rewrite) every rendered shared section in
     every carrier. Returns the worst code any section produced: 0 when every
     carrier matches every authority, 1 on drift, 2 on a structural fault."""
+    # Two phases, so a fault in the second section cannot leave the first
+    # already rendered: every authority and carrier is checked before any
+    # carrier is written (the same rule run_rendered applies within a section).
+    if render:
+        for spec in RENDERED:
+            if run_rendered(repo, False, spec, quiet=True) == FAULT_CODE:
+                return FAULT_CODE
     worst = 0
-    for name, authority, decision in RENDERED:
-        code = run_rendered(repo, render, name, authority, decision)
+    for spec in RENDERED:
+        code = run_rendered(repo, render, spec)
         if code == FAULT_CODE:
             return code
         worst = max(worst, code)
     return worst
 
 
-def run_rendered(repo: Path, render: bool, name: str, authority_rel: str, decision: str) -> int:
+def run_rendered(
+    repo: Path, render: bool, spec: tuple[str, str, str], *, quiet: bool = False
+) -> int:
     """Check (or, with `render`, rewrite) one rendered section in every carrier.
 
     Returns 0 when every carrier matches the authority, 1 on drift, and 2 when
@@ -323,6 +332,7 @@ def run_rendered(repo: Path, render: bool, name: str, authority_rel: str, decisi
     missing, duplicated, or hidden -- structural faults the checker cannot
     resolve on its own.
     """
+    name, authority_rel, decision = spec
     authority_path = repo / authority_rel
     try:
         authority = authority_path.read_text(encoding="utf-8")
@@ -368,6 +378,8 @@ def run_rendered(repo: Path, render: bool, name: str, authority_rel: str, decisi
             skill_md.write_text(replace_marked(text, name, authority), encoding="utf-8")
             continue
         failures += 1
+        if quiet:
+            continue
         print(
             f"DRIFT: {skill}/SKILL.md shared section {name!r} differs from {authority_rel}.\n"
             f"  The text has one home; edit that file, then run "

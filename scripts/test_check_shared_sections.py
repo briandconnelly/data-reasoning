@@ -472,3 +472,18 @@ def test_drift_in_a_second_rendered_section_is_reported(tmp_path, capsys):
     )
     assert css.run_gate(tmp_path, render=False) == css.DRIFT_CODE
     assert "'record-delivery'" in capsys.readouterr().err
+
+
+def test_render_writes_nothing_when_a_later_authority_is_faulty(tmp_path):
+    """Codex review of #74: with two rendered sections, a fenced second
+    authority must not leave the first already rendered into the carriers."""
+    for rel in ("scripts/shared-sections", "skills"):
+        shutil.copytree(REPO / rel, tmp_path / rel, ignore=shutil.ignore_patterns("tests"))
+    gate = tmp_path / "scripts/shared-sections/authorization-gate.md"
+    gate.write_text(gate.read_text(encoding="utf-8") + "An added gate line.\n", encoding="utf-8")
+    rd = tmp_path / "scripts/shared-sections/record-delivery.md"
+    rd.write_text("```\n" + rd.read_text(encoding="utf-8") + "```\n", encoding="utf-8")
+    before = {s: (tmp_path / "skills" / s / "SKILL.md").read_bytes() for s in css.GATE_CARRIERS}
+    assert css.run_gate(tmp_path, render=True) == css.FAULT_CODE
+    after = {s: (tmp_path / "skills" / s / "SKILL.md").read_bytes() for s in css.GATE_CARRIERS}
+    assert before == after
