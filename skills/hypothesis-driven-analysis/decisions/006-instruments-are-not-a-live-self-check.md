@@ -64,6 +64,10 @@ The suspension stays, because the skills mandate writing the template before fil
 Nothing points the agent at `--final` yet: that sentence is agent-read prose and owes an arm under decisions/001 before it ships, on exactly the terms this record already set for the deferred SKILL.md pointer.
 The hook also now reads Codex's `apply_patch` payload; `docs/record-validation.md` names the write paths covered and the one — shell commands — that is not.)*
 
+*(Extended 2026-11-08: the deferred SKILL.md pointer at `--final` is written, as a shared section rendered into all four skills from `scripts/shared-sections/record-delivery.md` (issue #63).
+It names the five record kinds that carry a validator signature, requires findings to be fixed on the owning skill's own terms or reported as limitations, and requires an unavailable validator to be reported as not validated.
+It is agent-read prose and ships as measured only on the terms this record set: the preregistration is `tests/runs/artifacts/2026-11-08-record-delivery-prereg.md`, and its arms ran the same day: `tests/runs/2026-11-08-record-delivery-wave.md` records post arms running the check on all four completed-record cells where pre arms ran it on none, a strict FINAL failure on DA-S1 where the arm tried to clear a finding by editing a sentinel before the validator's new rule stopped it, and — after issue #41 gave that cell a compliant record form — a re-measured DA-S1 pair in which post ran the check clean and pre ran it not at all, so the section ships as measured at n=1 per cell.)*
+
 ## Rules this record adds (2026-08-22)
 
 - Treat the hook's effect on record-writing behavior as unmeasured until an arm under `decisions/001` has run.

@@ -330,6 +330,17 @@ No competing hypotheses are required.
 The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix and its baseline in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
 Stated randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias a randomized comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded against those obligations.
 
+## Record Delivery
+
+<!-- shared: record-delivery -->
+Before delivering a conclusion, report, or handoff backed by a full investigation ledger, exploration log, identification review, decision record, or VoI record that you wrote or updated as a file, run the plugin's structural validator in its completed-record mode against the record's final saved contents: `python3 "<plugin-root>/instruments/check_record.py" --final "<record-path>"`, where `<plugin-root>` is the directory that holds the `skills/` folder this SKILL.md sits in (the file's path is `<plugin-root>/skills/<skill-name>/SKILL.md`, resolved through any symlink), so `instruments/` is a sibling of `skills/`, not inside it.
+Fix each finding on the terms the owning skill and its template set — a dated amendment where they require one, never a rewrite of preregistered text or of an evidence-backed status — then rerun; report any finding that remains as a limitation beside the conclusion.
+Never change a number, a provenance class, or a sentinel only to clear a finding: a sentinel belongs to the verdict the skill assigns it to, and a finding you cannot fix on the skill's terms is a limitation to report, not a line to rewrite.
+A clean result is structural evidence only, never a claim that the analysis is right.
+When the validator, `python3`, or the ability to run a command is unavailable, report the record as not validated and name the reason; install nothing and claim no clean pass.
+Mini ledgers, estimation records, and collection plans carry no validator signature and owe no run.
+<!-- /shared: record-delivery -->
+
 ## Non-Goals
 
 - Direct retrieval, summarization, and bounded descriptive queries — answer those directly with no loop.
