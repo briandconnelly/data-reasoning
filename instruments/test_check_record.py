@@ -1682,3 +1682,38 @@ def test_none_needed_belief_slot_under_prior_sensitive_is_caught():
         "- Prior class swept: 1:3 to 3:1", "- Prior class swept: none needed"
     )
     assert any("Prior class swept" in f and "none needed" in f for f in cr.check(rec))
+
+
+# Issue #76: two archived profile-route logs carry improvised titles. They are
+# read-only evidence; the tests read them and never write them.
+B10_ARCHIVE = (
+    REPO / "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery"
+)
+B10_PRE = B10_ARCHIVE / "b10-pre.scratch/exploration-log.md"
+B10_NOPY_PRE = B10_ARCHIVE / "b10-nopy-pre.scratch/exploration-log.md"
+
+
+@pytest.mark.parametrize("path", [B10_PRE, B10_NOPY_PRE], ids=["b10-pre", "b10-nopy-pre"])
+def test_archived_profile_logs_with_improvised_titles_are_recognized(path):
+    text = path.read_text(encoding="utf-8")
+    assert not text.startswith(tuple(cr.SIGNATURES)), "fixture no longer exercises the new rule"
+    assert cr.detect(text) == "exploration"
+
+
+def test_final_on_b10_pre_reports_missing_slots_not_unrecognized(capsys):
+    assert cr.main(["--final", str(B10_PRE)]) == 1
+    out = capsys.readouterr().out.splitlines()
+    assert "## Frame-lite: required '- Scope:' slot is missing" in out
+    assert "## Orientation record: required '- Schema and grain:' slot is missing" in out
+
+
+def test_entity_profile_note_without_required_heading_is_not_a_record(tmp_path, capsys):
+    """The CLI surface: exit 2, not a recognized record. The hook's silent
+    exit 0 for the same file is a different surface, pinned in
+    test_check_record_hook.py."""
+    f = tmp_path / "notes.md"
+    f.write_text("# Entity profile: notes\n\nno headings here\n")
+    assert cr.title_kind("# Entity profile: notes") == "exploration"
+    assert cr.detect(f.read_text()) is None
+    assert cr.main([str(f)]) == 2  # noqa: PLR2004 -- the CLI's documented not-a-record code
+    assert capsys.readouterr().out == ""
