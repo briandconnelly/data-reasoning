@@ -6,11 +6,12 @@ skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-
 import importlib.util
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 HOOK = REPO / "hooks" / "check_record_hook.py"
@@ -283,15 +284,63 @@ def test_with_python_the_wrapper_reaches_the_python_hook(tmp_path):
     assert "structural findings" in r.stderr
 
 
-def test_shell_sniff_signatures_match_python_signatures():
-    """The shell wrapper's record-signature list must not drift from
-    SIGNATURES in hooks/check_record_hook.py."""
-    sh_text = (REPO / "hooks" / "check_record_hook.sh").read_text(encoding="utf-8")
-    match = re.search(r"grep -q -E '\^# \(([^)]+)\): '", sh_text)
-    assert match, "could not find the signature grep in check_record_hook.sh"
-    sh_signatures = {f"# {name}: " for name in match.group(1).split("|")}
+# Issue #76: the four title matchers -- the validator's, the Python hook's,
+# and the shell wrapper's on-disk and apply_patch alternations -- must agree
+# on every title, including the improvised profile-route ones.
+TITLE_CORPUS = {
+    "# Investigation: x": True,
+    "# Exploration: x": True,
+    "# Identification Review: x": True,
+    "# Decision Record: x": True,
+    "# VoI Record: x": True,
+    "# Entity profile: Northgate Clinic account": True,
+    "# Exploration (profile route, entity): Northgate Clinic account, 2026-01..2026-06": True,
+    "# Entity profile (account): x": True,
+    "# Exploration (): x": True,
+    "# Profile: x": False,
+    "# Entity Profile: x": False,
+    "# Entity profiles: x": False,
+    "# Exploration(entity): x": False,
+    "# Exploration (unclosed: x": False,
+    "# Exploration (a) (b): x": False,
+    "# Exploration (a)b: x": False,
+    "# Investigation (x): y": False,
+    "## Entity profile: x": False,
+    "# Meeting notes": False,
+}
 
-    assert sh_signatures == set(hook_module.SIGNATURES)
+_validator_spec = importlib.util.spec_from_file_location(
+    "check_record", REPO / "instruments" / "check_record.py"
+)
+assert _validator_spec
+assert _validator_spec.loader
+validator_module = importlib.util.module_from_spec(_validator_spec)
+_validator_spec.loader.exec_module(validator_module)
+
+
+def test_all_four_title_matchers_agree(tmp_path):
+    for i, (title, expected) in enumerate(TITLE_CORPUS.items()):
+        case_dir = tmp_path / f"case{i}"
+        case_dir.mkdir()
+        f = case_dir / "doc.md"
+        f.write_text(title + "\n")
+        validator = validator_module.title_kind(title) is not None
+        python_hook = hook_module.looks_like_record(str(f))
+        disk_dir, patch_dir = case_dir / "disk", case_dir / "patch"
+        disk_dir.mkdir()
+        patch_dir.mkdir()
+        on_disk = run_command_without_python({"tool_input": {"file_path": str(f)}}, disk_dir)
+        # The added file does not exist, so only the patch-text matcher can see it.
+        patch = f"*** Begin Patch\n*** Add File: absent.md\n+{title}\n*** End Patch\n"
+        added = run_command_without_python(codex_payload(patch_dir, patch), patch_dir)
+        got = (validator, python_hook, on_disk.returncode == 2, added.returncode == 2)
+        assert got == (expected,) * 4, (title, got)
+
+
+def test_the_new_title_rule_maps_only_to_exploration():
+    for title, expected in TITLE_CORPUS.items():
+        if expected and not title.startswith(tuple(validator_module.SIGNATURES)):
+            assert validator_module.title_kind(title) == "exploration", title
 
 
 # 2026-09-15 Codex review: the hook read only `tool_input.file_path`, so on
@@ -687,3 +736,73 @@ def test_missing_python_hook_is_reported_as_missing_hook_not_missing_python(tmp_
     assert "not validated" in r.stderr
     assert "Python hook is missing" in r.stderr
     assert "python3 is not on PATH" not in r.stderr
+
+
+# Issue #76: behavioral cases for the improvised profile-route titles on each
+# path a record write can take.
+PROFILE_TITLES = (
+    "# Entity profile: Northgate Clinic account",
+    "# Exploration (profile route, entity): Northgate Clinic account",
+)
+# Recognized (carries a required heading) and incomplete (no Scope slot).
+PROFILE_BODY = "\n\n## Frame-lite\n\n- Effort budget: 6 queries\n\n## Orientation record\n"
+UPDATE_PATCH = "*** Begin Patch\n*** Update File: exploration-log.md\n@@\n-x\n+y\n*** End Patch\n"
+
+
+@pytest.mark.parametrize("title", PROFILE_TITLES)
+def test_profile_title_write_reports_findings(tmp_path, title):
+    f = tmp_path / "exploration-log.md"
+    f.write_text(title + PROFILE_BODY)
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 2
+    assert "structural findings" in r.stderr
+    assert "'- Scope:'" in r.stderr
+
+
+@pytest.mark.parametrize("title", PROFILE_TITLES)
+def test_profile_title_on_disk_apply_patch_reports_findings(tmp_path, title):
+    f = tmp_path / "exploration-log.md"
+    f.write_text(title + PROFILE_BODY)
+    r = run_hook(codex_payload(tmp_path, UPDATE_PATCH))
+    assert r.returncode == 2
+    assert "structural findings" in r.stderr
+    assert str(f) in r.stderr
+
+
+@pytest.mark.parametrize("title", PROFILE_TITLES)
+def test_without_python_profile_title_write_is_not_validated(tmp_path, title):
+    f = tmp_path / "exploration-log.md"
+    f.write_text(title + PROFILE_BODY)
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
+@pytest.mark.parametrize("title", PROFILE_TITLES)
+def test_without_python_profile_title_on_disk_apply_patch_is_not_validated(tmp_path, title):
+    f = tmp_path / "exploration-log.md"
+    f.write_text(title + PROFILE_BODY)
+    r = run_command_without_python(codex_payload(tmp_path, UPDATE_PATCH), tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+    assert str(f) in r.stderr
+
+
+@pytest.mark.parametrize("title", PROFILE_TITLES)
+def test_without_python_profile_title_added_by_patch_is_not_validated(tmp_path, title):
+    patch = f"*** Begin Patch\n*** Add File: exploration-log.md\n+{title}\n*** End Patch\n"
+    r = run_command_without_python(codex_payload(tmp_path, patch), tmp_path)
+    assert r.returncode == 2
+    assert "a record written by apply_patch was not validated" in r.stderr
+
+
+def test_entity_profile_note_without_required_heading_is_silent(tmp_path):
+    """The hook surface: a signature match with no required heading is a
+    user's own note. The validator CLI's exit 2 for the same file is a
+    different surface, pinned in test_check_record.py."""
+    f = tmp_path / "notes.md"
+    f.write_text("# Entity profile: notes\n\nno headings here\n")
+    assert hook_module.looks_like_record(str(f)) is True  # the sniff matches
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr

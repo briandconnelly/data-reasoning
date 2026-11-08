@@ -47,10 +47,11 @@ record_title() {
 }
 
 # True when $1 is a record: its title carries a signature, or its title could
-# not be determined.
+# not be determined. This alternation and the apply_patch one below mirror
+# SIGNATURES and EXPLORATION_TITLE in hooks/check_record_hook.py.
 has_record_title() {
   title=$(record_title "$1") || return 0
-  printf '%s\n' "$title" | grep -q -E '^# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '
+  printf '%s\n' "$title" | grep -q -E '^# (Investigation|Identification Review|Decision Record|VoI Record|(Entity profile|Exploration)( \([^)]*\))?): '
 }
 
 # Print the first readable .md path on stdin (one per line, relative ones
@@ -106,7 +107,7 @@ if [ -z "$file_path" ]; then
   # source, is not a record, whatever else the patch touches.
   command=$(printf '%s' "$payload" | grep -o -E '"command"[[:space:]]*:[[:space:]]*"([^"\\]|\\.)*"' | head -n 1 | sed 's/^"command"[[:space:]]*:[[:space:]]*"//; s/"$//')
   if printf '%s' "$command" | sed 's/\\n\*\*\* /\
-*** /g' | grep -E '^\*\*\* (Add File|Update File|Move to): [^\\]*\.md\\n' | grep -q -E '\\n\+# (Investigation|Exploration|Identification Review|Decision Record|VoI Record): '; then
+*** /g' | grep -E '^\*\*\* (Add File|Update File|Move to): [^\\]*\.md\\n' | grep -q -E '\\n\+# (Investigation|Identification Review|Decision Record|VoI Record|(Entity profile|Exploration)( \([^)]*\))?): '; then
     printf 'data-reasoning: a record written by apply_patch was not validated (%s).\nNot validated is not a clean pass. Validator terms: skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md\n' "$reason" >&2
     exit 2
   fi

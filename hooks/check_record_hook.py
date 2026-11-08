@@ -47,6 +47,8 @@ SIGNATURES = (
     "# Decision Record: ",
     "# VoI Record: ",
 )
+# Mirrors EXPLORATION_TITLE in instruments/check_record.py (issue #76).
+EXPLORATION_TITLE = re.compile(r"# (Entity profile|Exploration)( \([^)]*\))?: ")
 
 DECISION = (
     "skills/hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md"
@@ -85,7 +87,7 @@ def looks_like_record(path: str) -> bool | None:
         first = head.lstrip().split(b"\n", 1)[0].decode("utf-8")
     except UnicodeDecodeError:
         return None
-    return first.startswith(SIGNATURES)
+    return first.startswith(SIGNATURES) or EXPLORATION_TITLE.match(first) is not None
 
 
 def candidate_paths(payload: dict) -> list[str]:
