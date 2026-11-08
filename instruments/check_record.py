@@ -33,6 +33,14 @@ SIGNATURES = {
     "# VoI Record: ": "voi",
 }
 
+# Issue #76: a profile-route exploration log may carry an improvised title,
+# `# Entity profile: ...` or `# Exploration (<qualifier>): ...`. This is a
+# second, narrowly scoped rule beside the exact-prefix table above, and it
+# maps only to the exploration kind. hooks/check_record_hook.py and both
+# matchers in hooks/check_record_hook.sh mirror it; the hook suite holds the
+# four in agreement.
+EXPLORATION_TITLE = re.compile(r"# (Entity profile|Exploration)( \([^)]*\))?: ")
+
 REQUIRED_SECTIONS = {
     "ledger": [
         "## Problem",
@@ -476,13 +484,23 @@ def detect(text: str) -> str | None:
     user's own note titled `# Investigation: …` is not a ledger. The record
     must also carry at least one of its kind's required headings."""
     text = strip_frontmatter(text)
-    first = text.lstrip().split("\n", 1)[0]
+    kind = title_kind(text.lstrip().split("\n", 1)[0])
+    if kind is None:
+        return None
+    body = "\n" + "\n".join(line.rstrip() for line in text.split("\n")) + "\n"
+    if any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind]):
+        return kind
+    return None
+
+
+def title_kind(title: str) -> str | None:
+    """Kind a document title line signals, or None. The title alone does not
+    make a record; `detect` also requires a required heading."""
     for prefix, kind in SIGNATURES.items():
-        if first.startswith(prefix):
-            body = "\n" + "\n".join(line.rstrip() for line in text.split("\n")) + "\n"
-            if any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind]):
-                return kind
-            return None
+        if title.startswith(prefix):
+            return kind
+    if EXPLORATION_TITLE.match(title):
+        return "exploration"
     return None
 
 
