@@ -1,0 +1,93 @@
+{
+  "name": "f1-pre",
+  "fixture": "f1",
+  "started_utc": "2026-11-08T22:59:41.677502+00:00",
+  "duration_s": 19.2,
+  "exit_code": 0,
+  "claude_version": "2.1.319",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "da60ef12-bb72-4af4-8bb0-395bf8d0ef24",
+  "output_style_at_startup": "data-reasoning:Data Answer",
+  "plugins_at_startup": [
+    {
+      "name": "data-reasoning",
+      "path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f1-pre-z86kyvjb/plugin",
+      "source": "data-reasoning@inline",
+      "version": "0.3.0"
+    },
+    {
+      "name": "cc-plugin-agents-md",
+      "path": "builtin",
+      "source": "cc-plugin-agents-md@builtin"
+    },
+    {
+      "name": "cc-plugin-telemetry",
+      "path": "builtin",
+      "source": "cc-plugin-telemetry@builtin"
+    },
+    {
+      "name": "cc-plugin-privacy",
+      "path": "builtin",
+      "source": "cc-plugin-privacy@builtin"
+    },
+    {
+      "name": "cc-plugin-plugin-authoring",
+      "path": "builtin",
+      "source": "cc-plugin-plugin-authoring@builtin"
+    }
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "mcp_servers_at_startup": [],
+  "style_ref": "76a8308",
+  "style_sha256": "0d8bad1d49d768b1db470d7f344d60c7b511913c608b344663eccc49d342bb71",
+  "fixture_files_sha256": {
+    "README.txt": "6f86a5b9ab34bfcee2a81926dc155637ec4a2323928cf02275b1dce723923afb"
+  },
+  "prompt_sha256": "79247c9dfe5b741590b578cc20af383a20dc0d178db239cbe3b8b1fd2cc060b7",
+  "jsonl_sha256": "b6460249d7e69b3354f6086d71628ad38cf9d408bc59fe9d2dd5c4c5f4072ec4",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f1-pre-z86kyvjb",
+  "contaminated": [],
+  "tool_uses": [],
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 9418,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 279,
+    "output_tokens_details": {
+      "thinking_tokens": 95
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9418,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 279,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 9418,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 9418
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.040465999999999995,
+  "result_text": "Q3 net revenue was $5.87M (July\u2013September, sum of the three monthly net revenue figures). Monthly net revenue grew $0.29M from July to September, from $1.82M to $2.11M, or about 15.9%.\n\n- August was up 6.6% on July ($1.82M to $1.94M).\n- September was up 8.8% on August ($1.94M to $2.11M).\n\nSource: the three-row table you pasted from the finance dashboard. I couldn't see the dashboard itself, so I can't tell you its as-of date or whether the figures are final."
+}

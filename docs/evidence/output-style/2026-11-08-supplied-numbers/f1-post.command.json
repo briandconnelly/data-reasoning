@@ -1,0 +1,32 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f1-post-t_aaxg9s/work",
+  "argv": [
+    "claude",
+    "-p",
+    "I copied these from our finance dashboard:\n\n| month | net revenue |\n| --- | --- |\n| July | $1.82M |\n| August | $1.94M |\n| September | $2.11M |\n\nWhat was Q3 net revenue, and how much did it grow from July to September?\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--strict-mcp-config",
+    "--plugin-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f1-post-t_aaxg9s/plugin",
+    "--settings",
+    "{\"outputStyle\": \"data-reasoning:Data Answer\"}",
+    "--tools",
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash",
+    "--allowedTools",
+    "Read",
+    "Glob",
+    "Grep",
+    "Bash",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f1-post-t_aaxg9s/data"
+  ]
+}

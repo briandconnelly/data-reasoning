@@ -1,0 +1,9 @@
+I copied these from our finance dashboard:
+
+| month | net revenue |
+| --- | --- |
+| July | $1.82M |
+| August | $1.94M |
+| September | $2.11M |
+
+What was Q3 net revenue, and how much did it grow from July to September?

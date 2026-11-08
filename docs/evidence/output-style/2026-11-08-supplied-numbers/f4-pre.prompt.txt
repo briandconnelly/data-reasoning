@@ -1,0 +1,9 @@
+Here's the query I'd use for October order revenue; I haven't run it yet:
+
+    SELECT SUM(amount_usd) AS revenue
+    FROM sales.orders
+    WHERE status = 'completed'
+      AND ordered_at >= '2026-10-01'
+      AND ordered_at <  '2026-11-01';
+
+What was October order revenue?

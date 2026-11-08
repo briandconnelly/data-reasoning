@@ -1,0 +1,100 @@
+{
+  "name": "f2-pre",
+  "fixture": "f2",
+  "started_utc": "2026-11-08T22:59:41.677480+00:00",
+  "duration_s": 25.7,
+  "exit_code": 0,
+  "claude_version": "2.1.319",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "201facec-4597-4a90-a8df-246fa49a491f",
+  "output_style_at_startup": "data-reasoning:Data Answer",
+  "plugins_at_startup": [
+    {
+      "name": "data-reasoning",
+      "path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f2-pre-xfl9h8cm/plugin",
+      "source": "data-reasoning@inline",
+      "version": "0.3.0"
+    },
+    {
+      "name": "cc-plugin-agents-md",
+      "path": "builtin",
+      "source": "cc-plugin-agents-md@builtin"
+    },
+    {
+      "name": "cc-plugin-telemetry",
+      "path": "builtin",
+      "source": "cc-plugin-telemetry@builtin"
+    },
+    {
+      "name": "cc-plugin-privacy",
+      "path": "builtin",
+      "source": "cc-plugin-privacy@builtin"
+    },
+    {
+      "name": "cc-plugin-plugin-authoring",
+      "path": "builtin",
+      "source": "cc-plugin-plugin-authoring@builtin"
+    }
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Glob",
+    "Grep",
+    "Read"
+  ],
+  "mcp_servers_at_startup": [],
+  "style_ref": "76a8308",
+  "style_sha256": "0d8bad1d49d768b1db470d7f344d60c7b511913c608b344663eccc49d342bb71",
+  "fixture_files_sha256": {
+    "worker-return.md": "949924dc2dadf396132fad521de2c6f748b4d5cd9a153e35781d7344abb7fbb6"
+  },
+  "prompt_sha256": "ec7dc670fa2ea49bb2101866dee4806d7f0140a7c61ebb7a936d4282610c431b",
+  "jsonl_sha256": "601e7e1ece60a59da8f11863caf4ca638e4bb7bc3eb48564beb24b8affd40679",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f2-pre-xfl9h8cm",
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "tool": "Read",
+      "input": {
+        "file_path": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/probe-f2-pre-xfl9h8cm/data/worker-return.md"
+      }
+    }
+  ],
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 5376,
+    "cache_read_input_tokens": 14018,
+    "output_tokens": 739,
+    "output_tokens_details": {
+      "thinking_tokens": 319
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5376,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 628,
+        "cache_read_input_tokens": 9445,
+        "cache_creation_input_tokens": 504,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 504
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "total_cost_usd": 0.0303038,
+  "result_text": "There were 55,161 active subscriptions at the end of October (as of 2026-10-31), and 23.4% of them (12,884) were on the pro plan.\n\n- Basic: 41,210 (74.7%)\n- Pro: 12,884 (23.4%)\n- Enterprise: 1,067 (1.9%)\n\n- **Not re-run:** I didn't run the query myself. These are the worker's figures, and I only checked that the three plans sum to the stated total.\n- **Subscriptions, not customers:** A customer with two subscriptions counts twice, so pro's share of customers could differ.\n- **Possible undercount:** The filter is `started_at <= '2026-10-31'`, which compares against midnight. Subscriptions that started during the day on Oct 31 are probably left out. The effect is likely small.\n\nSource: `billing.subscriptions`, nightly load completed 2026-11-01 02:14 UTC, via the worker's return."
+}
