@@ -212,6 +212,16 @@ The seam with the costly-collection gate: the plan's "cheapest adequate collecti
 - No file tools: emit the Decision frame and Decision-state model (or the Pending decision and Signal model) as response text before any update arithmetic, and record that the precommitment is then only as strong as the visible message order.
 - More than two actions or a non-binary proposition, and no honest binary reduction: report the ask as outside this skill's v1 scope, state what the record cannot represent, and do not approximate it with a single crossover.
 
+## Record Delivery
+
+<!-- shared: record-delivery -->
+Before delivering a conclusion, report, or handoff backed by a full investigation ledger, exploration log, identification review, decision record, or VoI record that you wrote or updated as a file, run the plugin's structural validator in its completed-record mode against the record's final saved contents: `python3 "<plugin-root>/instruments/check_record.py" --final "<record-path>"`, where `<plugin-root>` is the directory two levels above this SKILL.md, resolved through any symlink.
+Fix each finding on the terms the owning skill and its template set — a dated amendment where they require one, never a rewrite of preregistered text or of an evidence-backed status — then rerun; report any finding that remains as a limitation beside the conclusion.
+A clean result is structural evidence only, never a claim that the analysis is right.
+When the validator, `python3`, or the ability to run a command is unavailable, report the record as not validated and name the reason; install nothing and claim no clean pass.
+Mini ledgers, estimation records, and collection plans carry no validator signature and owe no run.
+<!-- /shared: record-delivery -->
+
 ## Non-Goals
 
 - Multi-state or multi-action decision models, sequential decision processes, and portfolios of pulls — out of v1 scope, reported as such.

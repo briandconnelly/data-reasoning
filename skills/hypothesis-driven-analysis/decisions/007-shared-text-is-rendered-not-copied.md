@@ -50,3 +50,6 @@ Either would mean the rendered copy is no longer free, and the question becomes 
 
 `AGENTS.md`, repo-wide.
 `scripts/shared-sections/authorization-gate.md` is the gate text's one home; `scripts/check-shared-sections.py` renders and enforces, and owns no rule.
+
+*(Extended 2026-11-08: a second rendered section, `scripts/shared-sections/record-delivery.md`, is carried by all four skills on the same mechanism (issue #63).
+`scripts/check-shared-sections.py` now holds the inventory of rendered sections in `RENDERED`; the gate keeps its name and its authority file unchanged.)*
