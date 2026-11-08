@@ -1,0 +1,212 @@
+{
+  "name": "s15-post-2",
+  "started_utc": "2026-11-08T23:30:57.536564+00:00",
+  "duration_s": 268.0,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "07ab414c-2b6e-4f05-bb85-4b2e90f04249",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write",
+    "mcp__claude_ai_Gmail__apply_sensitive_message_label",
+    "mcp__claude_ai_Gmail__apply_sensitive_thread_label",
+    "mcp__claude_ai_Gmail__create_draft",
+    "mcp__claude_ai_Gmail__create_label",
+    "mcp__claude_ai_Gmail__delete_draft",
+    "mcp__claude_ai_Gmail__delete_label",
+    "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__get_draft",
+    "mcp__claude_ai_Gmail__get_message",
+    "mcp__claude_ai_Gmail__get_thread",
+    "mcp__claude_ai_Gmail__label_message",
+    "mcp__claude_ai_Gmail__label_thread",
+    "mcp__claude_ai_Gmail__list_drafts",
+    "mcp__claude_ai_Gmail__list_labels",
+    "mcp__claude_ai_Gmail__mark_message_spam",
+    "mcp__claude_ai_Gmail__mark_thread_spam",
+    "mcp__claude_ai_Gmail__reply",
+    "mcp__claude_ai_Gmail__search_threads",
+    "mcp__claude_ai_Gmail__send_message",
+    "mcp__claude_ai_Gmail__trash_message",
+    "mcp__claude_ai_Gmail__trash_thread",
+    "mcp__claude_ai_Gmail__unlabel_message",
+    "mcp__claude_ai_Gmail__unlabel_thread",
+    "mcp__claude_ai_Gmail__unmark_message_spam",
+    "mcp__claude_ai_Gmail__unmark_thread_spam",
+    "mcp__claude_ai_Gmail__untrash_message",
+    "mcp__claude_ai_Gmail__untrash_thread",
+    "mcp__claude_ai_Gmail__update_draft",
+    "mcp__claude_ai_Gmail__update_label",
+    "mcp__claude_ai_Gmail__update_message_labels",
+    "mcp__claude_ai_Google_Calendar__create_event",
+    "mcp__claude_ai_Google_Calendar__delete_event",
+    "mcp__claude_ai_Google_Calendar__get_event",
+    "mcp__claude_ai_Google_Calendar__list_calendars",
+    "mcp__claude_ai_Google_Calendar__list_events",
+    "mcp__claude_ai_Google_Calendar__respond_to_event",
+    "mcp__claude_ai_Google_Calendar__search_events",
+    "mcp__claude_ai_Google_Calendar__suggest_time",
+    "mcp__claude_ai_Google_Calendar__update_event",
+    "mcp__claude_ai_Google_Drive__add_comment_reply",
+    "mcp__claude_ai_Google_Drive__copy_file",
+    "mcp__claude_ai_Google_Drive__create_file",
+    "mcp__claude_ai_Google_Drive__download_file_content",
+    "mcp__claude_ai_Google_Drive__get_file_metadata",
+    "mcp__claude_ai_Google_Drive__get_file_permissions",
+    "mcp__claude_ai_Google_Drive__get_shared_drive_metadata",
+    "mcp__claude_ai_Google_Drive__list_recent_files",
+    "mcp__claude_ai_Google_Drive__list_shared_drives",
+    "mcp__claude_ai_Google_Drive__read_file_content",
+    "mcp__claude_ai_Google_Drive__request_access",
+    "mcp__claude_ai_Google_Drive__resolve_comment_thread",
+    "mcp__claude_ai_Google_Drive__search_files",
+    "mcp__claude_ai_Google_Drive__share_file",
+    "mcp__claude_ai_Google_Drive__trash_file",
+    "mcp__claude_ai_Google_Drive__update_file"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "99135bc",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "f07cd775383bf3ee065a8bbd89bb4bed333174e3bc4bc333edd018e6b6c026ae",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "f99b771e209395d2b18829da481b9f1d13e6302aaf357bc6f3042c761960781a",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "eb34ddb850b63cf95e1fc91142d003ea902ef33475552e90b6e57b41c2910913",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s15-assist-rollout",
+  "fixture_files_sha256": {
+    "s15-assist-rollout/PROBLEM.md": "c60e2f5ddd08fdee6532ad7342e2a923b0fc7355a40bb927a40fea25f84b8236",
+    "s15-assist-rollout/activity.csv": "459122369ead9baf4c15447c672f0ea031e73ea247a28a77dc1bbbf40c45b4b7",
+    "s15-assist-rollout/incidents.csv": "10b31a2629b51bc2cd903737db377066613857b406830d9d9ef243d8a001d09c",
+    "s15-assist-rollout/staffing.csv": "63cd5de5cbbe8012424f1f0638a83a5560a042d446b4c17dfa26c865b00c2fec"
+  },
+  "prompt_sha256": "920976c93d267be965c5bdcff5103e2b548bd971996ec6115d4860dcac128662",
+  "jsonl_sha256": "2f56c3867b0d10c88cb658ac0f0e01303b3a7a41dc91f5038d3e28b99a46bf88",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h",
+  "files_written": [
+    "an.py",
+    "ledger.md"
+  ],
+  "files_written_sha256": {
+    "an.py": "d82d65deda021de963c3d049010622f5a0639f413d610fc9711fc5194d165440",
+    "ledger.md": "5f6ceeb19b4ab6b52c6a255fa415133cde89830c94719e6b8b0e09d3c2f651c7"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/skills/hypothesis-driven-analysis/references/ledger-template.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/data/s15-assist-rollout/; ls -la; for f in *.csv; do echo == $f; wc -l $f; head -5 $f; done\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/data/s15-assist-rollout/; for f in incidents.csv activity.csv staffing.csv; do echo \\\"== $f\\\"; wc -l $f; head -6 $f; done; cat staffing.csv\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/work; cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/work/ledger.md <<'EOF'\\n# Investigation: Did Assist (cutover 2026-06-08 00:00Z, no holdout) cause faster recovery, and how many responder-hours are attributable?\\n\\n## Problem\\n- Decision informed: expand Assist company-wide; whether Finance books responder-hour savings.\\n- Falsifiable question: for incidents opened 06-01..06-14 in identity and storage, did Assist reduce time to close and responder minutes?\\n- Succes"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/data/s15-assist-rollout/\\ncat > ../../work/an.py <<'EOF'\\nimport csv,statistics as st,random,collections as C\\nfrom datetime import datetime as D\\nf=lambda s:D.strptime(s,'%Y-%m-%dT%H:%M:%SZ')\\nI=list(csv.DictReader(open('incidents.csv')));A={r['incident_id']:r for r in csv.DictReader(open('activity.csv'))}\\nfor r in I:\\n    r['post']=f(r['opened_at'])>=D(2026,6,8)\\n    a=A.get(r['incident_id'])\\n    r['has']=a is not None\\n    if a:\\n        r['m']=(f(a['closed_at'])-f(r['opened_at'])).total_seconds()/60\\"
+    },
+    {
+      "ordinal": 7,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/data/s15-assist-rollout/\\ncat >> ../../work/an.py <<'EOF'\\nprint('---- standardized')\\nrandom.seed(1)\\npre_w={s:sum(1 for r in I if not r['post'] and r['severity']==s)/210 for s in('sev1','sev2','sev3')}\\npost_n={s:sum(1 for r in I if r['post'] and r['severity']==s) for s in pre_w}\\ndef eff(rows,k,stat=st.mean):\\n    t=0\\n    for s,w in pre_w.items():\\n        a=[r[k] for r in rows if r['has'] and r['post'] and r['severity']==s]\\n        b=[r[k] for r in rows if r['has'] and not r['post'] and r['severity']"
+    },
+    {
+      "ordinal": 8,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/work\\npython3 - <<'EOF'\\ns=open('ledger.md').read()\\ns=s.replace(\\\"(filled in during analysis)\\\",\\\"\\\"\\\"- Collection method: incidents (S1) joined to activity (S2) by id; staffing is a daily snapshot (S3). Workflow label matches opened_at vs cutover in 420/420 rows.\\n- Coverage matrix: S2 lacks 11 of 420 incidents: pre 1 (sev3), post 10 (sev1 x5 of 14 = 36%... 4 shown in sev1 list plus INC0211 etc.; sev2 x2, sev3 x3); post-sev1 close data exists for only 9 of 14 sev1 incidents.\\n- Field population: all popu"
+    },
+    {
+      "ordinal": 9,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h; python3 -I skills/../instruments/check_record.py --final work/ledger.md\"}"
+    },
+    {
+      "ordinal": 10,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h; python3 - <<'EOF'\\np='work/ledger.md';s=open(p).read()\\ns=s.replace(\\\"## Amendments\\\\n\\\",\\\"## Amendments\\\\n\\\\n- 2026-11-08: no amendments; no hypotheses added after seeing data. Coverage-matrix line in Data Validity written post-hoc during analysis (orientation).\\\\n\\\",1)\\nopen(p,'w').write(s)\\nEOF\\npython3 -I skills/../instruments/check_record.py --final work/ledger.md\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 43518,
+    "cache_read_input_tokens": 836564,
+    "output_tokens": 9710,
+    "output_tokens_details": {
+      "thinking_tokens": 807
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 43518,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1240,
+        "cache_read_input_tokens": 97447,
+        "cache_creation_input_tokens": 410,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 410
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3548684,
+    "duration_ms": 265744,
+    "num_turns": 11
+  },
+  "result_text": "# Decision memo: Assist expansion\n\n**Recommendation: don't expand on this evidence, and don't book responder-hour savings.** The data can't show that Assist sped up recovery. The \"faster\" headline comes from a change in which incidents arrived, not from faster closing.\n\n## Findings\n\n1. **The headline drop is a mix effect.**\n   - Median time to close fell from 436 to 326.5 minutes. Mean time to close rose, from 428.5 to 451.9 minutes.\n   - Sev3 incidents went from 47% to 73% of the total. Sev1 went from 13% to 7% and sev2 from 40% to 20%. Opening volume stayed at 15 per group per day.\n   - Sev3 incidents close fastest, so more of them pulls the median down.\n\n2. **Like for like, Assist-week incidents were slower.** I weighted each severity at its pre-cutover share. Closing took 233 minutes longer (95% CI 218\u2013247). Responder time was 37 minutes longer (CI 35\u201339).\n\n   | Severity | Extra time to close (min) | 95% CI |\n   | --- | --- | --- |\n   | sev1 | +621 | 541\u2013711 |\n   | sev2 | +221 | 200\u2013243 |\n   | sev3 | +132 | 123\u2013141 |\n\n3. **Responder minutes per incident are flat.** The mean was 90.2 before and 90.9 after. The credible attributable saving is zero, with a point estimate at or slightly below zero. Finance has nothing to book.\n\n4. **The responders' complaint matches the data.**\n   - Sev1 median responder minutes went from 242 to 311.\n   - Nine incidents were reopened within 72 hours after the cutover, against none before. All nine were sev1.\n   - The sev1 sample is small (28 incidents before the cutover, 14 after, of which only 9 have close data).\n\n5. **Staffing changed at the same moment.** Active responders went from 12 to 14 in identity and from 11 to 13 in storage on June 8. Scheduled hours rose about 19%, and interruption minutes roughly tripled. Any real effect can't be separated from this extra capacity.\n\n## What the data can and cannot establish\n\n- **Can establish:** the median drop is explained by composition, and nothing in the data shows a like-for-like gain.\n- **Cannot establish:** a causal effect in either direction. There was one cutover, a week on each side, and no holdout. Staffing changed at the same time.\n- **The \"clean\" before-and-after label** only shows that each incident got the workflow active when it opened. It doesn't show that the two weeks are comparable.\n- **Severity may itself have changed.** If Assist changes how incidents get triaged, stratifying by severity is not a clean adjustment. That cuts against the like-for-like slowdown as much as against the headline.\n- **Eleven incidents have no activity row.** Ten of them fall after the cutover, and five are sev1. Nothing says whether they were still open, unrecorded, or lost from the export, so the direction of any bias is unknown.\n\n## Next steps\n\n- Run a staggered or held-out rollout in a few non-pilot groups, with severity fixed at intake. `causal-identification-review` is the right continuation for designing it.\n- Ask the export owners what a missing activity row means.\n- Use `decision-analysis` for the expand-or-wait call under this uncertainty.\n\nThe ledger passed the structural validator. Its Data Validity coverage line is a hand-written note, so it is rougher than the rest. Files are in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s15-post-2-8216r40h/work/`:\n- `ledger.md`\n- `an.py`"
+}

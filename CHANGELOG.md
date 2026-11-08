@@ -13,6 +13,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Changed
 
+- The evidence-status page records the binding-rules hoist for `hypothesis-driven-analysis` (#66): measured, and withdrawn after a preregistered regression on one cell, so the skill's text is unchanged; its prefix evidence was prefix-only, and Claude Code's context compaction itself was not exercised.
 - Decision analysis: § Numeric Policy now carries one ordered verdict rule (`dominated`, then the loss cap, then `prior-sensitive`, then `loss-sensitive`, then `robust`), treats only `user-elicited` and `externally-sourced` losses as belief-grade, and records a rounded elicited loss at its nominal value with analyst-chosen endpoints as `sensitivity-only`; § The Decide Route's verdict bullets point there. Both checkers enforce the paired sentinels, the loss cap, and per-axis flip tests.
 - The evidence-status page reports per-scenario measurement status: one table per skill covering every catalog scenario, with the wording each was measured against, whether that wording ships, and the result; it no longer calls the exploration and decision-analysis catalogs unrun, records the 2026-11-08 settlement of the missing-prior and verdict-precedence debts, and refreshes the context-cost word counts (#68).
 - The output style page names both ways to select `Data Answer` — `/output-style data-reasoning:Data Answer` and `/config` → Output style — and records that output styles are supported, not deprecated, in current Claude Code (#70).

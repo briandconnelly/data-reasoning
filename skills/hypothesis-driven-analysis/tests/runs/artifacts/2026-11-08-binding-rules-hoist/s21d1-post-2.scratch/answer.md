@@ -1,0 +1,5 @@
+H2 STATUS: UNRESOLVED
+
+GOVERNING SKILL TEXT: "Derive hypothesis status from the latest effective outcome of each test entry (the original outcome unless a dated amendment supersedes it); never edit status directly." and "The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise."
+
+REASONING: H2's only test is T2, and its reconciled outcome is NON_DISCRIMINATING. The recorded established deviation means the queries ran on 2026-06-09 and 2026-06-11, not the preregistered 06-10 vs 06-11, so H2's necessary prediction was never tested. REFUTED needs the necessary prediction to fail under an adequate test, and none exists. The worker's own CONTRADICTED label and its +1.6% figure belong to the wrong comparison and carry no weight. Nothing in the ledger supports H2 either, so the status is UNRESOLVED. Further queries are not authorized and the budget is spent, so the stop rule gives "stop with limits": the 06-10 vs 06-11 gateway p95 comparison is untested. If a decision hangs on this, `decision-analysis` is the continuation, when installed.

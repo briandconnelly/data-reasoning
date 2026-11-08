@@ -1,0 +1,117 @@
+{
+  "name": "s21d7-pre-1",
+  "started_utc": "2026-11-08T23:30:54.370047+00:00",
+  "duration_s": 189.6,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "cc3ab4f7-b985-4b1b-be55-f02c856c0ca1",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "692fd31",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "858f9f422ab89c6c723ca34296a2a544d396e302efa559aa6ec019192142e76c",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d7-support-clean.md",
+  "fixture_files_sha256": {
+    "d7-support-clean.md": "d77cce43c5a6313c9ab5f0da7d9a45493a8ae2a00a8a99e8e26d03b401b5ef3d"
+  },
+  "prompt_sha256": "fb9dd4b42b73edcb39c80ab5c78e4d67bd32a70ea4e39d8339989fbc68df47cf",
+  "jsonl_sha256": "ce1f44cd054a5b638e5793516c54047a4d33c6e7ef55f654883610442ef63861",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-1-3bd7b0ad",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "f9cfdaa878e5449624e0963f23f75b394ac29a135edca62f6245ba9ca7070664"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-1-3bd7b0ad/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-1-3bd7b0ad/data/d7-support-clean.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-1-3bd7b0ad/work/answer.md\", \"content\": \"H2 STATUS: UNRESOLVED\\n\\nBEST SUPPORTED: Yes, it may be reported as best supported, but only with a stated limitation. H2 is not REFUTED. T2 is CONSISTENT, and the preregistered detection limit (about 0.4% relative, against a predicted rise of more than 20%) means it discriminates. The only rivals, H1 and H3, are REFUTED, so no unrefuted rival explains the observations equally well. T2 rests on an unverified worker return, so the result must not be called established or action-"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 81722,
+    "cache_read_input_tokens": 93271,
+    "output_tokens": 2509,
+    "output_tokens_details": {
+      "thinking_tokens": 399
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 81722,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 844,
+        "cache_read_input_tokens": 81376,
+        "cache_creation_input_tokens": 1516,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1516
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.36131709999999995,
+    "duration_ms": 185278,
+    "num_turns": 4
+  },
+  "result_text": "H2's status is UNRESOLVED. It can be reported as best supported, but only with the unverified-return limitation stated. I wrote this to `work/answer.md`.\n\nH2 STATUS: UNRESOLVED\n\nBEST SUPPORTED: Yes, with a limitation.\n- H2 is not REFUTED.\n- T2 is CONSISTENT, and it discriminates, because the detection limit (about 0.4% relative) is far below the predicted rise of more than 20%.\n- The only rivals, H1 and H3, are REFUTED, so no unrefuted rival explains the observations equally well.\n- T2 rests on an unverified worker return, so the result can't be called established or action-ready.\n- Nothing identifies the cause, so the wording has to be associative: p95 rose alongside the drop, and that doesn't show gateway latency caused it.\n- If a decision hangs on this, the report should name `decision-analysis` as the continuation.\n\nGOVERNING SKILL TEXT:\n- \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n- \"`SUPPORTED` is not a status; \"best supported\" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.\"\n- \"Record the fault as a limitation and treat the outcome as resting on an unverified return, however plausible the innocent reading; that limitation reaches the conclusion, where it bars treating the result as established or action-ready.\"\n- \"Absent such a design, associative language is mandatory and the limitations name which of those threats remain open.\"\n\nREASONING: H2's necessary prediction was that a flat gateway p95 (<10% relative) would refute it. T2 came back CONSISTENT, so that prediction did not fail. The status set allows only REFUTED or UNRESOLVED, so H2 is UNRESOLVED. I took T2 as settled and did not re-run it, since the source is metered and the budget is spent. The best-supported bar is met, but the limitation \"rests on an unverified worker return\" still reaches the conclusion. The skill keeps that limitation separate from the outcome cell and does not turn it into NON_DISCRIMINATING. H2 is a causal hypothesis with no identifying design, so the threats that stay open are co-occurring changes, selection, and unmeasured confounding."
+}

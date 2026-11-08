@@ -1,0 +1,117 @@
+{
+  "name": "s21d7-pre-2",
+  "started_utc": "2026-11-08T23:30:54.748662+00:00",
+  "duration_s": 185.2,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "94ee32cc-1db8-4e81-820f-dd9e07139809",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "692fd31",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "858f9f422ab89c6c723ca34296a2a544d396e302efa559aa6ec019192142e76c",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d7-support-clean.md",
+  "fixture_files_sha256": {
+    "d7-support-clean.md": "d77cce43c5a6313c9ab5f0da7d9a45493a8ae2a00a8a99e8e26d03b401b5ef3d"
+  },
+  "prompt_sha256": "90a8247dac5d1bdb98110a6eb12252e32dd087e00932e894a086f767a9d26454",
+  "jsonl_sha256": "56018165a33bb7f42ac39c2f3ae4d0c6b6324664f15abaa0d7cc01d6affe86b2",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-2-bkubv3z5",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "ef30565a96de911abaf4241f72feab5cee7643fd3f15f9c7052d18b6a9ec19d7"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-2-bkubv3z5/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-2-bkubv3z5/data/d7-support-clean.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-pre-2-bkubv3z5/work/answer.md\", \"content\": \"H2 STATUS: UNRESOLVED\\n\\nBEST SUPPORTED: Yes, H2 may be reported as best supported, on the stated bar. H2 is not REFUTED. T2 is a CONSISTENT outcome from a test that discriminates, because the preregistered detection limit (about 0.4% relative) is far below the predicted >20% rise. The only rivals, H1 and H3, are REFUTED, so no unrefuted rival explains the observations equally well. The report must state that this rests on an unverified worker return (metered source, budget spe"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 81852,
+    "cache_read_input_tokens": 93263,
+    "output_tokens": 2710,
+    "output_tokens_details": {
+      "thinking_tokens": 508
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 81852,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 905,
+        "cache_read_input_tokens": 81369,
+        "cache_creation_input_tokens": 1657,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1657
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.36384629999999996,
+    "duration_ms": 181271,
+    "num_turns": 4
+  },
+  "result_text": "H2 is UNRESOLVED, and it may be reported as best supported, with a caveat. I wrote this to `work/answer.md` and did no data collection.\n\n**H2 STATUS:** UNRESOLVED\n\n**BEST SUPPORTED:** Yes, on the skill's stated bar:\n- H2 is not REFUTED.\n- T2 is a CONSISTENT outcome from a test that discriminates, because the preregistered detection limit (about 0.4% relative) is far below the predicted >20% rise.\n- The only rivals, H1 and H3, are REFUTED, so no unrefuted rival explains the same observations equally well.\n\nThe report must say the result rests on an unverified worker return: the source is metered, the budget is spent, and the query can't be re-run. That means it can't be called established or action-ready. There is no identifying design, so the wording must be associative, not causal.\n\n**GOVERNING SKILL TEXT:**\n- \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n- \"`SUPPORTED` is not a status; \"best supported\" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.\"\n- \"When neither is available \u2014 metered source, budget spent, and a return you cannot fault on its face \u2014 record that the verdict rests on an unverified worker return. That is a limitation to state, not a verification to claim.\"\n\n**REASONING:**\n- **Status:** REFUTED needs the necessary prediction (gateway p95 flat, under 10% relative) to fail under an adequate test. T2 is CONSISTENT: p95 went from 24.1 to 31.2 ms, +29.5%, so that prediction held. H2 is therefore UNRESOLVED. \"Supported\" is not a status, and \"best supported\" is basis text only.\n- **Reconciliation:** I did not revisit it. The Outcome stays CONSISTENT, with the unverified-return limitation beside it. That limitation doesn't turn the outcome into NON_DISCRIMINATING: the free check found no fault, and a change of the predicted size could not have hidden inside the detection limit.\n- **Bar and wording:** The bar is met, so H2 is best supported with the unverified-return limitation carried next to the conclusion. The wording stays associative because assignment isn't identified and other co-occurring changes are untested. The skill's constructive continuation is `causal-identification-review`, if installed.\n\nI wrote no ledger file, so I ran no record validator and make no validator claim."
+}

@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-2-twsw6smf",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nA skill is installed. Its full instructions live at:\n/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-2-twsw6smf/skills/hypothesis-driven-analysis/SKILL.md\n\nRead that file and follow it as your working method; its references live beside it.\n\nThe user's request:\n\n\"You are the main agent of an empirical investigation, resuming at a single decision point.\nThe skill governing your work is the installed skill named in these instructions: read its SKILL.md and follow it.\nYour status packet is /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-2-twsw6smf/data/d7-support-clean.md\nINPUT SCOPE (binding): the packet file and that SKILL.md are your ONLY inputs. Do not read any other file, and do not read anything under any tests/ directory. Do not run any git command whatsoever. Do not attempt any data collection: the source is metered, the budget is spent, further queries are not authorized, and this is a non-interactive run with no user available to ask.\nTASK: test T2 has already been reconciled into the ledger, and that reconciliation is settled. Derive H2's status from the ledger as the skill dictates.\nWrite your answer to answer.md in your working-files directory, in exactly this form:\nH2 STATUS: <the status you derive for H2 \u2014 name it exactly>\nBEST SUPPORTED: <whether H2 may be reported as best supported, and on what basis>\nGOVERNING SKILL TEXT: <quote the sentence(s) from SKILL.md your derivation follows, verbatim>\nREASONING: <a short paragraph>\nReport the same content as your final message.\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-2-twsw6smf/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-2-twsw6smf"
+  ]
+}

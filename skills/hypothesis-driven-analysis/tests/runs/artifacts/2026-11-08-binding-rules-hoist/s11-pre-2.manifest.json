@@ -1,0 +1,122 @@
+{
+  "name": "s11-pre-2",
+  "started_utc": "2026-11-08T23:30:57.806213+00:00",
+  "duration_s": 205.9,
+  "exit_code": 0,
+  "claude_version": "2.1.319 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "daf73ced-e75f-4dfd-ae67-bccad28676d4",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "692fd31",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "858f9f422ab89c6c723ca34296a2a544d396e302efa559aa6ec019192142e76c",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s11-mini",
+  "fixture_files_sha256": {
+    "s11-mini/checkout_latency.csv": "eea96d9793a56153d23f7412a1cebbba2ac0fb2eadd0acb4f1b9a41650a8523c"
+  },
+  "prompt_sha256": "b0270964b53bd6146bddd9cd5cf8459abc33d0523726485ddaf116f42852f1a3",
+  "jsonl_sha256": "b3c5fa3ded990390993fdb7d89089e301b094db8029130d205b1b43c581f4f58",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-2-igs7nnsb",
+  "files_written": [
+    "ledger-mini.md"
+  ],
+  "files_written_sha256": {
+    "ledger-mini.md": "7b04fd744da9d5a9eea9976fe9405a14b83e492067152c3bce1add1562b49878"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-2-igs7nnsb/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-2-igs7nnsb; wc -l data/s11-mini/checkout_latency.csv; head -4 data/s11-mini/checkout_latency.csv; python3 -I - <<'E'\\nimport csv,collections\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nd=collections.Counter(x['timestamp'][:10] for x in r);print(sorted(d.items()))\\nprint(r[0]['timestamp'],r[-1]['timestamp'])\\nprint(sum(1 for x in r if not x['latency_ms'].strip()), len({x['request_id'] for x in r}))\\nE\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-2-igs7nnsb; mkdir -p work; python3 -I - <<'E'\\nimport csv,random,math\\nfrom scipy import stats\\nE\\npython3 -I - <<'E'\\nimport csv,random\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nv=sorted(float(x['latency_ms']) for x in r);n=len(v)\\ndef p(a,q):\\n    return a[min(len(a)-1,int(-(-q*len(a)//1))-1)]\\nprint(n,p(v,.95),v[-5:],sum(x>500 for x in v))\\nrandom.seed(1);b=sorted(p(sorted(random.choices(v,k=n)),.95) for _ in range(5000))\\nprint(b[125],b[4875])\\n# order-stat binomial 95% CI\\nfrom math imp"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-2-igs7nnsb; python3 -I - <<'E'\\nimport csv\\nfrom collections import defaultdict\\nr=list(csv.DictReader(open('data/s11-mini/checkout_latency.csv')))\\nh=defaultdict(list)\\nfor x in r:h[x['timestamp'][11:13]].append(float(x['latency_ms']))\\nfor k in sorted(h):\\n    a=sorted(h[k]);print(k,len(a),a[int(.95*len(a))-1],a[-1])\\nE\\ncat > work/ledger-mini.md <<'E'\\n# Mini ledger\\nClaim: checkout p95 latency > 500ms on 2026-07-15 (non-causal, single claim; route: mini).\\nPrediction: if true, p95 (nearest-rank) of that day's late"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 79092,
+    "cache_read_input_tokens": 248839,
+    "output_tokens": 2357,
+    "output_tokens_details": {
+      "thinking_tokens": 172
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 79092,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 583,
+        "cache_read_input_tokens": 79754,
+        "cache_creation_input_tokens": 849,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 849
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3648419,
+    "duration_ms": 203757,
+    "num_turns": 5
+  },
+  "result_text": "**The data doesn't support the claim for the hours it covers, but it covers only 20 of the 24 hours.**\n\n- **p95:** The p95 of the file is 392.2 ms, well under 500 ms. I used a bootstrap 95% interval with 5,000 resamples, and the interval is 374.7\u2013409.4 ms. The 500 ms the claim needs is far outside it.\n- **Hourly p95:** No hour exceeds 500 ms. The highest hourly p95 is 460 ms, at 15:00.\n- **Slow requests:** 14 of 1,200 requests (1.2%) were over 500 ms, and the maximum was 708.7 ms. That is far too few to lift the p95 above 500 ms. If the claim came from seeing individual slow requests, that could explain it.\n\n**Coverage gap:** The file has exactly one row per minute from 00:00 to 19:59 UTC on 2026-07-15. Nothing covers 20:00\u201323:59, and I can't tell from the file whether those hours were unrecorded or had no traffic. Four hours of extra slow requests would be needed to push the daily p95 over 500 ms. That is not plausible given the first 20 hours, but I can't rule it out. The one-per-minute pattern also suggests this is a sample rather than every request. I assumed UTC timestamps for \"yesterday\".\n\nTo close the gap, check whether the source has 20:00\u201323:59 data, and whether the person making the claim measured something different, such as a different endpoint, a different percentile method, or the full request set.\n\nThe ledger is in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s11-pre-2-igs7nnsb/work/ledger-mini.md`."
+}
