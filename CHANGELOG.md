@@ -9,6 +9,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 ### Fixed
 
 - Decision analysis: the record validator now enforces the Numeric Policy's provenance rules — every provenance mention comes from the closed class set, `sensitivity-only` may not appear in Evidence and update, a `robust` verdict's losses must be `user-elicited` or `externally-sourced`, and a `dominated` verdict's belief slots read `none needed` (#60).
+- The record validator accepts the identification-review template's probes table (`assessment` and `evidence or reason` columns, not `result`), checks the assessment vocabulary as a closed set, and asks no probe rows of a `not-constructible` design (#61).
+- The record validator accepts an exploration log headed `## Frame-lite` for the profile route and asks it for scope and budget only, as SKILL.md § Profile Route prescribes (#62).
 
 ### Changed
 
