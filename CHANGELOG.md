@@ -6,6 +6,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-08
+
 ### Added
 
 - Decision analysis: a record form for a decision with no supported prior — Prior odds and Posterior odds read `none supported — see Robustness`, supported likelihood ratios stay in the Evidence table, an unquantified item is a paired `none supported` row with its reason, and the sweep in Robustness does the arithmetic (#41). Measured on DA-S1, DA-S1x and DA-S3 at n=1 per cell.
@@ -13,7 +15,6 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Changed
 
-- The evidence-status page records the binding-rules hoist for `hypothesis-driven-analysis` (#66): measured, and withdrawn after a preregistered regression on one cell, so the skill's text is unchanged; its prefix evidence was prefix-only, and Claude Code's context compaction itself was not exercised.
 - Decision analysis: § Numeric Policy now carries one ordered verdict rule (`dominated`, then the loss cap, then `prior-sensitive`, then `loss-sensitive`, then `robust`), treats only `user-elicited` and `externally-sourced` losses as belief-grade, and records a rounded elicited loss at its nominal value with analyst-chosen endpoints as `sensitivity-only`; § The Decide Route's verdict bullets point there. Both checkers enforce the paired sentinels, the loss cap, and per-axis flip tests.
 - The evidence-status page reports per-scenario measurement status: one table per skill covering every catalog scenario, with the wording each was measured against, whether that wording ships, and the result; it no longer calls the exploration and decision-analysis catalogs unrun, records the 2026-11-08 settlement of the missing-prior and verdict-precedence debts, and refreshes the context-cost word counts (#68).
 - The output style page names both ways to select `Data Answer` — `/output-style data-reasoning:Data Answer` and `/config` → Output style — and records that output styles are supported, not deprecated, in current Claude Code (#70).
@@ -71,7 +72,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 - The `exploratory-data-analysis`, `hypothesis-driven-analysis`, and `causal-identification-review` skills.
 - The plugin manifest, README, and repository conventions.
 
-[Unreleased]: https://github.com/briandconnelly/data-reasoning/compare/v0.3.0...dev
+[Unreleased]: https://github.com/briandconnelly/data-reasoning/compare/v0.4.0...dev
+[0.4.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/briandconnelly/data-reasoning/releases/tag/v0.1.0
