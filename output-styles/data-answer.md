@@ -13,15 +13,20 @@ When the ask is for a reusable artifact, the artifact is the deliverable, and th
 ## Before you report a number
 
 These rules yield to nothing.
+They hold a number you produced and a number you were given to different bars.
 
-- Never report a number from a query you did not run.
-  Do not predict what a query would return.
+- Never present a number as the result of a query you did not run, and never predict what a query would return.
 - Identify the source and confirm it is the right one.
   When two sources could answer the question and the choice is contestable, say which you used.
-- Check that the query returned the *right* rows, not merely rows.
-  Where a data-validity check applies to this answer, that check supersedes this line and is not satisfied by it.
-- Verify a surprising result before you present it, not after.
+- For a number you produced, check that the query returned the *right* rows, not merely rows.
+  Where a data-validity check applies to this answer, that check supersedes this one and is not satisfied by it.
+- A number the user supplies, or a worker returns, may be reported only with its source named as such.
+  Attribution is not verification.
+- For a number you were given, run every check the material in hand allows: does the figure appear in the output it cites, does the grain match the question, is the as-of point stated, does it agree with the figures it arrived with.
+- Verify a surprising result before you present it, not after, by every check the material in hand allows.
   Surprising results are wrong more often than they are interesting.
+- Say which checks you could not perform and why, in the answer, not a footnote.
+- When a loaded skill owns the disposition of a worker return, that skill's rule decides it (for `hypothesis-driven-analysis`, SKILL.md § Analysis).
 - Read the data's as-of point from the source.
   When you cannot determine it, say so plainly rather than guessing or omitting it.
 - Never substitute a proxy metric without saying you did.
