@@ -1,0 +1,125 @@
+{
+  "name": "da-s1-pre",
+  "started_utc": "2026-11-10T14:22:32.750563+00:00",
+  "duration_s": 58.0,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "a97a34a8-eced-4712-946e-805f14047683",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "cac2464",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "38ccdaf3e82726a97d08bcbb168829942a67994ecb1afc9bbb8b000153596054",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "c01b9ef98f74338f4f4a9f8f88885b00b6d4e7d9c18b8269f5ad2f7d24fee3a3"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "ebe48c9a25772935ef70df4f2a5b11793fb2c37d99dad28b03eac5d043b29940",
+  "jsonl_sha256": "887a9224b3b3f5e6b13b06761bb025c69d45bd8a88ef8350df331e79d70415d9",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "3c981cd9351af0638f209cd324466d0a46e698d3c1b30343e02ea40fc5cb6330"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the release carrying the connection-pool change, given an unresolved checkout p95 regression\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship the release vs hold the release one week\\n- Decision owner: the release owner (user's team)\\n- Reversibility: holding costs one week of delay and is recoverable; shipping a real regression reaches users and costs roughly ten times a hold\\n- Deadline or forcing event: release freeze on Friday\\"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"python3 -I \\\"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/instruments/check_record.py\\\" --final \\\"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/work/decision-record.md\\\"\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 74833,
+    "cache_read_input_tokens": 158109,
+    "output_tokens": 4464,
+    "output_tokens_details": {
+      "thinking_tokens": 1347
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 74833,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1086,
+        "cache_read_input_tokens": 75580,
+        "cache_creation_input_tokens": 3171,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3171
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.35979890000000003,
+    "duration_ms": 57146,
+    "num_turns": 6
+  },
+  "result_text": "**I'd lean toward holding. The analysis can't make that call for you, though.** It comes out `prior-sensitive`: the answer turns on a prior I don't have a supported number for.\n\n**What drives the answer**\n- **Loss and threshold:** you said a missed regression costs about 10 times a needless hold, so I used a loss ratio of 10. Hold wins once the odds that the regression is real exceed 1 in 10 (0.1).\n- **The one usable number:** the gap itself. The canary hosts run about 57 ms above control, which is past the 40 ms noise band. In your 20 past rollouts, 9 of 10 real regressions showed such a gap, against 2 of 10 non-regressions. That's a likelihood ratio of 4.5, estimated from that data.\n  - I treated the gap (T1) and the past-rollout table (T3) as one piece of evidence, not two. T3 is the reference class for T1's observation, so multiplying them would count it twice.\n  - The ratio rests on 10 rollouts per group, so it's imprecise. The 10/10 split was fixed by quota, so it says nothing about how often a gap turns out to be real.\n- **No usable prior:** nothing in the ledger says how likely a pool change is to regress p95 before you saw the gap. I didn't invent one. The two \"unresolved\" statuses carry no likelihood information either, so I gave them no number.\n- **Why the gap alone doesn't settle it:** both explanations predict the gap in the metrics pipeline, so the gap can't tell them apart. Only the raw access logs (T2) can, and they weren't acquired.\n\n**Where the answer flips**\n- Multiplying by 4.5 means hold wins whenever the pre-gap odds of a real regression exceed about 0.022. That is roughly a 2.2% chance.\n- Shipping is only the better call if you were already more than about 98% sure the pool change was harmless before seeing the gap.\n- With a gap this clean (every canary host above every control host), I doubt most people would hold that belief. That's why I lean hold, but it's your call.\n- The 10\u00d7 loss is the only loss figure I used. If the true cost ratio were below about 2 at a prior of 0.1, the answer would flip. You said \"roughly ten\", so I didn't sweep it.\n\n**What would change this**\n- The only thing that would turn a lean into a firm answer is the raw access logs. The restore is still pending. If they can be restored before Friday, run the discriminating test (T2): flat raw p95 points to an exporter artifact and favors ship, and a matching gap confirms a real regression and favors hold.\n- I haven't priced that option against the cost of a one-week hold. Restoring the logs is an action that needs your go-ahead.\n- Today is 2026-11-10 but the ledger dates the data to 2026-09-09 and the release to 2026-09-12. I assumed you're asking about that release, with Friday as the freeze. If the dates are off, the log retention window may matter too.\n\nThe structural validator ran clean. That only checks the record's format, not whether the analysis is right.\n\nThe record is at `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s1-pre-sowhhjcs/work/decision-record.md`."
+}

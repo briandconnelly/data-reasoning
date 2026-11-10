@@ -29,10 +29,17 @@ belief slots reading exactly `none needed`, with no trailing annotation; the
 voi signal-model/value-basis/verdict coupling and the quantity grammar for
 Cost and Upper bound; and
 (arithmetic gates) recomputation of the posterior-odds interval and, when a
-numeric decision threshold is recorded, of the prior-odds crossover interval
-(both endpoints) against the swept prior class. Required numeric fields that
-do not parse, or violate their domain (ordered ranges, odds, LRs, and
-thresholds strictly positive), are gate failures -- never skipped checks.
+numeric decision threshold is recorded or supplied by the stated loss ratio,
+the ordered verdict rule -- the prior, loss, and likelihood-ratio flips and
+the exact tie (see _check_ordered_rule), the crossover interval the
+verdict's axis names, and the direction of a robust recommendation against
+the Favored if true slot. Decision-boundary comparisons are exact (decimal
+values are read as exact fractions, and a range is a point only when its
+endpoints are equal); rounding tolerance applies only where a stated number
+(posterior odds, a crossover) is compared with a computed one. Required
+numeric fields that do not parse, or violate their domain (ordered ranges,
+odds, LRs, and thresholds strictly positive), are gate failures -- never
+skipped checks.
 
 Explicitly NOT this checker's claim: whether the record preceded reasoning
 (a transcript-level fact this file never sees), whether a likelihood ratio is
@@ -58,10 +65,13 @@ from __future__ import annotations
 
 import re
 import sys
+from fractions import Fraction
 from pathlib import Path
 
 ROUTES = frozenset({"decide", "voi"})
-DECIDE_VERDICTS = frozenset({"robust", "prior-sensitive", "loss-sensitive", "dominated"})
+DECIDE_VERDICTS = frozenset(
+    {"robust", "prior-sensitive", "loss-sensitive", "evidence-sensitive", "dominated"}
+)
 VOI_VERDICTS = frozenset(
     {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 )
@@ -90,6 +100,7 @@ DECIDE_LABELS: dict[str, tuple[str, ...]] = {
         "Reversibility:",
         "Deadline or forcing event:",
         "Consequences:",
+        "Favored if true:",
         "Loss ratio:",
         "Decision threshold (posterior odds):",
     ),
@@ -193,6 +204,70 @@ def parse_range(value: str) -> tuple[float, float] | None:
     return (low, high)
 
 
+Interval = tuple[Fraction, Fraction]
+
+
+def parse_exact(value: str) -> Interval | None:
+    """`parse_range`, read exactly: each decimal becomes a Fraction, so a
+    decision-boundary comparison is never decided by binary rounding."""
+    m = _RANGE.match(value)
+    if not m:
+        return None
+    low = Fraction(m.group(1))
+    high = Fraction(m.group(2)) if m.group(2) else low
+    if low > high:
+        return None
+    return (low, high)
+
+
+def _meets(a: Interval, b: Interval) -> bool:
+    """Closed intervals share a point; touching endpoints count (a tie is a flip)."""
+    return a[0] <= b[1] and b[0] <= a[1]
+
+
+def _is_point(r: Interval) -> bool:
+    return r[0] == r[1]
+
+
+Losses = dict[str, tuple[Fraction, Fraction]]
+
+
+def orient(losses: Losses) -> tuple[str, str, Fraction | None]:
+    """SKILL.md § Numeric Policy's orientation, executable.
+
+    `losses` maps each of the two actions to its (loss if H, loss if not-H).
+    Returns ``("dominated", winner, None)`` when one action's loss is no
+    higher than the other's in both states (ties included; r is never
+    computed), else ``(favored, other, r)``: favored has the lower loss when
+    H is true, and r = [L(other,H) - L(favored,H)] / [L(favored,not-H) -
+    L(other,not-H)], both differences positive.
+    """
+    (a, (a_h, a_n)), (b, (b_h, b_n)) = sorted(losses.items())
+    if a_h <= b_h and a_n <= b_n:
+        return ("dominated", a, None)
+    if b_h <= a_h and b_n <= a_n:
+        return ("dominated", b, None)
+    favored, other = (a, b) if a_h < b_h else (b, a)
+    f_h, f_n = losses[favored]
+    o_h, o_n = losses[other]
+    return (favored, other, (o_h - f_h) / (f_n - o_n))
+
+
+def preferred_action(losses: Losses, posterior_odds: Fraction) -> str | None:
+    """The action with the lower expected loss at these posterior odds of H,
+    or None at an exact tie. The favored action wins above 1/r."""
+    kind, winner, r = orient(losses)
+    if kind == "dominated":
+        return winner
+    assert r is not None
+    other = next(a for a in losses if a != kind)
+    if posterior_odds > 1 / r:
+        return kind
+    if posterior_odds < 1 / r:
+        return other
+    return None
+
+
 def parse_quantity(value: str) -> tuple[float, str] | None:
     """Parse a nonnegative decimal followed by its machine-comparable unit."""
     m = _QUANTITY.match(value)
@@ -221,13 +296,15 @@ _CELL_SPLIT = re.compile(r"(?<!\\)\|")
 # by one of these phrases and nothing else: "flips at prior odds 0.025",
 # "prior odds 0.02-0.03", "0.025". Signs, reversed ranges, and prose around
 # the number are not a crossover statement.
-_CROSSOVER_PREFIX = re.compile(r"^(?:flips at\s+)?(?:prior odds\s+|loss ratio\s+)?", re.I)
-_CROSSOVER_AXIS = re.compile(r"^(?:flips at\s+)?(prior odds|loss ratio)\b", re.I)
+_CROSSOVER_PREFIX = re.compile(
+    r"^(?:flips at\s+)?(?:prior odds\s+|loss ratio\s+|likelihood ratio\s+)?", re.I
+)
+_CROSSOVER_AXIS = re.compile(r"^(?:flips at\s+)?(prior odds|loss ratio|likelihood ratio)\b", re.I)
 
 
 def _crossover_axis(text: str) -> str | None:
-    """The quantity a stated crossover names, `prior odds` or `loss ratio`,
-    or None when it names neither."""
+    """The quantity a stated crossover names -- `prior odds`, `loss ratio`,
+    or `likelihood ratio` -- or None when it names none of them."""
     m = _CROSSOVER_AXIS.match(text.strip())
     return m.group(1).lower() if m else None
 
@@ -430,8 +507,9 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
         )
     else:
         failures.extend(_check_recommended_action(sections, verdict, actions))
+        failures.extend(_check_favored(frame, verdict, actions))
     belief_losses = _belief_grade_losses(sections)
-    if verdict in ("robust", "prior-sensitive") and not belief_losses:
+    if verdict in ("robust", "prior-sensitive", "evidence-sensitive") and not belief_losses:
         failures.append(
             f"a {verdict} verdict requires '- Loss ratio:' and '- Loss range swept:' to each "
             "carry exactly one user-elicited or externally-sourced provenance; any other class "
@@ -454,11 +532,38 @@ def _belief_grade_losses(sections: dict[str, str]) -> bool:
     return True
 
 
+def _action_names(actions: str) -> list[str]:
+    return [a.strip() for a in re.split(r"\s+vs\s+", actions)]
+
+
+def _check_favored(frame: str, verdict: str, actions: str) -> list[str]:
+    """Favored if true names a framed action, bare -- or, under `dominated`
+    only, reads exactly `none needed` (SKILL.md § Numeric Policy)."""
+    favored = (field(frame, "Favored if true:") or "").strip()
+    names = _action_names(actions)
+    if verdict == "dominated":
+        if favored != "none needed":
+            return [
+                "a dominated verdict requires '- Favored if true:' to read exactly "
+                f"'none needed', with no annotation; found {favored!r}"
+            ]
+        return []
+    if favored not in names:
+        return [
+            f"'- Favored if true:' must name one of the framed actions {names!r} exactly "
+            f"(or read 'none needed' under a dominated verdict); found {favored!r}"
+        ]
+    return []
+
+
 def _check_frame_scope(frame: str, actions: str) -> list[str]:
     """Enforce the v1 binary scope on the Actions slot and Consequences table."""
     failures: list[str] = []
-    if len(re.split(r"\s+vs\s+", actions)) != _SCOPE_ACTIONS:
+    names = _action_names(actions)
+    if len(names) != _SCOPE_ACTIONS:
         failures.append("Actions must name exactly two actions separated by ' vs ' (v1 scope)")
+    elif len({" ".join(n.lower().split()) for n in names}) != _SCOPE_ACTIONS:
+        failures.append(f"Actions must name two distinct actions; found {actions!r}")
     rows = _table_rows(frame)
     data = _data_rows(rows)
     if len(data) != _SCOPE_ACTION_ROWS:
@@ -540,6 +645,8 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             failures.append("Prior odds must parse as a positive number or ordered range")
 
     lr_product: tuple[float, float] | None = (1.0, 1.0)
+    lr_exact: Interval | None = (Fraction(1), Fraction(1))
+    lr_ranged = False  # some supported row states its ratio as a range
     supported_rows = 0
     data = _data_rows(_table_rows(evidence))
     if not data:
@@ -569,6 +676,10 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             lr_product = None
         elif lr_product is not None:
             lr_product = (lr_product[0] * lr[0], lr_product[1] * lr[1])
+            exact = parse_exact(row[1])
+            if exact is not None and lr_exact is not None:
+                lr_exact = (lr_exact[0] * exact[0], lr_exact[1] * exact[1])
+                lr_ranged = lr_ranged or not _is_point(exact)
         if row[2] not in PROVENANCE:
             failures.append(f"Evidence provenance cell {row[2]!r} is not a provenance class")
         if row[2] in ("externally-sourced", "estimated-from-data-in-hand") and not row[3]:
@@ -584,6 +695,14 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                 "no supported likelihood ratio remains, so no quantitative update is supported "
                 "and hypothetical inputs alone cannot reach robust (SKILL.md § Numeric Policy)"
             )
+    if lr_product is None:
+        lr_exact = None
+    if verdict == "evidence-sensitive" and not lr_ranged:
+        failures.append(
+            "an evidence-sensitive verdict requires a supported likelihood ratio stated as a "
+            "range in the Evidence table; no supported row states one, so no likelihood-ratio "
+            "range can flip the action (SKILL.md § Numeric Policy)"
+        )
 
     posterior_value = _bare(posterior_raw)
     posterior = None
@@ -620,7 +739,7 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
 
     crossover_text = (field(robustness, "Crossover:") or "").strip()
     threshold_value = _bare(field(frame, "Decision threshold (posterior odds):") or "")
-    threshold = None if threshold_value == "none stated" else parse_range(threshold_value)
+    threshold = None if threshold_value == "none stated" else parse_exact(threshold_value)
     if threshold_value != "none stated":
         if threshold is None:
             failures.append("Decision threshold must be 'none stated' or parse as a number")
@@ -628,154 +747,44 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
             failures.append("Decision threshold odds must be strictly positive")
             threshold = None
 
-    loss_swept = parse_range(_bare(field(robustness, "Loss range swept:") or ""))
+    loss_swept = parse_exact(_bare(field(robustness, "Loss range swept:") or ""))
+    if loss_swept is not None and loss_swept[0] <= 0:
+        loss_swept = None
     loss_stated_value = _bare(field(frame, "Loss ratio:") or "")
-    loss_stated = None if loss_stated_value == "none stated" else parse_range(loss_stated_value)
+    loss_stated = None if loss_stated_value == "none stated" else parse_exact(loss_stated_value)
     if threshold is None and loss_stated and loss_stated[0] > 0:
         # No threshold stated: the stated loss ratio supplies it (SKILL.md
         # § Numeric Policy), so a robust claim is never unverifiable merely
         # because the threshold slot reads 'none stated'.
         threshold = (1 / loss_stated[1], 1 / loss_stated[0])
 
-    if threshold and lr_product and swept:
-        # Prior flip, over the stated losses and every loss in the swept range
-        # (SKILL.md § Numeric Policy): prior odds at which posterior odds meet a
-        # threshold, so threshold / LR, where the threshold interval spans the
-        # stated one and 1 / L for the swept losses. A product of positive
-        # factors is monotone in each, so this interval meeting the class is
-        # the same fact as the action reversing somewhere in the class x range.
-        thr_lo, thr_hi = threshold
-        if loss_swept and loss_swept[0] > 0:
-            thr_lo = min(thr_lo, 1 / loss_swept[1])
-            thr_hi = max(thr_hi, 1 / loss_swept[0])
-        pf = (thr_lo / lr_product[1], thr_hi / lr_product[0])
-        class_is_point = swept[0] >= swept[1] * (1 - _REL_TOLERANCE)
-        prior_flip = (
-            not class_is_point
-            and pf[0] <= swept[1] * (1 + _REL_TOLERANCE)
-            and pf[1] >= swept[0] * (1 - _REL_TOLERANCE)
-        )
-        # Loss flip at the stated prior (the swept class standing in when no
-        # prior is supported): the loss ratio at which that prior's posterior
-        # meets 1 / L, so 1 / (prior * LR). A single-point range cannot flip.
-        stated_prior = prior or swept
-        lf = None
-        loss_flip = False
-        if loss_swept and loss_swept[0] > 0 and stated_prior[0] > 0:
-            lf = (1 / (stated_prior[1] * lr_product[1]), 1 / (stated_prior[0] * lr_product[0]))
-            loss_is_point = loss_swept[0] >= loss_swept[1] * (1 - _REL_TOLERANCE)
-            loss_flip = (
-                not loss_is_point
-                and lf[0] <= loss_swept[1] * (1 + _REL_TOLERANCE)
-                and lf[1] >= loss_swept[0] * (1 - _REL_TOLERANCE)
+    swept_x = parse_exact(_bare(field(robustness, "Prior class swept:") or ""))
+    prior_x = parse_exact(_bare(prior_value)) if prior and not no_prior else None
+    if swept_x is not None and swept_x[0] <= 0:
+        swept_x = None
+
+    if threshold and lr_exact and swept_x:
+        failures.extend(
+            _check_ordered_rule(
+                sections,
+                verdict=verdict,
+                belief_losses=belief_losses,
+                crossover_text=crossover_text,
+                threshold=threshold,
+                lr=lr_exact,
+                swept=swept_x,
+                prior=prior_x,
+                loss_swept=loss_swept,
             )
-        stated = _crossover_value(crossover_text)
-        round_lo, round_hi = _rounding_tolerances(crossover_text)
-        axis = _crossover_axis(crossover_text)
-
-        def _within(interval: tuple[float, float]) -> bool:
-            """Each stated endpoint lies in the computed interval widened by
-            the larger of the relative tolerance and half a unit in that
-            endpoint's own last decimal place."""
-            if stated is None:
-                return False
-            for value, rounding in ((stated[0], round_lo), (stated[1], round_hi)):
-                lo = min(interval[0] * (1 - _REL_TOLERANCE), interval[0] - rounding)
-                hi = max(interval[1] * (1 + _REL_TOLERANCE), interval[1] + rounding)
-                if not (lo <= value <= hi):
-                    return False
-            return True
-
-        def _axis_matches(expected: str) -> bool:
-            return axis is None or axis == expected
-
-        if verdict == "robust":
-            if prior_flip:
-                failures.append(
-                    f"robust verdict, but the computed prior-odds crossover "
-                    f"[{pf[0]:g}, {pf[1]:g}] lies inside the swept prior class (over the "
-                    "stated losses and the swept loss range)"
-                )
-            if loss_flip:
-                failures.append(
-                    f"robust verdict, but the computed loss-ratio crossover "
-                    f"[{lf[0]:g}, {lf[1]:g}] lies inside the swept loss range"
-                )
-            # § Robustness asks for the crossover statement, so a robust record
-            # may name the flip point outside the swept class -- every number
-            # it states must lie in the computed interval -- or carry the
-            # sentinel.
-            if crossover_text != "none within swept class":
-                if not _axis_matches("prior odds"):
-                    failures.append(
-                        "a robust verdict's stated Crossover names prior odds; "
-                        f"found {crossover_text!r}"
-                    )
-                elif not _within(pf):
-                    failures.append(
-                        "a robust verdict requires Crossover 'none within swept class' or the "
-                        f"flip point outside the swept class (computed [{pf[0]:g}, "
-                        f"{pf[1]:g}]); found {crossover_text!r}"
-                    )
-        elif verdict == "prior-sensitive":
-            if not prior_flip:
-                failures.append(
-                    "prior-sensitive verdict, but the computed prior-odds crossover "
-                    f"[{pf[0]:g}, {pf[1]:g}] does not intersect the swept prior class"
-                )
-            elif not _axis_matches("prior odds"):
-                failures.append(
-                    "a prior-sensitive verdict's Crossover names prior odds; "
-                    f"found {crossover_text!r}"
-                )
-            elif not _within(pf):
-                failures.append(
-                    f"prior-sensitive crossover {crossover_text!r} does not fall in the "
-                    f"computed prior-odds interval [{pf[0]:g}, {pf[1]:g}]"
-                )
-        elif verdict == "loss-sensitive" and belief_losses:
-            if prior_flip:
-                failures.append(
-                    "loss-sensitive verdict, but varying the prior flips the action "
-                    f"(computed [{pf[0]:g}, {pf[1]:g}] meets the swept class); "
-                    "the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
-                )
-            elif not _axis_matches("loss ratio"):
-                failures.append(
-                    "a loss-sensitive verdict's Crossover names a loss ratio; "
-                    f"found {crossover_text!r}"
-                )
-            elif lf is None or not loss_flip:
-                failures.append(
-                    "loss-sensitive verdict, but the computed loss-ratio crossover "
-                    + (f"[{lf[0]:g}, {lf[1]:g}] " if lf else "")
-                    + "does not intersect the swept loss range"
-                )
-            elif not _within(lf):
-                failures.append(
-                    f"loss-sensitive crossover {crossover_text!r} does not fall in the "
-                    f"computed loss-ratio interval [{lf[0]:g}, {lf[1]:g}]"
-                )
-        elif verdict == "loss-sensitive":
-            if not _axis_matches("loss ratio"):
-                failures.append(
-                    "a loss-sensitive verdict's Crossover names a loss ratio; "
-                    f"found {crossover_text!r}"
-                )
-            numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
-            if crossover_text.lower().startswith("none") or not numbers or float(numbers[0]) <= 0:
-                failures.append(
-                    "a loss-sensitive verdict requires a Crossover naming a positive flip "
-                    f"point; found {crossover_text!r}"
-                )
+        )
     else:
         if verdict == "robust" and crossover_text != "none within swept class":
             failures.append(
                 "a robust verdict requires Crossover 'none within swept class'; "
                 f"found {crossover_text!r}"
             )
-        if verdict in {"prior-sensitive", "loss-sensitive"}:
-            expected = "prior odds" if verdict == "prior-sensitive" else "loss ratio"
+        if verdict in _SENSITIVE_AXIS:
+            expected = _SENSITIVE_AXIS[verdict]
             axis = _crossover_axis(crossover_text)
             if axis is not None and axis != expected:
                 failures.append(
@@ -788,6 +797,254 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
                     f"point; found {crossover_text!r}"
                 )
     return failures
+
+
+# The quantity each sensitive verdict's Crossover reports (SKILL.md § Numeric
+# Policy's ordered rule).
+_SENSITIVE_AXIS = {
+    "prior-sensitive": "prior odds",
+    "loss-sensitive": "loss ratio",
+    "evidence-sensitive": "likelihood ratio",
+}
+
+
+def _fmt(interval: Interval) -> str:
+    return f"[{float(interval[0]):g}, {float(interval[1]):g}]"
+
+
+def _check_ordered_rule(  # noqa: PLR0912, PLR0913, PLR0915 -- one pass over the ordered rule
+    sections: dict[str, str],
+    *,
+    verdict: str,
+    belief_losses: bool,
+    crossover_text: str,
+    threshold: Interval,
+    lr: Interval,
+    swept: Interval,
+    prior: Interval | None,
+    loss_swept: Interval | None,
+) -> list[str]:
+    """SKILL.md § Numeric Policy's ordered verdict rule, decided exactly.
+
+    The prior and loss clauses are the base checker's (dev `cac2464`), with
+    exact comparisons in place of its 1% padding and point tolerance:
+
+    - prior: the prior odds at which posterior odds meet a threshold --
+      ``threshold / LR``, the threshold interval spanning the stated (or
+      loss-supplied) threshold and 1 / L for each swept loss L -- meet the
+      swept prior class, which must be a genuine range;
+    - loss: at the stated prior (the swept class standing in when no prior is
+      supported), posterior odds meet 1 / L for some swept L, the loss range
+      being a genuine range.
+
+    The likelihood-ratio clause is new: some ratio within the supported
+    ranges (which must form a genuine range) carries posterior odds at the
+    stated prior across the stated (or loss-supplied) threshold, not widened
+    by the swept losses. An exact tie -- every input a point and posterior
+    odds equal to that threshold -- prefers neither action and takes
+    prior-sensitive. A tie at a range's endpoint counts as reaching it.
+    """
+    failures: list[str] = []
+    thr_lo, thr_hi = threshold
+    if loss_swept:
+        thr_lo = min(thr_lo, 1 / loss_swept[1])
+        thr_hi = max(thr_hi, 1 / loss_swept[0])
+    pf = (thr_lo / lr[1], thr_hi / lr[0])
+    prior_flip = not _is_point(swept) and _meets(pf, swept)
+    stated_prior = prior or swept
+    lf: Interval | None = None
+    loss_flip = False
+    if loss_swept:
+        lf = (1 / (stated_prior[1] * lr[1]), 1 / (stated_prior[0] * lr[0]))
+        loss_flip = not _is_point(loss_swept) and _meets(lf, loss_swept)
+    at_prior = (stated_prior[0] * lr[0], stated_prior[1] * lr[1])
+    lr_flip = not _is_point(lr) and _meets(at_prior, threshold)
+    ef = (threshold[0] / stated_prior[1], threshold[1] / stated_prior[0])
+    tie = (
+        all(_is_point(r) for r in (swept, stated_prior, lr, threshold))
+        and (loss_swept is None or _is_point(loss_swept))
+        and at_prior[0] == threshold[0]
+    )
+    prior_clause = prior_flip or tie
+
+    stated = _crossover_value(crossover_text)
+    round_lo, round_hi = _rounding_tolerances(crossover_text)
+    axis = _crossover_axis(crossover_text)
+
+    def _within(interval: Interval) -> bool:
+        """Each stated endpoint lies in the computed interval widened by
+        the larger of the relative tolerance and half a unit in that
+        endpoint's own last decimal place."""
+        if stated is None:
+            return False
+        lo_c, hi_c = float(interval[0]), float(interval[1])
+        for value, rounding in ((stated[0], round_lo), (stated[1], round_hi)):
+            lo = min(lo_c * (1 - _REL_TOLERANCE), lo_c - rounding)
+            hi = max(hi_c * (1 + _REL_TOLERANCE), hi_c + rounding)
+            if not (lo <= value <= hi):
+                return False
+        return True
+
+    def _axis_matches(expected: str) -> bool:
+        return axis is None or axis == expected
+
+    if verdict == "robust":
+        if prior_flip:
+            failures.append(
+                f"robust verdict, but the computed prior-odds crossover {_fmt(pf)} lies "
+                "inside the swept prior class (over the stated losses, the swept loss range, "
+                "and the supported likelihood-ratio ranges)"
+            )
+        if loss_flip and lf is not None:
+            failures.append(
+                f"robust verdict, but the computed loss-ratio crossover {_fmt(lf)} "
+                "lies inside the swept loss range"
+            )
+        if lr_flip and not (prior_flip or loss_flip):
+            failures.append(
+                f"robust verdict, but the supported likelihood-ratio range flips the action: "
+                f"posterior odds {_fmt(at_prior)} at the stated prior meet the threshold "
+                f"{_fmt(threshold)}; the ordered rule gives evidence-sensitive "
+                "(SKILL.md § Numeric Policy)"
+            )
+        if tie:
+            failures.append(
+                f"robust verdict, but every input is a point and posterior odds "
+                f"{float(at_prior[0]):g} equal the threshold exactly, so neither action is "
+                "preferred; the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
+            )
+        # § Robustness asks for the crossover statement, so a robust record
+        # may name the flip point outside the swept class -- every number
+        # it states must lie in the computed interval -- or carry the
+        # sentinel.
+        # § Robustness names the likelihood-ratio product as a crossover
+        # quantity too, so a robust record may state that flip point instead
+        # (2026-11-10 DA-S10 canary); a loss-ratio statement stays rejected.
+        if crossover_text != "none within swept class":
+            if axis == "likelihood ratio":
+                if not _within(ef):
+                    failures.append(
+                        "a robust verdict's likelihood-ratio Crossover must lie in the computed "
+                        f"interval {_fmt(ef)}; found {crossover_text!r}"
+                    )
+            elif not _axis_matches("prior odds"):
+                failures.append(
+                    "a robust verdict's stated Crossover names prior odds or a likelihood "
+                    f"ratio; found {crossover_text!r}"
+                )
+            elif not _within(pf):
+                failures.append(
+                    "a robust verdict requires Crossover 'none within swept class' or the "
+                    f"flip point outside the swept class (computed {_fmt(pf)}); "
+                    f"found {crossover_text!r}"
+                )
+        if not (prior_flip or loss_flip or lr_flip or tie):
+            failures.extend(_check_robust_direction(sections, at_prior, threshold))
+    elif verdict == "prior-sensitive":
+        if not prior_clause:
+            failures.append(
+                f"prior-sensitive verdict, but the computed prior-odds crossover {_fmt(pf)} "
+                "does not intersect the swept prior class"
+            )
+        elif not _axis_matches("prior odds"):
+            failures.append(
+                f"a prior-sensitive verdict's Crossover names prior odds; found {crossover_text!r}"
+            )
+        elif not _within(pf):
+            failures.append(
+                f"prior-sensitive crossover {crossover_text!r} does not fall in the "
+                f"computed prior-odds interval {_fmt(pf)}"
+            )
+    elif verdict == "loss-sensitive" and belief_losses:
+        if prior_clause:
+            failures.append(
+                "loss-sensitive verdict, but varying the prior flips the action "
+                f"(computed {_fmt(pf)} meets the swept class); "
+                "the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
+            )
+        elif not _axis_matches("loss ratio"):
+            failures.append(
+                f"a loss-sensitive verdict's Crossover names a loss ratio; found {crossover_text!r}"
+            )
+        elif lf is None or not loss_flip:
+            failures.append(
+                "loss-sensitive verdict, but the computed loss-ratio crossover "
+                + (f"{_fmt(lf)} " if lf else "")
+                + "does not intersect the swept loss range"
+            )
+        elif not _within(lf):
+            failures.append(
+                f"loss-sensitive crossover {crossover_text!r} does not fall in the "
+                f"computed loss-ratio interval {_fmt(lf)}"
+            )
+    elif verdict == "loss-sensitive":
+        if not _axis_matches("loss ratio"):
+            failures.append(
+                f"a loss-sensitive verdict's Crossover names a loss ratio; found {crossover_text!r}"
+            )
+        numbers = re.findall(r"\d+(?:\.\d+)?", crossover_text)
+        if crossover_text.lower().startswith("none") or not numbers or float(numbers[0]) <= 0:
+            failures.append(
+                "a loss-sensitive verdict requires a Crossover naming a positive flip "
+                f"point; found {crossover_text!r}"
+            )
+    elif verdict == "evidence-sensitive":
+        if prior_clause:
+            failures.append(
+                "evidence-sensitive verdict, but varying the prior flips the action "
+                f"(computed {_fmt(pf)} meets the swept class); "
+                "the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
+            )
+        elif loss_flip:
+            failures.append(
+                "evidence-sensitive verdict, but varying the losses flips the action "
+                f"(computed {_fmt(lf) if lf else ''} meets the swept loss range); "
+                "the ordered rule gives loss-sensitive (SKILL.md § Numeric Policy)"
+            )
+        elif not lr_flip:
+            failures.append(
+                f"evidence-sensitive verdict, but posterior odds {_fmt(at_prior)} at the stated "
+                f"prior do not meet the threshold {_fmt(threshold)}: no supported "
+                "likelihood-ratio range flips the action"
+            )
+        elif not _axis_matches("likelihood ratio"):
+            failures.append(
+                "an evidence-sensitive verdict's Crossover names a likelihood ratio; "
+                f"found {crossover_text!r}"
+            )
+        elif not _within(ef):
+            failures.append(
+                f"evidence-sensitive crossover {crossover_text!r} does not fall in the "
+                f"computed likelihood-ratio interval {_fmt(ef)}"
+            )
+    return failures
+
+
+def _check_robust_direction(
+    sections: dict[str, str], joint: Interval, threshold: Interval
+) -> list[str]:
+    """A robust record recommends the Favored if true action when posterior
+    odds at the stated prior lie above the stated threshold, and the other
+    action when they lie below it (SKILL.md § Numeric Policy)."""
+    actions = _action_names(_bare(field(sections["Decision frame"], "Actions:") or ""))
+    favored = (field(sections["Decision frame"], "Favored if true:") or "").strip()
+    recommended = (field(sections["Verdict"], "Recommended action:") or "").strip()
+    if len(set(actions)) != _SCOPE_ACTIONS or favored not in actions or recommended not in actions:
+        return []  # each is its own finding already
+    other = next(a for a in actions if a != favored)
+    if joint[0] > threshold[1]:
+        expected, side = favored, "above"
+    elif joint[1] < threshold[0]:
+        expected, side = other, "below"
+    else:
+        return []  # a stated threshold range the posterior straddles: unsettled (decisions/007)
+    if recommended != expected:
+        return [
+            f"robust verdict recommends {recommended!r}, but posterior odds {_fmt(joint)} lie "
+            f"{side} the threshold {_fmt(threshold)}, where the preferred action is "
+            f"{expected!r} (Favored if true: {favored!r}; SKILL.md § Numeric Policy)"
+        ]
+    return []
 
 
 def _check_voi_signal_model(signal: str, basis: str, failures: list[str]) -> None:

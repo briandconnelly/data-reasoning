@@ -1,9 +1,10 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status: the original scenarios below are authored only — no arm of those fixtures has run, and nothing below is a result.**
+**Status (2026-11-10):** DA-S1, DA-S1x, DA-S3, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2 and DA-S4–S7 have no arm.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
-Every fixture named here is still to be generated; generating fixtures deterministically (with validators in the house pattern) and running arms is the recorded follow-up, and a fixture must be validated to still encode its stated properties before any run scored against it is trusted.
+Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
+A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.
 Trigger scenarios load a catalog containing this skill's description AND the three siblings', because the failure under test is collision; record which skill activated and, if this one, which route it took.
 Give each agent only the scenario prompt and any skill access required; do not reveal assertions, expected routes, or prior outputs.
@@ -11,9 +12,9 @@ With-skill subagents may read the skill files and the one fixture directory name
 Store each scored output as `tests/runs/YYYY-MM-DD-<id>-<variant>.md` (`baseline`, `with-skill`, `trigger`); on re-runs append `-rerun` and say which earlier run it supersedes and why.
 Score record shape with `check_decision.py`; anything asserting an action did NOT happen needs harness transcript evidence archived under `tests/runs/artifacts/`.
 
-## Owed measurements as of 2026-08-09
+## Owed measurements (opened 2026-08-09; entries dated)
 
-- Every scenario below: 0 arms run.
+- As of 2026-08-09 every scenario below had 0 arms run; the 2026-09-15 and 2026-11-08 entries below record the arms since.
 - The SKILL.md description's routing behavior: unmeasured.
 - The two HDA seam sentences: recorded as HDA's own debt in `skills/hypothesis-driven-analysis/tests/scenarios.md` § Owed measurements.
 - The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
@@ -34,13 +35,16 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
   A future attempt owes a `loss-sensitive` path for a no-prior record with `sensitivity-only` losses, which the withdrawn checker branch lacked, and its own preregistered arms.
   **Attempt 2, 2026-11-08:** § Numeric Policy now carries the no-supported-prior form, the rounded-loss rule, and one ordered verdict rule with the loss cap; both checkers carry the paired sentinels and the per-axis flip tests; preregistered in `runs/artifacts/2026-11-08-no-supported-prior-prereg.md` (DA-S1, DA-S1x exact-loss control, DA-S3, DA-S8).
 - Debt surfaced 2026-09-15 (wave 2): a `prior-sensitive` record must state two crossovers and the template's Crossover slot has one line; the DA-S8 post arm wrote both as prose and the checker read the wrong number.
+- The 2026-11-09 wording (`decisions/007`): the likelihood-ratio clause, the `evidence-sensitive` verdict, the tie and point rulings, and the Favored if true orientation slot.
+  **Measured 2026-11-10** (`runs/2026-11-10-evidence-sweep.md`): no behavioral lift on DA-S9 or DA-S10 at n=3 (pre already reasoned and acted correctly; preregistration row 7), no regression on the DA-S1 and DA-S8 controls at n=1; under the pre text all three DA-S9 arms chose `prior-sensitive`, which failed the base checker 3/3.
+  Preregistered in `runs/artifacts/2026-11-09-evidence-sweep/prereg.md` (new cells DA-S9 and DA-S10); the cells that already exist and reach the edited text are listed, with the debt left unpaid, in `runs/artifacts/2026-11-09-evidence-sweep/reachability.md`.
 
 ## Scenarios
 
 ### DA-S1 — clean decide
 
 **Prompt:** "Here's our investigation ledger (`tests/fixtures/da-s1-ledger/ledger.md`) — it ended with two UNRESOLVED explanations for the p95 regression. Release freeze is Friday. Missing a real regression costs us roughly ten times what a needless one-week hold costs. Should we ship or hold?"
-**Fixture:** `da-s1-ledger` — an HDA-format ledger with two UNRESOLVED rows and one evidence pointer usable as a sourced LR; to be generated with a validator.
+**Fixture:** `da-s1-ledger` — an HDA-format ledger with two UNRESOLVED rows and one evidence pointer usable as a sourced LR; generated by `fixtures/generate_da_s1.py` and validated by `fixtures/validate_da_s1.py`.
 **Expected:** decide route; a decision record written before the verdict.
 
 - [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
@@ -116,3 +120,30 @@ Added 2026-09-15 for the § Verdict precedence rule (both sensitivities fire →
 - [ ] Verdict is `prior-sensitive`, not `loss-sensitive`; Recommended action reads `returned to owner`.
   (Revised 2026-09-15 with § Verdict: the first form also required the loss crossover in Conditions, which one of two post arms and the pre arm did not do; see `runs/2026-09-15-da-s1-da-s8-degraded-mode-and-precedence.md` § Wave 3. Revised 2026-11-08 to the slot's one-value form; see `runs/2026-11-08-no-supported-prior.md`.)
 - [ ] Baseline expectation: picks a point estimate from each range and recommends unconditionally.
+
+### DA-S9 — a likelihood-ratio range alone flips the action (evidence sweep)
+
+**Prompt:** `runs/artifacts/2026-11-09-evidence-sweep/prompts/da-s9.txt`, with `{FIXTURE_PATH}` the staged `fixtures/da-sweep/s9-lr-range/` packet: tonight's checksum-mismatch alert on db-07 persisted after a re-read; the alert census's rate is stated as settled; losses over (corrupt, not) are restore now = (1, 1) and keep serving = (3, 0); "should we restore now or keep serving?"
+**Fixture:** `da-sweep/s9-lr-range` — a census of 200 alerts (40 confirmed corruption, prior odds 0.25) and a vendor note bounding the re-read ratio to 0.5–4 on every firmware revision; validated by `fixtures/validate_da_sweep.py`.
+**Expected:** decide route; restore now is favored if the corruption is real, the incremental loss ratio is (3 − 1) / (1 − 0) = 2, and the threshold is 0.5; posterior odds 0.125–1 straddle it while the prior and the losses are points, so only the ratio range flips the action, at a ratio of 2.
+Added 2026-11-09 for § Numeric Policy's likelihood-ratio clause and `evidence-sensitive` verdict (`decisions/007`); the assertions and their scoring are preregistered in `runs/artifacts/2026-11-09-evidence-sweep/prereg.md`.
+
+- [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
+- [ ] Prior odds `0.25` from the census, held fixed; the ratio row carries `0.5–4`, `externally-sourced`, naming the vendor note, the controller family, and the unknown firmware revision; posterior odds recompute (0.125–1).
+- [ ] At the fixed prior, the record shows that varying the ratio alone carries the posterior across the threshold 0.5.
+- [ ] Verdict `evidence-sensitive`; Recommended action `returned to owner`; Crossover names the likelihood ratio, 2.
+- [ ] Baseline expectation: picks a point inside 0.5–4 or the midpoint and recommends unconditionally.
+
+### DA-S10 — an asymmetric four-cell loss matrix (orientation)
+
+**Prompt:** `runs/artifacts/2026-11-09-evidence-sweep/prompts/da-s10.txt`, with `{FIXTURE_PATH}` the staged `fixtures/da-sweep/s10v2-loss-matrix/` packet: release 6.0's canary spiked; the release census's rate is stated as settled; losses in engineer-days are ship now = (10, 0) and hold one week = (1, 1) over (real, not); "ship now or hold one week?"
+**Fixture:** `da-sweep/s10v2-loss-matrix` — a census of releases 3.0–5.6 to a stated cutoff (7 of 207 real regressions, prior odds 0.035) and a quota-drawn reference class of 20,000 canaries per stratum fixing a ratio of 3, narrow enough that its 95% interval keeps the posterior between 0.1 and 1/9; release 6.0 appears in neither; validated by `fixtures/validate_da_sweep.py`.
+The first packet, `s10-loss-matrix` (20 per stratum), was retired on 2026-11-10 after its canary stated the ratio as an interval straddling the threshold; it is kept only as that canary's archived input.
+**Expected:** decide route; posterior odds 0.105; hold one week is favored if the regression is real, the incremental loss ratio is (10 − 1) / (1 − 0) = 9, so the threshold is 1/9 ≈ 0.111 and ship now is preferred; the raw reading 10:1 gives 0.1 and hold.
+Added 2026-11-09 for § Numeric Policy's orientation rule (`decisions/007`); scoring is preregistered beside DA-S9's.
+
+- [ ] Record written from the template before any posterior appears, and it passes `check_decision.py`.
+- [ ] Prior odds `0.035` and the ratio `3` carry `estimated-from-data-in-hand`, each naming its file and reference class; posterior odds recompute (0.105).
+- [ ] Favored if true reads `hold one week`; Loss ratio reads `9 — provenance: user-elicited`; the threshold stated or implied is 1/9 ≈ 0.111, not 0.1.
+- [ ] Verdict `robust`, Recommended action `ship now`.
+- [ ] Baseline expectation: reads the matrix as 10:1 and holds, or recommends without a threshold.

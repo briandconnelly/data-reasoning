@@ -1,0 +1,104 @@
+{
+  "name": "da-s10-baseline",
+  "started_utc": "2026-11-10T14:23:47.247714+00:00",
+  "duration_s": 39.6,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "411d8b77-29d6-45ac-a79b-121416c77a7f",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": null,
+  "skill_ref": "working-tree",
+  "skill_md_override": null,
+  "skill_files_sha256": null,
+  "instruments_sha256": {
+    "instruments/check_record.py": "e2dfdf8221ed04605571b127b6c4b1912f692fde99ff3a740125d0cfed636b5d"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-sweep/s10v2-loss-matrix",
+  "fixture_files_sha256": {
+    "s10v2-loss-matrix/README.md": "2e7acdaa6645717b5042e775e0bb498192333ddb2923369b049fe115d08f3d37",
+    "s10v2-loss-matrix/evidence/release_history.csv": "94e0ddcc89a98cff8d02279ec3fb286a3a8eb89cadbd753fe99bd06e1df13bbf",
+    "s10v2-loss-matrix/evidence/spike_reference.csv": "d90721e9224911aa95165883b6dad4c4d1e8068a310fed0da84c4c760d40038a"
+  },
+  "prompt_sha256": "d85352c6bf05062b65bd71e39d1ed7a62fed52fffbb3a9b23e6f54a55e259c90",
+  "jsonl_sha256": "e8f179d9a4e8d47a865ac26e6a7e8f74d962175e32c5008ca6384ec141fb90b0",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-baseline-ng7t2q_x",
+  "files_written": [
+    "notes.md"
+  ],
+  "files_written_sha256": {
+    "notes.md": "3352c8d0b062e4a4e65f76ecc4c203c3fd622bf6aba64d8567276dd964ad82ac"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-baseline-ng7t2q_x/data/s10v2-loss-matrix/ && ls -la && head -c 3000 *\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-baseline-ng7t2q_x/data/s10v2-loss-matrix/evidence && ls -la && cat spike_reference.csv && wc -l release_history.csv && head -5 release_history.csv && awk -F, 'NR>1{n[$NF]++}END{for(k in n)print k,n[k]}' release_history.csv\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-baseline-ng7t2q_x/work && cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-baseline-ng7t2q_x/work/notes.md <<'E'\\nprior 7/207=0.0338; P(spike|real)=18000/20000=0.9; P(spike|not)=6000/20000=0.3; LR=3\\nposterior odds=(7/200)*3=0.105 -> p=0.0950\\nE[loss] ship=10*0.0950=0.950; hold=1.0. Break-even p=0.1. Decision: ship (marginal).\\nE\\npython3 -c \\\"p=.105/1.105;print(p,10*p)\\\"\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 59602,
+    "cache_read_input_tokens": 137485,
+    "output_tokens": 1382,
+    "output_tokens_details": {
+      "thinking_tokens": 159
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 59602,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 539,
+        "cache_read_input_tokens": 63044,
+        "cache_creation_input_tokens": 523,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 523
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.26599249999999997,
+    "duration_ms": 39060,
+    "num_turns": 4
+  },
+  "result_text": "**Ship now.** The margin is thin: expected loss is 0.95 engineer-days for shipping against 1.00 for holding.\n\n**Calculation**\n- **Base rate:** the release history shows 7 real regressions in 207 releases, or 3.38%. That is odds of 7 to 200.\n- **Spike likelihoods:** the reference class was drawn to fixed 20,000/20,000 quotas, so I used only the within-class rates and ignored its 50/50 split.\n  - A spike appeared in 18,000 of 20,000 real regressions (0.90).\n  - A spike appeared in 6,000 of 20,000 non-regressions (0.30).\n  - A spike is therefore 3 times as likely under a real regression.\n- **Posterior:** the odds become 7/200 \u00d7 3 = 0.105, so P(real regression | spike) is about **9.5%**.\n- **Expected loss:**\n  - Ship now: 0.095 \u00d7 10 + 0.905 \u00d7 0 = **0.95 engineer-days**.\n  - Hold one week: **1.0 engineer-days**, since it costs 1 either way.\n\nHolding only wins if the probability of a real regression is above 10% (1 \u00f7 10). The posterior is 9.5%, just under that.\n\nBecause the margin is so thin, a modestly higher base rate or a weaker spike signal would flip the decision. You told me to treat the base rate as settled, so I did not vary it. The result does assume the reference class's spike rates apply to Release 6.0's canary. The release history stops at 5.6 and doesn't include 6.0.\n\nMy notes are in `work/notes.md`."
+}

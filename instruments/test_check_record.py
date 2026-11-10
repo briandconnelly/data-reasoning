@@ -266,6 +266,7 @@ GOOD_DECISION = """\
   | ship | regression ships | on time |
   | wait | caught | a week lost |
 
+- Favored if true: wait
 - Loss ratio: 3 — provenance: user-elicited
 - Decision threshold (posterior odds): 3:1 — provenance: user-elicited
 
@@ -1501,10 +1502,17 @@ def test_dominated_verdict_requires_none_needed_belief_slots():
         "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: dominated"
     ).replace("- Recommended action: returned to owner", "- Recommended action: ship")
     findings = cr.check(dom)
-    for label in ("Prior odds", "Posterior odds", "Prior class swept", "Crossover"):
+    for label in (
+        "Favored if true",
+        "Prior odds",
+        "Posterior odds",
+        "Prior class swept",
+        "Crossover",
+    ):
         assert any("dominated" in f and label in f for f in findings), (label, findings)
     ok = (
-        dom.replace("- Prior odds: 1:1 — provenance: user-elicited", "- Prior odds: none needed")
+        dom.replace("- Favored if true: wait", "- Favored if true: none needed")
+        .replace("- Prior odds: 1:1 — provenance: user-elicited", "- Prior odds: none needed")
         .replace("- Posterior odds: 2:1", "- Posterior odds: none needed")
         .replace("- Prior class swept: 1:3 to 3:1", "- Prior class swept: none needed")
         .replace("- Crossover: none within swept class", "- Crossover: none needed")
@@ -1717,3 +1725,58 @@ def test_entity_profile_note_without_required_heading_is_not_a_record(tmp_path, 
     assert cr.detect(f.read_text()) is None
     assert cr.main([str(f)]) == 2  # noqa: PLR2004 -- the CLI's documented not-a-record code
     assert capsys.readouterr().out == ""
+
+
+# decision-analysis decisions/007: the fifth verdict and the Favored if true
+# slot, structurally. The verdict arithmetic lives in the dev checker
+# (skills/decision-analysis/tests/check_decision.py), never here.
+
+
+def test_evidence_sensitive_is_in_the_closed_set():
+    rec = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: evidence-sensitive"
+    )
+    assert cr.check(rec, final=True) == []
+
+
+def test_evidence_sensitive_with_sensitivity_only_losses_is_capped():
+    rec = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: evidence-sensitive"
+    ).replace(
+        "- Loss ratio: 3 — provenance: user-elicited",
+        "- Loss ratio: 3 — provenance: sensitivity-only",
+    )
+    findings = cr.check(rec, final=True)
+    assert any("evidence-sensitive" in f and "Loss ratio" in f for f in findings), findings
+
+
+def test_favored_if_true_is_a_required_slot():
+    rec = GOOD_DECISION.replace("- Favored if true: wait\n", "")
+    assert any("Favored if true" in f for f in cr.check(rec, final=True))
+
+
+def test_favored_if_true_none_needed_only_under_dominated():
+    rec = GOOD_DECISION.replace("- Favored if true: wait", "- Favored if true: none needed")
+    findings = cr.check(rec)
+    assert any("Favored if true" in f and "none needed" in f for f in findings), findings
+
+
+def test_validator_does_no_verdict_arithmetic():
+    """A decimal record whose own likelihood-ratio range reverses the action
+    under `robust` is the dev checker's to reject; the shipped validator stays
+    structural (decisions/007), so it must not hand an arm the expected verdict."""
+    rec = (
+        GOOD_DECISION.replace("- Loss ratio: 3 —", "- Loss ratio: 1 —")
+        .replace(
+            "- Decision threshold (posterior odds): 3:1 — provenance: user-elicited",
+            "- Decision threshold (posterior odds): none stated",
+        )
+        .replace("- Prior odds: 1:1 —", "- Prior odds: 1 —")
+        .replace("| T1 consistent | 2 |", "| T1 consistent | 0.1-10 |")
+        .replace("- Posterior odds: 2:1", "- Posterior odds: 0.1-10")
+        .replace("- Prior class swept: 1:3 to 3:1", "- Prior class swept: 1-1")
+        .replace("- Loss range swept: 1 to 5 —", "- Loss range swept: 1-1 —")
+        .replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
+        .replace("- Recommended action: returned to owner", "- Recommended action: wait")
+    )
+    assert cr.check(rec, final=True) == []

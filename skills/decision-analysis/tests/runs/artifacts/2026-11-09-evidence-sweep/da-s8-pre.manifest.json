@@ -1,0 +1,125 @@
+{
+  "name": "da-s8-pre",
+  "started_utc": "2026-11-10T14:23:47.359364+00:00",
+  "duration_s": 85.0,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "38764c40-ad50-47a4-8c75-c921e518d618",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "cac2464",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "38ccdaf3e82726a97d08bcbb168829942a67994ecb1afc9bbb8b000153596054",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "c01b9ef98f74338f4f4a9f8f88885b00b6d4e7d9c18b8269f5ad2f7d24fee3a3"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "a0f62511e444a1292a006225e6768ef7a1ce735dc00496cc8cd9b058826808c7",
+  "jsonl_sha256": "e61e769016fcf02dcc976bbe8faf0a3a718c7ff4212e3127442d6207d9cab73d",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "b1a03e9ee60eb5534457fd83c1342a64c1c28444a32637f1f5b2f1f627ca949c"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/work && cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/work/decision-record.md <<'EOF'\\n# Decision Record: Ship or hold the pool-change release at the Friday freeze\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship the release with the pool change vs hold the release one week\\n- Decision owner: the release team (decision owner as named by the requester; not identified in the ledger)\\n- Reversibility: a hold costs one week and is recoverable; a shipped real regress"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr && ls instruments; python3 instruments/check_record.py --final work/decision-record.md; echo exit=$?\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 76289,
+    "cache_read_input_tokens": 240791,
+    "output_tokens": 5874,
+    "output_tokens_details": {
+      "thinking_tokens": 2646
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 76289,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1025,
+        "cache_read_input_tokens": 79983,
+        "cache_creation_input_tokens": 169,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 169
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3879951,
+    "duration_ms": 84419,
+    "num_turns": 6
+  },
+  "result_text": "**Recommendation: I can't give you a robust ship or hold, and the evidence alone doesn't settle it. The answer turns on your prior and your cost ratio, so the call goes back to you.** The verdict is `prior-sensitive`, and the loss ratio also flips it. The record is at `work/decision-record.md`, and the structural validator ran clean (exit 0). That check covers the record's format only, not whether the analysis is right.\n\n**The numbers**\n- **Evidence:** The only usable number is the reference class from your past canary rollouts. A gap over 40 ms showed up in 9 of 10 real regressions and 2 of 10 non-regressions, so the likelihood ratio is 0.9/0.2 = 4.5. I treated the 57 ms gap seen on 2026-09-09 and that table as one evidence item, not two. The gap alone can't separate a real change from an exporter artifact, because both come out of the same metrics pipeline.\n- **Posterior:** Your prior odds of 1:50 to 1:5 (0.02 to 0.2) become 0.09 to 0.9 after the update.\n- **Hold rule:** Hold when prior odds \u00d7 4.5 \u00d7 loss ratio is greater than 1. I counted one needless hold as 1 unit, so missing a real regression costs your 2 to 20.\n\n**Where it flips**\n- **Prior flips the answer:** The crossover prior is 0.111 at a loss ratio of 2, 0.044 at 5, 0.022 at 10 and 0.011 at 20. Ship only wins in the low-prior, low-loss corner. For example, a prior of 1:50 with a loss ratio of 2 gives ship.\n- **Loss ratio flips the answer too:** At a prior of 1:50, hold wins once the loss ratio exceeds 11.1. At a prior of 1:5, hold wins at every loss ratio from 2 to 20.\n- **Most of the space says hold:** If the team's real positions are anywhere near the middle, say a prior around 1:10 and a loss ratio of 5, hold wins.\n\n**What would settle it**\n- **The test that could resolve it:** The ledger's missing test, T2, would recompute p95 from the raw canary access logs. It is the only thing that tells a real regression from an exporter artifact, and it could push the posterior well outside 0.09 to 0.9.\n- **Cost vs. a hold:** The ledger shows the log restore as pending, and logs are kept for only 7 days. Weigh the restore time against a one-week hold; I have no cost figure for it.\n- **Date mismatch:** The ledger is dated September, with a 09-12 release, but today is 2026-11-10. Check whether the restore has landed since.\n\n**Limits**\n- **Small sample:** The 4.5 ratio comes from 10 rollouts per group, so it is noisy. I did not sweep it.\n- **No cause claimed:** The claim is descriptive. Nothing here says the pool change caused a gap.\n- **Nothing authorized:** This is a recommendation only; it authorizes neither shipping nor holding."
+}
