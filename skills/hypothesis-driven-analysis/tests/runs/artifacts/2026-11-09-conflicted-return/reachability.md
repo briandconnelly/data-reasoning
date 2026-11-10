@@ -1,6 +1,6 @@
 # Reachability: conflicted-return rule for status and "best supported" (issue #86)
 
-Written 2026-11-09, before any arm of this workstream exists.
+Written 2026-11-09, before any arm of this workstream exists; Revision 1 (2026-11-10), after the cross-model design review and still before any arm, moves S16 to debt, pays S21 d4, and corrects the budget sentence (§ Budget).
 Scope judgement per `../../../PROTOCOL.md` § What owes a rerun and `../../../../decisions/001-rerun-obligation.md`: a cell owes arms when its decision point traverses an edited sentence.
 
 ## Step 0 — the reported failure, re-derived
@@ -69,29 +69,34 @@ A "leading" or "best supported" phrase that the arm explicitly negates ("not bes
 | S21 d5 | E3 directly, E2 | cleared-but-unrepeatable `CONTRADICTED`: the over-correction the carve-out guards | yes — control | canary + 3 post |
 | S21 d7 | E3 directly, E2 | cleared-but-unrepeatable `CONSISTENT`: best supported must stand | yes — control | canary + 3 post |
 | S21 d1 | E2, antecedent false | `NON_DISCRIMINATING` floor | yes (floor control) | canary + 3 post |
-| S21 d4 | E2, antecedent false | `CONTRADICTED` with a disclosed immaterial deviation; neither a conflict nor the "unverified" wording that makes d5 the near miss | reached | **no — debt** |
-| S20 c3 | E1 inside the disposition block it is scored on; E2 via its unscored `H2 STATUS` field | the scored Outcome cell (`CONTRADICTED`, not `NON_DISCRIMINATING`) sits beside E1, and E2's "counts neither as … a discriminating test" is the sentence most likely to tempt a downgrade | yes — control on `decisions/003`'s token | canary + 3 post |
+| S21 d4 | E2, antecedent false | `CONTRADICTED` with a disclosed immaterial deviation; neither a conflict nor the "unverified" wording that makes d5 the near miss | yes — control | canary + 3 post (Revision 1) |
+| S20 c3 | E1 inside the disposition block it is scored on; E2 via its unscored `H2 STATUS` field | the scored Outcome cell (`CONTRADICTED`, not `NON_DISCRIMINATING`) sits beside E1, and E2's "counts neither as … a discriminating test" is the sentence most likely to tempt a downgrade | yes — compliance control on `decisions/003`'s token (post-only: compliance, not lift) | canary + 3 post |
 | S20 c1, c2, c4 | E1 read in the same subsection, antecedent false | established deviation, derived-value error, immaterial deviation; H2 status unscored | reached | no — debt |
-| S16 | E2 (bar limb), E1 | W2's conflicted `CONSISTENT` is H2's only support, H1/H3 refuted: the bar is live in a free full-route conclusion; its catalog text permitted "leading remaining candidate" | yes — the only full-route cell where the antecedent is true | canary + 3 post |
+| S16 | E2 (bar limb), E1 | W2's conflicted `CONSISTENT` is H2's only support: the antecedent is true in a free full-route conclusion | yes — but **entangled** | **no — debt** (Revision 1) |
 | S19 | E2 read at the bar, antecedent false | no return at all; already barred from "best supported" by having no `CONSISTENT` outcome | reached | no — debt |
 | S10 | E1 only if a live return faults, antecedent false on the archived run | honest live workers | reached | no — debt |
 | S1, S4, S6, S7, S8, S12, S15, S18 | E2, E3 read in § Conclusion, antecedent false | no conflicted return in any fixture; E3's antecedent arises only with a metered unrepeatable source, which none has | reached | no — debt |
 | S2, S3, S9, S11, S13, S14, S17, S22a–d | none | never reach § Conclusion (`direct`, `mini`, `estimation`, or no activation) | no | no |
 | CIR, DA, EDA cells | none | each stages its own skill | no | no |
 
-S16 owes arms because it is the cell where the rule changes the expected outcome of a free investigation, not only of a probe.
-Its fixture also carries a partial coherence the probes lack: W2's Command 2 and its output agree on 2026-07-15 (`index_used=NONE`, `first_seen=…09:00`), so an arm may argue that half of the return is uncontested.
-That half is still inside the return whose records conflict, and the necessary prediction is a two-day contrast whose baseline is the conflicted half; E2's "evidence from outside that return" is not met by it.
+**S16 owes arms and is not measured here.**
+It is the one full-route cell where the rule's antecedent is true, but its fixture cannot isolate the rule.
+Its ledger records "Sensitivity checks performed: none available at this grain", and H1 and H3 are refuted on flat results, so an arm following SKILL.md's null-result rule can leave a rival unresolved and decline "best supported" for H2 on the bar's third limb without the new sentence.
+The fixture also carries a partial coherence the probes lack: W2's Command 2 and its output agree on 2026-07-15 (`index_used=NONE`, `first_seen=…09:00`), so an arm may argue half the return is uncontested; that half is still inside the conflicted return, and the necessary prediction is a two-day contrast whose baseline is the conflicted half.
+What would make it measurable: a versioned S16 packet that preregisters a detection limit for the W1 and W3 datasets (as S20 and S21's Data Validity sections do), leaving the plants unchanged; that is a fixture change with its own digests and is outside this workstream.
+The catalog keeps S16's expected outcome as it was, with a dated draft note saying how "leading remaining candidate" must read under the drafted rule and that the note is unmeasured.
 
 S20 c3 is paid although E1 is a cross-reference, which `PROTOCOL.md` exempts: E1 is not a bare pointer inside c3's decision block, because the sentence it points at says the outcome does not count as a discriminating test, and c3 is the cell that scores whether an arm keeps a conflicted return's outcome rather than downgrading it.
+It has no pre under this frame, so it can establish compliance with the token rule after the edit, never lift.
 
-d4 is the one requested cell left unpaid.
-Its decision point reads E2, but neither of E2's or E3's antecedents is present, and d5 is the stricter refute-side control on the same path (it shares the "unverified" wording that a misapplied E2 would latch onto, which d4 does not).
-The 30-arm ceiling with five canaries cannot hold S21 ×5, S16, S20 c3 and d4 at canary + 3 each plus any retry, and S16 and S20 c3 each test something no S21 cell tests.
-That is a judgement, and d4 is recorded as debt, not as covered.
+## Budget (Revision 1, 2026-11-10)
+
+Seven paid cells at canary + 3 each — S21 d1, d3, d4, d5, d6, d7 and S20 c3 — are 7 canaries and 21 scored arms, 28 in all, leaving 2 of the 30-arm ceiling as the reserve.
+The first draft of this file said "five canaries"; it planned seven (S21 ×5, S16, S20 c3), and that sentence was wrong.
+d4 is paid with the budget S16 released, after the cross-model design review judged S16 entangled.
 
 ## Debt this workstream leaves
 
-S21 d4; S20 c1, c2, c4; S19; S10; S1, S4, S6, S7, S8, S12, S15, S18.
-Every one reads E2 or E3 with the antecedent false; none is measured for this change, and the wave record must say so.
+S16 (entangled, above); S20 c1, c2, c4; S19; S10; S1, S4, S6, S7, S8, S12, S15, S18.
+Every one but S16 reads E2 or E3 with the antecedent false; none is measured for this change, and the wave record must say so.
 Every arm is Sonnet under `run_arm.py`; Codex is unmeasured.
