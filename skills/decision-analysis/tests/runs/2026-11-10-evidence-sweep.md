@@ -75,7 +75,8 @@ The checker change ships.
 The `SKILL.md` and template text is not withdrawn, because row 7 prescribes no withdrawal; any later reduction of it is a new draft with its own reachability and arms.
 Nothing here measures a behavioral lift from the text.
 
-What the arms do show, without a disposition row of its own: under the pre text the DA-S9 arms had no legal verdict — they reasoned correctly and returned the decision, but `prior-sensitive` at a point prior class fails the base checker 3/3 — while every post DA-S9 record passes both checkers.
+What the arms do show, without a disposition row of its own: under the pre text the DA-S9 arms had no fitting label — they reasoned correctly and returned the decision, but the `prior-sensitive` verdict all three chose fails the base checker at a point prior class, 3/3 — while every post DA-S9 record chose `evidence-sensitive` and passes both checkers.
+This is not a claim that no verdict could pass the old checkers: they wrongly accept `robust` on these inputs, which is the defect the change fixes (commit review, 2026-11-10).
 That is a record-validity effect of the vocabulary, observed at n=3, not a change in reasoning or action.
 
 ## What did not go as preregistered
