@@ -1,0 +1,126 @@
+{
+  "name": "da-s8-post",
+  "started_utc": "2026-11-10T14:23:47.362034+00:00",
+  "duration_s": 75.5,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "574bdb82-09ba-4097-a67e-65be550c0e45",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "a470770",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "c2cc9fd2ddea9ed4cd553c982fc7b1f7aa73bb36ecb9e52e6432f9ddd143dba7",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/007-evidence-sweep-and-loss-orientation.md": "dae789bfa98f4bddbc0d5131e800030b4e072d517031604c9dece6b7218008f8",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "4fdc330cda5e97ee05e5fbeae49cc9e933df5ad50985ea3c68e7c2a34ac26577"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e2dfdf8221ed04605571b127b6c4b1912f692fde99ff3a740125d0cfed636b5d"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "0ffae5d6b4dffb1951e8cc5059fc3ce2eec3a4c921f503871d7f976786c475e1",
+  "jsonl_sha256": "7bdc7370a94db8a3a688d1206622076ba87a2b4b60911b1748800b71817e377f",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "a940b6fa2105f2a90bfcfe37494dcc4d5d4575ab255aa91e0f9ec89e07c8c625"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the pool-change release at the Friday freeze\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship the release vs hold the release one week\\n- Decision owner: the release owner / team that sets the Friday freeze\\n- Reversibility: a hold costs one week of delay and can be lifted next week; a shipped real regression costs user-facing latency until it is detected and rolled back\\n- Deadline or forcing event: release freeze Friday (ledger:"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /tmp && python3 -I \\\"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/instruments/check_record.py\\\" --final \\\"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/work/decision-record.md\\\"\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 76373,
+    "cache_read_input_tokens": 159283,
+    "output_tokens": 5375,
+    "output_tokens_details": {
+      "thinking_tokens": 2098
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 76373,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1192,
+        "cache_read_input_tokens": 76198,
+        "cache_creation_input_tokens": 4034,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4034
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3751863,
+    "duration_ms": 74969,
+    "num_turns": 6
+  },
+  "result_text": "**Verdict: the evidence doesn't settle ship versus hold across the ranges you gave. Hold is the safer lean, but the decision belongs to the owner.** The decision record's formal verdict is `prior-sensitive`, so the choice depends on which prior you adopt.\n\n**How I got there**\n- **Question:** is the canary-vs-control p95 gap a real served-latency regression? Hold is the favored action if it is real.\n- **Evidence:** the 57 ms gap (above the 40 ms noise band) is the only usable evidence. In the ledger's reference class of 20 past rollouts, 9 of 10 real regressions showed such a gap and 2 of 10 non-regressions did. That gives a likelihood ratio of 0.9 / 0.2 = 4.5. The split is quota-drawn, so it supports a likelihood ratio but not a base rate.\n- **Priors and losses:** I used your 1:50 to 1:5 prior (0.02\u20130.2) and your 2\u201320\u00d7 loss ratio as given. Neither is an invented number.\n- **Result:** the posterior odds of a real regression are about 0.09 to 0.9, against a hold-threshold of 0.05 to 0.5.\n- **Ledger status tokens:** I took no likelihood information from the two UNRESOLVED statuses.\n\n**Where it flips**\n\n| If a missed regression costs\u2026 | Hold is preferred when prior odds exceed\u2026 |\n| --- | --- |\n| 2\u00d7 a hold | 1:9 (0.111) |\n| 5\u00d7 | about 1:23 |\n| 10\u00d7 | about 1:45 |\n| 20\u00d7 | about 1:90, below your prior range, so hold wins at every prior you gave |\n\n- **Ship wins only in one corner:** a skeptical prior (below about 1:9) combined with a low miss cost (near 2\u00d7).\n- **Hold wins everywhere else:** at a miss cost of about 11\u00d7 or more, hold is preferred at every prior in your range. At a prior of 1:5, hold is preferred at every loss in your range.\n- **What the team should argue about:** whether the prior is below about 1:9 and a miss is only about 2\u00d7 a hold. The ship-versus-hold question comes down to those two numbers.\n\n**Caveats**\n- The likelihood ratio rests on only 10 and 10 past rollouts. I did not sweep its sampling error, so treat 4.5 as soft.\n- The gap comes from the same metrics pipeline that H2 (an exporter artifact) questions. The raw access-log test (T2) never ran, and that test is what could separate the two explanations.\n- The ledger's `S3` raw-log restore is still pending. If it lands before the freeze, a flat raw-log p95 would refute a real regression and favor shipping. I did not price that wait against the one-week hold. That would be a separate voi analysis, and pulling the logs needs its own authorization.\n- The ledger is dated September (release 2026-09-12), but today is 2026-11-10. Check that this is still the live freeze and that the evidence isn't stale.\n- I did not open `reference_class.csv`. I used the counts as the ledger reports them.\n- The structural check on the record (`check_record.py`) printed nothing. I'm treating that as no findings, not as proof the analysis is right.\n\nFiles are in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-post-kt8cg4ph/work`:\n- decision-record.md"
+}

@@ -1,0 +1,14 @@
+You are the main agent on a data-analysis task for a user.
+
+A skill is installed. Its full instructions live at:
+/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s9-post-1-0at32net/skills/decision-analysis/SKILL.md
+
+Read that file and follow it as your working method; its references live beside it.
+
+The user's request:
+
+"Tonight's checksum-mismatch alert on db-07 is written up in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s9-post-1-0at32net/data/s9-lr-range/README.md`, with our alert history and the storage vendor's note on re-reads. The mismatch persisted after a re-read. The alert history is a complete census, and we treat its corruption rate as the settled base rate, not something to vary. Our options are restoring db-07 from last night's backup now, or keeping it serving while we investigate in the morning. Our losses, in hours of outage-equivalent: restore now and it is real corruption, 1; restore now and it isn't, 1; keep serving and it is real corruption, 3; keep serving and it isn't, 0. We'll act on your recommendation ourselves — should we restore now or keep serving?"
+
+Write any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s9-post-1-0at32net/work.
+Read only what the request and these instructions name; do not read anything else on this machine.
+Your final message is your report to the user.

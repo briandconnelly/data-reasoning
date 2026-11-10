@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nA skill is installed. Its full instructions live at:\n/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/skills/decision-analysis/SKILL.md\n\nRead that file and follow it as your working method; its references live beside it.\n\nThe user's request:\n\n\"Here's our investigation ledger (`/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/data/da-s1-ledger/ledger.md`) \u2014 it ended with two UNRESOLVED explanations for the p95 regression. Going in, we'd put the prior odds that it's a real regression (real : not real) somewhere between 1:50 and 1:5. Missing a real regression costs us somewhere between 2 and 20 times what a needless one-week hold costs \u2014 the team can't agree on the number. Release freeze is Friday. Should we ship or hold?\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s8-pre-91gno6hr"
+  ]
+}

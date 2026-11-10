@@ -1,7 +1,7 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status (2026-11-10):** DA-S1, DA-S1x, DA-S3, and DA-S8 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2 and DA-S4–S7 have no arm; DA-S9 and DA-S10 are preregistered and unrun.
+**Status (2026-11-10):** DA-S1, DA-S1x, DA-S3, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2 and DA-S4–S7 have no arm.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
 Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
@@ -35,7 +35,8 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
   A future attempt owes a `loss-sensitive` path for a no-prior record with `sensitivity-only` losses, which the withdrawn checker branch lacked, and its own preregistered arms.
   **Attempt 2, 2026-11-08:** § Numeric Policy now carries the no-supported-prior form, the rounded-loss rule, and one ordered verdict rule with the loss cap; both checkers carry the paired sentinels and the per-axis flip tests; preregistered in `runs/artifacts/2026-11-08-no-supported-prior-prereg.md` (DA-S1, DA-S1x exact-loss control, DA-S3, DA-S8).
 - Debt surfaced 2026-09-15 (wave 2): a `prior-sensitive` record must state two crossovers and the template's Crossover slot has one line; the DA-S8 post arm wrote both as prose and the checker read the wrong number.
-- The 2026-11-09 wording (`decisions/007`): the likelihood-ratio sweep, the `evidence-sensitive` verdict, the tie and point rulings, and the Favored if true orientation slot: unmeasured.
+- The 2026-11-09 wording (`decisions/007`): the likelihood-ratio clause, the `evidence-sensitive` verdict, the tie and point rulings, and the Favored if true orientation slot.
+  **Measured 2026-11-10** (`runs/2026-11-10-evidence-sweep.md`): no behavioral lift on DA-S9 or DA-S10 at n=3 (pre already reasoned and acted correctly; preregistration row 7), no regression on the DA-S1 and DA-S8 controls at n=1; under the pre text the DA-S9 records had no legal verdict and failed the base checker 3/3.
   Preregistered in `runs/artifacts/2026-11-09-evidence-sweep/prereg.md` (new cells DA-S9 and DA-S10); the cells that already exist and reach the edited text are listed, with the debt left unpaid, in `runs/artifacts/2026-11-09-evidence-sweep/reachability.md`.
 
 ## Scenarios

@@ -43,6 +43,12 @@ The adopted ratio test reads the stated (or loss-supplied) threshold at the stat
 
 The changed dev checker was run read-only against every archived decision record under `tests/runs/`, with the new slot added to an in-memory copy; the run record of that comparison is the branch's verification report, and no archived record's arithmetic finding changed.
 
+## Measurement
+
+Run on 2026-11-10 (`../tests/runs/2026-11-10-evidence-sweep.md`): on both new cells the pre text already produced the right reasoning and action in 3 of 3 arms, so the preregistration's row 7 fired — no behavioral lift at n=3 — and the change ships as a vocabulary and checker fix rather than a measured improvement in reasoning.
+What the arms did show is the gap the first defect named: with no fifth verdict, the pre arms on the likelihood-ratio cell labelled a correct analysis `prior-sensitive`, one saying the closed set "has no value for a flip driven by an unswept likelihood ratio", and all three records failed the base checker.
+The first packet for the orientation cell was entangled with the likelihood-ratio rule (a 20-per-arm reference class supported a straddling interval) and was redesigned before any scored arm.
+
 ## Open owner question
 
 How a stated Decision threshold relates to the threshold the loss ratio implies is not settled here: a stated threshold keeps governing as before, and the prior clause still widens it by the inverse of each swept loss, as the base checker did.

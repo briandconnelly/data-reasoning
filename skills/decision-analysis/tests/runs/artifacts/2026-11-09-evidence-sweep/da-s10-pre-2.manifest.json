@@ -1,0 +1,125 @@
+{
+  "name": "da-s10-pre-2",
+  "started_utc": "2026-11-10T14:23:47.361354+00:00",
+  "duration_s": 111.9,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "80ca3d50-49b2-4e44-8800-76dba3c11520",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "cac2464",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "38ccdaf3e82726a97d08bcbb168829942a67994ecb1afc9bbb8b000153596054",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "c01b9ef98f74338f4f4a9f8f88885b00b6d4e7d9c18b8269f5ad2f7d24fee3a3"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-sweep/s10v2-loss-matrix",
+  "fixture_files_sha256": {
+    "s10v2-loss-matrix/README.md": "2e7acdaa6645717b5042e775e0bb498192333ddb2923369b049fe115d08f3d37",
+    "s10v2-loss-matrix/evidence/release_history.csv": "94e0ddcc89a98cff8d02279ec3fb286a3a8eb89cadbd753fe99bd06e1df13bbf",
+    "s10v2-loss-matrix/evidence/spike_reference.csv": "d90721e9224911aa95165883b6dad4c4d1e8068a310fed0da84c4c760d40038a"
+  },
+  "prompt_sha256": "1836492e996a5b615f1e468dab08f9f6e84d883524dd145dc24ce8fbfe966f5f",
+  "jsonl_sha256": "105bafeb0458dd945c2d732a28f54b6c4a5eb6556dc1165672b2c95458e0f751",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm",
+  "files_written": [
+    "decision_record.md"
+  ],
+  "files_written_sha256": {
+    "decision_record.md": "52a83e796f0c9695f680b6e7ee9409c26afa207fb5c14139dd272e897d993378"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Bash",
+      "input": "{\"command\": \"ls -la /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm/skills/decision-analysis/ /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm/data/s10v2-loss-matrix/\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm; cat data/s10v2-loss-matrix/README.md; ls -R data/s10v2-loss-matrix/evidence; cat skills/decision-analysis/references/decision-record-template.md; ls skills/decision-analysis/..\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm/data/s10v2-loss-matrix/evidence; cat spike_reference.csv; wc -l release_history.csv; head -5 release_history.csv; python3 -I -c \\\"\\nimport csv\\nr=list(csv.DictReader(open('release_history.csv')))\\nprint(r[0].keys(),len(r))\\nk=sum(1 for x in r if x['real_regression'].strip().lower() in('1','true','yes'))\\nprint(k,k/len(r), set(x['real_regression'] for x in r))\\\"\"}"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"mkdir -p /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm/work; cat > /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-da-s10-pre-2-u2x63erm/work/decision_record.md <<'EOF'\\n# Decision Record: Ship Release 6.0 now or hold one week after canary error-rate spike\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship now vs hold one week\\n- Decision owner: release owner (the user's team)\\n- Reversibility: not stated; losses are given as engineer-days and treated as complete\\n- Deadline or forcing event: Release 6.0 canary spike; hold window is one week"
+    }
+  ],
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 73147,
+    "cache_read_input_tokens": 232044,
+    "output_tokens": 3723,
+    "output_tokens_details": {
+      "thinking_tokens": 903
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 73147,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 749,
+        "cache_read_input_tokens": 74626,
+        "cache_creation_input_tokens": 2376,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2376
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.35304240000000003,
+    "duration_ms": 111254,
+    "num_turns": 6
+  },
+  "result_text": "**Ship now.** It is a narrow call, though. The decision record is `work/decision_record.md`, and the structural validator passed with no findings.\n\n**The calculation**\n- **Base rate:** 7 of the 207 releases from 3.0 through 5.6 had a confirmed real regression. That gives prior odds of 7/200 = 0.035. I held this fixed, as you asked.\n- **Canary spike:** In the consortium reference class, 90% of real regressions showed the spike (18,000 of 20,000) and 30% of non-regressions did (6,000 of 20,000). The likelihood ratio is 0.9 / 0.3 = 3. The 20,000/20,000 split is a fixed quota, so I used only the within-group rates and not the split.\n- **Posterior:** 0.035 \u00d7 3 = 0.105 odds, which is about a 9.5% chance this is a real regression.\n- **Threshold:** Shipping costs 10 if real and 0 if not. Holding costs 1 either way. Holding wins only when the posterior odds exceed 1/(10\u22121) = 0.111, or about a 10% chance of a real regression.\n- **Expected loss:** Shipping is about 0.95 engineer-days and holding is 1. 0.105 is just under 0.111, so shipping wins.\n\n**Verdict: robust, with a thin margin.** Your base rate and losses are single fixed points, so nothing in the swept range flips the answer. I recorded where it would flip outside that range:\n- **Base rate:** the choice flips at prior odds above about 0.037, a regression rate of roughly 3.6% against the census 3.4%.\n- **Regression loss:** the choice flips if shipping a real regression costs more than about 10.5 engineer-days.\n- **Likelihood ratio:** the choice flips if the ratio is above about 3.17.\n\nA small change in any of these reverses the call, so treat \"ship\" as a weak preference.\n\n**What the answer assumes**\n- Release 6.0's spike is comparable to the consortium's first-hour canaries, and the census base rate applies to 6.0.\n- Both are single-point inputs. If you doubt the comparability, that is the part of the answer to revisit.\n\nThis is a recommendation only. It doesn't authorize the ship."
+}
