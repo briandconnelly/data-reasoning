@@ -6,6 +6,12 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Changed
+
+- Decision analysis: a likelihood ratio stated as a range is now swept, not only carried through the posterior. A record is `robust` only when one action is preferred across the prior class, the loss range, and every supported ratio range jointly; a new fifth verdict, `evidence-sensitive`, returns the decision to the owner with the likelihood-ratio crossover when only a ratio range flips it. Comparisons with the threshold are exact, a range whose endpoints are equal is a point, and an exact tie is never `robust`.
+- Decision analysis: the record's Decision frame has a new required slot, `Favored if true`, naming the action with the lower loss when the proposition is true. The loss ratio is defined as the ratio of incremental losses relative to that action, replacing the undefined "hold wins" rule, and the order of the Actions slot carries no meaning. Records written to the previous template lack the slot and now fail both checkers.
+- Both record checkers enforce the new verdict, the new slot, and the direction of a `robust` recommendation; `instruments/check_record.py` recomputes the ordered verdict rule when a record's numbers are decimals. Unmeasured: the preregistered cells DA-S9 and DA-S10 have not run.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added
