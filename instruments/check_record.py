@@ -151,6 +151,7 @@ ASSESSMENTS = {
 }
 DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "evidence-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
+VOI_VALUE_BASES = {"signal-model", "upper-bound"}
 
 # The decision skill's provenance classes (SKILL.md § Numeric Policy), and
 # the two that count as belief-grade for losses: a `robust` verdict needs
@@ -583,6 +584,28 @@ def _leading_token(value: str, allowed: set[str]) -> str | None:
         if v.startswith(tok) and v[len(tok) :].startswith(DELIMITERS):
             return tok
     return None
+
+
+LIST_SEPARATOR = re.compile(r"\s*(?:,|;|\band\b)\s*")
+PARENTHETICAL = re.compile(r"\([^()]*\)")
+
+
+def _mentions_only(value: str, allowed: set[str]) -> bool:
+    """True when `value` is a list -- comma, semicolon, or `and` separated --
+    whose every item begins with an allowed token (annotations after a token
+    are legitimate, as in `_leading_token`). A separator inside a
+    parenthetical annotation does not split the list. An empty list is not a
+    list."""
+    v = _normalize(value)
+    # Mask parentheticals so their commas are not separators, keeping offsets.
+    masked = PARENTHETICAL.sub(lambda m: "(" + "x" * (len(m.group()) - 2) + ")", v)
+    items, start = [], 0
+    for m in LIST_SEPARATOR.finditer(masked):
+        items.append(v[start : m.start()])
+        start = m.end()
+    items.append(v[start:])
+    items = [i for i in items if i.strip()]
+    return bool(items) and all(_leading_token(i, allowed) is not None for i in items)
 
 
 def _section(text: str, heading: str) -> str:
@@ -1204,7 +1227,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
             _check_assessments(_section(body, h.rstrip()), h.rstrip(), findings)
         for line in body.splitlines():
             stripped = _unemphasize(line.strip())
-            if stripped.startswith(("- Disposition:", "- Dispositions:")):
+            if stripped.startswith("- Disposition:"):
                 value = stripped.split(":", 1)[1]
                 if _unfilled_cell(value, "Disposition", final, findings):
                     continue
@@ -1213,6 +1236,25 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
                         f"disposition {_normalize(value)!r} does not begin with a value "
                         f"from the closed set {sorted(DISPOSITIONS | {'none'})} — 'valid' and "
                         f"'certified' are not dispositions"
+                    )
+            if stripped.startswith("- Dispositions:"):
+                # The Handoff slot carries every value assigned above, so it
+                # is a collection (the template's "disposition value(s)"), or
+                # the `none` sentinel for a route that assigns none. Every
+                # item must itself be a closed-set value: a list is not a way
+                # to smuggle `certified` in behind a valid first item.
+                value = stripped.split(":", 1)[1]
+                if _unfilled_cell(value, "Disposition", final, findings):
+                    continue
+                # A single value with an annotation was always accepted, and
+                # stays so; the list form is the addition.
+                if _leading_token(value, DISPOSITIONS | {"none"}) is None and not _mentions_only(
+                    value, DISPOSITIONS
+                ):
+                    findings.append(
+                        f"disposition {_normalize(value)!r} is neither 'none' nor a list of "
+                        f"values from the closed set {sorted(DISPOSITIONS | {'none'})} — 'valid' "
+                        f"and 'certified' are not dispositions"
                     )
             if stripped.startswith("- Route:"):
                 value = stripped.split(":", 1)[1]
@@ -1236,6 +1278,24 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
                     findings.append(
                         f"verdict {_normalize(value)!r} does not begin with a value "
                         f"from the closed set {sorted(allowed)}"
+                    )
+        # Closed slots beside the verdict: the record kind fixes its Route,
+        # and a VoI record's Value basis is one of two values.
+        closed = {"Route": {"decide"} if kind == "decision" else {"voi"}}
+        if kind == "voi":
+            closed["Value basis"] = VOI_VALUE_BASES
+        for label, tokens in closed.items():
+            for line in body.splitlines():
+                stripped = _unemphasize(line.strip())
+                if not stripped.startswith(f"- {label}:"):
+                    continue
+                value = stripped.split(":", 1)[1]
+                if _unfilled_cell(value, label, final, findings):
+                    continue
+                if _leading_token(value, tokens) is None:
+                    findings.append(
+                        f"{label.lower()} {_normalize(value)!r} does not begin with a value "
+                        f"from the closed set {sorted(tokens)}"
                     )
         if kind == "decision":
             _check_decision_provenance(body, final, findings)

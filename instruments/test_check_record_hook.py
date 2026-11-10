@@ -59,7 +59,7 @@ def test_clean_record_is_silent(tmp_path):
     f.write_text(
         "# VoI Record: is the pull worth it?\n\n## VoI\n\n- Route: voi\n"
         "- Pending decision: ship vs wait\n- Signal model: a 2-week holdout\n"
-        "- Value basis: expected loss avoided\n- Value calculation: 0.4 x 3 = 1.2\n"
+        "- Value basis: signal-model\n- Value calculation: 0.4 x 3 = 1.2\n"
         "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: break-even-only\n"
     )
     r = run_hook({"tool_input": {"file_path": str(f)}})
@@ -599,6 +599,17 @@ def test_without_python_unterminated_frontmatter_fails_closed(tmp_path):
     assert "not validated" in r.stderr
 
 
+def test_without_python_a_record_behind_crlf_frontmatter_is_reported(tmp_path):
+    """The awk delimiter test compared against a bare `---`, so a CRLF file's
+    `---\r` never opened frontmatter and its record went unreported."""
+    f = tmp_path / "record.md"
+    f.write_bytes(b"---\r\ntitle: x\r\n---\r\n\r\n# Investigation: why\r\n\r\n## Problem\r\n")
+    assert hook_module.looks_like_record(str(f)) is True
+    r = run_command_without_python({"tool_input": {"file_path": str(f)}}, tmp_path)
+    assert r.returncode == 2
+    assert "not validated" in r.stderr
+
+
 def test_shell_and_python_agree_on_the_title_sniff(tmp_path):
     """The two paths must classify the same files the same way."""
     cases = {
@@ -607,12 +618,15 @@ def test_shell_and_python_agree_on_the_title_sniff(tmp_path):
         "frontmatter-record.md": "---\na: b\n---\n\n# Investigation: why\n",
         "plain.md": "# Meeting notes\n\nnothing here\n",
         "blank-then-record.md": "\n\n# Exploration: shape of the table\n",
+        "crlf-record.md": "# Investigation: why\r\n\r\n## Problem\r\n",
+        "crlf-frontmatter-record.md": "---\r\na: b\r\n---\r\n\r\n# Investigation: why\r\n",
+        "crlf-plain.md": "---\r\na: b\r\n---\r\n\r\n# Meeting notes\r\n",
     }
     for i, (name, text) in enumerate(cases.items()):
         case_dir = tmp_path / f"case{i}"
         case_dir.mkdir()
         f = case_dir / name
-        f.write_text(text)
+        f.write_bytes(text.encode())
         shell = run_command_without_python({"tool_input": {"file_path": str(f)}}, case_dir)
         assert shell.returncode == (2 if hook_module.looks_like_record(str(f)) else 0), name
 
