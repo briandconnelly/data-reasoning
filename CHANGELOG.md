@@ -13,6 +13,12 @@ The version is the `version` field of the plugin manifests; installs track the `
 - The record validator (`instruments/check_record.py`) accepts `evidence-sensitive`, applies the belief-grade loss requirement to it, and requires the `Favored if true` slot, which reads `none needed` under `dominated` and only there. It does no verdict arithmetic. Measured 2026-11-10 on one model: no behavioral lift on the new cells DA-S9 and DA-S10 at n=3, where the old text already led agents to the right reasoning and action, but under it all three DA-S9 arms chose `prior-sensitive`, which the base development checker rejects, where all three arms on the new text chose `evidence-sensitive` and pass both checkers; no regression on the DA-S1 and DA-S8 controls at n=1.
 - Hypothesis-driven analysis: an outcome resting on a worker return whose execution records conflict can no longer make a hypothesis `REFUTED` or clear the "best supported" bar until outside evidence resolves the conflict; a return the free check cleared but could not re-run is unaffected (#86). Measured 2026-11-10 on Sonnet at n=3 per cell: the support-side probe that prompted it went from 1/3 (historical pre, selected after the failure) to 3/3, and every control held; a descriptive result, not a significant one.
 
+### Fixed
+
+- The record validator no longer rejects an identification review whose Handoff lists more than one disposition (`- Dispositions: identified-if, unresolved`), which the template allows for a multi-design review. Every listed item must still be a closed-set value.
+- The record validator checks two closed slots it used to pass unread: a decision or VoI record's `Route` (`decide` or `voi`), and a VoI record's `Value basis` (`signal-model` or `upper-bound`).
+- Without `python3`, the hook's shell fallback now reports a record that sits behind CRLF frontmatter as not validated; it used to miss it and stay silent.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added
