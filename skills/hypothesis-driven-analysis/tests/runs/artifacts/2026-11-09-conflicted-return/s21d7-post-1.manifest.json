@@ -1,0 +1,117 @@
+{
+  "name": "s21d7-post-1",
+  "started_utc": "2026-11-10T14:12:07.502425+00:00",
+  "duration_s": 41.8,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "18d938bc-d313-474c-a020-a482c699ba3a",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "60f19e6",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "0fb674389aeaeba8099d84da580769703efece73b9f4442de2d659171614a27d",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d7-support-clean.md",
+  "fixture_files_sha256": {
+    "d7-support-clean.md": "d77cce43c5a6313c9ab5f0da7d9a45493a8ae2a00a8a99e8e26d03b401b5ef3d"
+  },
+  "prompt_sha256": "29dff59c330aff566c5f2e1b17386e8a6294161cd002649381158612f8b6532c",
+  "jsonl_sha256": "99c0b309801c3286d07ece717da1e18fd812d0e4ac0ab3bf9f290a86e3a79004",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-1-op63cyx2",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "c5ac9099ecafecb5f5dad6f45b6c6450df800205f2498839a9ec624013256826"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-1-op63cyx2/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-1-op63cyx2/data/d7-support-clean.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d7-post-1-op63cyx2/work/answer.md\", \"content\": \"H2 STATUS: UNRESOLVED\\n\\nBEST SUPPORTED: Yes, H2 may be reported as best supported. It is not REFUTED. T2 is a CONSISTENT outcome from a test that discriminates (the census p95 has a 0.1ms detection limit, about 0.4% relative, against a predicted rise of more than 20%). Both rivals, H1 and H3, are REFUTED on clean returns, so no unrefuted rival explains the observations equally well. \\\"Best supported\\\" goes in the basis text only, never in the status cell. The wording must be "
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 76779,
+    "cache_read_input_tokens": 90908,
+    "output_tokens": 2495,
+    "output_tokens_details": {
+      "thinking_tokens": 366
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 76779,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 860,
+        "cache_read_input_tokens": 78897,
+        "cache_creation_input_tokens": 1489,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1489
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.34116880000000005,
+    "duration_ms": 40968,
+    "num_turns": 4
+  },
+  "result_text": "I've written the answer to `work/answer.md`, and it says H2's status is UNRESOLVED. H2 may still be reported as best supported, with associative wording and one stated limitation.\n\n**H2 STATUS:** UNRESOLVED\n\n**BEST SUPPORTED:** Yes, H2 may be reported as best supported.\n- H2 is not REFUTED.\n- T2 is a CONSISTENT outcome from a test that discriminates. The p95 figure is a full census with a 0.1ms detection limit, about 0.4% relative, against a predicted rise of more than 20%.\n- H1 and H3 are both REFUTED on clean returns, so no unrefuted rival explains the same observations.\n- \"Best supported\" goes in the basis text only, never in the status cell.\n- The wording must be associative, not causal, because nothing identifies the cause. The 2026-06-10 vs 2026-06-11 contrast is a plain before/after.\n- The report must also say the T2 return could not be re-run, since the source is metered and the budget is spent.\n\n**GOVERNING SKILL TEXT:**\n- \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n- \"A return the free check cleared that merely could not be re-run is not this case: its outcome refutes and supports like any other.\"\n- \"`SUPPORTED` is not a status; \"best supported\" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.\"\n\n**REASONING:**\n- **Necessary prediction held.** H2 would have been refuted by a p95 change under 10%. Gateway p95 went from 24.1 to 31.2 ms, which is +7.1 ms or +29.5% relative (I recomputed this from the raw outputs). The status set allows only REFUTED or UNRESOLVED, so H2 is UNRESOLVED.\n- **The unverified note is a limitation, not a bar.** The skill separates a return with conflicting execution records from one that passed the free check but couldn't be re-run. T2 is the second kind, so its outcome supports like any other.\n- **Wording and limitations.** The conclusion should read something like \"gateway p95 latency rose alongside the drop\". The limitations should name the open threats: co-occurring changes and unmeasured confounders. They should also point to `causal-identification-review` as the next step, if it is installed."
+}

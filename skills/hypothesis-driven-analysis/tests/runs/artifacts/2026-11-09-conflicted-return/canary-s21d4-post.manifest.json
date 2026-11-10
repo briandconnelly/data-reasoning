@@ -1,0 +1,117 @@
+{
+  "name": "canary-s21d4-post",
+  "started_utc": "2026-11-10T14:11:14.821171+00:00",
+  "duration_s": 26.0,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "efe9692e-80b8-4ae0-8ccb-4ce9c27f18c0",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "60f19e6",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "0fb674389aeaeba8099d84da580769703efece73b9f4442de2d659171614a27d",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d4-deviation.md",
+  "fixture_files_sha256": {
+    "d4-deviation.md": "37eba39fcd1bafdee2efec9eb1a70860a9b6a8d5ee012da87459ff89664b1b78"
+  },
+  "prompt_sha256": "d7adcdf1499cde92b859c730ea400bfa8e1fd4ac65ab6679d511bcbbfac40d3a",
+  "jsonl_sha256": "4b99a0ec6cb8f777f14f87367404bb26e6dd4697da51a52f43b0eab2073e41e7",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d4-post-3lxfamqc",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "815075e102919cee3c5def12db0bf7583658f6d46ec32edb080e88338d6c68cb"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d4-post-3lxfamqc/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d4-post-3lxfamqc/data/d4-deviation.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d4-post-3lxfamqc/work/answer.md\", \"content\": \"H2 STATUS: REFUTED\\nGOVERNING SKILL TEXT: \\\"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\\\" and \\\"An established deviation that leaves the prediction adequately tested is a deviation to record, not a downgrade to make.\\\"\\nREASONING: H2 declared one necessary prediction at Plan time: a flat gateway p95 (<10% relative) between 2026-06-10 and 2026-06-11 refutes it. The ledger's s"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 75940,
+    "cache_read_input_tokens": 90499,
+    "output_tokens": 1936,
+    "output_tokens_details": {
+      "thinking_tokens": 249
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 75940,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 702,
+        "cache_read_input_tokens": 78486,
+        "cache_creation_input_tokens": 1087,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1087
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.3321819,
+    "duration_ms": 20324,
+    "num_turns": 4
+  },
+  "result_text": "H2 STATUS: REFUTED\n\nGOVERNING SKILL TEXT: \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\" and \"An established deviation that leaves the prediction adequately tested is a deviation to record, not a downgrade to make.\"\n\nREASONING:\n- **Necessary prediction:** H2 declared one at Plan time. A flat gateway p95 (<10% relative) between 2026-06-10 and 2026-06-11 refutes it.\n- **Result:** The settled T2 outcome is CONTRADICTED, so the prediction H2 requires (a >20% rise) failed. The p95 went from 24.1 to 25.0 ms. I recomputed that from the raw figures as +3.7%, inside the flat band.\n- **Deviation:** The only fault is the disclosed `--format json` flag. The ledger says it left the dataset, grain, fields and days unchanged. It is recorded, and the test counts as adequate, so no NON_DISCRIMINATING downgrade applies.\n- **Adequacy:** The daily row is a complete census with a 0.1 ms detection limit, about 0.4% relative. That is far below the predicted 20% rise, so a real effect could not have hidden.\n- **Why the unidentified-contrast rule doesn't apply:** T2 reads the mechanism (gateway latency), not an unidentified exposure\u2013outcome contrast. The rule that leaves such a contrast UNRESOLVED therefore doesn't apply.\n- **Execution record:** It is coherent, with no conflicting-record fault, so the result can carry REFUTED.\n- **Scope:** H2 is refuted only as the account of the 2026-06-11 drop, meaning latency did not rise. Other gateway defects and other explanations are untouched.\n\nThe answer is saved at `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-s21d4-post-3lxfamqc/work/answer.md`."
+}

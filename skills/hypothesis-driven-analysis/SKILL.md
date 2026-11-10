@@ -262,6 +262,7 @@ Spot-verify the evidence behind the leading explanation and the strongest rival.
 - When the execution records themselves conflict — a quoted output with no source among the commands shown, a command and the output beneath it naming different days — nothing is established, because one resolution has the briefed collection happening with the fault confined to the report of it.
 - Nor is anything verified: the same worker whose quote broke also attested that its quotes were exact, so the return's remaining attestations cannot clear the fault they sit beside, and a benign explanation you can construct is a plausible story, not a verification.
 - Record the fault as a limitation and treat the outcome as resting on an unverified return, however plausible the innocent reading; that limitation reaches the conclusion, where it bars treating the result as established or action-ready.
+- Whether such an outcome can carry a `REFUTED` status or "best supported" is stated in § Conclusion.
 - "Unverified" is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with the limitation recorded beside it.
 - Do not reach for `NON_DISCRIMINATING` here either — it says a test could not discriminate, not that you doubt a return which, if honest, discriminated fine.
 
@@ -295,6 +296,9 @@ Precedence when tests disagree:
 - two adequate tests of the *same* necessary prediction that disagree leave the hypothesis `UNRESOLVED` until you reconcile them — record the disagreement rather than averaging it away.
 
 A data-artifact hypothesis is never `REFUTED` on a validity check that did not probe coverage and missingness.
+
+An outcome resting on a return whose execution records conflict (§ Analysis) counts neither as a necessary prediction's failure under an adequate test nor as the `CONSISTENT` outcome from a discriminating test that the "best supported" bar below requires, until evidence from outside that return resolves the conflict.
+A return the free check cleared that merely could not be re-run is not this case: its outcome refutes and supports like any other.
 
 `SUPPORTED` is not a status; "best supported" is conclusion language and must clear a stated bar: the hypothesis is not `REFUTED`, at least one `CONSISTENT` outcome came from a test that discriminates it from the named rivals, and no unrefuted rival explains the same observations equally well.
 The per-hypothesis summary table repeats each row's Plan-time claim class in its `claim` column unchanged, and fills its `status` column with `REFUTED` or `UNRESOLVED` alone: "best supported" is basis text, so it goes in the `basis` cell, never the `status` cell, and a claim class is never invented or relabelled here to house an outcome.
