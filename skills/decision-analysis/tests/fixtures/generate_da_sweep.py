@@ -23,7 +23,16 @@ exactly, so they are `user-elicited` and belief-grade, and no other gate in
   matrix, ship = (10, 0) and hold = (1, 1), gives an incremental loss ratio
   of 9 (threshold 1/9, about 0.111): ship. Reading the raw 10:1 gives a
   threshold of 0.1: hold. The release asked about, 6.0, is after the
-  history's cutoff and appears in neither file.
+  history's cutoff and appears in neither file. Retired 2026-11-10: its
+  20-per-arm reference class let a canary state the ratio as a sampling
+  interval (about 1.5-6) that straddles 1/9, so the likelihood-ratio clause
+  decided the verdict. Kept, unchanged, as the archived canary's fixture.
+- `s10v2-loss-matrix/`: s10 with the reference class as counts of 20,000
+  canaries per stratum at the same rates (ratio 3). A 95% log-ratio
+  interval on the ratio, about 2.94-3.07, lies strictly between the raw
+  reading's crossover (0.1 / 0.035, about 2.857) and the incremental
+  one ((1/9) / 0.035, about 3.175), so posterior odds stay between 0.1 and
+  1/9 across it and the two readings still disagree.
 
 `validate_da_sweep.py` holds both packets to these properties. Deterministic
 from a fixed seed on this module's own `random.Random`. Run from the repo root:
@@ -55,6 +64,10 @@ S10_RELEASES = 207
 S10_REGRESSIONS = 7
 S10_REF_REAL, S10_REF_REAL_SPIKE = 20, 18
 S10_REF_CLEAN, S10_REF_CLEAN_SPIKE = 20, 6
+# s10v2: the same rates over 20,000 canaries per stratum.
+S10V2_PER_ARM = 20000
+S10V2_REAL_SPIKE = 18000
+S10V2_CLEAN_SPIKE = 6000
 
 S9_README = """\
 # Checksum-mismatch alert on db-07
@@ -110,6 +123,29 @@ Files:
   error-rate spike (`canary_spike`).
 """
 
+S10V2_README = """\
+# Release 6.0 canary: error-rate spike
+
+Release 6.0's canary showed an error-rate spike in its first hour. Release 6.0
+has not shipped and appears in neither file below.
+
+Files:
+
+- `evidence/release_history.csv` is a census: every release we shipped from
+  3.0 (2023-01-02) through 5.6, the last release before the cutoff of
+  2026-10-31, one row each, with whether the post-release review confirmed a
+  real regression (`real_regression`). No release is missing and none was
+  sampled.
+- `evidence/spike_reference.csv` is the canary-telemetry consortium's
+  reference class, as counts: from its complete census of comparable
+  first-hour canaries across member companies, 20,000 canaries of releases
+  later confirmed as real regressions and 20,000 of releases confirmed as
+  not, drawn to those fixed quotas (so its 20,000/20,000 split is not a base
+  rate), each counted by whether it showed the same first-hour error-rate
+  spike (`canary_spike`). The census holds millions of canaries, so a
+  reference class this size is routine.
+"""
+
 
 def alert_history() -> list[dict[str, str]]:
     outcomes = [True] * S9_CORRUPT + [False] * (S9_ALERTS - S9_CORRUPT)
@@ -153,6 +189,23 @@ def spike_reference() -> list[dict[str, str]]:
     ]
 
 
+def spike_reference_counts() -> list[dict[str, str]]:
+    return [
+        {"real_regression": "true", "canary_spike": "true", "canaries": str(S10V2_REAL_SPIKE)},
+        {
+            "real_regression": "true",
+            "canary_spike": "false",
+            "canaries": str(S10V2_PER_ARM - S10V2_REAL_SPIKE),
+        },
+        {"real_regression": "false", "canary_spike": "true", "canaries": str(S10V2_CLEAN_SPIKE)},
+        {
+            "real_regression": "false",
+            "canary_spike": "false",
+            "canaries": str(S10V2_PER_ARM - S10V2_CLEAN_SPIKE),
+        },
+    ]
+
+
 def write_csv(rows: list[dict[str, str]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -173,8 +226,13 @@ def main() -> None:
     write_text(S9_VENDOR_NOTE, s9 / "evidence" / "vendor-note.md")
     s10 = OUT / "s10-loss-matrix"
     write_text(S10_README, s10 / "README.md")
-    write_csv(release_history(), s10 / "evidence" / "release_history.csv")
+    history = release_history()
+    write_csv(history, s10 / "evidence" / "release_history.csv")
     write_csv(spike_reference(), s10 / "evidence" / "spike_reference.csv")
+    s10v2 = OUT / "s10v2-loss-matrix"
+    write_text(S10V2_README, s10v2 / "README.md")
+    write_csv(history, s10v2 / "evidence" / "release_history.csv")
+    write_csv(spike_reference_counts(), s10v2 / "evidence" / "spike_reference.csv")
     print(f"wrote {OUT}")
 
 

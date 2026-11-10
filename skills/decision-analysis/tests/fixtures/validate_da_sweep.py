@@ -30,6 +30,13 @@ generator or a checker.
 6. s10 with the prompt's matrix ship = (10, 0), hold = (1, 1): the
    incremental ratio 9 gives threshold 1/9, the raw 10:1 gives 1/10, and the
    posterior 0.105 lies strictly between them, so the readings disagree.
+6b. s10v2 (the redesigned DA-S10 packet, 2026-11-10) keeps s10's census and
+   rates but counts 20,000 canaries per stratum: (a) the 95% log-ratio
+   interval on the ratio lies strictly between the raw reading's crossover
+   0.1 / prior and the incremental one (1/9) / prior, and (b) posterior odds
+   at both interval endpoints stay strictly between 0.1 and 1/9; the README
+   calls the reference class a quota draw from a complete census, and 6.0
+   appears in neither file.
 7. No packet file states a prior, posterior, probability, odds, or a loss:
    those come from the analysis and the prompt, never from the fixture.
 8. Regenerating from the committed generator reproduces every byte.
@@ -39,6 +46,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import math
 import re
 import subprocess
 import sys
@@ -68,7 +76,11 @@ FILES = (
     "s10-loss-matrix/README.md",
     "s10-loss-matrix/evidence/release_history.csv",
     "s10-loss-matrix/evidence/spike_reference.csv",
+    "s10v2-loss-matrix/README.md",
+    "s10v2-loss-matrix/evidence/release_history.csv",
+    "s10v2-loss-matrix/evidence/spike_reference.csv",
 )
+Z95 = 1.959963984540054
 
 
 def fail(msg: str) -> None:
@@ -152,6 +164,52 @@ def check_s10(fx: Path) -> None:
         fail(f"s10 posterior {posterior} is not strictly between 1/{raw} and 1/{incremental}")
 
 
+def check_s10v2(fx: Path) -> None:
+    pkt = fx / "s10v2-loss-matrix"
+    history = rows(pkt / "evidence" / "release_history.csv")
+    prior = odds([r["real_regression"] == "true" for r in history])
+    if prior != S10_PRIOR:
+        fail(f"s10v2 census gives prior odds {prior}, not {S10_PRIOR}")
+    counts = {
+        (r["real_regression"], r["canary_spike"]): int(r["canaries"])
+        for r in rows(pkt / "evidence" / "spike_reference.csv")
+    }
+    n_real = counts[("true", "true")] + counts[("true", "false")]
+    n_clean = counts[("false", "true")] + counts[("false", "false")]
+    p_real = Fraction(counts[("true", "true")], n_real)
+    p_clean = Fraction(counts[("false", "true")], n_clean)
+    if p_real / p_clean != S10_RATIO:
+        fail(f"s10v2 reference class gives ratio {p_real / p_clean}, not {S10_RATIO}")
+    se = math.sqrt(
+        float(1 - p_real) / (n_real * float(p_real))
+        + float(1 - p_clean) / (n_clean * float(p_clean))
+    )
+    lo, hi = (float(S10_RATIO) * math.exp(k * Z95 * se) for k in (-1, 1))
+    raw_thr, inc_thr = 0.1, 1 / 9
+    raw_cross, inc_cross = raw_thr / float(prior), inc_thr / float(prior)
+    if not (raw_cross < lo and hi < inc_cross):
+        fail(
+            f"s10v2 95% ratio interval {lo:.4f}-{hi:.4f} is not inside "
+            f"({raw_cross:.4f}, {inc_cross:.4f})"
+        )
+    for end in (lo, hi):
+        post = float(prior) * end
+        if not (raw_thr < post < inc_thr):
+            fail(f"s10v2 posterior {post:.5f} at ratio {end:.4f} leaves (0.1, 1/9)")
+    readme = (pkt / "README.md").read_text(encoding="utf-8")
+    for phrase in (
+        "is a census",
+        "complete census",
+        "not a base",
+        "cutoff",
+        f"Release {S10_TARGET}",
+    ):
+        if phrase not in readme:
+            fail(f"s10v2 README lost {phrase!r}")
+    if S10_TARGET in {r["release"] for r in history}:
+        fail(f"release {S10_TARGET} has a resolved row in s10v2: the fixture would leak the answer")
+
+
 def check_tokens(fx: Path) -> None:
     for rel in FILES:
         for i, line in enumerate((fx / rel).read_text(encoding="utf-8").splitlines(), 1):
@@ -183,6 +241,7 @@ def main() -> None:
     fx = ap.parse_args().fixture
     check_s9(fx)
     check_s10(fx)
+    check_s10v2(fx)
     check_tokens(fx)
     check_regeneration(fx)
     print("OK: da-sweep keeps every property it sets")

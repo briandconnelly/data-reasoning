@@ -1,0 +1,5 @@
+real_regression,canary_spike,canaries
+true,true,18000
+true,false,2000
+false,true,6000
+false,false,14000

@@ -205,3 +205,13 @@ They are fixture validation, excluded from any scored artifact.
   The step-2 table neutralized the missing-ratio form but not a supported interval around a point ratio, so DA-S10's V and A cannot separate the orientation rule from the likelihood-ratio rule: pre has no `evidence-sensitive`, and a post arm taking it would fail V and A for a reason the cell does not test.
   By this file's literal canary criterion (P and R) the canary is informative; by PROTOCOL step 4's ("for the reason under test") the fixture is entangled.
   The wave stopped here, before any scored arm, for the owner to decide; no scored arm has run.
+
+## DA-S10 packet redesign (note added 2026-11-10; the rules above are unchanged)
+
+On the owner's ruling (PROTOCOL step 4 back to step 2), DA-S10 moves to a new packet, `tests/fixtures/da-sweep/s10v2-loss-matrix/`; the original `s10-loss-matrix/` stays in the fixture unchanged as the first canary's archived input, and that canary stays excluded.
+Why: the first canary legitimately stated the 20-per-arm reference class's ratio as a 95% interval (1.51–5.95) that straddles the incremental crossover (1/9) / 0.035 ≈ 3.175, so the likelihood-ratio clause decided its verdict.
+What changed: the reference class is now counts of 20,000 canaries per stratum at the same rates (18,000 and 6,000 with the spike; ratio 3), described as a quota draw from a consortium's complete census of comparable canaries, so its split is still not a base rate; the release census, the prior odds 0.035, the target release 6.0, and the prompt `prompts/da-s10.txt` are unchanged.
+With n = 20,000 per arm the 95% log-ratio interval on the ratio is about 2.936–3.066, strictly between the raw reading's crossover 0.1 / 0.035 ≈ 2.857 and the incremental one ≈ 3.175, so posterior odds at either endpoint (about 0.1028–0.1073) stay between 0.1 and 1/9: an arm that records the ratio as that interval still reaches `robust` naming `ship now` under the incremental reading and `hold one week` under the raw one, and the scored assertions stand as written.
+`validate_da_sweep.py` asserts both properties, the census wording, and the target's absence, and each assertion was seen to fail on a mutated copy.
+Every DA-S10 command above takes `--fixture $FX/da-sweep/s10v2-loss-matrix` in place of `s10-loss-matrix`; the fresh canary is named `canary2-da-s10-post`.
+Arm budget: the five canaries (four first canaries and this one) count against the ceiling of 24, leaving 19 for 16 scored arms and up to 3 retries; the earlier "up to 2" retry reserve becomes up to 3 only because the ceiling is unchanged.

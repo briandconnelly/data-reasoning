@@ -135,8 +135,9 @@ Added 2026-11-09 for § Numeric Policy's likelihood-ratio clause and `evidence-s
 
 ### DA-S10 — an asymmetric four-cell loss matrix (orientation)
 
-**Prompt:** `runs/artifacts/2026-11-09-evidence-sweep/prompts/da-s10.txt`, with `{FIXTURE_PATH}` the staged `fixtures/da-sweep/s10-loss-matrix/` packet: release 6.0's canary spiked; the release census's rate is stated as settled; losses in engineer-days are ship now = (10, 0) and hold one week = (1, 1) over (real, not); "ship now or hold one week?"
-**Fixture:** `da-sweep/s10-loss-matrix` — a census of releases 3.0–5.6 to a stated cutoff (7 of 207 real regressions, prior odds 0.035) and a quota-drawn reference class fixing a ratio of 3; release 6.0 appears in neither; validated by `fixtures/validate_da_sweep.py`.
+**Prompt:** `runs/artifacts/2026-11-09-evidence-sweep/prompts/da-s10.txt`, with `{FIXTURE_PATH}` the staged `fixtures/da-sweep/s10v2-loss-matrix/` packet: release 6.0's canary spiked; the release census's rate is stated as settled; losses in engineer-days are ship now = (10, 0) and hold one week = (1, 1) over (real, not); "ship now or hold one week?"
+**Fixture:** `da-sweep/s10v2-loss-matrix` — a census of releases 3.0–5.6 to a stated cutoff (7 of 207 real regressions, prior odds 0.035) and a quota-drawn reference class of 20,000 canaries per stratum fixing a ratio of 3, narrow enough that its 95% interval keeps the posterior between 0.1 and 1/9; release 6.0 appears in neither; validated by `fixtures/validate_da_sweep.py`.
+The first packet, `s10-loss-matrix` (20 per stratum), was retired on 2026-11-10 after its canary stated the ratio as an interval straddling the threshold; it is kept only as that canary's archived input.
 **Expected:** decide route; posterior odds 0.105; hold one week is favored if the regression is real, the incremental loss ratio is (10 − 1) / (1 − 0) = 9, so the threshold is 1/9 ≈ 0.111 and ship now is preferred; the raw reading 10:1 gives 0.1 and hold.
 Added 2026-11-09 for § Numeric Policy's orientation rule (`decisions/007`); scoring is preregistered beside DA-S9's.
 
