@@ -129,8 +129,9 @@ hooks = [
   # tree, but fixtures/generate.py and validate_*.py are not named test_*.py, so
   # default collection skips them.
   { id = "cir-instrument-tests", name = "causal-identification-review: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/causal-identification-review/tests", files = "^skills/causal-identification-review/(SKILL\\.md|tests/[^/]+\\.py|references/identification-review-template\\.md)$", pass_filenames = false },
-  # The suite also imports instruments/check_record.py for a differential test
-  # (both checkers accept the same decide verdict), so it watches that file too.
+  # The suite also imports instruments/check_record.py (the two checkers' decide
+  # verdict sets must be equal, and its structural findings on built records),
+  # so it watches that file too.
   { id = "da-instrument-tests", name = "decision-analysis: the record checker's own unit suite passes", language = "python", language_version = "python3", additional_dependencies = ["pytest>=8"], entry = "python -m pytest -q skills/decision-analysis/tests", files = "^(skills/decision-analysis/(SKILL\\.md|tests/[^/]+\\.py|references/decision-record-template\\.md)|instruments/check_record\\.py)$", pass_filenames = false },
   # instruments/ is the public, fixture-neutral structural validator adopted in
   # principle by HDA decisions/006 (which owns its scope). Its parity test

@@ -1,64 +1,80 @@
-# Preregistration: 2026-11-09 likelihood-ratio sweep, `evidence-sensitive`, and loss orientation
+# Preregistration: 2026-11-09 likelihood-ratio clause, `evidence-sensitive`, and loss orientation
 
-Written before any arm ran; no arm has run.
-This wave measures the decision-analysis wording changed under `../../../decisions/007-evidence-sweep-and-loss-orientation.md`, per `../../../../hypothesis-driven-analysis/tests/PROTOCOL.md`.
-The cells the edit reaches among the existing catalog, and which of them this wave pays for, are in `reachability.md` beside this file.
+Written before any arm ran; revised 2026-11-10 after a cross-model design review returned NO-GO on the first draft, still before any arm ran.
+This wave measures the decision-analysis change recorded in `../../../decisions/007-evidence-sweep-and-loss-orientation.md`, per `../../../../hypothesis-driven-analysis/tests/PROTOCOL.md`.
+The cells the change reaches among the existing catalog, and which this wave pays for, are in `reachability.md` beside this file.
+
+## Estimand
+
+The comparison is pre against post on the **combined change**: `SKILL.md`, the record template, and the shipped structural validator `instruments/check_record.py` (which `run_arm.py` stages from the skill's ref, so pre arms get the `cac2464` validator and post arms get this branch's).
+It is not a measurement of the SKILL.md wording alone.
+The dev checker `tests/check_decision.py` is never staged; it is the scorer's instrument.
 
 ## Step 0: the failures exist
 
-Both defects were reproduced against the checkers at `dev` `cac2464` before any edit, with a scratch script that builds the record and runs both checkers.
-D1: prior odds 1, a prior class of 1–1, loss ratio and loss range 1, and a likelihood ratio of 0.1–10 give posterior odds 0.1–10 around a threshold of 1; a `robust` verdict drew no finding from `check_decision.py` or `instruments/check_record.py --final`.
-D2: § Numeric Policy said "hold wins where posterior odds exceed one over the loss ratio" and nothing defined "hold" or said the ratio is of loss differences; the arithmetic in DA-S10 below is the case the two readings decide differently.
-No archived arm reached either defect: every archived decision record carries the point ratio 4.5, so this is a defect in the rule's text and checkers, not an observed agent failure, and the wave's first question is whether agents need the new wording at all.
+Both defects were reproduced against the checkers at `dev` `cac2464` before any edit.
+D1: prior odds 1, a prior class of 1–1, loss ratio and loss range 1, and a likelihood ratio of 0.1–10 give posterior odds 0.1–10 around a threshold of 1; a `robust` verdict drew no finding from either checker.
+D2: § Numeric Policy said "hold wins where posterior odds exceed one over the loss ratio", and nothing defined "hold" or said the ratio is of loss differences.
+No archived arm reached either defect: every archived decision record carries the point ratio 4.5.
+These are defects in the rule's text and the checker, not observed agent failures, so the wave's first question is whether agents need the new text at all.
 
 ## What changed
 
-| Change | File and section |
+| Change | Where |
 | --- | --- |
-| Orientation: the Favored if true slot, the incremental loss ratio r, and the favored action preferred above the threshold (replacing "hold wins") | `SKILL.md` § Numeric Policy; § The Decide Route's Decision frame paragraph; template skeleton and § Slot notes |
-| `dominated` covers statewise ties and takes `none needed` in Favored if true | § Numeric Policy |
-| `evidence-sensitive`, fifth in the ordered rule; `robust` now requires one action across the prior class, the loss range, and the supported ratio ranges jointly | § Numeric Policy; § The Decide Route's Verdict and Robustness paragraphs; template Crossover skeleton and § Slot notes |
-| Exact comparisons, the point rule, and the exact-tie residual to `prior-sensitive` (replacing "a tie counts as a flip; a range that is a single point cannot flip") | § Numeric Policy |
-| Both checkers: the new verdict, slot, joint predicate, exact boundary arithmetic, and robust-direction check | `tests/check_decision.py`; `instruments/check_record.py` |
+| Orientation: the Favored if true slot, the incremental loss ratio, the favored action preferred above the threshold (replacing "hold wins") | `SKILL.md` § Numeric Policy; § The Decide Route's Decision frame paragraph; template skeleton and § Slot notes |
+| `dominated` includes statewise ties; its Favored if true reads `none needed` | § Numeric Policy |
+| The `evidence-sensitive` clause and the extended `robust` clause | § Numeric Policy; § The Decide Route's Verdict and Robustness paragraphs; template Crossover skeleton and § Slot notes |
+| Exact comparisons, the point rule, and the all-point exact tie | § Numeric Policy |
+| Dev checker: the likelihood-ratio clause at the stated prior and threshold, exact comparisons, the slot, the robust direction | `tests/check_decision.py` (scorer only) |
+| Shipped validator: `evidence-sensitive` in the closed set and its loss-provenance coupling; the slot required, with `none needed` coupled to `dominated` | `instruments/check_record.py` (staged) |
 
-Both checkers are frozen with the wording.
-A checker defect found during scoring pauses interpretation, is fixed with a test, and every archived record is rescored transparently.
+Both checkers are frozen with the text.
+A checker defect found while scoring pauses interpretation (dispositions below).
 
 ## Packets
 
 The fixture is `tests/fixtures/da-sweep/`, generated by `generate_da_sweep.py` and held to its properties by `validate_da_sweep.py` (prek hook `validate-da-sweep-fixture`).
 Each arm stages one packet directory, so neither cell sees the other's files.
 
-### DA-S9 — `da-sweep/s9-lr-range/` (rule: the likelihood-ratio sweep and `evidence-sensitive`)
+### DA-S9 — `da-sweep/s9-lr-range/` (the likelihood-ratio clause)
 
-Contents: `README.md` (tonight's alert on db-07; the mismatch persisted after a re-read); `evidence/alert_history.csv` (a census of every checksum-mismatch alert since 2024, 200 rows, 40 confirmed corruption, with no re-read column); `evidence/vendor-note.md` (the vendor measured the ratio of re-read persistence rates at 0.5 on the oldest firmware and 4 on the newest, and the fleet's firmware is not exposed).
-Prompt: `prompts/da-s9.txt` (SHA-256 `596eb100643f80e8c65e4ce6c321b87dd51296dc611d2eb58523252efb06a58a`); it states the loss as "exactly twice", so the loss ratio is a `user-elicited` point.
+Contents: `README.md` (tonight's alert on db-07; the mismatch persisted after a re-read); `evidence/alert_history.csv` (a census of every checksum-mismatch alert since 2024: 200 rows, 40 confirmed corruption, no re-read column); `evidence/vendor-note.md` (the ratio of re-read persistence rates lies between 0.5 and 4 on every firmware revision the controller family has shipped, no narrower figure is given for any revision, and the fleet's revision is not exposed).
+Prompt: `prompts/da-s9.txt` (SHA-256 `92f090847351a5fa6316d6b8b1541be753489775ad9943b79cbb341225eb1050`).
+It pins the prior ("we treat its corruption rate as the settled base rate, not something to vary") and states all four losses over (corrupt, not): restore now = (1, 1), keep serving = (3, 0).
 
 Expected answer:
 
-- Prior odds 40 / 160 = 0.25, `estimated-from-data-in-hand`, from the census.
+- Prior odds 40 / 160 = 0.25, `estimated-from-data-in-hand`; Prior class swept 0.25 (a point, as the owner pinned it).
 - One evidence row, ratio 0.5–4, `externally-sourced`, naming the vendor note, the controller family, and the unknown firmware revision.
 - Posterior odds 0.25 × 0.5 = 0.125 to 0.25 × 4 = 1.
-- Favored if true: the restore action (lower loss if the corruption is real); loss ratio 2, so threshold 1/2 = 0.5.
-- 0.125 < 0.5 < 1: the posterior straddles the threshold while the prior class (the census point) and the loss range (the stated point) cannot flip anything, so the ordered rule gives `evidence-sensitive`.
-- Crossover: the ratio at which posterior meets threshold, 0.5 / 0.25 = 2, inside 0.5–4.
-- Recommended action: `returned to owner`.
-- If the record posits a wider `sensitivity-only` prior class around 0.25 (permitted by § Numeric Policy's robustness-first priors), the joint range still straddles and the ordered rule credits the prior: `prior-sensitive`, crossover prior odds 0.5 / 4 = 0.125 to 0.5 / 0.5 = 1.
+- Favored if true: the restore action (1 < 3 when the corruption is real).
+- r = (3 − 1) / (1 − 0) = 2; threshold 1/2; Loss ratio `2 — provenance: user-elicited`.
+- At the fixed prior 0.25, a ratio of 0.5 gives 0.125 < 0.5 and a ratio of 4 gives 1 > 0.5: the ratio range alone flips the action; the prior class and the loss range are points and cannot.
+- Verdict `evidence-sensitive`; Recommended action `returned to owner`; Crossover `flips at likelihood ratio 2` (0.5 / 0.25).
+- The raw reading (3:1, threshold 1/3) is straddled too, so the verdict does not turn on orientation, but it puts the crossover at 4/3; a crossover of 1.33 is scored as a failed C.
 
-### DA-S10 — `da-sweep/s10-loss-matrix/` (rule: orientation and the incremental loss ratio)
+### DA-S10 — `da-sweep/s10-loss-matrix/` (orientation)
 
-Contents: `README.md` (release 4.12's canary spike); `evidence/release_history.csv` (a census of every release since 2023, 207 rows, 7 real regressions); `evidence/spike_reference.csv` (20 real regressions, 18 with the spike; 20 clean releases, 6 with the spike; drawn to fixed quotas and stated not to be a base rate).
-Prompt: `prompts/da-s10.txt` (SHA-256 `5aa3565397c81b0593143d3ed890f2d2c0629b6f34b07a8e21145177d38ee8fd`); it states the four-cell loss matrix exactly.
+Contents: `README.md` (release 6.0's canary spike; 6.0 has not shipped and appears in neither file); `evidence/release_history.csv` (a census of releases 3.0 through 5.6, to a stated cutoff of 2026-10-31: 207 rows, 7 real regressions); `evidence/spike_reference.csv` (20 real regressions, 18 with the spike; 20 clean releases, 6 with the spike; quota-drawn and stated not to be a base rate).
+Prompt: `prompts/da-s10.txt` (SHA-256 `7b34f89d49e10386fb3af7a35180eafb3caef866d1e3a32066b08eb5407663fb`).
+It pins the prior the same way and states all four losses in engineer-days.
 
 Expected answer:
 
-- Prior odds 7 / 200 = 0.035 from the census; ratio (18/20) / (6/20) = 3 from the reference class; both `estimated-from-data-in-hand`.
+- Prior odds 7 / 200 = 0.035 from the census; ratio (18/20) / (6/20) = 3 from the reference class; both `estimated-from-data-in-hand`; Prior class swept 0.035.
 - Posterior odds 0.035 × 3 = 0.105.
-- Losses over (real, not real): ship now = (10, 0), hold one week = (1, 1); Favored if true: `hold one week` (1 < 10 when real).
-- r = [L(ship, real) − L(hold, real)] / [L(hold, not) − L(ship, not)] = (10 − 1) / (1 − 0) = 9; threshold 1/9 ≈ 0.1111; loss ratio `9 — provenance: user-elicited`.
-- 0.105 < 0.1111: the other action, `ship now`, is preferred; with the census point as the prior class and every input a point, the verdict is `robust` naming `ship now`.
+- Favored if true: `hold one week` (1 < 10 when real).
+- r = (10 − 1) / (1 − 0) = 9; threshold 1/9 ≈ 0.1111; Loss ratio `9 — provenance: user-elicited`.
+- 0.105 < 0.1111: `ship now` is preferred; every input is a point and no tie, so `robust` naming `ship now`, Crossover `none within swept class` or a prior-odds statement of 1/27 ≈ 0.037.
 - The raw reading (10:1, threshold 0.1) gives 0.105 > 0.1 and `hold one week`: the wrong action.
-- If the record posits a wider `sensitivity-only` prior class, it is `prior-sensitive` once the class reaches the crossover prior odds (1/9) / 3 = 1/27 ≈ 0.037, and still `robust` naming `ship now` if it does not.
+
+### Controls: DA-S1 and DA-S8 under the orientation rule
+
+Both control prompts state the loss as a comparison of regrets, which is the incremental ratio directly.
+DA-S1's "missing a real regression costs us roughly ten times what a needless one-week hold costs" reads, with hold favored if the regression is real, as [L(ship, real) − L(hold, real)] / [L(hold, not) − L(ship, not)] = 10, so the threshold stays 0.1 as the 2026-11-08 assertions scored it.
+DA-S8's "between 2 and 20 times" reads the same way as r = 2–20, threshold 0.05–0.5.
+Both use the point ratio 4.5, so the likelihood-ratio clause cannot change their verdict; the controls test that the new slot and verdict leave the existing assertions passable.
 
 ## Assertions, scored separately
 
@@ -66,69 +82,109 @@ Every assertion is scored on the delivered record and the archived transcript; a
 
 | ID | Kind | DA-S9 | DA-S10 |
 | --- | --- | --- | --- |
-| R | rationale | the record or report says the ratio range is what the choice turns on: the range is carried into the sweep, and the flip is located on it (a ratio or a posterior straddling the threshold), not on a picked point | the record derives the threshold from incremental losses (9, or 1/9 ≈ 0.111), not from the raw 10:1; Favored if true (post) or the record's prose (baseline, pre) names hold as the action that is better if the regression is real |
-| V | verdict | `evidence-sensitive` at a point prior class, or `prior-sensitive` with a non-point `sensitivity-only` class; never `robust` | `robust` at a point prior class, or `prior-sensitive` with a class reaching 1/27; never a verdict whose numbers put the posterior above the threshold |
-| A | recommendation | `returned to owner`; no unconditional restore or keep-serving | `ship now` under `robust`; `returned to owner` under `prior-sensitive`; never `hold one week` as the recommendation |
-| C | crossover | likelihood ratio 2 (within the checker's rounding rule) under `evidence-sensitive`; prior odds 0.125–1 under `prior-sensitive` | `none within swept class` or a prior-odds statement within 1/27 under `robust`; prior odds 1/27 ≈ 0.037 under `prior-sensitive` |
-| K | checkers (post arms only) | `check_decision.py` and `check_record.py --final` at this branch both pass the delivered record | same |
+| P | prior held fixed (gate) | Prior class swept is the point 0.25 | Prior class swept is the point 0.035 |
+| R | rationale | at the fixed prior, the record or report shows that varying the ratio alone across 0.5–4 carries the posterior across the threshold 0.5 | the threshold is derived from incremental losses (r = 9, threshold ≈ 0.111), not from the raw 10:1; hold is named as the action better if the regression is real |
+| V | verdict | `evidence-sensitive` | `robust` |
+| A | recommendation | `returned to owner` | `ship now` |
+| C | crossover | likelihood ratio 2, within `check_decision.py`'s rounding rule | `none within swept class`, or prior odds within 1/27 |
+| K | checkers (post arms) | `check_decision.py` and `check_record.py --final` at this branch both pass | same |
 
-The pre wording has no `evidence-sensitive` label and no Favored if true slot, so a pre arm cannot pass V on DA-S9's point-class branch or K on either cell by construction.
-The attribution question is therefore R and A (and, on DA-S10, V and C, which the pre wording can reach): did the pre wording already produce the correct reasoning and action?
+An arm that fails P has widened the prior the owner pinned; it is **uninformative** on the cell's rule.
+Its R, V, A, C are recorded and never count toward any disposition below except "uninformative arms".
+The pre text has no `evidence-sensitive` label and no Favored if true slot, so a pre arm cannot pass V on DA-S9 or K on either cell by construction; the attribution question is R and A on DA-S9, and R, V, A, C on DA-S10.
 Pre arms' records are also run through the checkers at `cac2464`, reported and not scored.
+Control cells are scored on their catalog assertions (DA-S1.1–S1.4; DA-S8.1–S8.4 as revised 2026-11-08) plus K on post arms.
 
-## Other rules each fixture reaches, and how each is neutralized (PROTOCOL step 2)
+## Other rules each packet reaches, and how each is neutralized (PROTOCOL step 2)
 
 | Rule | DA-S9 | DA-S10 |
 | --- | --- | --- |
 | No-supported-prior form | a census base rate supplies a supported prior | same |
-| Loss cap (`sensitivity-only` losses) | the prompt states the loss ratio exactly ("exactly twice"), so it is `user-elicited` | the prompt states all four cells exactly |
-| Rounded elicited loss | no rounding word | no rounding word |
-| Missing-ratio form | the vendor supplies a range with its source and conditioning | the reference class fixes a point ratio |
-| `dominated` | not dominated: restore costs more when the data is fine | not dominated: ship costs 0 vs 1 when clean, 10 vs 1 when real |
-| Causal-claim discipline | the proposition "the mismatch is real corruption" is descriptive | "the release is a real regression" is descriptive |
+| Robustness-first priors (a wider `sensitivity-only` class) | the owner pins the rate in the prompt; an arm that widens anyway fails P | same |
+| Loss cap (`sensitivity-only` losses) | all four losses stated exactly | same |
+| Rounded elicited loss | no rounding word | same |
+| Missing-ratio form | the vendor bounds the ratio with its source and conditioning | the reference class fixes a point ratio |
+| `dominated` | not dominated: restore loses 1 vs 0 when clean | not dominated: ship loses 0 vs 1 when clean |
+| Causal-claim discipline | "the mismatch is real corruption" is descriptive | "6.0 is a real regression" is descriptive |
 | Independence of multiplied items | one evidence item | one evidence item |
-| Authorization gate and costly collection | the prompt says the team will act itself; no data pull is needed or offered | no pull needed; nothing to execute |
+| Answer leakage | the history has no re-read column, so it cannot pin the ratio | 6.0 is absent from both files (validator-checked) |
+| Authorization gate and costly collection | the team acts itself; no pull is needed or offered | no pull needed; nothing to execute |
 | VoI route | no collection option is named; a VoI question in Handoff is permitted and not scored | same |
 | Record Delivery (`--final`) | present at both `cac2464` and post; each arm's run of it is recorded, not scored | same |
-| Ordered-rule precedence | a wider `sensitivity-only` prior class routes to `prior-sensitive`; preregistered above as an accepted branch, scored as "uninformative on `evidence-sensitive`" | a wider class may route to `prior-sensitive`; preregistered above |
 
 ## Arms (proposed; none run)
 
-Model: `sonnet` on every arm, resolved model recorded per arm.
-Harness: `../../../../hypothesis-driven-analysis/tests/run_arm.py`, with `--fixture` set to the one packet directory and `--prompt-file` to the cell's prompt.
-Pre = the skill at `dev` `cac2464` (`--skill-ref cac2464`); post = this branch's commit at the time of the run.
+Model `sonnet` on every arm, resolved model recorded per arm; ceiling 24.
 
 | Cell | Canary (post, excluded) | Baseline | Pre | Post | Arms |
 | --- | --- | --- | --- | --- | --- |
 | DA-S9 | 1 | 1 | 3 | 3 | 8 |
 | DA-S10 | 1 | 1 | 3 | 3 | 8 |
-| DA-S1 control (`reachability.md`) | — | — | 1 | 1 | 2 |
-| DA-S8 control (`reachability.md`) | — | — | 1 | 1 | 2 |
-| Retry reserve (bounded, below) | | | | | up to 4 |
-| **Ceiling** | | | | | **24** |
+| DA-S1 control | 1 | — | 1 | 1 | 3 |
+| DA-S8 control | 1 | — | 1 | 1 | 3 |
+| Retry reserve (bounded, below) | | | | | up to 2 |
+| **Total** | | | | | **24** |
+
+Commands, run from the repository root of a clean checkout of this branch at the reviewed commit (`git status` empty), with `OUT=skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep`, `RUN=skills/hypothesis-driven-analysis/tests/run_arm.py`, and `FX=skills/decision-analysis/tests/fixtures`.
+Pre arms stage the skill and the validator from `cac2464`; post and canary arms stage both from the working tree; baselines stage no skill and the working-tree validator.
+`<n>` is 1, 2, 3.
+
+```sh
+# DA-S9
+python3 $RUN --name canary-da-s9-post --prompt-file $OUT/prompts/da-s9.txt --skill decision-analysis --fixture $FX/da-sweep/s9-lr-range --out $OUT --model sonnet
+python3 $RUN --name da-s9-baseline --prompt-file $OUT/prompts/da-s9.txt --fixture $FX/da-sweep/s9-lr-range --out $OUT --model sonnet
+python3 $RUN --name da-s9-pre-<n> --prompt-file $OUT/prompts/da-s9.txt --skill decision-analysis --skill-ref cac2464 --fixture $FX/da-sweep/s9-lr-range --out $OUT --model sonnet
+python3 $RUN --name da-s9-post-<n> --prompt-file $OUT/prompts/da-s9.txt --skill decision-analysis --fixture $FX/da-sweep/s9-lr-range --out $OUT --model sonnet
+# DA-S10
+python3 $RUN --name canary-da-s10-post --prompt-file $OUT/prompts/da-s10.txt --skill decision-analysis --fixture $FX/da-sweep/s10-loss-matrix --out $OUT --model sonnet
+python3 $RUN --name da-s10-baseline --prompt-file $OUT/prompts/da-s10.txt --fixture $FX/da-sweep/s10-loss-matrix --out $OUT --model sonnet
+python3 $RUN --name da-s10-pre-<n> --prompt-file $OUT/prompts/da-s10.txt --skill decision-analysis --skill-ref cac2464 --fixture $FX/da-sweep/s10-loss-matrix --out $OUT --model sonnet
+python3 $RUN --name da-s10-post-<n> --prompt-file $OUT/prompts/da-s10.txt --skill decision-analysis --fixture $FX/da-sweep/s10-loss-matrix --out $OUT --model sonnet
+# Controls (prompts frozen in the 2026-11-08 wave)
+P=skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/prompts
+python3 $RUN --name canary-da-s1-post --prompt-file $P/da-s1.txt --skill decision-analysis --fixture $FX/da-s1-ledger --out $OUT --model sonnet
+python3 $RUN --name da-s1-pre --prompt-file $P/da-s1.txt --skill decision-analysis --skill-ref cac2464 --fixture $FX/da-s1-ledger --out $OUT --model sonnet
+python3 $RUN --name da-s1-post --prompt-file $P/da-s1.txt --skill decision-analysis --fixture $FX/da-s1-ledger --out $OUT --model sonnet
+python3 $RUN --name canary-da-s8-post --prompt-file $P/da-s8.txt --skill decision-analysis --fixture $FX/da-s1-ledger --out $OUT --model sonnet
+python3 $RUN --name da-s8-pre --prompt-file $P/da-s8.txt --skill decision-analysis --skill-ref cac2464 --fixture $FX/da-s1-ledger --out $OUT --model sonnet
+python3 $RUN --name da-s8-post --prompt-file $P/da-s8.txt --skill decision-analysis --fixture $FX/da-s1-ledger --out $OUT --model sonnet
+```
+
+A retry takes the voided arm's name with `-retry` appended.
 
 ## Canaries (step 4)
 
-One post arm per new cell, excluded from the scored artifact, scored on R alone.
-A canary that reaches the right verdict without R — `evidence-sensitive` without the ratio range carrying the flip, or `ship now` without the incremental threshold — marks the fixture entangled: return to step 2, revise the packet, and spend no scored arm on it.
+One post arm per cell — both new cells and both controls — excluded from the scored artifact and scored on rationale.
+A new-cell canary is **informative** only if it passes P and R: on DA-S9, the ratio range at the fixed prior carries the flip; on DA-S10, the threshold comes from incremental losses.
+An uninformative canary (fails P, or reaches V without R) sends the fixture or prompt back to design (step 2); no scored arm of that cell launches until a revised packet's canary is informative, and the revision is a new draft with its own review.
+A control canary that cannot fill the new slot or fails a catalog assertion for a reason the change introduced pauses the wave before any scored arm.
 
 ## Dispositions
 
-| Outcome | Disposition | Reachable without the change? |
-| --- | --- | --- |
-| Pre passes R and A on 3/3 arms of a cell (and V, C on DA-S10) | **Wording unnecessary for behavior on that cell**: the checker fixes ship; the SKILL.md sentences for that cell are reduced to the minimum the checker needs (the verdict label and the slot) and recorded as a clarification with no measured lift | yes |
-| Post passes R, V, A, C, K on 3/3 where pre fails R or A on at least 2/3, and no control regresses | **Successful correction**: ships as measured at n=3 per cell on this model and harness | no |
-| Post and pre do no better than each other on R and A (both pass, both fail, or within one arm) | **No observed lift**: ships only as a clarification carrying no measured claim, owner decides; the checker change ships regardless, since D1 is a checker defect reproduced independently of any arm | yes |
-| A control cell (DA-S1, DA-S8) post fails a catalog assertion its pre passes | **Regression on a control**: the sentences that cell reaches are withdrawn or revised and remeasured before merge | no |
-| A canary reaches the label without R | **Entangled canary**: fixture revised (step 2); scored arms not launched for that cell | yes |
-| Arm crashes, times out, reads outside its packet, or sees this file | **Contaminated or failed arm**: voided, recorded, one fresh retry | yes |
-| Retries | **Bounded**: one retry per voided arm and four retries in all; past that the cell is reported as not measured, never padded | yes |
-| Checker defect found while scoring | Interpretation paused; fix with a test; rescore every archived record transparently | yes |
+Rows apply per cell, in the order listed; the first row that matches governs.
+
+| # | Outcome | Disposition | Reachable without the change? |
+| --- | --- | --- | --- |
+| 1 | A checker defect surfaces while scoring | Interpretation paused; fix with a test; rescore every archived record transparently; then resume at row 2 | yes |
+| 2 | An arm crashes, times out, reads outside its packet, or is otherwise contaminated | Voided and recorded; one retry from the reserve; with the reserve spent, the cell is reported **not measured** | yes |
+| 3 | The cell's canary is uninformative | **Entangled**: fixture or prompt back to design; that cell's scored arms are not run in this wave | yes |
+| 4 | Fewer than two scored post arms of a new cell pass P | **Uninformative**: the cell is reported not measured on its rule; no lift is claimed | yes |
+| 5 | A control's post fails a catalog assertion its pre passes | **Regression on a control**: the edits that cell reaches are withdrawn or revised and remeasured before merge | no |
+| 6 | On a new cell, post does worse than pre on R or A by two or more arms | **Regression on a new cell**: the text that cell reaches is withdrawn or revised and remeasured before merge | no |
+| 7 | Pre passes R and A on 3/3 informative arms (and V, C on DA-S10) | **Text unnecessary for behavior on that cell**: the checker change ships; any later reduction of the SKILL.md or template text is a new draft with its own reachability assessment and arms, never a quiet trim | yes |
+| 8 | Post passes P, R, V, A, C, K on 3/3, pre fails R or A on at least 2/3, and rows 5–6 did not fire | **Successful correction**: ships as measured at n=3 per cell on this model and harness | no |
+| 9 | Mixed: post leads pre on R or A by one or two arms without meeting row 8 (for example pre 0/3, post 2/3) | **Observed, not established**: reported with counts; ships only as a clarification carrying no measured claim, owner decides | no |
+| 10 | Post and pre within one arm of each other on R and A | **No observed lift**: ships only as a clarification carrying no measured claim, owner decides; the dev-checker fix ships regardless, since D1 is a checker defect reproduced independently of any arm | yes |
+| 11 | A cell the reachability assessment owes but this wave does not run (DA-S1x, DA-S3) | **Unmeasured debt**: named in `docs/evidence-status.md`; the shipped text is not described as measured on it | yes |
+| 12 | Anything not matched above | Owner decides, with the counts; no claim of lift | yes |
+
+Retries are bounded: one per voided arm and two in all; past that the cell is reported not measured, never padded.
 
 ## What n=3 can and cannot show
 
-Three pre and three post arms per cell can show a gross difference — 0/3 against 3/3 on R or A — and can catch a wording that fails outright.
-They cannot estimate a rate, separate a one-arm difference from noise, or show the wording helps on another model, another host (Codex is unmeasured), or another fixture.
-A 3/3 against 3/3 tie is "no observed lift", not evidence of no effect; a 2/3 against 3/3 split is reported as observed and not interpreted.
+Three pre and three post arms per cell can show a gross difference — 0/3 against 3/3 on R or A — and catch text that fails outright.
+They cannot estimate a rate, separate a one-arm difference from noise, or show the change helps on another model, another host (Codex is unmeasured), or another fixture.
+A 3/3 against 3/3 tie is "no observed lift", not evidence of no effect.
+The controls, at one arm each, can catch a gross regression and nothing finer.
 
 Scorer: to be named in the run record on its `Scorer:` line, per PROTOCOL § Who scored it; every quote grepped against the archive before citation.

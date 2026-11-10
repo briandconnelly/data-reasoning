@@ -12,15 +12,18 @@ exactly, so they are `user-elicited` and belief-grade, and no other gate in
 `decision-analysis` § Numeric Policy can explain the verdict.
 
 - `s9-lr-range/`: a point prior (odds 40/160 = 0.25) and a ratio the vendor
-  pins only to a range, 0.5 to 4. With a loss ratio of 2 (threshold 0.5) the
-  posterior range 0.125 to 1 straddles the threshold although the prior class
-  and the losses are points: the likelihood-ratio range alone flips the
-  action (crossover at a ratio of 2).
+  bounds only to 0.5-4 across every firmware revision. With the prompt's
+  losses restore = (1, 1), keep serving = (3, 0) over (corrupt, not), the
+  incremental loss ratio is 2 (threshold 0.5) and the posterior range 0.125
+  to 1 straddles it although the prior and the losses are points: the
+  likelihood-ratio range alone flips the action, at a ratio of 2 (the raw
+  3:1 reading would put it at 4/3).
 - `s10-loss-matrix/`: a point prior (odds 7/200 = 0.035) and a point ratio
   (18/20 over 6/20 = 3), so posterior odds 0.105. The prompt's four-cell loss
   matrix, ship = (10, 0) and hold = (1, 1), gives an incremental loss ratio
   of 9 (threshold 1/9, about 0.111): ship. Reading the raw 10:1 gives a
-  threshold of 0.1: hold.
+  threshold of 0.1: hold. The release asked about, 6.0, is after the
+  history's cutoff and appears in neither file.
 
 `validate_da_sweep.py` holds both packets to these properties. Deterministic
 from a fixed seed on this module's own `random.Random`. Run from the repo root:
@@ -41,11 +44,13 @@ RNG = random.Random(20261109)
 # s9: every checksum-mismatch alert since 2024, each with its confirmed outcome.
 S9_ALERTS = 200
 S9_CORRUPT = 40
-# The vendor's range for the ratio of re-read persistence rates.
+# The vendor's bound on the ratio of re-read persistence rates, valid for
+# every firmware revision of the controller family.
 S9_RATIO_LOW, S9_RATIO_HIGH = "0.5", "4"
 
-# s10: every release since 2023 (a census) and the spike reference class
-# (quota-drawn: 20 regressions, 20 clean releases).
+# s10: every release from 3.0 through 5.6 (a census to the cutoff) and the
+# spike reference class (quota-drawn: 20 regressions, 20 clean releases).
+# The release under decision, 6.0, is after the cutoff.
 S10_RELEASES = 207
 S10_REGRESSIONS = 7
 S10_REF_REAL, S10_REF_REAL_SPIKE = 20, 18
@@ -74,27 +79,30 @@ S9_VENDOR_NOTE = f"""\
 
 Published by the controller vendor, revision 3.
 
-Across the vendor's field population of this controller family, a mismatch that
-reflects real on-disk corruption persists across an immediate re-read more
-often than a transient mismatch does. The ratio of the two persistence rates
-(persists given real corruption, divided by persists given a transient fault)
-depends on the controller firmware revision: the vendor measures it at
-{S9_RATIO_LOW} on the oldest supported revision and {S9_RATIO_HIGH} on the
-newest, and gives no figure in between. Firmware revisions in a customer fleet
-are not exposed by the controller's management interface.
+For a checksum mismatch on this controller family, compare how often it
+persists across an immediate re-read when it reflects real on-disk corruption
+with how often it persists when it reflects a transient fault. The ratio of
+those two persistence rates (persists given real corruption, divided by
+persists given a transient fault) lies between {S9_RATIO_LOW} and {S9_RATIO_HIGH}
+on every firmware revision this controller family has shipped, and the vendor
+gives no narrower figure for any single revision: the ratio depends on the
+revision, and the bound covers all of them. Firmware revisions in a customer
+fleet are not exposed by the controller's management interface.
 """
 
 S10_README = """\
-# Release 4.12 canary: error-rate spike
+# Release 6.0 canary: error-rate spike
 
-Release 4.12's canary showed an error-rate spike in its first hour.
+Release 6.0's canary showed an error-rate spike in its first hour. Release 6.0
+has not shipped and appears in neither file below.
 
 Files:
 
-- `evidence/release_history.csv` is a census: every release we have shipped
-  since 2023-01-01, one row each, with whether the post-release review
-  confirmed a real regression (`real_regression`). No release is missing and
-  none was sampled.
+- `evidence/release_history.csv` is a census: every release we shipped from
+  3.0 (2023-01-02) through 5.6, the last release before the cutoff of
+  2026-10-31, one row each, with whether the post-release review confirmed a
+  real regression (`real_regression`). No release is missing and none was
+  sampled.
 - `evidence/spike_reference.csv` is a reference class built for the canary
   dashboard: 20 releases that were real regressions and 20 that were not,
   drawn to quotas fixed by the analyst (so its 20/20 split is not a base

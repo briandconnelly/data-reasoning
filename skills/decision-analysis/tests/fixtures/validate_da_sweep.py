@@ -13,13 +13,18 @@ recomputed here from the packet files, exactly, rather than imported from the
 generator or a checker.
 
 1. s9's census fixes prior odds 40/160 = 0.25, and states that it is a census.
-2. s9's vendor note pins the ratio only to the range 0.5-4 and says why no
-   point is available (firmware revision not exposed).
-3. s9 with the prompt's loss ratio 2 (threshold 1/2): posterior odds
-   0.125-1 straddle the threshold while the prior and the losses are points,
-   so only the ratio range flips the action; the flip is at a ratio of 2,
-   inside 0.5-4.
-4. s10's census fixes prior odds 7/200 = 0.035, and states that it is a census.
+2. s9's vendor note bounds the ratio to 0.5-4 on every firmware revision,
+   gives no narrower figure, says why no point is available (revision not
+   exposed), and claims no direction for the ratio that 0.5 would contradict.
+3. s9 with the prompt's losses restore = (1, 1), keep serving = (3, 0): the
+   incremental ratio 2 gives threshold 1/2; posterior odds 0.125-1 straddle
+   it while the prior and the losses are points, so only the ratio range
+   flips the action, at a ratio of 2 inside 0.5-4. The raw 3:1 reading
+   (threshold 1/3) is straddled too, so the verdict does not turn on the
+   orientation rule, while its crossover (4/3) differs from the scored 2.
+4. s10's census fixes prior odds 7/200 = 0.035, states that it is a census
+   with an explicit cutoff, and the release under decision (6.0) appears in
+   neither the census nor the reference class.
 5. s10's reference class fixes the ratio 18/20 over 6/20 = 3 and states that
    it was drawn to quotas, so its split is not a base rate.
 6. s10 with the prompt's matrix ship = (10, 0), hold = (1, 1): the
@@ -46,10 +51,11 @@ GENERATOR = HERE / "generate_da_sweep.py"
 
 S9_PRIOR = Fraction(1, 4)
 S9_RATIO = (Fraction(1, 2), Fraction(4))
-S9_LOSS_RATIO = Fraction(2)
+S9_LOSSES = {"restore": (Fraction(1), Fraction(1)), "serve": (Fraction(3), Fraction(0))}
 S9_CROSSOVER = Fraction(2)
 S10_PRIOR = Fraction(7, 200)
 S10_RATIO = Fraction(3)
+S10_TARGET = "6.0"
 S10_LOSSES = {"ship now": (Fraction(10), Fraction(0)), "hold one week": (Fraction(1), Fraction(1))}
 
 FORBIDDEN = re.compile(
@@ -92,20 +98,26 @@ def check_s9(fx: Path) -> None:
     if "persisted" in alert_history_header(alerts):
         fail("s9 alert history must not record re-read persistence (it would pin the ratio)")
     note = (pkt / "evidence" / "vendor-note.md").read_text(encoding="utf-8")
-    m = re.search(
-        r"measures it at\s+(\S+)\s+on the oldest.*?and\s+(\S+)\s+on the\s+newest", note, re.S
-    )
+    flat = " ".join(note.split())
+    m = re.search(r"lies between (\S+) and (\S+) on every firmware revision", flat)
     if m is None:
-        fail("s9 vendor note no longer states the two measured ratios")
-    stated = {Fraction(m.group(1)), Fraction(m.group(2))}
-    if stated != set(S9_RATIO) or "not exposed" not in note:
-        fail(f"s9 vendor note must pin the ratio only to {S9_RATIO} and say why: {stated}")
-    threshold = 1 / S9_LOSS_RATIO
+        fail("s9 vendor note no longer bounds the ratio on every firmware revision")
+    stated = (Fraction(m.group(1)), Fraction(m.group(2)))
+    if stated != S9_RATIO or "no narrower figure" not in flat or "not exposed" not in flat:
+        fail(f"s9 vendor note must bound the ratio to {S9_RATIO} and say why: {stated}")
+    if re.search(r"more often|less often|more frequent|less frequent", flat):
+        fail("s9 vendor note must not claim a direction the 0.5 endpoint contradicts")
+    (r_h, r_n), (s_h, s_n) = S9_LOSSES["restore"], S9_LOSSES["serve"]
+    incremental = (s_h - r_h) / (r_n - s_n)  # restore is favored if true
+    raw = s_h / r_h
     post = (prior * S9_RATIO[0], prior * S9_RATIO[1])
-    if not (post[0] < threshold < post[1]):
-        fail(f"s9 posterior {post} does not straddle threshold {threshold}")
-    if threshold / prior != S9_CROSSOVER or not (S9_RATIO[0] < S9_CROSSOVER < S9_RATIO[1]):
+    for threshold in (1 / incremental, 1 / raw):
+        if not (post[0] < threshold < post[1]):
+            fail(f"s9 posterior {post} does not straddle threshold {threshold}")
+    if (1 / incremental) / prior != S9_CROSSOVER or not (S9_RATIO[0] < S9_CROSSOVER < S9_RATIO[1]):
         fail("s9 ratio crossover is not 2 inside the vendor range")
+    if (1 / raw) / prior == S9_CROSSOVER:
+        fail("s9's raw-reading crossover must differ from the scored one")
 
 
 def alert_history_header(alerts: list[dict[str, str]]) -> str:
@@ -127,6 +139,11 @@ def check_s10(fx: Path) -> None:
     readme = (pkt / "README.md").read_text(encoding="utf-8")
     if "is a census" not in readme or "not a base" not in readme:
         fail("s10 README must state the census and the quota-drawn reference class")
+    if "cutoff" not in readme or f"Release {S10_TARGET}" not in readme:
+        fail("s10 README must name the release under decision and the census cutoff")
+    named = {r["release"] for r in history} | {r["release"] for r in ref}
+    if S10_TARGET in named:
+        fail(f"release {S10_TARGET} has a resolved row: the fixture would leak the answer")
     posterior = prior * ratio
     (ship_h, ship_n), (hold_h, hold_n) = S10_LOSSES["ship now"], S10_LOSSES["hold one week"]
     incremental = (ship_h - hold_h) / (hold_n - ship_n)  # hold is favored if true
