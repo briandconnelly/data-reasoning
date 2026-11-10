@@ -78,12 +78,21 @@ An earlier draft of this record claimed there was "no owning file to point at". 
 An arm reaches the disposition Scenario 21's d3 or d6 cell scores as a miss, under any wording of the Analysis or Conclusion sections — which is the signal that the inference stopped being reliable and has to be written down after all.
 Scenario 21's eighteen scored cells are the intended standing check, but nothing currently reruns them: the prek hook validates only the fixture text, so an edit to either section will not trigger them by itself. Treat it as a check someone has to remember, not one the repo enforces.
 
-## Amendment, 2026-11-10 — reopening condition met; wording drafted, measurement pending
+## Amendment, 2026-11-10 — reopening condition met; the rule is now written and measured
 
 The condition above fired on the wording this record left in place.
 In the 2026-11-08 binding-rules wave, two of the three d6 arms run on `dev`'s unedited SKILL.md (`s21d6-pre-1`, `s21d6-pre-2`) reported H2 as best supported with a limitation attached, under `tests/run_arm.py`'s prompt frame rather than the 2026-07-25 one (issue #86; re-derived from the archive in `tests/runs/artifacts/2026-11-09-conflicted-return/reachability.md`).
-So the claim that the existing text produces the reading holds for the refute side at that frame (d3 pre 3/3) and does not hold for the support side (d6 pre 1/3).
+So the claim that the existing text produces the reading held on the refute side at that frame (d3 pre 3/3) and failed on the support side (d6 pre 1/3).
 
-A § Conclusion rule is drafted at `60f19e6`, keyed on conflicting execution records rather than on the unverified-return limitation, with the cleared-but-unrepeatable return carved out and a pointer from § Analysis; its preregistration is `tests/runs/artifacts/2026-11-09-conflicted-return/prereg.md`.
-It is **unmeasured**: no arm has run against it, and "What was decided" above stands as the record of 2026-07-25 until the wave's verdict replaces this amendment.
-That preregistration says what this amendment becomes under each verdict.
+**"What was decided" above is superseded on the support side.**
+SKILL.md § Conclusion now carries the rule, keyed on conflicting execution records rather than on the unverified-return limitation, with the cleared-but-unrepeatable return carved out, and § Analysis points to it (commit `60f19e6`).
+It avoids the three rationales killed above: it names one observable state rather than asking that adequacy be shown, it never keys on the word "unverified", and it restricts what the Conclusion may do with an outcome without touching any cell.
+
+Measured under its preregistration (`tests/runs/artifacts/2026-11-09-conflicted-return/prereg.md`, Revision 1), the verdict was its ship row: d6 went from 1/3 (the reused, historical pre, selected after the failure) to 3/3, with every arm citing the new sentence; d3, d5, d7 and d1 held at 3/3; d4 and S20 c3 complied at 3/3 with no pre under that frame (`tests/runs/2026-11-10-conflicted-return-wave.md`).
+That is n=3 on one model and one fixture family, a one-sided Fisher exact p = 0.2 against the reused pre: descriptive, not significant, and d3 is not a lift.
+
+**Where the rule lives now:** SKILL.md § Conclusion, the paragraph before "best supported"'s bar, with the pointer in § Analysis's conflicting-execution-records bullets.
+The status set and the bar are unchanged; this record no longer describes a rule left unwritten.
+
+**Reopening condition, replacing the one above:** a control over-applies the rule — an arm on S21 d5, d7, d4 or d1, or on S20 c3, fails citing it — or S21 d6 or d3 misses again under any wording.
+The unmeasured parts stay open: the rule's "until evidence from outside that return resolves the conflict" clause has no packet, and S16 is still debt.
