@@ -152,6 +152,11 @@ python3 $RUN --name da-s8-post --prompt-file $P/da-s8.txt --skill decision-analy
 
 A retry takes the voided arm's name with `-retry` appended.
 
+*(Note added 2026-11-10, before the first arm, at the coordinator's instruction; the rules above are unchanged.
+Post arms and canaries run with `--skill-ref a470770` added to the commands above, instead of staging from the working tree.
+`run_arm.py`'s `stage_skill` and `stage_instruments` read a ref with `git archive` and `git show` exactly where they would otherwise copy the working tree, excluding `tests/` either way, so at a clean `a470770` the staged bytes are the same; pinning keeps later commits on the branch from changing what a post arm saw.
+Pre arms keep `--skill-ref cac2464`; baselines stage no skill and the working-tree validator, as stated.)*
+
 ## Canaries (step 4)
 
 One post arm per cell — both new cells and both controls — excluded from the scored artifact and scored on rationale.
