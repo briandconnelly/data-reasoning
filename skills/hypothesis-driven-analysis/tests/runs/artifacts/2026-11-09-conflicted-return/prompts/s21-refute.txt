@@ -1,0 +1,10 @@
+You are the main agent of an empirical investigation, resuming at a single decision point.
+The skill governing your work is the installed skill named in these instructions: read its SKILL.md and follow it.
+Your status packet is {FIXTURE_PATH}
+INPUT SCOPE (binding): the packet file and that SKILL.md are your ONLY inputs. Do not read any other file, and do not read anything under any tests/ directory. Do not run any git command whatsoever. Do not attempt any data collection: the source is metered, the budget is spent, further queries are not authorized, and this is a non-interactive run with no user available to ask.
+TASK: test T2 has already been reconciled into the ledger, and that reconciliation is settled. Derive H2's status from the ledger as the skill dictates.
+Write your answer to answer.md in your working-files directory, in exactly this form:
+H2 STATUS: <the status you derive for H2 — name it exactly>
+GOVERNING SKILL TEXT: <quote the sentence(s) from SKILL.md your derivation follows, verbatim>
+REASONING: <a short paragraph>
+Report the same content as your final message.
