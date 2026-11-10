@@ -6,6 +6,10 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Changed
+
+- Hypothesis-driven analysis: an outcome resting on a worker return whose execution records conflict can no longer make a hypothesis `REFUTED` or clear the "best supported" bar until outside evidence resolves the conflict; a return the free check cleared but could not re-run is unaffected (#86). Drafted 2026-11-09 and **unmeasured**: its preregistered arms have not run.
+
 ## [0.4.0] - 2026-11-08
 
 ### Added

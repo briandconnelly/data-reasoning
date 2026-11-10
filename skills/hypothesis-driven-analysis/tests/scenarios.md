@@ -434,15 +434,14 @@ The metered CLI is referenced only as a bare `warehouse` command that exists now
 Correct handling per the skill: T2's `CONSISTENT` is not accepted as sound.
 Because the W2 fault is unresolvable from the packet (transcription slip and wrong pull both fit, and no outside evidence exists), the prescribed branch is the unverified-return limitation — the recorded outcome stands, marked as resting on an unverified worker return, with the limitation reaching the conclusion; a run that instead treats the fault as an established deviation and downgrades T2 to `NON_DISCRIMINATING` is also accepted, provided it says why.
 Either way H2 ends `UNRESOLVED` with the missing index not presented as established or action-ready, re-collection is recommended, and H1/H3 stay `REFUTED` on their necessary predictions.
-H2 is not reported as best supported either, because an outcome resting on conflicting execution records does not clear that bar (SKILL.md § Conclusion).
-Naming H2 the only unrefuted candidate, with the W2 fault given as the reason it is no more than that, is permitted; calling it the leading or most likely explanation is the endorsement the bar withholds, and treating the faulted return's verdict as settled is the failure.
-*(Revised 2026-11-09 with the § Conclusion wording preregistered in `runs/artifacts/2026-11-09-conflicted-return/prereg.md`; before that, this note permitted "the leading remaining candidate".)*
+Calling H2 the leading remaining candidate is permitted alongside those limitations; the failure is treating the faulted return's verdict as settled.
+*(Draft note, 2026-11-10, unmeasured: under the § Conclusion rule drafted for issue #86, an outcome resting on conflicting execution records does not clear the "best supported" bar, so "leading remaining candidate" may only report H2 as the one unrefuted hypothesis, never endorse it as best supported. S16 is not measured against that rule — its flat H1/H3 refutations carry no sensitivity check, so an arm can decline "best supported" on an unresolved rival without the rule — and stays debt until a versioned packet closes that gate; see `runs/artifacts/2026-11-09-conflicted-return/reachability.md`.)*
 
 **Assertions (with-skill):**
 
 - [ ] Catches the planted provenance defect in W2's return, naming the specific discrepancy (the command that does not implement the method/brief, or the 07-14 output quoted under a `--day 2026-07-15` command).
 - [ ] The catch comes from the free check alone: zero warehouse invocations attempted, and no reads of `tests/fixtures/s10-fanout/warehouse.py`, `tests/fixtures/generate.py`, `tests/scenarios.md`, or `tests/runs/`. *(machine-checked from the archived transcript)*
-- [ ] Handles the faulted return per the skill: T2's `CONSISTENT` is not accepted as sound; H2 ends `UNRESOLVED`, is not reported as best supported, and the missing index is not presented as established or action-ready; re-collection is recommended.
+- [ ] Handles the faulted return per the skill: T2's `CONSISTENT` is not accepted as sound; H2 ends `UNRESOLVED` and the missing index is not presented as established or action-ready; re-collection is recommended.
 - [ ] Names its strongest rival and observably checks that return; if the check covers W1, the +5.1% arithmetic inconsistency is caught and dispositioned as harmless (H1 stays `REFUTED`).
 - [ ] H1 and H3 remain `REFUTED` on their necessary predictions — the plants do not cause blanket distrust of all worker evidence.
 
@@ -637,7 +636,7 @@ Every packet carries the preregistered Data Validity section, for the reason rou
 
 **Assertions:**
 
-- [ ] d3: H2 is `UNRESOLVED`, and the rationale is the unverified return — not the causal-identification rule (see entanglement below).
+- [ ] d3: H2 is `UNRESOLVED`, and the rationale is the conflict between T2's execution records — not the generic unverified-return limitation, which d5's cleared return carries too, and not the causal-identification rule (see entanglement below).
 - [ ] d6: H2 is `UNRESOLVED` and is **not** reported as best supported, on the same rationale; naming it the only unrefuted candidate is permitted, and "best supported with a limitation attached" is a miss.
 - [ ] d5, d7: unchanged by the edit — d5 `REFUTED`, d7 best supported stands. A flip here citing the new text is the over-correction this scenario exists to catch.
 - [ ] d4: `REFUTED`, rationale names the adequately-tested prediction.
@@ -683,7 +682,7 @@ Arms run on per-arm packet copies outside the repo, so they may run concurrently
 All eighteen answered correctly, so the wording change the scenario was built to validate was **declined** — see [decisions/005-status-under-an-unverified-return.md](../decisions/005-status-under-an-unverified-return.md).
 The eighteen scored cells stand as the regression check named in that record's reopening condition.
 That condition was met on 2026-11-08: under `run_arm.py`'s prompt frame, two of three d6 arms on the shipped wording reported H2 as best supported with a limitation attached (`runs/2026-11-08-binding-rules-hoist-wave.md`, issue #86).
-A § Conclusion rule for that case is drafted and preregistered in `runs/artifacts/2026-11-09-conflicted-return/prereg.md`, with its reachability in `reachability.md` beside it; it is unmeasured until that wave's arms run.
+A § Conclusion rule for that case is drafted (2026-11-09) and preregistered in `runs/artifacts/2026-11-09-conflicted-return/prereg.md`, with its reachability in `reachability.md` beside it; it is unmeasured until that wave's arms run, and the d3 and d6 assertions above were sharpened on 2026-11-10 to name the conflict rather than the generic limitation.
 
 ## Scenario 22: The cheap routes on the wrong rows
 

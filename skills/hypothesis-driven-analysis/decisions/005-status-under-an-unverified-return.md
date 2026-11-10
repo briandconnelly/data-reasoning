@@ -77,3 +77,13 @@ An earlier draft of this record claimed there was "no owning file to point at". 
 
 An arm reaches the disposition Scenario 21's d3 or d6 cell scores as a miss, under any wording of the Analysis or Conclusion sections — which is the signal that the inference stopped being reliable and has to be written down after all.
 Scenario 21's eighteen scored cells are the intended standing check, but nothing currently reruns them: the prek hook validates only the fixture text, so an edit to either section will not trigger them by itself. Treat it as a check someone has to remember, not one the repo enforces.
+
+## Amendment, 2026-11-10 — reopening condition met; wording drafted, measurement pending
+
+The condition above fired on the wording this record left in place.
+In the 2026-11-08 binding-rules wave, two of the three d6 arms run on `dev`'s unedited SKILL.md (`s21d6-pre-1`, `s21d6-pre-2`) reported H2 as best supported with a limitation attached, under `tests/run_arm.py`'s prompt frame rather than the 2026-07-25 one (issue #86; re-derived from the archive in `tests/runs/artifacts/2026-11-09-conflicted-return/reachability.md`).
+So the claim that the existing text produces the reading holds for the refute side at that frame (d3 pre 3/3) and does not hold for the support side (d6 pre 1/3).
+
+A § Conclusion rule is drafted at `60f19e6`, keyed on conflicting execution records rather than on the unverified-return limitation, with the cleared-but-unrepeatable return carved out and a pointer from § Analysis; its preregistration is `tests/runs/artifacts/2026-11-09-conflicted-return/prereg.md`.
+It is **unmeasured**: no arm has run against it, and "What was decided" above stands as the record of 2026-07-25 until the wave's verdict replaces this amendment.
+That preregistration says what this amendment becomes under each verdict.
