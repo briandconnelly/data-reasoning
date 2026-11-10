@@ -1,0 +1,131 @@
+{
+  "name": "canary-da-s8-post",
+  "started_utc": "2026-11-10T14:16:06.417717+00:00",
+  "duration_s": 65.9,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "7f69f38a-d87e-4a0e-9665-a3fad9b20792",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "decision-analysis",
+  "skill_ref": "a470770",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "decision-analysis/SKILL.md": "c2cc9fd2ddea9ed4cd553c982fc7b1f7aa73bb36ecb9e52e6432f9ddd143dba7",
+    "decision-analysis/agents/openai.yaml": "0d6e598cb01572974a0935503c6d1b3a3dcbbffcbf832d28aa6b98bb003f35a9",
+    "decision-analysis/decisions/001-name.md": "bbda984dcfd93182cf642dfe221ef64d1ebb0c5b40a46c1e41076a9230cbfbb6",
+    "decision-analysis/decisions/002-authority-map.md": "cb3c593c663620cee03c553abfd08e66a467b48c3fbdfc9f8ec5077e048a9b27",
+    "decision-analysis/decisions/003-numeric-provenance-policy.md": "2fe1d9ff8c8f5d37a2eb8125b3aa2312b34b7f779ea3e33d27310806019deeb8",
+    "decision-analysis/decisions/004-binary-scope.md": "e4eca63c6b0b64ca7998f47e64d127da98a12fd3094002e1cc21fd807ee8233a",
+    "decision-analysis/decisions/005-voi-definition.md": "ff90c2d2959cae7559f1a8da279e4dad0af5d907181eb1e045a6c38dabe2a2e2",
+    "decision-analysis/decisions/006-verdict-never-authorizes.md": "37585ead3295ed2c4ee3fd0819579c74f90a0e5286265af274fa814b4c3c8627",
+    "decision-analysis/decisions/007-evidence-sweep-and-loss-orientation.md": "dae789bfa98f4bddbc0d5131e800030b4e072d517031604c9dece6b7218008f8",
+    "decision-analysis/decisions/README.md": "f81eb4111fd26f97ecd9a4eafdfea554f3b5951b46f72f424ae9387a9fc09b61",
+    "decision-analysis/references/decision-record-template.md": "4fdc330cda5e97ee05e5fbeae49cc9e933df5ad50985ea3c68e7c2a34ac26577"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e2dfdf8221ed04605571b127b6c4b1912f692fde99ff3a740125d0cfed636b5d"
+  },
+  "fixture": "skills/decision-analysis/tests/fixtures/da-s1-ledger",
+  "fixture_files_sha256": {
+    "da-s1-ledger/evidence/host_p95.csv": "6533f1efedcc00b5771ce32ee73d28bc2bb7514c6a2ef58be5441dc24015f79a",
+    "da-s1-ledger/evidence/reference_class.csv": "39090920f020cfe1e22fb89cd06758cf944f8b1c5c5d378f9de15864372cfd9d",
+    "da-s1-ledger/ledger.md": "efcb3cd84052f6df654f7d3201efa6d5aaec77e4f1cd0b362d15c98f192dcbef"
+  },
+  "prompt_sha256": "640fae9ac635e692ebb5dee729fd5b379c84f1d75267b6deea46ea70802d2197",
+  "jsonl_sha256": "0e3f8c6b6afe051b0051aed53bd04594fefa73c7f163156f095f15eb2a086f19",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9",
+  "files_written": [
+    "decision-record.md"
+  ],
+  "files_written_sha256": {
+    "decision-record.md": "4b716a1c98fa066c78bb20594966af76bf685ebe78ca47aed2a31d2fe8e33d06"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9/skills/decision-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9/data/da-s1-ledger/ledger.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9/skills/decision-analysis/references/decision-record-template.md\"}"
+    },
+    {
+      "ordinal": 4,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9/work/decision-record.md\", \"content\": \"# Decision Record: ship or hold the pool-change release at Friday's freeze\\n\\n## Decision frame\\n\\n- Route: decide\\n- Actions: ship the release vs hold the release one week\\n- Decision owner: release team (the team disagrees on the loss multiple)\\n- Reversibility: a hold costs one week and can be lifted; a shipped real regression costs the user-elicited multiple of that, and rollback cost is inside that multiple\\n- Deadline or forcing event: release freeze Friday"
+    },
+    {
+      "ordinal": 5,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9 && python3 -I instruments/check_record.py --final work/decision-record.md\"}"
+    },
+    {
+      "ordinal": 6,
+      "tool": "Bash",
+      "input": "{\"command\": \"cd /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9 && python3 -I instruments/check_record.py --final work/decision-record.md; echo exit=$?\"}"
+    }
+  ],
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 76591,
+    "cache_read_input_tokens": 319664,
+    "output_tokens": 5579,
+    "output_tokens_details": {
+      "thinking_tokens": 2178
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 76591,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1135,
+        "cache_read_input_tokens": 80249,
+        "cache_creation_input_tokens": 193,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 193
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.39414439999999995,
+    "duration_ms": 65383,
+    "num_turns": 7
+  },
+  "result_text": "Your inputs don't settle ship versus hold. The answer flips inside the ranges you gave me, so the call is yours. I put the numbers in a record, and the structural validator passed with no findings. That only checks the record's structure, not whether the analysis is right.\n\n**The one usable piece of evidence.** The canary/control p95 gap was 57 ms, against a 40 ms noise band. In the 20 past canary rollouts in the ledger's reference file, 9 of 10 real regressions showed a gap over 40 ms. So did 2 of 10 non-regressions. That gives a likelihood ratio of 4.5 (0.9 \u00f7 0.2) in favor of \"real\". I used it once, because the ledger's T1 and T3 are the same observation. The two unresolved rows add nothing, since an UNRESOLVED status carries no likelihood information. The 4.5 is a single point from 20 rollouts, and I did not widen it for small-sample error.\n\n**The arithmetic.**\n- **Prior odds:** 1:50 to 1:5 is 0.02 to 0.2.\n- **Posterior odds:** 0.09 to 0.9.\n- **Hold threshold:** hold when posterior odds exceed 1/r, where r is your 2\u201320 loss multiple. That puts the threshold at 0.05 to 0.5.\n- **Overlap:** the posterior range and the threshold range overlap, so neither action wins everywhere.\n\n**Where it flips.** Hold wins when prior odds \u00d7 4.5 \u00d7 r is above 1.\n\n| Missing a real regression costs | Prior odds at which the answer flips | Same, as a ratio |\n| --- | --- | --- |\n| 2\u00d7 a needless hold | 0.111 | about 1:9 |\n| 5\u00d7 | 0.044 | about 1:23 |\n| 10\u00d7 | 0.022 | about 1:45 |\n| 20\u00d7 | 0.011 | below your range |\n\n- **If the team is near 20\u00d7:** hold at any prior you gave.\n- **If the team is near 2\u00d7 and the prior is pessimistic about a regression (1:50):** ship.\n- **At your most skeptical prior (1:50):** the loss multiple flips the answer at about 11\u00d7.\n- **At your least skeptical prior (1:5):** hold wins at every loss multiple from 2\u00d7 to 20\u00d7.\n\nSo the disagreement that decides this is mostly the prior, and then the loss multiple.\n\n**What would settle it.** The ledger's discriminating test never ran. It would recompute p95 from the raw canary access logs, to separate a real latency change from an exporter artifact. Those logs were not acquired, and the restore request was pending. They are retained only 7 days, so check whether the restore landed. The record doesn't price that wait, because no cost or timing was stated. If the logs show the gap, hold. If they show flat latency, the exporter-artifact explanation gains ground.\n\n**Assumptions in the record.**\n- A hold costs 1 unit when the regression isn't real and nothing when it is.\n- Shipping with no regression costs nothing.\n- Your 2\u201320 loss range counts as belief-grade because you supplied it.\n- Ship-versus-hold is a binary on \"the regression is real\", so the record makes no causal claim.\n\nThe record is at `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-canary-da-s8-post-gklhsgq9/work/decision-record.md`."
+}

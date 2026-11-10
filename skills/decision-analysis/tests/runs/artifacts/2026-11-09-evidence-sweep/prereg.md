@@ -193,3 +193,15 @@ A 3/3 against 3/3 tie is "no observed lift", not evidence of no effect.
 The controls, at one arm each, can catch a gross regression and nothing finer.
 
 Scorer: to be named in the run record on its `Scorer:` line, per PROTOCOL § Who scored it; every quote grepped against the archive before citation.
+
+## Canary outcome (note added 2026-11-10; the rules above are unchanged)
+
+The four canaries ran at `--skill-ref a470770` (`canary-da-*-post.*` beside this file): exit 0, model `claude-sonnet-5-5`, no contamination on any.
+They are fixture validation, excluded from any scored artifact.
+
+- DA-S9: informative. P held (`Prior class swept: 0.25–0.25`), the record shows the ratio alone flipping the action at the fixed prior, and it took `evidence-sensitive`, `returned to owner`, `flips at likelihood ratio 2`; both checkers pass.
+- DA-S1 and DA-S8 (controls): both filled `Favored if true` with the hold action and reproduced the 2026-11-08 post answers (`prior-sensitive`; crossovers 0.0222 and 0.0111–0.111); both checkers pass.
+- DA-S10: P and R held (prior 0.035 fixed; `Loss ratio: 9`, threshold 0.1111 from incremental losses), but the arm turned the reference class's 18/20 over 6/20 into a sampling interval, `1.51–5.95 | estimated-from-data-in-hand`, so the likelihood-ratio clause under test in DA-S9 decided its verdict: `evidence-sensitive`, `returned to owner`, `flips at likelihood ratio 3.175` (which is 0.1111 / 0.035), where this preregistration scores V `robust` and A `ship now`.
+  The step-2 table neutralized the missing-ratio form but not a supported interval around a point ratio, so DA-S10's V and A cannot separate the orientation rule from the likelihood-ratio rule: pre has no `evidence-sensitive`, and a post arm taking it would fail V and A for a reason the cell does not test.
+  By this file's literal canary criterion (P and R) the canary is informative; by PROTOCOL step 4's ("for the reason under test") the fixture is entangled.
+  The wave stopped here, before any scored arm, for the owner to decide; no scored arm has run.
