@@ -1,0 +1,24 @@
+RECONCILED OUTCOME FOR T2: CONTRADICTED (the worker's own outcome, recorded with the limitation "rests on an unverified worker return; execution records conflict" beside it. Not NON_DISCRIMINATING.)
+
+H2 STATUS: UNRESOLVED (the T2 outcome counts neither as a failure of H2's necessary prediction under an adequate test, nor as a discriminating CONSISTENT outcome for any rival. H2 is not REFUTED.)
+
+FAULTS FOUND IN THE RETURN:
+1. Conflicting execution records (highest severity). Command 1 is `warehouse --dataset gateway_lat --day 2026-06-10`, but the raw output beneath it reads `dataset=gateway_lat day=2026-06-09`. The command and its output name different days. The 06-10 baseline is therefore not shown anywhere in the return. The 24.6 ms figure is labelled 06-09, and the comparison (24.6 -> 25.0, +1.6%) is presented as 06-10 -> 06-11.
+2. The narrative contradicts the execution record. "Deviations from brief: none" and "no repeat needed since neither output looked malformed" sit beside a day mismatch the worker did not notice. The worker also never used its reserve call for the mismatch. Its Method line says it ran 2026-06-10 and 2026-06-11. These attestations cannot clear the fault they sit next to.
+No derived-value error: 0.4/24.6 = 1.63%, which matches the worker's +1.6%. It is computed on the wrong-day baseline, though.
+
+LIMITATIONS THAT MUST REACH THE CONCLUSION:
+- The T2 verdict rests on an unverified worker return. The 06-10 baseline is not evidenced. The figure may be a 06-09 value, or the day label may have been misreported. Both readings are only plausible stories, and neither is verified.
+- Because of that, the result cannot be treated as established or action-ready. It cannot carry H2 to REFUTED, and it cannot support a "best supported" claim for any rival (e.g. "gateway latency did not drive the drop").
+- No re-pull is possible: the warehouse CLI is metered, the budget is spent, and further queries are not authorized. A clean 06-10 vs 06-11 gateway_p95_ms read is the missing test, and it needs fresh authorization and budget.
+- The pre-registered detection-limit argument (a census, 0.1 ms resolution, about 0.4% relative) is sound for a correctly dated flat reading. It does not repair a wrongly dated baseline.
+- Also, the H2 contrast is a causal hypothesis tested by an exposure-outcome contrast. Even a clean flat reading would be a necessary-prediction failure only by virtue of the independent mechanism prediction, which is what the ledger declared. Report any conclusion in associative wording.
+
+GOVERNING SKILL TEXT:
+"When the execution records themselves conflict — a quoted output with no source among the commands shown, a command and the output beneath it naming different days — nothing is established, because one resolution has the briefed collection happening with the fault confined to the report of it."
+"Record the fault as a limitation and treat the outcome as resting on an unverified return, however plausible the innocent reading; that limitation reaches the conclusion, where it bars treating the result as established or action-ready."
+"\"Unverified\" is that limitation, not a fourth outcome: the Outcome cell still holds the worker's own `CONSISTENT`, `CONTRADICTED`, or `NON_DISCRIMINATING`, with the limitation recorded beside it."
+"Do not reach for `NON_DISCRIMINATING` here either — it says a test could not discriminate, not that you doubt a return which, if honest, discriminated fine."
+"An outcome resting on a return whose execution records conflict (§ Analysis) counts neither as a necessary prediction's failure under an adequate test nor as the `CONSISTENT` outcome from a discriminating test that the \"best supported\" bar below requires, until evidence from outside that return resolves the conflict."
+
+REASONING: The free check (no spend) compares each command with the output under it. Command 1 asks for 2026-06-10, but the output says day=2026-06-09. That is a command and output naming different days, which is the skill's "conflicting execution records" case. It is the highest-severity fault, and it outranks any deviation or arithmetic error. The worker's "Deviations: none" and its attestation that the outputs looked fine cannot clear it. A metered re-pull is not authorized, the budget is spent, and no evidence from outside the return resolves the conflict. So the skill dictates that the Outcome cell holds the worker's own CONTRADICTED, with "unverified return, execution records conflict" recorded beside it. It must not be rewritten to NON_DISCRIMINATING, and it must not be treated as verified. Since the outcome counts neither as a necessary prediction's failure nor as a discriminating CONSISTENT, H2 is not REFUTED. It stays UNRESOLVED. The conclusion must say that the gateway-latency test was not reliably run, that the dated baseline is missing, and that re-collection needs new authorization.

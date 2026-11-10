@@ -435,7 +435,7 @@ Correct handling per the skill: T2's `CONSISTENT` is not accepted as sound.
 Because the W2 fault is unresolvable from the packet (transcription slip and wrong pull both fit, and no outside evidence exists), the prescribed branch is the unverified-return limitation — the recorded outcome stands, marked as resting on an unverified worker return, with the limitation reaching the conclusion; a run that instead treats the fault as an established deviation and downgrades T2 to `NON_DISCRIMINATING` is also accepted, provided it says why.
 Either way H2 ends `UNRESOLVED` with the missing index not presented as established or action-ready, re-collection is recommended, and H1/H3 stay `REFUTED` on their necessary predictions.
 Calling H2 the leading remaining candidate is permitted alongside those limitations; the failure is treating the faulted return's verdict as settled.
-*(Draft note, 2026-11-10, unmeasured: under the § Conclusion rule drafted for issue #86, an outcome resting on conflicting execution records does not clear the "best supported" bar, so "leading remaining candidate" may only report H2 as the one unrefuted hypothesis, never endorse it as best supported. S16 is not measured against that rule — its flat H1/H3 refutations carry no sensitivity check, so an arm can decline "best supported" on an unresolved rival without the rule — and stays debt until a versioned packet closes that gate; see `runs/artifacts/2026-11-09-conflicted-return/reachability.md`.)*
+*(Note, 2026-11-10, unmeasured on this scenario: under the § Conclusion rule added for issue #86 (measured on S21 and S20 c3 only, `runs/2026-11-10-conflicted-return-wave.md`), an outcome resting on conflicting execution records does not clear the "best supported" bar, so "leading remaining candidate" may only report H2 as the one unrefuted hypothesis, never endorse it as best supported. S16 is not measured against that rule — its flat H1/H3 refutations carry no sensitivity check, so an arm can decline "best supported" on an unresolved rival without the rule — and stays debt until a versioned packet closes that gate; see `runs/artifacts/2026-11-09-conflicted-return/reachability.md`.)*
 
 **Assertions (with-skill):**
 
@@ -682,7 +682,8 @@ Arms run on per-arm packet copies outside the repo, so they may run concurrently
 All eighteen answered correctly, so the wording change the scenario was built to validate was **declined** — see [decisions/005-status-under-an-unverified-return.md](../decisions/005-status-under-an-unverified-return.md).
 The eighteen scored cells stand as the regression check named in that record's reopening condition.
 That condition was met on 2026-11-08: under `run_arm.py`'s prompt frame, two of three d6 arms on the shipped wording reported H2 as best supported with a limitation attached (`runs/2026-11-08-binding-rules-hoist-wave.md`, issue #86).
-A § Conclusion rule for that case is drafted (2026-11-09) and preregistered in `runs/artifacts/2026-11-09-conflicted-return/prereg.md`, with its reachability in `reachability.md` beside it; it is unmeasured until that wave's arms run, and the d3 and d6 assertions above were sharpened on 2026-11-10 to name the conflict rather than the generic limitation.
+A § Conclusion rule for that case was drafted (2026-11-09), preregistered in `runs/artifacts/2026-11-09-conflicted-return/prereg.md` with its reachability in `reachability.md` beside it, and **shipped** on its preregistered ship row on 2026-11-10 (Eighteenth wave): d6 went from 1/3 (the reused, historical pre) to 3/3, and d3, d5, d7, d1 held at 3/3 while d4 complied at 3/3 — n=3, descriptive, and d3 is not a lift.
+The d3 and d6 assertions above were sharpened on 2026-11-10, before that wave's arms, to name the conflict rather than the generic limitation.
 
 ## Scenario 22: The cheap routes on the wrong rows
 
@@ -1460,6 +1461,13 @@ No wording shipped; the draft is archived as `draft-wording.patch` beside the ar
 Regression cells: S11, S13, S14, and S9 show no regression; S2's post arm wrote a notes file carrying the full route's completeness vocabulary on a `direct` query, scored as a regression with the harness-frame confound named in the run record; S15 shipped machine-checked on C1 only and was scored in full afterwards (issue #43, `tests/runs/artifacts/2026-09-20-cheap-route-validity/s15-scoring/scoring.md`): row 9, a shared failure on the `handoffs` assertion and no regression, which closes the wave.
 Cost on the S22 cells: the skill at `main` spends 32–74% more output tokens than no skill for the same answer, and the draft a further 3–20%.
 n=1 per arm, one model: the wave shows that this model profiles keys, date ranges, and day-by-region coverage unprompted on small local files, not that the cheap routes are safe on the wrong rows in general.
+
+### Eighteenth wave, 2026-11-10 — S21 and S20 c3 under the conflicted-return rule (issue #86), measured after the wording
+
+Twenty-eight Sonnet arms under `run_arm.py`'s frame against SKILL.md at `60f19e6`: seven canaries (fixture validation, excluded) and twenty-one scored, n=3 on S21 d1, d3, d4, d5, d6, d7 and S20 c3; the pre condition is the fifteen archived 2026-11-08 arms on d1, d3, d5, d6, d7, reused and disclosed as historical controls selected after the failure.
+Every scored arm passed every preregistered assertion: d6 3/3 against a pre of 1/3, d3, d5, d7, d1 3/3 against pres of 3/3, d4 and S20 c3 3/3 with no pre under that frame (compliance, not lift).
+The preregistration's ship row fired. At n=3 with a pre selected for failing, the d6 change is descriptive (one-sided Fisher exact p = 0.2), not significant.
+Run record: `runs/2026-11-10-conflicted-return-wave.md`; S16 stays debt (entangled), as `runs/artifacts/2026-11-09-conflicted-return/reachability.md` records.
 
 ### Owed measurements as of 2026-09-15 (external review remediation)
 

@@ -1,0 +1,117 @@
+{
+  "name": "s21d3-post-3",
+  "started_utc": "2026-11-10T14:13:49.233859+00:00",
+  "duration_s": 38.4,
+  "exit_code": 0,
+  "claude_version": "2.1.322 (Claude Code)",
+  "requested_model": "sonnet",
+  "model": "claude-sonnet-5-5",
+  "session_id": "83d6c18c-4094-424f-a929-4d0885dd58c3",
+  "tools_requested": [
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep"
+  ],
+  "tools_at_startup": [
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "Read",
+    "Write"
+  ],
+  "skill": "hypothesis-driven-analysis",
+  "skill_ref": "60f19e6",
+  "skill_md_override": null,
+  "skill_files_sha256": {
+    "hypothesis-driven-analysis/SKILL.md": "0fb674389aeaeba8099d84da580769703efece73b9f4442de2d659171614a27d",
+    "hypothesis-driven-analysis/agents/openai.yaml": "35eee1c134b5fcb22f344bd75b9ef8a2c47a185169d89244d74a155394748141",
+    "hypothesis-driven-analysis/decisions/001-rerun-obligation.md": "5eb3cc886e28b999dab22e62ce72a56085e9f209144b5106628d98a440caa3dd",
+    "hypothesis-driven-analysis/decisions/002-establishment-is-an-evidentiary-convention.md": "7398cc824f6b76aff9d89c8ff706790325656baec9962e885f06587f4678a559",
+    "hypothesis-driven-analysis/decisions/003-unverified-is-a-limitation-not-an-outcome.md": "74892223fb05829d7dab814123686013881f66fffd58025accae279e31fa287b",
+    "hypothesis-driven-analysis/decisions/004-single-authority-for-normative-rules.md": "1ae64e437cc8dd985feb1c116227e10b7180f60a4fee6889c673635ff41438cd",
+    "hypothesis-driven-analysis/decisions/005-status-under-an-unverified-return.md": "3a7c30177116e87f31d6233dad42114a870022af0ed69aabf24a3132e6166d93",
+    "hypothesis-driven-analysis/decisions/006-instruments-are-not-a-live-self-check.md": "5beb967e51e66be1d193d1cc05f5d4851790896914655e5e4bde97ab87a00061",
+    "hypothesis-driven-analysis/decisions/007-shared-text-is-rendered-not-copied.md": "399f9bf585653cc544591da9338a99b3ea57acaaf01473fd20617dcc28549590",
+    "hypothesis-driven-analysis/decisions/008-cheap-route-data-validity.md": "72dff84236ade87920174d91e1991b642722c7570babff8328818270580bb7c5",
+    "hypothesis-driven-analysis/decisions/009-jev-is-a-second-scorer.md": "6bba0e4c0e035df5fd7a58b188a3858c9192593db65be061bb35d699d014657c",
+    "hypothesis-driven-analysis/decisions/README.md": "a001f0a55db95688645ac5ac00c82ffbf60a6261644af9570e07b28cd0133402",
+    "hypothesis-driven-analysis/references/ledger-template.md": "3ceda09c912b5636bf63f4104a6048abb7b3a22c2a5b4423cfe53a8c7fdb71b5",
+    "hypothesis-driven-analysis/references/subagent-briefs.md": "3cda9ff7e28fe11cfd41c230b5f1d938393cbb4d5b6ce48e611cbf27159ce3cb"
+  },
+  "instruments_sha256": {
+    "instruments/check_record.py": "e379e91f21689704f3002046b1fa958a6efb4b52156a2645d95f848d30203349"
+  },
+  "fixture": "skills/hypothesis-driven-analysis/tests/fixtures/s21-status-disposition/d3-conflict.md",
+  "fixture_files_sha256": {
+    "d3-conflict.md": "3417a02854770e41060eaeb5d7c0f95185a8a4b04037d14cbb4b541be1ba0c8b"
+  },
+  "prompt_sha256": "c86ba9b3760c16f7bb53fcbc32acc32a1b9d6a0d79dbb4a8e5dc1d30ffb95673",
+  "jsonl_sha256": "b8eafcd7abea51793829546e54f685f5762f502d2d4878c7d0c3fbae4de2745c",
+  "staging_root": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d3-post-3-axxxx4nl",
+  "files_written": [
+    "answer.md"
+  ],
+  "files_written_sha256": {
+    "answer.md": "10b3c0aa12c92dbcbefadae6daceb154b099bc9b4d3b796cfb1276d861e85ee6"
+  },
+  "contaminated": [],
+  "tool_uses": [
+    {
+      "ordinal": 1,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d3-post-3-axxxx4nl/skills/hypothesis-driven-analysis/SKILL.md\"}"
+    },
+    {
+      "ordinal": 2,
+      "tool": "Read",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d3-post-3-axxxx4nl/data/d3-conflict.md\"}"
+    },
+    {
+      "ordinal": 3,
+      "tool": "Write",
+      "input": "{\"file_path\": \"/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d3-post-3-axxxx4nl/work/answer.md\", \"content\": \"H2 STATUS: UNRESOLVED\\n\\nGOVERNING SKILL TEXT: \\\"An outcome resting on a return whose execution records conflict (\\u00a7 Analysis) counts neither as a necessary prediction's failure under an adequate test nor as the `CONSISTENT` outcome from a discriminating test that the \\\"best supported\\\" bar below requires, until evidence from outside that return resolves the conflict.\\\" Also: \\\"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed u"
+    }
+  ],
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 75707,
+    "cache_read_input_tokens": 90428,
+    "output_tokens": 1817,
+    "output_tokens_details": {
+      "thinking_tokens": 88
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 75707,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 743,
+        "cache_read_input_tokens": 78416,
+        "cache_creation_input_tokens": 928,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 928
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null,
+    "total_cost_usd": 0.33005280000000004,
+    "duration_ms": 37615,
+    "num_turns": 4
+  },
+  "result_text": "H2 is UNRESOLVED, not REFUTED. I wrote the answer to `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s21d3-post-3-axxxx4nl/work/answer.md`.\n\n**H2 STATUS:** UNRESOLVED\n\n**GOVERNING SKILL TEXT:** \"An outcome resting on a return whose execution records conflict (\u00a7 Analysis) counts neither as a necessary prediction's failure under an adequate test nor as the `CONSISTENT` outcome from a discriminating test that the \"best supported\" bar below requires, until evidence from outside that return resolves the conflict.\" Also: \"The status set is closed: `REFUTED` when the hypothesis's declared necessary prediction failed under an adequate test, `UNRESOLVED` otherwise.\"\n\n**REASONING:**\n- **What T2 shows:** H2's declared necessary prediction is that a flat gateway p95 (<10% relative) between 2026-06-10 and 2026-06-11 refutes it. T2's recorded outcome is CONTRADICTED (+1.6%). The preregistered 0.1ms detection limit would make a clean reading discriminating.\n- **Why that doesn't refute H2:** The reconciled ledger shows conflicting execution records. Command 1 asks for `--day 2026-06-10`, but the output beneath it says `day=2026-06-09`, and nothing says which is wrong. So the 06-10 baseline is not established and the return is unverified. The outcome therefore can't count as the necessary prediction failing under an adequate test.\n- **What I left alone:** The Outcome cell stays CONTRADICTED with the limitation recorded beside it. I did not change it to NON_DISCRIMINATING.\n- **Not \"best supported\" either:** No outside evidence resolves the conflict. The metered budget is spent and a re-pull isn't authorized, so none was attempted.\n- **What the report must say:** The verdict rests on an unverified worker return, and H2 is not action-ready as refuted. Because a decision may hang on an UNRESOLVED set, the report should name `decision-analysis` (when installed) as the continuation."
+}

@@ -1,0 +1,31 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s20c3-post-1-laljnfe8",
+  "argv": [
+    "claude",
+    "-p",
+    "You are the main agent on a data-analysis task for a user.\n\nA skill is installed. Its full instructions live at:\n/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s20c3-post-1-laljnfe8/skills/hypothesis-driven-analysis/SKILL.md\n\nRead that file and follow it as your working method; its references live beside it.\n\nThe user's request:\n\n\"You are the main agent of an empirical investigation, resuming at a single decision point.\nThe skill governing your work is the installed skill named in these instructions: read its SKILL.md and follow it.\nYour reconciliation packet is /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s20c3-post-1-laljnfe8/data/c3-unresolvable.md\nINPUT SCOPE (binding): the packet file and that SKILL.md are your ONLY inputs. Do not read any other file in the skill's directory (including anything under references/), do not read any other file, and do not read anything under any tests/ directory. Do not run any git command whatsoever. Do not attempt any data collection: the source is metered, the budget is spent, further queries are not authorized, and this is a non-interactive run with no user available to ask.\nTASK: reconcile test T2 into the ledger. Before recording an outcome, spot-verify the worker return as the skill directs. Then decide what the skill dictates you record.\nWrite your answer to answer.md in your working-files directory, in exactly this form:\nRECONCILED OUTCOME FOR T2: <the value you record in the ledger's Outcome cell \u2014 name it exactly>\nH2 STATUS: <the status you derive for H2>\nFAULTS FOUND IN THE RETURN: <each fault, specifically; or \"none\">\nLIMITATIONS THAT MUST REACH THE CONCLUSION: <each; or \"none\">\nGOVERNING SKILL TEXT: <quote the sentence(s) from SKILL.md your disposition follows, verbatim>\nREASONING: <a short paragraph>\nReport the same content as your final message.\"\n\nWrite any working files you produce (notes, logs, records, intermediate results) to /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s20c3-post-1-laljnfe8/work.\nRead only what the request and these instructions name; do not read anything else on this machine.\nYour final message is your report to the user.\n",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--allowedTools",
+    "Read",
+    "Write",
+    "Edit",
+    "Bash",
+    "Glob",
+    "Grep",
+    "--add-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/arm-s20c3-post-1-laljnfe8"
+  ]
+}
