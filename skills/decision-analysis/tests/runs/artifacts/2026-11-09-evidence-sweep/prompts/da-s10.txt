@@ -1,0 +1,1 @@
+Release 4.12's canary showed an error-rate spike; the write-up, our release history, and the canary spike reference class are in `{FIXTURE_PATH}/`. Our costs, in engineer-days: ship now and it's a real regression, 10; ship now and it isn't, 0; hold one week and it's real, 1; hold one week and it isn't, 1. Ship now or hold one week?
