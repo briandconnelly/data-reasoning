@@ -23,6 +23,7 @@ The skeletons show the exact label and the bare shape of each value; everything 
   | <action A> | <outcome> | <outcome> |
   | <action B> | <outcome> | <outcome> |
 
+- Favored if true: <action A or action B exactly as written in Actions, or none needed>
 - Loss ratio: <multiple> — provenance: <class>
 - Decision threshold (posterior odds): <odds> — provenance: <class>
 
@@ -51,7 +52,7 @@ The skeletons show the exact label and the bare shape of each value; everything 
 
 - Prior class swept: <low>–<high> — provenance: <class>
 - Loss range swept: <low>–<high> — provenance: <class>
-- Crossover: <the prior odds or loss ratio at which the preferred action flips, or none within swept class>
+- Crossover: <the prior odds, loss ratio, or likelihood-ratio product at which the preferred action flips, or none within swept class>
 
 ## Verdict
 
@@ -102,9 +103,9 @@ Provenance is exactly one class from `../SKILL.md` § Numeric Policy on the deci
 `derived` is not a class; a threshold derived from an elicited loss ratio carries the loss ratio's class.
 
 Sentinels replace the whole value and appear bare, with no suffix and no provenance.
-The decide record's sentinels, by slot, are `none stated` (Decision threshold); `none needed` (Prior odds, Posterior odds, Prior class swept, Crossover); `none supported — see Robustness` (Prior odds and Posterior odds, always both together); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` (Recommended action); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+The decide record's sentinels, by slot, are `none stated` (Decision threshold); `none needed` (Favored if true, Prior odds, Posterior odds, Prior class swept, Crossover); `none supported — see Robustness` (Prior odds and Posterior odds, always both together); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` (Recommended action); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
 An evidence item with no supportable ratio writes `none supported` in both its LR cell and its provenance cell, and the reason in its source cell; a supported item keeps its number and class.
-When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's to say; a stated Crossover is a bare number or ordered range, optionally introduced by `flips at prior odds` or `flips at loss ratio`, and which quantity the slot carries under each verdict is § Numeric Policy's to say.
+When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's to say; a stated Crossover is a bare number or ordered range, optionally introduced by `flips at prior odds`, `flips at loss ratio`, or `flips at likelihood ratio`, and which quantity the slot carries under each verdict is § Numeric Policy's to say.
 
 The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
 

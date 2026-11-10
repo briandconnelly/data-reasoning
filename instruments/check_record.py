@@ -107,6 +107,7 @@ REQUIRED_SLOTS = {
             "Decision owner",
             "Reversibility",
             "Deadline or forcing event",
+            "Favored if true",
             "Loss ratio",
             "Decision threshold (posterior odds)",
         ],
@@ -148,7 +149,7 @@ ASSESSMENTS = {
     "not-run",
     "not-testable-here",
 }
-DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "dominated"}
+DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "evidence-sensitive", "dominated"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 
 # The decision skill's provenance classes (SKILL.md § Numeric Policy), and
@@ -169,6 +170,7 @@ NO_LR_SENTINEL = "none supported"
 PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([A-Za-z][A-Za-z-]*)`?")
 # Belief slots a `dominated` verdict leaves at the template's sentinel.
 DOMINATED_NONE_NEEDED = (
+    ("## Decision frame", "Favored if true"),
     ("## Evidence and update", "Prior odds"),
     ("## Evidence and update", "Posterior odds"),
     ("## Robustness", "Prior class swept"),
@@ -1040,10 +1042,11 @@ def _check_no_prior_form(evidence: str, findings: list[str]) -> None:
 
 
 def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None:
-    """A `robust` or `prior-sensitive` verdict's losses carry belief-grade
-    provenance; a `dominated` verdict's belief slots read `none needed`, and no
-    other verdict's do; `robust` needs a supported ratio. A slot still in
-    template state is skipped outside final mode, like every other slot."""
+    """A `robust`, `prior-sensitive`, or `evidence-sensitive` verdict's losses
+    carry belief-grade provenance; a `dominated` verdict's belief slots and
+    Favored if true read `none needed`, and no other verdict's do; `robust`
+    needs a supported ratio. A slot still in template state is skipped
+    outside final mode, like every other slot."""
     verdict_value = _slot_value(_section(body, "## Verdict"), "Verdict")
     if verdict_value is None or _unfilled(verdict_value):
         return
@@ -1052,7 +1055,7 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
         return
     if verdict == "robust":
         _check_robust_has_a_supported_ratio(body, findings)
-    if verdict in ("robust", "prior-sensitive"):
+    if verdict in ("robust", "prior-sensitive", "evidence-sensitive"):
         _check_belief_grade_losses(body, verdict, final, findings)
     _check_none_needed_slots(body, verdict, final, findings)
 

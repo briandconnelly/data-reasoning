@@ -97,18 +97,25 @@ Losses are not like priors: missing decision-relevant preferences — losses, th
 Belief-grade losses are `user-elicited` or `externally-sourced`; any other class on Loss ratio or Loss range swept caps the verdict at `loss-sensitive`.
 A rounded elicited loss ("roughly ten") is recorded at its nominal value as `user-elicited` with the rounding stated in Conditions; a rounding word supplies no range endpoints, and endpoints the analyst chooses are `sensitivity-only` unless the decision owner or an external source supplies or confirms them.
 
+Orientation has its home here.
+The Decision frame's Favored if true slot names the action with the lower loss when the proposition is true, in the Actions slot's own words; the order in which Actions lists the two actions carries no meaning.
+With H the proposition, favored that action, and other the remaining one, the loss ratio is r = [L(other, H) − L(favored, H)] / [L(favored, not-H) − L(other, not-H)], defined only when both differences are positive; the `dominated` clause below takes every other case before any division.
+The favored action is preferred where posterior odds of the proposition exceed the threshold, and the other action where they fall below it; when no threshold is stated, the stated loss ratio supplies it as 1/r.
+
 Verdict selection is one ordered rule, and the first clause that applies governs:
 
-- `dominated` when one action wins under every state; no probabilities are needed, and the belief slots take the template's `none needed`.
+- `dominated` when one action's loss is no higher than the other's under both states, ties included; no probabilities are needed, and the belief slots and Favored if true take the template's `none needed`.
 - `loss-sensitive` when Loss ratio or Loss range swept carries any class but a belief-grade one; report the loss-ratio crossover and return the judgment to the owner.
 - `prior-sensitive` when varying the prior across the stated class changes the preferred action at the stated losses or at any loss in the stated range — whether or not varying the losses alone would change it too; report the prior-odds crossover.
 - `loss-sensitive` when the prior class cannot flip the action and varying the losses across the stated range at the stated prior does; report the loss-ratio crossover.
-- `robust` otherwise: one action is preferred at every point of the stated prior class and loss range taken together, under belief-grade losses; the conditions are part of the verdict, not a footnote.
+- `evidence-sensitive` when neither the prior class nor the loss range can flip the action and some likelihood ratio within the supported ranges carries the posterior odds at the stated prior across the threshold at the stated losses; report the likelihood-ratio crossover, the product of the supported ratios at which the action flips.
+- `robust` otherwise: one action is preferred at every point of the stated prior class and loss range taken together and at every likelihood ratio within the supported ranges, under belief-grade losses; the conditions are part of the verdict, not a footnote.
 
-A tie counts as a flip; a range that is a single point cannot flip.
-When no threshold is stated, the stated loss ratio supplies it (hold wins where posterior odds exceed one over the loss ratio).
+The prior and loss clauses test their own quantity with each supported likelihood ratio held anywhere within its stated range.
+Comparisons with the threshold are exact: posterior odds equal to the threshold prefer neither action, so a range that reaches the threshold at an endpoint flips the action there.
+A range whose endpoints are equal is a point, and a point never flips the action on its own.
+When every input is a point and posterior odds equal the threshold exactly, neither action is preferred: the record is `prior-sensitive` and reports the stated prior odds as the crossover.
 A record where both the prior and the losses flip the action reports both crossovers.
-v1 sweeps the prior class and the loss range only: a likelihood ratio stated as a range is carried through the posterior range and named in Conditions, never swept on its own.
 
 Evidence items multiplied together state why they are conditionally independent given each state, or are combined into one item; sequential multiplication of unconditional likelihood ratios double-counts shared evidence.
 
@@ -121,7 +128,7 @@ Write the record to a file from [references/decision-record-template.md](referen
 Six blocks, in order:
 
 **Decision frame.**
-The two actions, the decision owner, reversibility, the deadline or forcing event, and each action's consequences under each state.
+The two actions, the decision owner, reversibility, the deadline or forcing event, each action's consequences under each state, and the action the proposition favors (§ Numeric Policy).
 Losses and thresholds carry provenance per § Numeric Policy.
 
 **Decision-state model.**
@@ -136,13 +143,13 @@ Posterior odds carry no provenance class of their own: they are derived, and the
 When no supported prior exists, this block takes the missing-support form § Numeric Policy describes, and the arithmetic moves to Robustness.
 
 **Robustness.**
-The prior class and loss range actually swept, and the crossover statements: at what prior, or what loss ratio, the preferred action flips.
+The prior class and loss range actually swept, and the crossover statements: at what prior, what loss ratio, or what likelihood-ratio product the preferred action flips.
 This block is the skill's signature output, and it is where `sensitivity-only` numbers live.
 
 **Verdict.**
-The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `dominated` — and which value a record takes is settled by § Numeric Policy's ordered rule, which this block records and does not restate.
+The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `evidence-sensitive`, `dominated` — and which value a record takes is settled by § Numeric Policy's ordered rule, which this block records and does not restate.
 
-The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive` and `loss-sensitive` it reads `returned to owner`, because the crossover, not the record, locates the choice.
+The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive`, `loss-sensitive`, and `evidence-sensitive` it reads `returned to owner`, because the crossover, not the record, locates the choice.
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).
 
 **Handoff.**
