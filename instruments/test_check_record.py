@@ -96,7 +96,7 @@ CONCLUSION_BODY = (
 )
 VOI_SLOTS = (
     "- Route: voi\n- Pending decision: ship vs wait\n- Signal model: a 2-week holdout\n"
-    "- Value basis: expected loss avoided\n- Value calculation: 0.4 x 3 = 1.2\n"
+    "- Value basis: signal-model\n- Value calculation: 0.4 x 3 = 1.2\n"
     "- Upper bound: 1.5\n- Cost: 1.0\n"
 )
 
@@ -865,14 +865,63 @@ def test_two_routes_joined_by_comma_is_a_finding():
     assert any("route 'review, construct' does not begin with" in f for f in findings)
 
 
-def test_two_dispositions_joined_by_comma_is_a_finding():
-    rec = GOOD_REVIEW.replace(
-        "- Dispositions: identified-if", "- Dispositions: identified-if, assumption-contradicted"
-    )
+def test_two_dispositions_joined_by_comma_are_a_list_in_the_handoff():
+    """The Handoff slot carries "the disposition value(s) assigned above"
+    (identification-review-template.md), so a two-design review lists two.
+    Until 2026-11-10 this was a finding, which failed correct records."""
+    for joined in (
+        "identified-if, assumption-contradicted",
+        "identified-if; unresolved",
+        "identified-if and not-constructible",
+        "`identified-if`, `unresolved`",
+        # An archived record's own form: annotated items, a comma inside one.
+        "assumption-contradicted (West before/after); not-constructible (control / RD, noted outside)",
+    ):
+        rec = GOOD_REVIEW.replace("- Dispositions: identified-if", f"- Dispositions: {joined}")
+        assert rec != GOOD_REVIEW
+        assert cr.check(rec) == [], joined
+
+
+@pytest.mark.parametrize(
+    "joined",
+    ["identified-if, certified", "valid, identified-if", "identified-if,", "none, identified-if"],
+)
+def test_a_dispositions_list_cannot_smuggle_an_open_value(joined):
+    rec = GOOD_REVIEW.replace("- Dispositions: identified-if", f"- Dispositions: {joined}")
     assert rec != GOOD_REVIEW
     findings = cr.check(rec)
-    assert any("disposition 'identified-if, assumption-contradicted'" in f for f in findings)
+    if joined == "identified-if,":
+        assert findings == []  # a trailing separator leaves one valid item
+        return
+    assert any(f"disposition {joined!r}" in f for f in findings)
     assert not any("slot is missing" in f for f in findings)
+
+
+def test_a_design_blocks_own_disposition_is_still_one_value():
+    rec = GOOD_REVIEW.replace(
+        "- Disposition: identified-if", "- Disposition: identified-if, unresolved", 1
+    )
+    assert rec != GOOD_REVIEW
+    assert any("disposition 'identified-if, unresolved" in f for f in cr.check(rec))
+
+
+def test_voi_route_and_value_basis_are_closed_sets():
+    good = "# VoI Record: probe\n\n## VoI\n\n" + VOI_SLOTS + "- Verdict: worth-it\n"
+    assert cr.check(good) == []
+    bad_route = good.replace("- Route: voi", "- Route: nonsense")
+    bad_basis = good.replace("- Value basis: signal-model", "- Value basis: invented")
+    assert bad_route != good
+    assert bad_basis != good
+    assert any("route 'nonsense'" in f for f in cr.check(bad_route))
+    assert any("value basis 'invented'" in f for f in cr.check(bad_basis))
+    ok = good.replace("- Value basis: signal-model", "- Value basis: upper-bound")
+    assert cr.check(ok) == []
+
+
+def test_decide_route_is_a_closed_set():
+    bad = GOOD_DECISION.replace("- Route: decide", "- Route: voi")
+    assert bad != GOOD_DECISION
+    assert any("route 'voi'" in f for f in cr.check(bad))
 
 
 @pytest.mark.parametrize(
@@ -1262,7 +1311,7 @@ def test_multiline_voi_prose_slot_is_read_as_filled():
     rec = (
         "# VoI Record: x\n\n## VoI\n\n- Route: voi\n- Pending decision: ship vs wait\n"
         "- Signal model:\n\n  a 2-week holdout that reports the p95 gap with a 40 ms band\n\n"
-        "- Value basis: expected loss avoided\n- Value calculation:\n\n"
+        "- Value basis: signal-model\n- Value calculation:\n\n"
         "  0.4 probability of a flip times a loss of 3 is 1.2\n\n"
         "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: worth-it\n"
     )
@@ -1273,7 +1322,7 @@ def test_multiline_voi_prose_slot_is_read_as_filled():
 def test_multiline_slot_with_no_continuation_is_still_empty():
     rec = (
         "# VoI Record: x\n\n## VoI\n\n- Route: voi\n- Pending decision: ship vs wait\n"
-        "- Signal model:\n- Value basis: expected loss avoided\n- Value calculation: 1.2\n"
+        "- Signal model:\n- Value basis: signal-model\n- Value calculation: 1.2\n"
         "- Upper bound: 1.5\n- Cost: 1.0\n- Verdict: worth-it\n"
     )
     assert any("required slot 'Signal model' is empty" in f for f in cr.check(rec))

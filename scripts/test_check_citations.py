@@ -11,6 +11,7 @@ fail and a case that must pass.
 from __future__ import annotations
 
 import importlib.util
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -356,3 +357,46 @@ def test_path_qualified_unresolvable_name_with_a_quote_is_flagged(repo):
     violations = cc.check(write(repo, f'nope/dir/x.md\'s "{stale}" holds.'))
     assert len(violations) == 1
     assert "does not resolve" in violations[0]
+
+
+def test_fallback_ignores_a_copy_in_an_ignored_tree(tmp_path, monkeypatch):
+    """A nested agent worktree under an ignored directory carries a copy of
+    every run record. Walking it made a bare-filename citation resolve to two
+    files, so the checker failed on an unchanged checkout (2026-11-09)."""
+    git = shutil.which("git")
+    if git is None:
+        pytest.skip("git is not available")
+    runs = tmp_path / "skill" / "tests" / "runs"
+    runs.mkdir(parents=True)
+    (runs / "wave.md").write_text("frozen evidence\n")
+    copy = tmp_path / ".claude" / "worktrees" / "agent-x" / "skill" / "tests" / "runs"
+    copy.mkdir(parents=True)
+    (copy / "wave.md").write_text("frozen evidence\n")
+    (tmp_path / ".gitignore").write_text(".claude/\n")
+    citing = tmp_path / "skill" / "tests" / "scenarios.md"
+    citing.write_text("see wave.md\n")
+    subprocess.run([git, "init", "-q", str(tmp_path)], check=True)
+    monkeypatch.setattr(cc, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cc, "_RESOLVED", {})
+    monkeypatch.setattr(cc, "_REPO_FILES", {})
+    assert cc.resolve("wave.md", citing) == runs / "wave.md"
+
+
+def test_fallback_still_refuses_two_copies_git_would_track(tmp_path, monkeypatch):
+    """The positive control for the test above: two non-ignored copies are a
+    real ambiguity and must stay unresolved."""
+    git = shutil.which("git")
+    if git is None:
+        pytest.skip("git is not available")
+    for sub in ("a", "b"):
+        d = tmp_path / sub / "tests" / "runs"
+        d.mkdir(parents=True)
+        (d / "wave.md").write_text("frozen evidence\n")
+    citing = tmp_path / "skill" / "scenarios.md"
+    citing.parent.mkdir()
+    citing.write_text("see wave.md\n")
+    subprocess.run([git, "init", "-q", str(tmp_path)], check=True)
+    monkeypatch.setattr(cc, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cc, "_RESOLVED", {})
+    monkeypatch.setattr(cc, "_REPO_FILES", {})
+    assert cc.resolve("wave.md", citing) is None

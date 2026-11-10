@@ -202,12 +202,51 @@ def resolve(name: str, citing: Path) -> Path | None:
         directory = directory.parent
 
     if found is None:
-        matches = [p for p in REPO_ROOT.rglob(name) if p.is_file() and ".git" not in p.parts]
+        matches = [p for p in _repo_files() if p.name == name]
         if len(matches) == 1:
             found = matches[0]
 
     _RESOLVED[key] = found
     return found
+
+
+_REPO_FILES: dict[Path, list[Path]] = {}
+
+
+def _repo_files() -> list[Path]:
+    """Every file git tracks or would track under REPO_ROOT: the index plus
+    untracked files that are not ignored. An ignored tree -- a nested agent
+    worktree under `.claude/worktrees/` carries a full copy of the repository
+    -- is not part of the repository, and walking it made every bare-filename
+    citation resolve to two files. Outside a git checkout, fall back to the
+    walk. Cached per root, since the unit suite repoints REPO_ROOT."""
+    root = REPO_ROOT
+    if root not in _REPO_FILES:
+        try:
+            out = subprocess.run(
+                ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+                cwd=root,
+                capture_output=True,
+                check=True,
+            ).stdout.decode("utf-8")
+            inside = (
+                subprocess.run(
+                    ["git", "rev-parse", "--show-toplevel"],
+                    cwd=root,
+                    capture_output=True,
+                    check=True,
+                )
+                .stdout.decode("utf-8")
+                .strip()
+            )
+            if Path(inside).resolve() != root.resolve():
+                raise OSError("REPO_ROOT is not a git toplevel")
+            _REPO_FILES[root] = [root / f for f in out.split("\0") if f and (root / f).is_file()]
+        except (OSError, subprocess.CalledProcessError):
+            _REPO_FILES[root] = [
+                p for p in root.rglob("*") if p.is_file() and ".git" not in p.parts
+            ]
+    return _REPO_FILES[root]
 
 
 def scope_files() -> list[Path]:

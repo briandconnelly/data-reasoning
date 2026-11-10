@@ -38,6 +38,7 @@ fi
 # of the budget: like the Python hook, an indeterminate title fails closed.
 record_title() {
   head -c "$FRONTMATTER_SCAN_BYTES" "$1" | awk '
+    { sub(/\r$/, "") }
     NR == 1 && $0 == "---" { fm = 1; next }
     fm { if ($0 == "---") fm = 0; next }
     /^[[:space:]]*$/ { next }
