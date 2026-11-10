@@ -19,6 +19,7 @@ import importlib.util
 from fractions import Fraction
 from pathlib import Path
 
+from base_check_decision_cac2464 import check as base_check
 from check_decision import (
     DECIDE_VERDICTS,
     EXIT_UNVERIFIABLE,
@@ -1279,8 +1280,10 @@ def test_rounded_crossover_at_the_tolerance_edge_is_accepted():
 # D1: a likelihood ratio stated as a range was carried through the posterior
 # and never swept, so `robust` survived a supported LR range that alone
 # reversed the action. D2: the threshold rule named an undefined "hold" and
-# never said which losses form the ratio. Records below are built from
-# parameters so each case states only the numbers it is about.
+# never said which losses form the ratio. The arithmetic lives here, in the
+# dev checker only; the shipped validator gained the verdict and the slot
+# structurally and nothing else. Records are built from parameters so each
+# case states only the numbers it is about.
 
 _CR_SPEC = importlib.util.spec_from_file_location(
     "check_record", Path(__file__).resolve().parents[3] / "instruments" / "check_record.py"
@@ -1305,11 +1308,10 @@ def _rng(text: str) -> tuple[Fraction, Fraction]:
 def build(  # noqa: PLR0913 -- one keyword per slot the ordered rule reads
     *,
     prior: str | None = "1",
-    cls: str = "1",
-    cls_prov: str = "sensitivity-only",
+    cls: str | None = None,
     lrs: tuple[str, ...] = ("1",),
     loss: str = "1",
-    losses: str = "1",
+    losses: str | None = None,
     loss_prov: str = "user-elicited",
     threshold: str = "none stated",
     verdict: str = "robust",
@@ -1319,7 +1321,10 @@ def build(  # noqa: PLR0913 -- one keyword per slot the ordered rule reads
     actions: tuple[str, str] = (SHIP, HOLD),
 ) -> str:
     """A complete decide record; prior=None writes the no-supported-prior form.
+    The prior class defaults to the prior and the loss range to the loss.
     Posterior odds are computed exactly from the prior and the LR rows."""
+    cls = cls or prior or "1"
+    losses = losses or loss
     lr = (Fraction(1), Fraction(1))
     for r in lrs:
         lo, hi = _rng(r)
@@ -1382,7 +1387,7 @@ def build(  # noqa: PLR0913 -- one keyword per slot the ordered rule reads
 
 ## Robustness
 
-- Prior class swept: {cls} — provenance: {cls_prov}
+- Prior class swept: {cls} — provenance: sensitivity-only
 - Loss range swept: {losses} — provenance: {loss_prov}
 - Crossover: {crossover}
 
@@ -1400,41 +1405,71 @@ def build(  # noqa: PLR0913 -- one keyword per slot the ordered rule reads
 """
 
 
-def _cr(text: str) -> list[str]:
-    return cr.check(text, final=True)
-
-
 def _clean(text: str) -> bool:
-    return check(text) == [] and _cr(text) == []
+    """The dev checker passes it, and the shipped validator finds nothing
+    structural in it."""
+    return check(text) == [] and cr.check(text, final=True) == []
+
+
+def _says(text: str, fragment: str) -> bool:
+    return any(fragment in f for f in check(text))
 
 
 def test_builder_known_positive_passes_both_checkers():
-    assert _clean(build(prior="2", cls="2", rec=HOLD))  # posterior 2 above threshold 1
+    assert _clean(build(prior="2", rec=HOLD))  # posterior 2 above threshold 1
 
 
 def test_point_prior_lr_range_straddle_is_evidence_sensitive():
     """The D1 reproduction: prior 1, class 1-1, losses 1, LR 0.1-10."""
-    bad = build(lrs=("0.1–10",))
-    assert any("the ordered rule gives evidence-sensitive" in f for f in check(bad))
-    assert any("gives 'evidence-sensitive'" in f for f in _cr(bad))
+    assert _says(build(lrs=("0.1–10",)), "the ordered rule gives evidence-sensitive")
     ok = build(
         lrs=("0.1–10",),
         verdict="evidence-sensitive",
         rec=OWNER,
         crossover="flips at likelihood ratio 1",
     )
-    assert _clean(ok), (check(ok), _cr(ok))
-    wrong_value = ok.replace("flips at likelihood ratio 1", "flips at likelihood ratio 5")
-    assert any("computed likelihood-ratio interval" in f for f in check(wrong_value))
-    wrong_axis = ok.replace("flips at likelihood ratio 1", "flips at prior odds 1")
-    assert any("names a likelihood ratio" in f for f in check(wrong_axis))
+    assert _clean(ok), check(ok)
+    assert _says(
+        ok.replace("flips at likelihood ratio 1", "flips at likelihood ratio 5"),
+        "computed likelihood-ratio interval",
+    )
+    assert _says(
+        ok.replace("flips at likelihood ratio 1", "flips at prior odds 1"),
+        "names a likelihood ratio",
+    )
+
+
+def test_the_base_threshold_contract_is_unchanged():
+    """Review 2026-11-10: prior = class = 0.5, LR 1, loss = range = 1, stated
+    threshold 0.1. The base checker accepts robust; widening the stated
+    threshold by 1 / L must not newly demand prior-sensitive."""
+    rec = build(prior="0.5", threshold="0.1", rec=HOLD)
+    assert _clean(rec), check(rec)
+    assert base_check(rec) == []
+
+
+def test_a_stated_threshold_range_alone_is_not_a_new_flip():
+    """Point inputs inside a stated threshold range: unsettled contract
+    (decisions/007's open question), so robust stays as the base accepted it."""
+    rec = build(prior="1", threshold="0.5–2", rec=HOLD)
+    assert check(rec) == []
+    assert base_check(rec) == []
+
+
+def test_lr_flip_is_read_against_the_stated_threshold():
+    # Stated threshold 0.1, losses 1 (1 / L = 1): the LR range 0.5-2 at prior 0.5
+    # gives 0.25-1, which meets 1 / L but not the stated threshold, so no LR flip.
+    assert _clean(build(prior="0.5", lrs=("0.5–2",), threshold="0.1", rec=HOLD))
+    rec = build(prior="0.5", lrs=("0.1–2",), threshold="0.1")
+    assert _says(rec, "the ordered rule gives evidence-sensitive")
 
 
 def test_narrow_genuine_prior_straddle_is_not_a_point():
-    """0.999-1.001 straddles threshold 1; the old 1% tolerance read it as a point."""
+    """0.999-1.001 straddles threshold 1; the base's 1% tolerance read it as a
+    point and accepted robust -- an exact comparison that now differs."""
     bad = build(prior="1", cls="0.999–1.001")
-    assert any("lies inside the swept prior class" in f for f in check(bad))
-    assert any("gives 'prior-sensitive'" in f for f in _cr(bad))
+    assert base_check(bad) == []
+    assert _says(bad, "lies inside the swept prior class")
     ok = build(
         prior="1",
         cls="0.999–1.001",
@@ -1447,12 +1482,9 @@ def test_narrow_genuine_prior_straddle_is_not_a_point():
 
 def test_narrow_genuine_loss_straddle_is_not_a_point():
     bad = build(losses="0.999–1.001")
-    assert any("lies inside the swept loss range" in f for f in check(bad))
+    assert _says(bad, "lies inside the swept loss range")
     ok = build(
-        losses="0.999–1.001",
-        verdict="loss-sensitive",
-        rec=OWNER,
-        crossover="flips at loss ratio 1",
+        losses="0.999–1.001", verdict="loss-sensitive", rec=OWNER, crossover="flips at loss ratio 1"
     )
     assert _clean(ok)
 
@@ -1460,16 +1492,12 @@ def test_narrow_genuine_loss_straddle_is_not_a_point():
 def test_close_non_straddles_stay_robust_on_the_right_side():
     assert _clean(build(prior="1.001", cls="1.001–1.002", rec=HOLD))
     assert _clean(build(prior="0.998", cls="0.998–0.999", rec=SHIP))
-    wrong = build(prior="0.998", cls="0.998–0.999", rec=HOLD)
-    assert any("lie below the threshold" in f for f in check(wrong))
-    assert any("lie below the threshold" in f for f in _cr(wrong))
+    assert _says(build(prior="0.998", cls="0.998–0.999", rec=HOLD), "lie below the threshold")
 
 
 def test_a_range_touching_the_threshold_at_an_endpoint_flips():
-    prior_touch = build(prior="1", cls="1–2")
-    assert any("lies inside the swept prior class" in f for f in check(prior_touch))
-    lr_touch = build(lrs=("1–2",))
-    assert any("gives evidence-sensitive" in f for f in check(lr_touch))
+    assert _says(build(prior="1", cls="1–2"), "lies inside the swept prior class")
+    assert _says(build(lrs=("1–2",)), "the ordered rule gives evidence-sensitive")
     ok = build(
         lrs=("1–2",),
         verdict="evidence-sensitive",
@@ -1480,32 +1508,17 @@ def test_a_range_touching_the_threshold_at_an_endpoint_flips():
 
 
 def test_exact_tie_at_points_is_prior_sensitive_never_robust():
-    """Every input a point and posterior odds equal the threshold: no action
-    is preferred, so not robust; the ordered rule's residual gives
-    prior-sensitive (decisions/007's tie ruling, a judgement call)."""
-    tie = build()
-    assert any("no range flipping the action on its own" in f for f in check(tie))
-    assert any("gives 'prior-sensitive'" in f for f in _cr(tie))
+    """Every input a point and posterior odds equal to the threshold: no
+    action is preferred, so not robust; decisions/007's tie ruling (an owner
+    judgement call) gives prior-sensitive."""
+    assert _says(build(), "equal the threshold exactly")
     assert _clean(build(verdict="prior-sensitive", rec=OWNER, crossover="flips at prior odds 1"))
     for verdict, axis in (
         ("evidence-sensitive", "likelihood ratio"),
         ("loss-sensitive", "loss ratio"),
     ):
         bad = build(verdict=verdict, rec=OWNER, crossover=f"flips at {axis} 1")
-        assert any("the ordered rule gives prior-sensitive" in f for f in check(bad)), verdict
-        assert any("gives 'prior-sensitive'" in f for f in _cr(bad)), verdict
-
-
-def test_a_threshold_range_straddling_alone_is_prior_sensitive():
-    rec = build(threshold="0.5–2")
-    assert any("no range flipping the action on its own" in f for f in check(rec))
-    ok = build(
-        threshold="0.5–2",
-        verdict="prior-sensitive",
-        rec=OWNER,
-        crossover="flips at prior odds 0.5–2",
-    )
-    assert _clean(ok)
+        assert _says(bad, "the ordered rule gives prior-sensitive"), verdict
 
 
 def test_prior_range_with_lr_range_straddle_keeps_prior_precedence():
@@ -1517,8 +1530,7 @@ def test_prior_range_with_lr_range_straddle_keeps_prior_precedence():
         rec=OWNER,
         crossover="flips at likelihood ratio 0.4",
     )
-    assert any("the ordered rule gives prior-sensitive" in f for f in check(bad))
-    assert any("gives 'prior-sensitive'" in f for f in _cr(bad))
+    assert _says(bad, "the ordered rule gives prior-sensitive")
     ok = build(
         prior="2",
         cls="2–3",
@@ -1540,8 +1552,7 @@ def test_loss_range_with_lr_range_straddle_keeps_loss_precedence():
         rec=OWNER,
         crossover="flips at likelihood ratio 1",
     )
-    assert any("the ordered rule gives loss-sensitive" in f for f in check(bad))
-    assert any("gives 'loss-sensitive'" in f for f in _cr(bad))
+    assert _says(bad, "the ordered rule gives loss-sensitive")
     ok = build(
         lrs=("0.5–2",),
         losses="0.25–4",
@@ -1553,28 +1564,26 @@ def test_loss_range_with_lr_range_straddle_keeps_loss_precedence():
 
 
 def test_lr_range_that_cannot_reach_the_threshold_stays_robust():
-    assert _clean(build(prior="2", cls="2", lrs=("1.1–3",), rec=HOLD))
+    assert _clean(build(prior="2", lrs=("1.1–3",), rec=HOLD))
     bad = build(
         prior="2",
-        cls="2",
         lrs=("1.1–3",),
         verdict="evidence-sensitive",
         rec=OWNER,
         crossover="flips at likelihood ratio 0.5",
     )
-    assert any("no supported likelihood-ratio range flips" in f for f in check(bad))
-    assert any("gives 'robust'" in f for f in _cr(bad))
+    assert _says(bad, "no supported likelihood-ratio range flips")
 
 
 def test_several_lr_factors_are_swept_as_their_product():
     """Each factor 1-1.5 alone keeps prior 0.5 below threshold 1 (0.5-0.75);
     their product 1-2.25 reaches it (0.5-1.125)."""
-    bad = build(prior="0.5", cls="0.5", lrs=("1–1.5", "1–1.5"), rec=SHIP)
-    assert any("gives evidence-sensitive" in f for f in check(bad))
-    assert any("gives 'evidence-sensitive'" in f for f in _cr(bad))
+    assert _says(
+        build(prior="0.5", lrs=("1–1.5", "1–1.5"), rec=SHIP),
+        "the ordered rule gives evidence-sensitive",
+    )
     ok = build(
         prior="0.5",
-        cls="0.5",
         lrs=("1–1.5", "1–1.5"),
         verdict="evidence-sensitive",
         rec=OWNER,
@@ -1584,8 +1593,7 @@ def test_several_lr_factors_are_swept_as_their_product():
 
 
 def test_no_supported_prior_form_reaches_evidence_sensitive():
-    bad = build(prior=None, lrs=("0.1–10",))
-    assert any("gives evidence-sensitive" in f for f in check(bad))
+    assert _says(build(prior=None, lrs=("0.1–10",)), "the ordered rule gives evidence-sensitive")
     ok = build(
         prior=None,
         lrs=("0.1–10",),
@@ -1604,8 +1612,8 @@ def test_evidence_sensitive_with_sensitivity_only_losses_is_capped():
         rec=OWNER,
         crossover="flips at likelihood ratio 1",
     )
-    assert any("caps the verdict at loss-sensitive" in f for f in check(bad))
-    assert any("evidence-sensitive" in f and "Loss ratio" in f for f in _cr(bad))
+    assert _says(bad, "caps the verdict at loss-sensitive")
+    assert any("evidence-sensitive" in f and "Loss ratio" in f for f in cr.check(bad, final=True))
 
 
 def test_evidence_sensitive_needs_a_supported_lr_range():
@@ -1615,7 +1623,7 @@ def test_evidence_sensitive_needs_a_supported_lr_range():
         rec=OWNER,
         crossover="flips at likelihood ratio 0.5",
     )
-    assert any("requires a supported likelihood ratio stated as a range" in f for f in check(bad))
+    assert _says(bad, "requires a supported likelihood ratio stated as a range")
     unsupported = replace_once(
         build(
             lrs=("0.1–10",),
@@ -1626,8 +1634,7 @@ def test_evidence_sensitive_needs_a_supported_lr_range():
         "| item 1 | 0.1–10 | externally-sourced | vendor note 1, alert class X, this host |",
         "| item 1 | none supported | none supported | no reproducible source |",
     )
-    findings = check(unsupported)
-    assert any("requires a supported likelihood ratio stated as a range" in f for f in findings)
+    assert _says(unsupported, "requires a supported likelihood ratio stated as a range")
 
 
 def test_evidence_sensitive_must_return_to_owner():
@@ -1637,7 +1644,7 @@ def test_evidence_sensitive_must_return_to_owner():
         rec=HOLD,
         crossover="flips at likelihood ratio 1",
     )
-    assert any("returned to owner" in f for f in check(bad))
+    assert _says(bad, "returned to owner")
 
 
 def test_recommendation_contradicting_orientation_fails():
@@ -1645,36 +1652,43 @@ def test_recommendation_contradicting_orientation_fails():
     flipped = replace_once(
         VALID_DECIDE, "- Favored if true: hold one week", "- Favored if true: ship now"
     )
-    assert any("lie above the threshold" in f for f in check(flipped))
-    assert any("lie above the threshold" in f for f in _cr(flipped))
+    assert _says(flipped, "lie above the threshold")
     wrong_rec = replace_once(
         VALID_DECIDE, "- Recommended action: hold one week", "- Recommended action: ship now"
     )
-    assert any("lie above the threshold" in f for f in check(wrong_rec))
+    assert _says(wrong_rec, "lie above the threshold")
 
 
 def test_favored_if_true_names_a_framed_action_or_dominated_sentinel():
     bad = replace_once(VALID_DECIDE, "- Favored if true: hold one week", "- Favored if true: hold")
-    assert any("must name one of the framed actions" in f for f in check(bad))
-    assert any("Favored if true" in f for f in _cr(bad))
+    assert _says(bad, "must name one of the framed actions")
     sentinel = replace_once(
         VALID_DECIDE, "- Favored if true: hold one week", "- Favored if true: none needed"
     )
-    assert any("Favored if true" in f for f in check(sentinel))
-    assert any("Favored if true" in f and "none needed" in f for f in _cr(sentinel))
+    assert _says(sentinel, "Favored if true")
+    assert any("Favored if true" in f and "none needed" in f for f in cr.check(sentinel))
     missing = replace_once(VALID_DECIDE, "- Favored if true: hold one week\n", "")
-    assert any("Favored if true" in f for f in check(missing))
-    assert any("Favored if true" in f for f in _cr(missing))
+    assert _says(missing, "Favored if true")
+    assert any("Favored if true" in f for f in cr.check(missing, final=True))
     dominated = replace_once(
         _dominated_decide(), "- Favored if true: none needed", "- Favored if true: hold one week"
     )
-    assert any("dominated verdict requires '- Favored if true:'" in f for f in check(dominated))
+    assert _says(dominated, "dominated verdict requires '- Favored if true:'")
+
+
+def test_duplicate_action_names_are_a_finding_not_a_crash():
+    """Review 2026-11-10: `hold one week vs hold one week` raised StopIteration
+    in the direction check."""
+    for actions in ((HOLD, HOLD), (HOLD, "Hold  one week")):
+        for verdict, rec in (("robust", HOLD), ("evidence-sensitive", OWNER)):
+            text = build(prior="2", actions=actions, verdict=verdict, rec=rec)
+            assert _says(text, "two distinct actions"), (actions, verdict)
 
 
 def test_action_order_carries_no_meaning():
     for actions in ((SHIP, HOLD), (HOLD, SHIP)):
-        assert _clean(build(prior="2", cls="2", rec=HOLD, actions=actions)), actions
-        assert _clean(build(prior="0.5", cls="0.5", rec=SHIP, actions=actions)), actions
+        assert _clean(build(prior="2", rec=HOLD, actions=actions)), actions
+        assert _clean(build(prior="0.5", rec=SHIP, actions=actions)), actions
     swapped = replace_once(
         replace_once(
             VALID_DECIDE,
@@ -1694,7 +1708,6 @@ def test_negating_the_proposition_keeps_the_recommendation():
     action becomes ship now, and hold one week stays the recommendation."""
     neg = build(
         prior="1–4",
-        cls="1–4",
         lrs=("0.2–0.333333",),
         loss="0.1",
         losses="0.05–0.2",
@@ -1702,9 +1715,11 @@ def test_negating_the_proposition_keeps_the_recommendation():
         favored=SHIP,
         rec=HOLD,
     )
-    assert _clean(neg), (check(neg), _cr(neg))
-    wrong = neg.replace("- Recommended action: hold one week", "- Recommended action: ship now")
-    assert any("lie below the threshold" in f for f in check(wrong))
+    assert _clean(neg), check(neg)
+    assert _says(
+        neg.replace("- Recommended action: hold one week", "- Recommended action: ship now"),
+        "lie below the threshold",
+    )
 
 
 def test_orientation_is_the_incremental_loss_ratio():
@@ -1742,53 +1757,99 @@ def test_decide_verdict_sets_are_equal_across_checkers():
     assert "evidence-sensitive" in DECIDE_VERDICTS
 
 
-# (record keywords, the verdict the ordered rule gives, its crossover)
-_DIFFERENTIAL = [
-    ({"prior": "2", "cls": "2"}, "robust", "none within swept class"),
-    ({"prior": "0.5", "cls": "0.5"}, "robust", "none within swept class"),
-    ({"lrs": ("0.1–10",)}, "evidence-sensitive", "flips at likelihood ratio 1"),
-    ({"prior": "1", "cls": "0.999–1.001"}, "prior-sensitive", "flips at prior odds 1"),
-    ({"losses": "0.999–1.001"}, "loss-sensitive", "flips at loss ratio 1"),
-    ({}, "prior-sensitive", "flips at prior odds 1"),
-    (
-        {"prior": "0.5", "cls": "0.5", "lrs": ("1–1.5", "1–1.5")},
-        "evidence-sensitive",
-        "flips at likelihood ratio 2",
-    ),
-    ({"lrs": ("0.5–2",), "losses": "0.25–4"}, "loss-sensitive", "flips at loss ratio 1"),
-    (
-        {"prior": "2", "cls": "2–3", "lrs": ("0.1–10",)},
-        "prior-sensitive",
-        "flips at prior odds 0.1–10",
-    ),
-    ({"prior": None, "lrs": ("0.1–10",)}, "evidence-sensitive", "flips at likelihood ratio 1"),
-    (
-        {"prior": "0.25", "cls": "0.25", "lrs": ("0.5–4",), "loss": "2", "losses": "2"},
-        "evidence-sensitive",
-        "flips at likelihood ratio 2",
-    ),
-]
+def _near(a: Fraction, b: Fraction) -> bool:
+    """Within the base checker's 1% padding, where exact comparison may differ."""
+    return abs(a - b) <= Fraction(1, 100) * max(abs(a), abs(b))
 
 
-def test_both_checkers_accept_exactly_the_verdict_the_ordered_rule_gives():
-    """Differential: on each case the two checkers accept the same verdict
-    and reject every other non-dominated one."""
-    for kwargs, expected, crossover in _DIFFERENTIAL:
-        for verdict in ("robust", "prior-sensitive", "loss-sensitive", "evidence-sensitive"):
-            if verdict == "robust":
-                rec_action = HOLD if _rng(kwargs.get("cls", "1"))[0] >= 1 else SHIP
-            else:
-                rec_action = OWNER
-            rec = build(
-                **kwargs,
-                verdict=verdict,
-                rec=rec_action,
-                crossover=crossover if verdict == expected else "none within swept class",
-            )
-            ok_decision, ok_record = check(rec) == [], _cr(rec) == []
-            assert ok_decision == ok_record == (verdict == expected), (
-                kwargs,
-                verdict,
-                check(rec),
-                _cr(rec),
-            )
+def test_lr_point_records_keep_the_base_verdicts():
+    """Differential against the frozen base checker: on records with no
+    likelihood-ratio range, the reworked checker accepts exactly the verdicts
+    the base accepted, except where an exact comparison differs (a boundary
+    within the base's 1% padding, or an all-point exact tie)."""
+    compared = 0
+    for prior in ("0.2", "0.9", "2.5"):
+        p = Fraction(prior)
+        for cls in (prior, f"{p / 2:g}–{p * 2:g}"):
+            sw = _rng(cls)
+            for lr_text in ("0.5", "1.7", "3"):
+                lr = Fraction(lr_text)
+                for loss in ("3", "7"):
+                    ell = Fraction(loss)
+                    for losses in (loss, f"{ell / 2:g}–{ell * 2:g}"):
+                        rr = _rng(losses)
+                        for threshold in ("none stated", "0.3"):
+                            t = (
+                                (1 / ell,) * 2
+                                if threshold == "none stated"
+                                else (Fraction("0.3"),) * 2
+                            )
+                            thr = (min(t[0], 1 / rr[1]), max(t[1], 1 / rr[0]))
+                            pf = (thr[0] / lr, thr[1] / lr)
+                            lf = (1 / (p * lr), 1 / (p * lr))
+                            if (
+                                _near(pf[0], sw[1])
+                                or _near(pf[1], sw[0])
+                                or _near(lf[0], rr[1])
+                                or _near(lf[1], rr[0])
+                                or _near(p * lr, t[0])
+                            ):
+                                continue
+                            above = p * lr > t[0]
+                            for verdict in ("robust", "prior-sensitive", "loss-sensitive"):
+                                if verdict == "robust":
+                                    rec_action, crossover = (
+                                        (HOLD if above else SHIP),
+                                        ("none within swept class"),
+                                    )
+                                elif verdict == "prior-sensitive":
+                                    mid = (pf[0] + pf[1]) / 2
+                                    rec_action, crossover = (
+                                        OWNER,
+                                        f"flips at prior odds {float(mid):.6g}",
+                                    )
+                                else:
+                                    rec_action, crossover = (
+                                        OWNER,
+                                        (f"flips at loss ratio {float(lf[0]):.6g}"),
+                                    )
+                                text = build(
+                                    prior=prior,
+                                    cls=cls,
+                                    lrs=(lr_text,),
+                                    loss=loss,
+                                    losses=losses,
+                                    threshold=threshold,
+                                    verdict=verdict,
+                                    rec=rec_action,
+                                    crossover=crossover,
+                                )
+                                new_ok, base_ok = check(text) == [], base_check(text) == []
+                                assert new_ok == base_ok, (prior, cls, lr_text, loss, losses,
+                                                           threshold, verdict, check(text),
+                                                           base_check(text))  # fmt: skip
+                                compared += 1
+    assert compared > 200  # noqa: PLR2004 -- the grid must not be skipped into vacuity
+
+
+def test_preregistered_expected_records_pass():
+    """The answers prereg.md scores DA-S9 and DA-S10 against are records this
+    checker accepts, and the wrong readings are rejected."""
+    restore, serve = "restore now", "keep serving"
+    s9 = build(
+        prior="0.25",
+        lrs=("0.5–4",),
+        loss="2",
+        actions=(restore, serve),
+        favored=restore,
+        verdict="evidence-sensitive",
+        rec=OWNER,
+        crossover="flips at likelihood ratio 2",
+    )
+    assert _clean(s9), check(s9)
+    raw = s9.replace("flips at likelihood ratio 2", "flips at likelihood ratio 1.33")
+    assert _says(raw, "computed likelihood-ratio interval")
+    s10 = build(prior="0.035", lrs=("3",), loss="9", rec=SHIP)
+    assert _clean(s10), check(s10)
+    assert _says(s10.replace("- Recommended action: ship now", "- Recommended action: hold one week"),
+                 "lie below the threshold")  # fmt: skip

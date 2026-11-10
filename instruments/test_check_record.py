@@ -1727,179 +1727,56 @@ def test_entity_profile_note_without_required_heading_is_not_a_record(tmp_path, 
     assert capsys.readouterr().out == ""
 
 
-# The ordered verdict rule, swept jointly over the prior class, the loss
-# range, and the supported likelihood-ratio ranges (decision-analysis
-# decisions/007). Checked only when every number it reads is a decimal, as
-# the template requires; GOOD_DECISION's `3:1` odds keep it silent.
+# decision-analysis decisions/007: the fifth verdict and the Favored if true
+# slot, structurally. The verdict arithmetic lives in the dev checker
+# (skills/decision-analysis/tests/check_decision.py), never here.
 
 
-def _decimal_decision(  # noqa: PLR0913 -- one keyword per slot the rule reads
-    *,
-    prior="1 — provenance: externally-sourced",
-    posterior="1",
-    cls="1",
-    lrs=("1",),
-    losses="1",
-    loss_prov="user-elicited",
-    verdict="robust",
-    rec="wait",
-    favored="wait",
-    actions="ship vs wait",
-):
-    rows = "".join(
-        f"  | item {i} | {r} | externally-sourced | vendor note {i} |\n"
-        for i, r in enumerate(lrs, 1)
-    )
-    first, second = actions.split(" vs ")
-    return (
-        GOOD_DECISION.replace("- Actions: ship vs wait", f"- Actions: {actions}")
-        .replace("  | ship | regression ships | on time |", f"  | {first} | a | b |")
-        .replace("  | wait | caught | a week lost |", f"  | {second} | c | d |")
-        .replace("- Favored if true: wait", f"- Favored if true: {favored}")
-        .replace(
-            "- Loss ratio: 3 — provenance: user-elicited",
-            f"- Loss ratio: 1 — provenance: {loss_prov}",
-        )
-        .replace(
-            "- Decision threshold (posterior odds): 3:1 — provenance: user-elicited",
-            "- Decision threshold (posterior odds): none stated",
-        )
-        .replace("- Prior odds: 1:1 — provenance: user-elicited", f"- Prior odds: {prior}")
-        .replace(
-            "  | T1 consistent | 2 | estimated-from-data-in-hand | ledger T1; checkout p95; US |\n",
-            rows,
-        )
-        .replace("- Posterior odds: 2:1", f"- Posterior odds: {posterior}")
-        .replace(
-            "- Prior class swept: 1:3 to 3:1",
-            f"- Prior class swept: {cls} — provenance: sensitivity-only",
-        )
-        .replace(
-            "- Loss range swept: 1 to 5 — provenance: user-elicited",
-            f"- Loss range swept: {losses} — provenance: {loss_prov}",
-        )
-        .replace("- Verdict: prior-sensitive — crossover at 3:1", f"- Verdict: {verdict}")
-        .replace("- Recommended action: returned to owner", f"- Recommended action: {rec}")
-    )
-
-
-def _rule_findings(rec: str) -> list[str]:
-    return [f for f in cr.check(rec, final=True) if "ordered rule" in f or "threshold" in f]
-
-
-def test_decimal_decision_known_positive_passes():
-    rec = _decimal_decision(prior="2 — provenance: externally-sourced", posterior="2", cls="2")
-    assert cr.check(rec, final=True) == []
-
-
-def test_point_prior_lr_range_straddle_cannot_be_robust():
-    """The D1 reproduction: prior 1, class 1, losses 1, LR 0.1-10."""
-    rec = _decimal_decision(lrs=("0.1-10",), posterior="0.1-10")
-    assert any("gives 'evidence-sensitive'" in f for f in _rule_findings(rec))
-    ok = rec.replace("- Verdict: robust", "- Verdict: evidence-sensitive").replace(
-        "- Recommended action: wait", "- Recommended action: returned to owner"
-    )
-    assert cr.check(ok, final=True) == []
-
-
-def test_narrow_prior_straddle_and_close_non_straddle():
-    straddle = _decimal_decision(cls="0.999-1.001")
-    assert any("gives 'prior-sensitive'" in f for f in _rule_findings(straddle))
-    above = _decimal_decision(
-        prior="1.001 — provenance: externally-sourced", posterior="1.001", cls="1.001-1.002"
-    )
-    assert cr.check(above, final=True) == []
-
-
-def test_exact_tie_at_points_is_not_robust():
-    rec = _decimal_decision()
-    assert any("gives 'prior-sensitive'" in f for f in _rule_findings(rec))
-    for verdict in ("evidence-sensitive", "loss-sensitive"):
-        bad = rec.replace("- Verdict: robust", f"- Verdict: {verdict}").replace(
-            "- Recommended action: wait", "- Recommended action: returned to owner"
-        )
-        assert any("gives 'prior-sensitive'" in f for f in _rule_findings(bad)), verdict
-
-
-def test_earlier_clauses_take_precedence_over_evidence_sensitive():
-    prior_range = _decimal_decision(
-        prior="2 — provenance: externally-sourced",
-        posterior="0.2-20",
-        cls="2-3",
-        lrs=("0.1-10",),
-        verdict="evidence-sensitive",
-        rec="returned to owner",
-    )
-    assert any("gives 'prior-sensitive'" in f for f in _rule_findings(prior_range))
-    loss_range = _decimal_decision(
-        lrs=("0.5-2",),
-        posterior="0.5-2",
-        losses="0.25-4",
-        verdict="evidence-sensitive",
-        rec="returned to owner",
-    )
-    assert any("gives 'loss-sensitive'" in f for f in _rule_findings(loss_range))
-
-
-def test_several_lr_factors_are_swept_as_their_product():
-    rec = _decimal_decision(
-        prior="0.5 — provenance: externally-sourced",
-        posterior="0.5-1.125",
-        cls="0.5",
-        lrs=("1-1.5", "1-1.5"),
-        rec="ship",
-    )
-    assert any("gives 'evidence-sensitive'" in f for f in _rule_findings(rec))
-
-
-def test_no_supported_prior_form_reaches_evidence_sensitive():
-    rec = _decimal_decision(
-        prior="none supported — see Robustness",
-        posterior="none supported — see Robustness",
-        lrs=("0.1-10",),
-        verdict="evidence-sensitive",
-        rec="returned to owner",
+def test_evidence_sensitive_is_in_the_closed_set():
+    rec = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: evidence-sensitive"
     )
     assert cr.check(rec, final=True) == []
 
 
 def test_evidence_sensitive_with_sensitivity_only_losses_is_capped():
-    rec = _decimal_decision(
-        lrs=("0.1-10",),
-        posterior="0.1-10",
-        loss_prov="sensitivity-only",
-        verdict="evidence-sensitive",
-        rec="returned to owner",
+    rec = GOOD_DECISION.replace(
+        "- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: evidence-sensitive"
+    ).replace(
+        "- Loss ratio: 3 — provenance: user-elicited",
+        "- Loss ratio: 3 — provenance: sensitivity-only",
     )
     findings = cr.check(rec, final=True)
     assert any("evidence-sensitive" in f and "Loss ratio" in f for f in findings), findings
 
 
-def test_robust_recommendation_must_match_orientation_and_side():
-    below = dict(prior="0.5 — provenance: externally-sourced", posterior="0.5", cls="0.5")
-    assert cr.check(_decimal_decision(**below, rec="ship"), final=True) == []
-    assert any(
-        "lie below the threshold" in f
-        for f in cr.check(_decimal_decision(**below, rec="wait"), final=True)
-    )
-    flipped = _decimal_decision(**below, rec="ship", favored="ship")
-    assert any("lie below the threshold" in f for f in cr.check(flipped, final=True))
+def test_favored_if_true_is_a_required_slot():
+    rec = GOOD_DECISION.replace("- Favored if true: wait\n", "")
+    assert any("Favored if true" in f for f in cr.check(rec, final=True))
 
 
-def test_favored_if_true_must_name_a_framed_action():
-    bad = _decimal_decision(favored="hold")
-    assert any("Favored if true" in f for f in cr.check(bad))
+def test_favored_if_true_none_needed_only_under_dominated():
+    rec = GOOD_DECISION.replace("- Favored if true: wait", "- Favored if true: none needed")
+    findings = cr.check(rec)
+    assert any("Favored if true" in f and "none needed" in f for f in findings), findings
 
 
-def test_action_order_carries_no_meaning():
-    for actions in ("ship vs wait", "wait vs ship"):
-        rec = _decimal_decision(
-            prior="2 — provenance: externally-sourced", posterior="2", cls="2", actions=actions
+def test_validator_does_no_verdict_arithmetic():
+    """A decimal record whose own likelihood-ratio range reverses the action
+    under `robust` is the dev checker's to reject; the shipped validator stays
+    structural (decisions/007), so it must not hand an arm the expected verdict."""
+    rec = (
+        GOOD_DECISION.replace("- Loss ratio: 3 —", "- Loss ratio: 1 —")
+        .replace(
+            "- Decision threshold (posterior odds): 3:1 — provenance: user-elicited",
+            "- Decision threshold (posterior odds): none stated",
         )
-        assert cr.check(rec, final=True) == [], actions
-
-
-def test_non_decimal_records_leave_the_ordered_rule_silent():
-    # GOOD_DECISION writes 3:1 odds the template forbids; the structural
-    # validator neither guesses at them nor fails correct work over them.
-    assert not _rule_findings(GOOD_DECISION)
+        .replace("- Prior odds: 1:1 —", "- Prior odds: 1 —")
+        .replace("| T1 consistent | 2 |", "| T1 consistent | 0.1-10 |")
+        .replace("- Posterior odds: 2:1", "- Posterior odds: 0.1-10")
+        .replace("- Prior class swept: 1:3 to 3:1", "- Prior class swept: 1-1")
+        .replace("- Loss range swept: 1 to 5 —", "- Loss range swept: 1-1 —")
+        .replace("- Verdict: prior-sensitive — crossover at 3:1", "- Verdict: robust")
+        .replace("- Recommended action: returned to owner", "- Recommended action: wait")
+    )
+    assert cr.check(rec, final=True) == []

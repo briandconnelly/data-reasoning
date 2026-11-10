@@ -30,9 +30,8 @@ voi signal-model/value-basis/verdict coupling and the quantity grammar for
 Cost and Upper bound; and
 (arithmetic gates) recomputation of the posterior-odds interval and, when a
 numeric decision threshold is recorded or supplied by the stated loss ratio,
-the ordered verdict rule decided over the swept prior class, the loss range,
-and the product of the supported likelihood-ratio ranges jointly -- each
-axis's flip, the joint robustness predicate, the crossover interval the
+the ordered verdict rule -- the prior, loss, and likelihood-ratio flips and
+the exact tie (see _check_ordered_rule), the crossover interval the
 verdict's axis names, and the direction of a robust recommendation against
 the Favored if true slot. Decision-boundary comparisons are exact (decimal
 values are read as exact fractions, and a range is a point only when its
@@ -560,8 +559,11 @@ def _check_favored(frame: str, verdict: str, actions: str) -> list[str]:
 def _check_frame_scope(frame: str, actions: str) -> list[str]:
     """Enforce the v1 binary scope on the Actions slot and Consequences table."""
     failures: list[str] = []
-    if len(re.split(r"\s+vs\s+", actions)) != _SCOPE_ACTIONS:
+    names = _action_names(actions)
+    if len(names) != _SCOPE_ACTIONS:
         failures.append("Actions must name exactly two actions separated by ' vs ' (v1 scope)")
+    elif len({" ".join(n.lower().split()) for n in names}) != _SCOPE_ACTIONS:
+        failures.append(f"Actions must name two distinct actions; found {actions!r}")
     rows = _table_rows(frame)
     data = _data_rows(rows)
     if len(data) != _SCOPE_ACTION_ROWS:
@@ -824,44 +826,46 @@ def _check_ordered_rule(  # noqa: PLR0912, PLR0913, PLR0915 -- one pass over the
 ) -> list[str]:
     """SKILL.md § Numeric Policy's ordered verdict rule, decided exactly.
 
-    The threshold interval spans the stated (or loss-supplied) threshold and
-    1 / L for every swept loss L. The joint posterior range is the swept prior
-    class times the product of the supported likelihood-ratio ranges. Each
-    axis flips the action when it is a genuine range (endpoints differ) and,
-    with the other inputs held somewhere in their own ranges, moving it
-    across its range reaches the threshold -- a tie counts:
+    The prior and loss clauses are the base checker's (dev `cac2464`), with
+    exact comparisons in place of its 1% padding and point tolerance:
 
-    - prior: the joint posterior range meets the threshold interval;
-    - loss: at the stated prior (the swept class standing in when no prior
-      is supported), posterior odds meet 1 / L for some swept L;
-    - likelihood ratio: the joint posterior range meets the threshold interval.
+    - prior: the prior odds at which posterior odds meet a threshold --
+      ``threshold / LR``, the threshold interval spanning the stated (or
+      loss-supplied) threshold and 1 / L for each swept loss L -- meet the
+      swept prior class, which must be a genuine range;
+    - loss: at the stated prior (the swept class standing in when no prior is
+      supported), posterior odds meet 1 / L for some swept L, the loss range
+      being a genuine range.
 
-    A record whose joint range meets the threshold although no axis is a
-    genuine range (an exact tie at points, or a stated threshold range
-    straddling alone) takes prior-sensitive, the first sensitive clause.
+    The likelihood-ratio clause is new: some ratio within the supported
+    ranges (which must form a genuine range) carries posterior odds at the
+    stated prior across the stated (or loss-supplied) threshold, not widened
+    by the swept losses. An exact tie -- every input a point and posterior
+    odds equal to that threshold -- prefers neither action and takes
+    prior-sensitive. A tie at a range's endpoint counts as reaching it.
     """
     failures: list[str] = []
     thr_lo, thr_hi = threshold
     if loss_swept:
         thr_lo = min(thr_lo, 1 / loss_swept[1])
         thr_hi = max(thr_hi, 1 / loss_swept[0])
-    thr = (thr_lo, thr_hi)
-    joint = (swept[0] * lr[0], swept[1] * lr[1])
-    straddle = _meets(joint, thr)
-    # Prior odds at which posterior odds meet the threshold, and the LR
-    # product at which the swept prior's posterior meets it.
     pf = (thr_lo / lr[1], thr_hi / lr[0])
-    ef = (thr_lo / swept[1], thr_hi / swept[0])
-    prior_flip = straddle and not _is_point(swept)
-    lr_flip = straddle and not _is_point(lr)
+    prior_flip = not _is_point(swept) and _meets(pf, swept)
     stated_prior = prior or swept
     lf: Interval | None = None
     loss_flip = False
     if loss_swept:
         lf = (1 / (stated_prior[1] * lr[1]), 1 / (stated_prior[0] * lr[0]))
         loss_flip = not _is_point(loss_swept) and _meets(lf, loss_swept)
-    residual = straddle and not (prior_flip or lr_flip or loss_flip)
-    prior_clause = prior_flip or residual
+    at_prior = (stated_prior[0] * lr[0], stated_prior[1] * lr[1])
+    lr_flip = not _is_point(lr) and _meets(at_prior, threshold)
+    ef = (threshold[0] / stated_prior[1], threshold[1] / stated_prior[0])
+    tie = (
+        all(_is_point(r) for r in (swept, stated_prior, lr, threshold))
+        and (loss_swept is None or _is_point(loss_swept))
+        and at_prior[0] == threshold[0]
+    )
+    prior_clause = prior_flip or tie
 
     stated = _crossover_value(crossover_text)
     round_lo, round_hi = _rounding_tolerances(crossover_text)
@@ -896,18 +900,18 @@ def _check_ordered_rule(  # noqa: PLR0912, PLR0913, PLR0915 -- one pass over the
                 f"robust verdict, but the computed loss-ratio crossover {_fmt(lf)} "
                 "lies inside the swept loss range"
             )
-        if lr_flip and not prior_flip:
+        if lr_flip and not (prior_flip or loss_flip):
             failures.append(
                 f"robust verdict, but the supported likelihood-ratio range flips the action: "
-                f"joint posterior odds {_fmt(joint)} meet the threshold {_fmt(thr)}; "
-                "the ordered rule gives evidence-sensitive (SKILL.md § Numeric Policy)"
-            )
-        if residual:
-            failures.append(
-                f"robust verdict, but joint posterior odds {_fmt(joint)} meet the threshold "
-                f"{_fmt(thr)} with no range flipping the action on its own (an exact tie, or a "
-                "stated threshold range); the ordered rule gives prior-sensitive "
+                f"posterior odds {_fmt(at_prior)} at the stated prior meet the threshold "
+                f"{_fmt(threshold)}; the ordered rule gives evidence-sensitive "
                 "(SKILL.md § Numeric Policy)"
+            )
+        if tie:
+            failures.append(
+                f"robust verdict, but every input is a point and posterior odds "
+                f"{float(at_prior[0]):g} equal the threshold exactly, so neither action is "
+                "preferred; the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
             )
         # § Robustness asks for the crossover statement, so a robust record
         # may name the flip point outside the swept class -- every number
@@ -925,8 +929,8 @@ def _check_ordered_rule(  # noqa: PLR0912, PLR0913, PLR0915 -- one pass over the
                     f"flip point outside the swept class (computed {_fmt(pf)}); "
                     f"found {crossover_text!r}"
                 )
-        if not (straddle or loss_flip):
-            failures.extend(_check_robust_direction(sections, joint, thr))
+        if not (prior_flip or loss_flip or lr_flip or tie):
+            failures.extend(_check_robust_direction(sections, at_prior, threshold))
     elif verdict == "prior-sensitive":
         if not prior_clause:
             failures.append(
@@ -990,9 +994,9 @@ def _check_ordered_rule(  # noqa: PLR0912, PLR0913, PLR0915 -- one pass over the
             )
         elif not lr_flip:
             failures.append(
-                f"evidence-sensitive verdict, but joint posterior odds {_fmt(joint)} do not "
-                f"meet the threshold {_fmt(thr)}: no supported likelihood-ratio range flips "
-                "the action"
+                f"evidence-sensitive verdict, but posterior odds {_fmt(at_prior)} at the stated "
+                f"prior do not meet the threshold {_fmt(threshold)}: no supported "
+                "likelihood-ratio range flips the action"
             )
         elif not _axis_matches("likelihood ratio"):
             failures.append(
@@ -1011,15 +1015,20 @@ def _check_robust_direction(
     sections: dict[str, str], joint: Interval, threshold: Interval
 ) -> list[str]:
     """A robust record recommends the Favored if true action when posterior
-    odds lie above the threshold, and the other action when they lie below
-    (SKILL.md § Numeric Policy)."""
+    odds at the stated prior lie above the stated threshold, and the other
+    action when they lie below it (SKILL.md § Numeric Policy)."""
     actions = _action_names(_bare(field(sections["Decision frame"], "Actions:") or ""))
     favored = (field(sections["Decision frame"], "Favored if true:") or "").strip()
     recommended = (field(sections["Verdict"], "Recommended action:") or "").strip()
-    if favored not in actions or recommended not in actions or len(actions) != _SCOPE_ACTIONS:
+    if len(set(actions)) != _SCOPE_ACTIONS or favored not in actions or recommended not in actions:
         return []  # each is its own finding already
     other = next(a for a in actions if a != favored)
-    expected, side = (favored, "above") if joint[0] > threshold[1] else (other, "below")
+    if joint[0] > threshold[1]:
+        expected, side = favored, "above"
+    elif joint[1] < threshold[0]:
+        expected, side = other, "below"
+    else:
+        return []  # a stated threshold range the posterior straddles: unsettled (decisions/007)
     if recommended != expected:
         return [
             f"robust verdict recommends {recommended!r}, but posterior odds {_fmt(joint)} lie "

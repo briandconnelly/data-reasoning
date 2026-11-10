@@ -10,11 +10,6 @@ each record kind's required slots; it suspends completeness findings while a
 record still carries template placeholders or `pending` slots (the skills
 mandate writing the template before filling it).
 
-For a decision record whose numbers are all decimals, it also recomputes the
-decision-analysis ordered verdict rule exactly (the 2026-11-09 extension of
-that decision record names why); a record it cannot read that way is left
-to the structural checks alone.
-
 `--final` is the completed-record mode: nothing suspends completeness, and a
 slot still holding a placeholder, `...`, or `pending` is a finding. The hook
 runs the default mode on every write because a write is not a delivery; a
@@ -28,7 +23,6 @@ from __future__ import annotations
 
 import re
 import sys
-from fractions import Fraction
 from pathlib import Path
 
 SIGNATURES = {
@@ -1050,11 +1044,9 @@ def _check_no_prior_form(evidence: str, findings: list[str]) -> None:
 def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None:
     """A `robust`, `prior-sensitive`, or `evidence-sensitive` verdict's losses
     carry belief-grade provenance; a `dominated` verdict's belief slots and
-    Favored if true read `none needed`, and no other verdict's do; any other
-    verdict's Favored if true names a framed action; `robust` needs a
-    supported ratio; and, when every number the ordered rule reads is a
-    decimal, the verdict is the one that rule gives. A slot still in
-    template state is skipped outside final mode, like every other slot."""
+    Favored if true read `none needed`, and no other verdict's do; `robust`
+    needs a supported ratio. A slot still in template state is skipped
+    outside final mode, like every other slot."""
     verdict_value = _slot_value(_section(body, "## Verdict"), "Verdict")
     if verdict_value is None or _unfilled(verdict_value):
         return
@@ -1066,151 +1058,6 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
     if verdict in ("robust", "prior-sensitive", "evidence-sensitive"):
         _check_belief_grade_losses(body, verdict, final, findings)
     _check_none_needed_slots(body, verdict, final, findings)
-    if verdict != "dominated":
-        _check_favored_names_an_action(body, final, findings)
-        _check_ordered_rule(body, verdict, findings)
-
-
-def _actions(body: str) -> list[str]:
-    value = _slot_value(_section(body, "## Decision frame"), "Actions") or ""
-    return [_normalize(a) for a in re.split(r"\s+vs\s+", _normalize(value))]
-
-
-def _check_favored_names_an_action(body: str, final: bool, findings: list[str]) -> None:
-    """SKILL.md § Numeric Policy: orientation is named, never inferred from
-    the order of the Actions slot."""
-    value = _slot_value(_section(body, "## Decision frame"), "Favored if true")
-    if value is None or (not final and _unfilled(value)) or _normalize(value) == "none needed":
-        return  # missing is its own finding; `none needed` is the dominated check's
-    if _normalize(value) not in _actions(body):
-        findings.append(
-            f"## Decision frame: '- Favored if true:' must name one of the framed actions "
-            f"{_actions(body)!r} exactly; found {value!r} (SKILL.md § Numeric Policy)"
-        )
-
-
-# A decimal or decimal range, as the template's slot notes require; anything
-# else (`3:1`, prose) leaves the ordered-rule check silent rather than wrong.
-_DECIMAL_RANGE = re.compile(r"^(\d+(?:\.\d+)?)(?:\s*[\u2013-]\s*(\d+(?:\.\d+)?))?$")
-
-
-def _exact_range(value: str | None) -> tuple[Fraction, Fraction] | None:
-    if value is None:
-        return None
-    m = _DECIMAL_RANGE.match(_normalize(value.split("\u2014", 1)[0]))
-    if not m:
-        return None
-    lo = Fraction(m.group(1))
-    hi = Fraction(m.group(2)) if m.group(2) else lo
-    return (lo, hi) if 0 < lo <= hi else None
-
-
-def _ordered_rule_inputs(body: str):
-    """The exact numbers the ordered rule reads, or None when any is not a
-    decimal (or decimal range) the template allows."""
-    frame = _section(body, "## Decision frame")
-    evidence = _section(body, "## Evidence and update")
-    robust = _section(body, "## Robustness")
-    swept = _exact_range(_slot_value(robust, "Prior class swept"))
-    losses = _exact_range(_slot_value(robust, "Loss range swept"))
-    threshold_value = _slot_value(frame, "Decision threshold (posterior odds)") or ""
-    if _normalize(threshold_value) == "none stated":
-        stated_loss = _exact_range(_slot_value(frame, "Loss ratio"))
-        threshold = stated_loss and (1 / stated_loss[1], 1 / stated_loss[0])
-    else:
-        threshold = _exact_range(threshold_value)
-    prior_value = _slot_value(evidence, "Prior odds") or ""
-    prior = None if _normalize(prior_value) == NO_PRIOR_SENTINEL else _exact_range(prior_value)
-    if prior is None and _normalize(prior_value) != NO_PRIOR_SENTINEL:
-        return None
-    rows = _table_rows(evidence)
-    lr = (Fraction(1), Fraction(1))
-    supported = 0
-    for cell in _column(rows, "lr"):
-        if _normalize(cell) == NO_LR_SENTINEL:
-            continue
-        r = _exact_range(cell)
-        if r is None:
-            return None
-        lr = (lr[0] * r[0], lr[1] * r[1])
-        supported += 1
-    if not (swept and losses and threshold and supported):
-        return None
-    return swept, losses, threshold, prior or swept, lr
-
-
-def _meets(a, b) -> bool:
-    return a[0] <= b[1] and b[0] <= a[1]
-
-
-def expected_decide_verdict(swept, losses, threshold, prior, lr) -> tuple[str, bool]:
-    """The verdict SKILL.md § Numeric Policy's ordered rule gives under
-    belief-grade losses, decided exactly, and whether the joint posterior
-    lies above the threshold (meaningful only for `robust`).
-
-    The threshold spans the stated (or loss-supplied) one and 1 / L for each
-    swept L; the joint posterior is the swept prior class times the product
-    of the supported ratios. A range is a point only when its endpoints are
-    equal, and a point never flips the action on its own; touching counts.
-    """
-    thr = (min(threshold[0], 1 / losses[1]), max(threshold[1], 1 / losses[0]))
-    joint = (swept[0] * lr[0], swept[1] * lr[1])
-    straddle = _meets(joint, thr)
-    at_prior = (1 / (prior[1] * lr[1]), 1 / (prior[0] * lr[0]))
-    loss_flip = losses[0] < losses[1] and _meets(at_prior, losses)
-    if straddle and swept[0] < swept[1]:
-        return "prior-sensitive", False
-    if loss_flip:
-        return "loss-sensitive", False
-    if straddle and lr[0] < lr[1]:
-        return "evidence-sensitive", False
-    if straddle:
-        return "prior-sensitive", False  # a tie or a threshold range, no range flipping alone
-    return "robust", joint[0] > thr[1]
-
-
-def _check_ordered_rule(body: str, verdict: str, findings: list[str]) -> None:
-    """The claimed verdict against the ordered rule, when the record's numbers
-    are all decimals and its losses belief-grade (a capped record is the
-    loss-cap check's); a robust record's recommendation against the side of
-    the threshold its posterior lies on and Favored if true."""
-    inputs = _ordered_rule_inputs(body)
-    if inputs is None or not _belief_grade(body):
-        return  # a capped record's verdict is the loss-cap check's
-    expected, above = expected_decide_verdict(*inputs)
-    if verdict != expected:
-        findings.append(
-            f"## Verdict: the ordered rule gives {expected!r} for this record's prior class, "
-            f"loss range, and supported likelihood ratios; found {verdict!r} "
-            f"(SKILL.md § Numeric Policy)"
-        )
-        return
-    if verdict != "robust":
-        return
-    favored = _normalize(_slot_value(_section(body, "## Decision frame"), "Favored if true") or "")
-    actions = _actions(body)
-    recommended = _normalize(_slot_value(_section(body, "## Verdict"), "Recommended action") or "")
-    if favored not in actions or recommended not in actions or len(actions) != 2:  # noqa: PLR2004
-        return
-    want = favored if above else next(a for a in actions if a != favored)
-    if recommended != want:
-        side = "above" if above else "below"
-        findings.append(
-            f"## Verdict: robust recommends {recommended!r}, but posterior odds lie {side} the "
-            f"threshold, where the preferred action is {want!r} (Favored if true: {favored!r}; "
-            f"SKILL.md § Numeric Policy)"
-        )
-
-
-def _belief_grade(body: str) -> bool:
-    for heading, label in (
-        ("## Decision frame", "Loss ratio"),
-        ("## Robustness", "Loss range swept"),
-    ):
-        provs = PROVENANCE_MENTION.findall(_slot_value(_section(body, heading), label) or "")
-        if len(provs) != 1 or provs[0] not in LOSS_PROVENANCE_FOR_ROBUST:
-            return False
-    return True
 
 
 def _check_robust_has_a_supported_ratio(body: str, findings: list[str]) -> None:

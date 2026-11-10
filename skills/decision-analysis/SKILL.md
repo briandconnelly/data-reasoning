@@ -108,13 +108,13 @@ Verdict selection is one ordered rule, and the first clause that applies governs
 - `loss-sensitive` when Loss ratio or Loss range swept carries any class but a belief-grade one; report the loss-ratio crossover and return the judgment to the owner.
 - `prior-sensitive` when varying the prior across the stated class changes the preferred action at the stated losses or at any loss in the stated range — whether or not varying the losses alone would change it too; report the prior-odds crossover.
 - `loss-sensitive` when the prior class cannot flip the action and varying the losses across the stated range at the stated prior does; report the loss-ratio crossover.
-- `evidence-sensitive` when neither the prior class nor the loss range can flip the action and varying the supported likelihood ratios across their stated ranges does; report the likelihood-ratio crossover, the product of the supported ratios at which the action flips.
-- `robust` otherwise: one action is preferred at every combination of the stated prior class, the loss range, and the supported likelihood-ratio ranges taken together, under belief-grade losses; the conditions are part of the verdict, not a footnote.
+- `evidence-sensitive` when neither the prior class nor the loss range can flip the action and some likelihood ratio within the supported ranges carries the posterior odds at the stated prior across the threshold at the stated losses; report the likelihood-ratio crossover, the product of the supported ratios at which the action flips.
+- `robust` otherwise: one action is preferred at every point of the stated prior class and loss range taken together and at every likelihood ratio within the supported ranges, under belief-grade losses; the conditions are part of the verdict, not a footnote.
 
 The prior and loss clauses test their own quantity with each supported likelihood ratio held anywhere within its stated range.
-Comparisons with the threshold are exact: posterior odds equal to the threshold prefer neither action, so a range that reaches the threshold at an endpoint flips the action there, and no record with a tie anywhere in its combined inputs is `robust`.
+Comparisons with the threshold are exact: posterior odds equal to the threshold prefer neither action, so a range that reaches the threshold at an endpoint flips the action there.
 A range whose endpoints are equal is a point, and a point never flips the action on its own.
-When the combined inputs reach the threshold but no range flips the action on its own — every input a point at an exact tie, or a stated threshold range alone straddling the posterior — the record is `prior-sensitive`, the first sensitive clause, and reports the prior-odds crossover.
+When every input is a point and posterior odds equal the threshold exactly, neither action is preferred: the record is `prior-sensitive` and reports the stated prior odds as the crossover.
 A record where both the prior and the losses flip the action reports both crossovers.
 
 Evidence items multiplied together state why they are conditionally independent given each state, or are combined into one item; sequential multiplication of unconditional likelihood ratios double-counts shared evidence.
