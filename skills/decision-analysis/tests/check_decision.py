@@ -917,11 +917,20 @@ def _check_ordered_rule(  # noqa: PLR0912, PLR0913, PLR0915 -- one pass over the
         # may name the flip point outside the swept class -- every number
         # it states must lie in the computed interval -- or carry the
         # sentinel.
+        # § Robustness names the likelihood-ratio product as a crossover
+        # quantity too, so a robust record may state that flip point instead
+        # (2026-11-10 DA-S10 canary); a loss-ratio statement stays rejected.
         if crossover_text != "none within swept class":
-            if not _axis_matches("prior odds"):
+            if axis == "likelihood ratio":
+                if not _within(ef):
+                    failures.append(
+                        "a robust verdict's likelihood-ratio Crossover must lie in the computed "
+                        f"interval {_fmt(ef)}; found {crossover_text!r}"
+                    )
+            elif not _axis_matches("prior odds"):
                 failures.append(
-                    "a robust verdict's stated Crossover names prior odds; "
-                    f"found {crossover_text!r}"
+                    "a robust verdict's stated Crossover names prior odds or a likelihood "
+                    f"ratio; found {crossover_text!r}"
                 )
             elif not _within(pf):
                 failures.append(

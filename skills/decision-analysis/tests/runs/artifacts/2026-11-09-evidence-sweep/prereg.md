@@ -215,3 +215,12 @@ With n = 20,000 per arm the 95% log-ratio interval on the ratio is about 2.936�
 `validate_da_sweep.py` asserts both properties, the census wording, and the target's absence, and each assertion was seen to fail on a mutated copy.
 Every DA-S10 command above takes `--fixture $FX/da-sweep/s10v2-loss-matrix` in place of `s10-loss-matrix`; the fresh canary is named `canary2-da-s10-post`.
 Arm budget: the five canaries (four first canaries and this one) count against the ceiling of 24, leaving 19 for 16 scored arms and up to 3 retries; the earlier "up to 2" retry reserve becomes up to 3 only because the ceiling is unchanged.
+
+## Second DA-S10 canary and a checker fix (note added 2026-11-10; the rules above are unchanged)
+
+`canary2-da-s10-post` (packet `s10v2-loss-matrix`, `--skill-ref a470770`; exit 0, `claude-sonnet-5-5`, no contamination) is informative and clean on rationale: P held (`Prior class swept: 0.035–0.035`), R held (`Loss ratio: 9`, threshold 0.1111, hold favored), it noted the ratio's sampling interval "about 2.94–3.07, below the 3.175 crossover", and it took `robust` naming `ship now`.
+It stated `Crossover: flips at likelihood ratio 3.175`, which `SKILL.md` § The Decide Route's Robustness paragraph licenses and which `tests/check_decision.py` rejected because it accepted only a prior-odds statement under `robust`.
+Under disposition row 1 that is a checker defect, fixed before any scored arm with a test (`test_robust_may_state_the_likelihood_ratio_crossover`): a robust record may now state a likelihood-ratio crossover, which must lie in the computed interval; a loss-ratio statement stays rejected.
+Assertion C for DA-S10 is not changed: it is scored as written (`none within swept class`, or prior odds within 1/27), so a robust record naming the likelihood-ratio crossover fails C, and the record is read for that alongside its other assertions.
+The canary also wrote `Claim class: predictive`, which the dev checker rejects; it is an arm error scored under K as written, not a fixture property.
+The scored batch runs next: baselines, pre, and post for all four cells as tabled, DA-S10 on `s10v2-loss-matrix`.

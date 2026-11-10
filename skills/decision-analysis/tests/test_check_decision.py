@@ -1853,3 +1853,17 @@ def test_preregistered_expected_records_pass():
     assert _clean(s10), check(s10)
     assert _says(s10.replace("- Recommended action: ship now", "- Recommended action: hold one week"),
                  "lie below the threshold")  # fmt: skip
+
+
+def test_robust_may_state_the_likelihood_ratio_crossover():
+    """2026-11-10 DA-S10 canary: a robust record stated `flips at likelihood
+    ratio 3.175` ((1/9) / 0.035), which § Robustness licenses; the checker
+    accepted only a prior-odds statement."""
+    ok = build(
+        prior="0.035", lrs=("3",), loss="9", rec=SHIP, crossover="flips at likelihood ratio 3.175"
+    )
+    assert _clean(ok), check(ok)
+    bad = ok.replace("flips at likelihood ratio 3.175", "flips at likelihood ratio 5")
+    assert _says(bad, "likelihood-ratio Crossover must lie in the computed interval")
+    loss_axis = ok.replace("flips at likelihood ratio 3.175", "flips at loss ratio 9.5")
+    assert _says(loss_axis, "names prior odds or a likelihood ratio")
