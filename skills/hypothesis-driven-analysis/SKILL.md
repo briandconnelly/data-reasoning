@@ -201,6 +201,7 @@ A criterion a true slow-leak variant would fail in more than one run of twenty c
 
 ### Analysis
 
+Before a computed number enters the ledger as evidence, run the checks in [references/computation-checks.md](references/computation-checks.md) that apply to it.
 Analyze inline by default.
 Fan out to subagents per [references/subagent-briefs.md](references/subagent-briefs.md) only when at least two bounded, independent test packages exist **and** at least one of these observable conditions holds:
 
