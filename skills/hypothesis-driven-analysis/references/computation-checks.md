@@ -2,11 +2,13 @@
 
 These checks catch a computed number that is wrong because of how it was computed, not because of what the world did.
 SKILL.md's Analysis section says when they run.
-A check that fails is a concrete failure mechanism, so it can promote a `data-artifact` hypothesis; a check that passes is recorded in one line beside the result.
+Record each check run, and its outcome, in one line beside the result.
+
+A failed check is a discrepancy, not yet a mechanism: whether it can promote a `data-artifact` hypothesis is settled by the promotion rule in SKILL.md's Plan section.
 
 ## Join fan-out
 
-A join on a key that is not unique on one side multiplies rows, and every sum or count over the result inflates.
+A join fans out when it returns more than one row per row of the original grain — typically when the key is not unique on the side being joined in — and every aggregate over the result is distorted: counts inflate, but a signed sum can move in either direction.
 Compare the row count before and after each join, and count rows per original grain key afterward; any key with more rows than the intended join cardinality is fan-out.
 A distinct count of the grain key cannot detect it, because duplicated rows keep the same key.
 
@@ -19,7 +21,7 @@ An equal-weight figure and a pooled figure computed from the underlying numerato
 ## Incomplete periods
 
 A period still accumulating data — the current day, week, or month, or a window whose late-arriving records have not landed — is not comparable with a closed one.
-A count or sum over it reads low, but a mean or rate can move either way, depending on which records arrive late; the completeness-semantics rules in SKILL.md's Analysis section govern any claim about the direction of that bias.
+Only an append-only count or a sum of nonnegative values reads low; a signed sum, a mean, or a rate can move either way, depending on which records arrive late; the completeness-semantics rules in SKILL.md's Analysis section govern any claim about the direction of that bias.
 Compare only closed periods, or equal-length windows aligned on the same elapsed time, and state the data's completeness horizon.
 
 ## Denominator drift
