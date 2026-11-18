@@ -1,7 +1,7 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4–S7, and DA-S11 have no arm.
+**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
 Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
