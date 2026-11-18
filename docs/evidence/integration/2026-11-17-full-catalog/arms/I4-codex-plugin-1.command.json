@@ -1,0 +1,14 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I4-codex-plugin-1-8blaqv9w",
+  "argv": [
+    "codex",
+    "exec",
+    "--json",
+    "--skip-git-repo-check",
+    "-s",
+    "workspace-write",
+    "-C",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I4-codex-plugin-1-8blaqv9w",
+    "<prompt.txt>"
+  ]
+}
