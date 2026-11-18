@@ -596,7 +596,8 @@ def _check_recommended_action(sections: dict[str, str], verdict: str, actions: s
             )
     else:
         expected = "no preference" if verdict == "indifferent" else "returned to owner"
-        if recommended == expected:
+        value = recommended.strip("`*").strip() if verdict == "indifferent" else recommended
+        if value == expected:
             return failures
         failures.append(
             f"a {verdict} verdict requires '- Recommended action:' to read exactly "

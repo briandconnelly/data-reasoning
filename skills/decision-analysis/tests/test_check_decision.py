@@ -1905,8 +1905,15 @@ def test_indifferent_record_contract_in_both_checkers():
         record = replace_once(record, old, new)
     assert check(record) == []
     assert cr.check(record, final=True) == []
+    for formatted in ("**no preference**", "`no preference`"):
+        styled = replace_once(
+            record, "- Recommended action: no preference", f"- Recommended action: {formatted}"
+        )
+        assert check(styled) == []
+        assert cr.check(styled, final=True) == []
     for label, wrong in (
         ("Recommended action", "returned to owner"),
+        ("Recommended action", "`no preference` — either action"),
         ("Loss ratio", "1 — provenance: user-elicited"),
         ("Favored if true", "ship now"),
     ):

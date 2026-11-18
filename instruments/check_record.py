@@ -1092,7 +1092,7 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
     if (
         recommended is not None
         and (final or not _unfilled(recommended))
-        and (recommended == "no preference") != (verdict == "indifferent")
+        and (_normalize(recommended) == "no preference") != (verdict == "indifferent")
     ):
         findings.append(
             "## Verdict: '- Recommended action:' must read 'no preference' "
