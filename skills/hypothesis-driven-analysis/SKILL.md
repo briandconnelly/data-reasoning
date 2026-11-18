@@ -42,9 +42,14 @@ Ask what assigned the exposure, and route on what you are *told* assigned it —
 Randomization stated, or assignment stated to be plausibly independent of the outcome, with a comparison group that would have moved the same way had the cause been absent: the effect is identified and no rival explanations need telling apart, so the work is **estimation** — or `mini`, if someone has already stated a claim, numeric or qualitative, for you to check.
 "Is B better than A, and by how much" over an assignment you have been told was random is an estimation task, however causal it sounds — the design already did the discriminating that the loop would otherwise have to do.
 Assigned by anything else — someone launched it, it shipped to whoever got it, it happened in a week when other things also happened: nothing identifies the effect, every co-occurring change is a live rival, and that is **full**.
-A stated quasi-experimental structure — a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: route its review through `causal-identification-review` when installed, and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
+A stated quasi-experimental structure — a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: before estimating anything from it, load `causal-identification-review` in the same turn (on Claude Code, call the `Skill` tool with `data-reasoning:causal-identification-review`; on a host that exposes skills as files, read its `SKILL.md`), and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
+A before/after or treated-vs-untreated comparison the user implies ("we rolled it out here, not there") is such a structure even when nobody calls it a design.
 "How much did launching the campaign improve conversion" is the unidentified-assignment case wearing the identified one's clothes: a causal question carrying a number, with no design behind it.
 The loop's job there is not to produce the number — it is to establish that the number is not available from this data, and to report what is.
+
+**Causal estimate limit.** This holds whether or not `causal-identification-review` is installed or was loaded, and whatever the user says they need the number for.
+Until an identification review ends `identified-if` with its probes run, give no point estimate, adjusted estimate, or sensitivity range as the effect or as a stand-in for it — a caveat beside a number does not make it associative.
+The direct answer is that the magnitude is not determinable from this data, which threats block it, and what design or data would identify it; observed contrasts may be reported only as labelled descriptive differences.
 
 **Unstated assignment is the common case, and it is not an invitation to assume.**
 "We ran variants A and B" does not say users were randomized; it is equally consistent with shipping A one week and B the next, which identifies nothing.
@@ -315,7 +320,7 @@ Apply the precommitted stop rule:
 - **Iterate** (return to Plan) only when a specific, available test could change the answer within the remaining budget.
 - **Stop with limits** otherwise: report what is known and what cannot be determined from the available data — "can't tell from this data" is a valid conclusion.
   When the conclusion is that nothing identifies the effect, the report names `causal-identification-review` (when installed) as the constructive continuation — the design that would identify the effect, and what that design assumes, is that skill's work to produce.
-  When a decision hangs on an `UNRESOLVED` set, the report names `decision-analysis` (when installed) as the constructive continuation — whether any action is defensible across that uncertainty, and where the answer flips, is that skill's work to produce.
+  When the user asks for a choice between actions that hangs on an `UNRESOLVED` set, load `decision-analysis` in the same turn before recommending (on Claude Code, call the `Skill` tool with `data-reasoning:decision-analysis`; on a host that exposes skills as files, read its `SKILL.md`) — whether any action is defensible across that uncertainty, and where the answer flips, is that skill's work to produce; when it is not installed, the report names it as the constructive continuation.
 
 Multiple contributing explanations are allowed; do not force a single winner.
 Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.

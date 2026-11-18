@@ -282,3 +282,29 @@ def test_no_shipped_markdown_cites_a_path_missing_from_the_release_tree(tmp_path
     assert build(out).returncode == 0
     dangling = dangling_citations(out)
     assert not dangling, f"citations that dangle in a release install: {dangling}"
+
+
+@pytest.mark.parametrize("flag", ["--help", "-h"])
+def test_help_prints_usage_and_builds_nothing(tmp_path, flag):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), flag],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0
+    assert "usage:" in result.stdout
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_an_unknown_option_is_refused_not_built(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPT), "--bogus"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert list(tmp_path.iterdir()) == []
