@@ -99,12 +99,14 @@ A rounded elicited loss ("roughly ten") is recorded at its nominal value as `use
 
 Orientation has its home here.
 The Decision frame's Favored if true slot names the action with the lower loss when the proposition is true, in the Actions slot's own words; the order in which Actions lists the two actions carries no meaning.
-With H the proposition, favored that action, and other the remaining one, the loss ratio is r = [L(other, H) − L(favored, H)] / [L(favored, not-H) − L(other, not-H)], defined only when both differences are positive; the `dominated` clause below takes every other case before any division.
+With H the proposition, favored that action, and other the remaining one, the loss ratio is r = [L(other, H) − L(favored, H)] / [L(favored, not-H) − L(other, not-H)], defined only when both differences are positive; the `indifferent` and `dominated` clauses below take every other case before any division.
 The favored action is preferred where posterior odds of the proposition exceed the threshold, and the other action where they fall below it; when no threshold is stated, the stated loss ratio supplies it as 1/r.
 
 Verdict selection is one ordered rule, and the first clause that applies governs:
 
-- `dominated` when one action's loss is no higher than the other's under both states, ties included; no probabilities are needed, and the belief slots and Favored if true take the template's `none needed`.
+- `indifferent` when the established point losses are equal for both actions in each state.
+  Use `none needed` for Favored if true, Loss ratio, Prior odds, Posterior odds, Prior class swept, Loss range swept, and Crossover, since neither a belief update nor a loss-ratio sweep can distinguish these actions at the stated losses.
+- `dominated` when one action's loss is no higher than the other's under both states and is strictly lower in at least one; no probabilities are needed, and the belief slots and Favored if true take the template's `none needed`.
 - `loss-sensitive` when Loss ratio or Loss range swept carries any class but a belief-grade one; report the loss-ratio crossover and return the judgment to the owner.
 - `prior-sensitive` when varying the prior across the stated class changes the preferred action at the stated losses or at any loss in the stated range — whether or not varying the losses alone would change it too; report the prior-odds crossover.
 - `loss-sensitive` when the prior class cannot flip the action and varying the losses across the stated range at the stated prior does; report the loss-ratio crossover.
@@ -147,9 +149,10 @@ The prior class and loss range actually swept, and the crossover statements: at 
 This block is the skill's signature output, and it is where `sensitivity-only` numbers live.
 
 **Verdict.**
-The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `evidence-sensitive`, `dominated` — and which value a record takes is settled by § Numeric Policy's ordered rule, which this block records and does not restate.
+The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `evidence-sensitive`, `dominated`, `indifferent` — and which value a record takes is settled by § Numeric Policy's ordered rule, which this block records and does not restate.
 
-The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive`, `loss-sensitive`, and `evidence-sensitive` it reads `returned to owner`, because the crossover, not the record, locates the choice.
+The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive`, `loss-sensitive`, and `evidence-sensitive` it reads `returned to owner`, because the crossover locates the choice.
+Under `indifferent`, Recommended action reads `no preference`.
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).
 
 **Handoff.**

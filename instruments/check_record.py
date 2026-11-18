@@ -149,7 +149,14 @@ ASSESSMENTS = {
     "not-run",
     "not-testable-here",
 }
-DECIDE_VERDICTS = {"robust", "prior-sensitive", "loss-sensitive", "evidence-sensitive", "dominated"}
+DECIDE_VERDICTS = {
+    "robust",
+    "prior-sensitive",
+    "loss-sensitive",
+    "evidence-sensitive",
+    "dominated",
+    "indifferent",
+}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 VOI_VALUE_BASES = {"signal-model", "upper-bound"}
 
@@ -169,8 +176,8 @@ LOSS_PROVENANCE_FOR_ROBUST = {"user-elicited", "externally-sourced"}
 NO_PRIOR_SENTINEL = "none supported — see Robustness"
 NO_LR_SENTINEL = "none supported"
 PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([A-Za-z][A-Za-z-]*)`?")
-# Belief slots a `dominated` verdict leaves at the template's sentinel.
-DOMINATED_NONE_NEEDED = (
+# Shared slots for the statewise verdicts in Numeric Policy.
+STATEWISE_NONE_NEEDED = (
     ("## Decision frame", "Favored if true"),
     ("## Evidence and update", "Prior odds"),
     ("## Evidence and update", "Posterior odds"),
@@ -1066,8 +1073,8 @@ def _check_no_prior_form(evidence: str, findings: list[str]) -> None:
 
 def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None:
     """A `robust`, `prior-sensitive`, or `evidence-sensitive` verdict's losses
-    carry belief-grade provenance; a `dominated` verdict's belief slots and
-    Favored if true read `none needed`, and no other verdict's do; `robust`
+    carry belief-grade provenance; statewise verdicts use the Numeric Policy
+    sentinels; `robust`
     needs a supported ratio. A slot still in template state is skipped
     outside final mode, like every other slot."""
     verdict_value = _slot_value(_section(body, "## Verdict"), "Verdict")
@@ -1081,6 +1088,16 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
     if verdict in ("robust", "prior-sensitive", "evidence-sensitive"):
         _check_belief_grade_losses(body, verdict, final, findings)
     _check_none_needed_slots(body, verdict, final, findings)
+    recommended = _slot_value(_section(body, "## Verdict"), "Recommended action")
+    if (
+        recommended is not None
+        and (final or not _unfilled(recommended))
+        and (_normalize(recommended) == "no preference") != (verdict == "indifferent")
+    ):
+        findings.append(
+            "## Verdict: '- Recommended action:' must read 'no preference' "
+            "exactly when the verdict is indifferent (SKILL.md § The Decide Route)"
+        )
 
 
 def _check_robust_has_a_supported_ratio(body: str, findings: list[str]) -> None:
@@ -1110,23 +1127,26 @@ def _check_belief_grade_losses(body: str, verdict: str, final: bool, findings: l
 
 
 def _check_none_needed_slots(body: str, verdict: str, final: bool, findings: list[str]) -> None:
-    """`none needed` fills the belief slots under `dominated` and nowhere else."""
-    for heading, label in DOMINATED_NONE_NEEDED:
+    """Check the sentinel coupling from Numeric Policy."""
+    loss_slots = (("## Decision frame", "Loss ratio"), ("## Robustness", "Loss range swept"))
+    for heading, label in (*STATEWISE_NONE_NEEDED, *loss_slots):
         value = _slot_value(_section(body, heading), label)
         if value is None:
             continue
         is_sentinel = _normalize(value) == "none needed"
-        if verdict == "dominated":
+        if verdict == "indifferent" or (
+            verdict == "dominated" and (heading, label) in STATEWISE_NONE_NEEDED
+        ):
             if (not final and _unfilled(value)) or is_sentinel:
                 continue
             findings.append(
-                f"{heading}: a dominated verdict requires '- {label}:' to read exactly "
+                f"{heading}: a {verdict} verdict requires '- {label}:' to read exactly "
                 f"'none needed'; found {value!r} (SKILL.md § The Decide Route)"
             )
         elif is_sentinel:
             findings.append(
-                f"{heading}: '- {label}:' reads 'none needed', which only a dominated "
-                f"verdict licenses; this record's verdict is {verdict!r} "
+                f"{heading}: '- {label}:' reads 'none needed', which is reserved for "
+                f"dominated or indifferent records as specified for this slot; found {verdict!r} "
                 f"(SKILL.md § The Decide Route)"
             )
 

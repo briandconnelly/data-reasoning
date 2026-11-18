@@ -19,6 +19,9 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Fixed
 
+- Decision analysis records `indifferent` with `no preference` when both actions have equal losses in each state (#95).
+  Both record checkers accept the new verdict and enforce its required slot values.
+
 - Decision analysis now checks whether the supplied signal probabilities and prior describe a consistent model before pricing information (#94).
   An inconsistent model yields a perfect-information bound when the remaining inputs support one.
   Behavioral impact is unmeasured.

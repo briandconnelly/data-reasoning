@@ -70,7 +70,14 @@ from pathlib import Path
 
 ROUTES = frozenset({"decide", "voi"})
 DECIDE_VERDICTS = frozenset(
-    {"robust", "prior-sensitive", "loss-sensitive", "evidence-sensitive", "dominated"}
+    {
+        "robust",
+        "prior-sensitive",
+        "loss-sensitive",
+        "evidence-sensitive",
+        "dominated",
+        "indifferent",
+    }
 )
 VOI_VERDICTS = frozenset(
     {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
@@ -232,17 +239,19 @@ def _is_point(r: Interval) -> bool:
 Losses = dict[str, tuple[Fraction, Fraction]]
 
 
-def orient(losses: Losses) -> tuple[str, str, Fraction | None]:
+def orient(losses: Losses) -> tuple[str, str | None, Fraction | None]:
     """SKILL.md § Numeric Policy's orientation, executable.
 
     `losses` maps each of the two actions to its (loss if H, loss if not-H).
-    Returns ``("dominated", winner, None)`` when one action's loss is no
-    higher than the other's in both states (ties included; r is never
-    computed), else ``(favored, other, r)``: favored has the lower loss when
-    H is true, and r = [L(other,H) - L(favored,H)] / [L(favored,not-H) -
+    Returns ``("indifferent", None, None)`` for equal vectors, or
+    ``("dominated", winner, None)`` for a unique statewise winner.
+    Otherwise returns ``(favored, other, r)``: favored has the lower loss when H is true,
+    and r = [L(other,H) - L(favored,H)] / [L(favored,not-H) -
     L(other,not-H)], both differences positive.
     """
-    (a, (a_h, a_n)), (b, (b_h, b_n)) = sorted(losses.items())
+    (a, (a_h, a_n)), (b, (b_h, b_n)) = losses.items()
+    if (a_h, a_n) == (b_h, b_n):
+        return ("indifferent", None, None)
     if a_h <= b_h and a_n <= b_n:
         return ("dominated", a, None)
     if b_h <= a_h and b_n <= a_n:
@@ -257,9 +266,8 @@ def preferred_action(losses: Losses, posterior_odds: Fraction) -> str | None:
     """The action with the lower expected loss at these posterior odds of H,
     or None at an exact tie. The favored action wins above 1/r."""
     kind, winner, r = orient(losses)
-    if kind == "dominated":
+    if r is None:
         return winner
-    assert r is not None
     other = next(a for a in losses if a != kind)
     if posterior_odds > 1 / r:
         return kind
@@ -438,15 +446,20 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     frame = sections["Decision frame"]
 
     actions = _bare(field(frame, "Actions:") or "")
+    verdict = _bare(field(sections["Verdict"], "Verdict:") or "")
     failures.extend(_check_frame_scope(frame, actions))
 
+    labels = ("Decision threshold (posterior odds):",)
+    if verdict != "indifferent":
+        labels += ("Loss ratio:",)
+        failures.extend(
+            _check_slot_provenance(
+                (("Loss range swept:", field(sections["Robustness"], "Loss range swept:") or ""),)
+            )
+        )
     failures.extend(
         _check_slot_provenance(
-            tuple(
-                (label, field(frame, label) or "")
-                for label in ("Loss ratio:", "Decision threshold (posterior odds):")
-            ),
-            "none stated",
+            tuple((label, field(frame, label) or "") for label in labels), "none stated"
         )
     )
     failures.extend(
@@ -464,11 +477,6 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
                 ),
             ),
             "none needed",
-        )
-    )
-    failures.extend(
-        _check_slot_provenance(
-            (("Loss range swept:", field(sections["Robustness"], "Loss range swept:") or ""),)
         )
     )
 
@@ -500,7 +508,6 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
             "it belongs in Robustness"
         )
 
-    verdict = _bare(field(sections["Verdict"], "Verdict:") or "")
     if verdict not in DECIDE_VERDICTS:
         failures.append(
             f"Verdict value {verdict!r} is not in the closed set {sorted(DECIDE_VERDICTS)}"
@@ -537,21 +544,20 @@ def _action_names(actions: str) -> list[str]:
 
 
 def _check_favored(frame: str, verdict: str, actions: str) -> list[str]:
-    """Favored if true names a framed action, bare -- or, under `dominated`
-    only, reads exactly `none needed` (SKILL.md § Numeric Policy)."""
+    """Check the Favored if true slot against Numeric Policy."""
     favored = (field(frame, "Favored if true:") or "").strip()
     names = _action_names(actions)
-    if verdict == "dominated":
+    if verdict in ("dominated", "indifferent"):
         if favored != "none needed":
             return [
-                "a dominated verdict requires '- Favored if true:' to read exactly "
+                f"a {verdict} verdict requires '- Favored if true:' to read exactly "
                 f"'none needed', with no annotation; found {favored!r}"
             ]
         return []
     if favored not in names:
         return [
             f"'- Favored if true:' must name one of the framed actions {names!r} exactly "
-            f"(or read 'none needed' under a dominated verdict); found {favored!r}"
+            f"(or read 'none needed' under a dominated or indifferent verdict); found {favored!r}"
         ]
     return []
 
@@ -588,10 +594,14 @@ def _check_recommended_action(sections: dict[str, str], verdict: str, actions: s
                 f"a {verdict} verdict requires '- Recommended action:' to name one of "
                 f"the framed actions {action_names!r}; found {recommended!r}"
             )
-    elif recommended != "returned to owner":
+    else:
+        expected = "no preference" if verdict == "indifferent" else "returned to owner"
+        value = recommended.strip("`*").strip() if verdict == "indifferent" else recommended
+        if value == expected:
+            return failures
         failures.append(
             f"a {verdict} verdict requires '- Recommended action:' to read exactly "
-            f"'returned to owner'; found {recommended!r}"
+            f"{expected!r}; found {recommended!r}"
         )
     return failures
 
@@ -600,25 +610,26 @@ def _check_decide_arithmetic(  # noqa: PLR0912, PLR0915 -- one gate pass over fi
     sections: dict[str, str], verdict: str, belief_losses: bool = True
 ) -> list[str]:
     failures: list[str] = []
-    if verdict == "dominated":
-        # Statewise domination needs no probabilities (SKILL.md § The Decide
-        # Route): Prior odds, Posterior odds, Prior class swept, and
-        # Crossover carry no belief-grade numbers to recompute or sweep, so
-        # none of the numeric parsing, recomputation, or crossover gates
-        # below apply to this record -- but the sentinel itself is required,
-        # not optional, on each of those four slots.
+    if verdict in ("dominated", "indifferent"):
+        # Numeric Policy skips belief arithmetic for statewise verdicts.
         evidence = sections["Evidence and update"]
         robustness = sections["Robustness"]
-        for section, label in (
+        sentinel_slots = (
             (evidence, "Prior odds:"),
             (evidence, "Posterior odds:"),
             (robustness, "Prior class swept:"),
             (robustness, "Crossover:"),
-        ):
+        )
+        if verdict == "indifferent":
+            sentinel_slots += (
+                (sections["Decision frame"], "Loss ratio:"),
+                (robustness, "Loss range swept:"),
+            )
+        for section, label in sentinel_slots:
             value = (field(section, label) or "").strip()
             if value != "none needed":
                 failures.append(
-                    f"a dominated verdict requires '- {label}' to read exactly "
+                    f"a {verdict} verdict requires '- {label}' to read exactly "
                     f"'none needed', with no annotation; found {value!r}"
                 )
         return failures
