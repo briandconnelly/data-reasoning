@@ -8,6 +8,7 @@ runs, and test suites stay on `dev`. The output directory is created fresh;
 an existing directory is rebuilt only when it carries this builder's marker
 file."""
 
+import argparse
 import json
 import shutil
 import sys
@@ -86,7 +87,16 @@ def build(out: Path) -> None:
     point_marketplace_at_self(out)
 
 
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Copy the plugin's runtime files into a clean directory."
+    )
+    parser.add_argument(
+        "output_dir", type=Path, help="directory to create (or rebuild, if this script made it)"
+    )
+    args = parser.parse_args()
+    build(args.output_dir.resolve())
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 2:  # noqa: PLR2004
-        sys.exit("usage: build-release-tree.py OUTPUT_DIR")
-    build(Path(sys.argv[1]).resolve())
+    main()
