@@ -1,0 +1,1 @@
+How many orders in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I1-claude-none-3-yv9x6xqt/data/orders.csv` were placed on 2026-06-10 (UTC)?

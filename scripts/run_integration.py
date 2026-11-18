@@ -120,13 +120,15 @@ def install_codex_plugin(release: Path, env: dict[str, str]) -> str:
 
 def observed_route(events: list[dict], host: str) -> list[str]:
     route: list[str] = []
-    pat = re.compile(r"(" + "|".join(SKILLS) + r")/SKILL\.md")
+    # A shell read may brace-expand several skills: skills/{a,b}/SKILL.md.
+    pat = re.compile(r"(?:\{([^{}]*)\}|([\w-]+))/SKILL\.md")
     for text in _tool_inputs(events, host):
         for skill in SKILLS:
             if f"data-reasoning:{skill}" in text or text.strip('"') == skill:
                 route.append(skill)
         for m in pat.finditer(text):
-            route.append(m.group(1))
+            names = m.group(1).split(",") if m.group(1) is not None else [m.group(2)]
+            route.extend(n for n in names if n in SKILLS)
     return [s for i, s in enumerate(route) if i == 0 or s != route[i - 1]]
 
 
@@ -136,7 +138,7 @@ def _tool_inputs(events: list[dict], host: str):
             for block in ev.get("message", {}).get("content", []):
                 if block.get("type") == "tool_use":
                     yield json.dumps(block.get("input", {}))
-        if host == "codex" and ev.get("type") in ("item.started", "item.completed"):
+        if host == "codex" and ev.get("type") == "item.completed":
             item = ev.get("item", {})
             if item.get("type") in ("command_execution", "file_read", "mcp_tool_call"):
                 yield json.dumps(item)
@@ -188,10 +190,13 @@ def read_events(path: Path) -> list[dict]:
     return events
 
 
-def model_of(events: list[dict], stderr: str, host: str) -> str | None:
+def model_of(events: list[dict], codex_home: str | None, host: str) -> str | None:
     if host == "codex":
-        m = re.search(r"model:\s*(\S+)", stderr, re.IGNORECASE)
-        return m.group(1) if m else None
+        # codex exec --json omits the model; the session rollout records it.
+        models = set()
+        for f in Path(codex_home or "").glob("sessions/**/*.jsonl"):
+            models.update(re.findall(r'"model":"([^"]+)"', f.read_text(encoding="utf-8")))
+        return ",".join(sorted(models)) or None
     for ev in events:
         if ev.get("type") == "system" and ev.get("subtype") == "init":
             return ev.get("model")
@@ -242,7 +247,7 @@ def main() -> None:
     duration = round(time.monotonic() - start)
 
     events = read_events(base.with_suffix(".jsonl"))
-    model = model_of(events, base.with_suffix(".stderr").read_text(encoding="utf-8"), args.host)
+    model = model_of(events, env.get("CODEX_HOME"), args.host)
     route = observed_route(events, args.host)
     base.with_suffix(".final.md").write_text(
         final_message(events, args.host) + "\n", encoding="utf-8"
