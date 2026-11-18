@@ -8,14 +8,15 @@ This page carries the measurement status that the README used to; the decision r
 Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work; `causal-identification-review` is the constructive continuation when adjudication concludes nothing identifies the effect, or when a claimed design needs its identifying assumptions checked before anyone trusts it.
 `decision-analysis` is the constructive continuation when a decision hangs on what an investigation left `UNRESOLVED`: it consumes ledgers and review records as evidence, and its verdicts recommend without authorizing.
 All four skills carry the same authorization gate and the same Record Delivery section; each text lives once in `scripts/shared-sections/` and is rendered into each skill by `scripts/check-shared-sections.py`, which fails when a rendered copy drifts or is hidden.
-Paths under `tests/`, `scripts/`, and `jev/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.
+Paths under `tests/`, `scripts/`, `jev/`, and `docs/evidence/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.
 
-The handoff from exploration to hypothesis-driven analysis is a design claim, not a measured one.
-No run has yet exercised that handoff: its fixture is the exploration catalog's E1, which has no scored arm (§ Scenario status).
+The full-catalog integration suite (`docs/evidence/integration/2026-11-17-full-catalog/results.md`, issue #96) ran all four skills as an install exposes them, n=3 per cell, on Claude Code (`claude-sonnet-5-5`) and Codex (`gpt-6.2-sol`).
+On Codex the plugin arms took the designed handoffs — exploration to adjudication on the E1 seam fixture, adjudication to identification review on CS3 — and kept the evidence boundary across them; on E1 the no-plugin arms broke it (0/3 against 3/3).
+On Claude Code no arm made any multi-skill handoff: the boundary gain on E1 came from exploration alone, and on CS3 adjudication loaded without identification review and every arm, with or without the plugin, offered the flow an effect size.
 Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against the then two-skill shipped surface plus a `systematic-debugging` stand-in, not the four skills that now ship.
 `exploratory-data-analysis`'s description was measured alone (the query-pool arms) and beside `hypothesis-driven-analysis`'s only (T13, T14); `causal-identification-review`'s has n=1 trigger cells (CS1, CS2, CS6a) against a three-skill catalog; `decision-analysis`'s has none.
-Routing between all four skills rests on zero arms run against the full catalog — the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` holds every description until that changes.
-Treat the routing between them, and the handoff itself, as unverified.
+Routing between all four skills now rests on that suite's 24 plugin arms; the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` is not lifted by this page.
+Treat the handoff as measured on Codex at n=3 and unverified on Claude Code.
 
 ## Scenario status
 
@@ -117,10 +118,10 @@ The focused VoI wording checks of 2026-09-04 ran seven cases of their own, not c
 
 ## Owed evidence
 
-Three pieces of evidence were named as owed by the external review of 2026-09-15, so the gap is not mistaken for an oversight; as of 2026-11-08 none has started, and no run record under `skills/*/tests/runs/` is an arm of any of them:
+Three pieces of evidence were named as owed by the external review of 2026-09-15, so the gap is not mistaken for an oversight; as of 2026-11-17 the first has run, and no run record under `skills/*/tests/runs/` is an arm of any of them:
 
 - An end-to-end integration suite for the shipped four-skill workflow, on both hosts: a direct answer that loads no skill, exploration handing a lead to adjudication, adjudication handing a dead end to identification review, and an `UNRESOLVED` ledger entering a decision record.
-  Every arm run so far exercises one skill in isolation; none shows an agent choosing the right skill, keeping the evidence boundary across a handoff, or finishing the user's task.
+  Ran 2026-11-17 (`docs/evidence/integration/2026-11-17-full-catalog/results.md`): the handoffs are shown on Codex and not taken on Claude Code; one model per host, n=3.
 - A frozen representative suite kept alongside the adversarial catalogs.
   The catalogs' rule that a baseline already passing means the scenario is too easy finds failures; it cannot estimate practical benefit, because ordinary tasks a baseline already handles still pay the skill's context and ceremony.
   The representative suite keeps such tasks, and scores accuracy, unnecessary ceremony, latency, and total context cost.
@@ -129,7 +130,7 @@ Three pieces of evidence were named as owed by the external review of 2026-09-15
 Cell-level debts are the `unrun`, "no arm", and `withdrawn` rows above.
 The 2026-11-09 decision-analysis change (the likelihood-ratio clause, `evidence-sensitive`, and the Favored if true slot) was measured on 2026-11-10 on DA-S9 and DA-S10 with no behavioral lift at n=3 (row 7 of its preregistration) and on the DA-S1 and DA-S8 controls with no regression at n=1 (`skills/decision-analysis/tests/runs/2026-11-10-evidence-sweep.md`); the reached cells it left unpaid, DA-S1x and DA-S3, are listed in `skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/reachability.md`.
 The Record Delivery section ships measured on S1, B10, CS3, and DA-S1 only; its other reachable cells are listed as debt in `skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery-prereg.md`.
-Every November arm ran on one Claude model; Codex is unmeasured.
+Every November arm ran on one Claude model; Codex is measured only by the integration suite.
 
 ## Remediation wave of 2026-09-15
 
