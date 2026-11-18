@@ -1,0 +1,13 @@
+{
+  "name": "I1-claude-none-1",
+  "cell": "I1",
+  "host": "claude",
+  "condition": "none",
+  "skills_ref": "1f133452455959c47bf1d62586e556b642da89c1",
+  "host_version": "2.1.327 (Claude Code)",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "duration_s": 8,
+  "observed_route": [],
+  "ran_at": "2026-11-18T02:26:22+00:00"
+}

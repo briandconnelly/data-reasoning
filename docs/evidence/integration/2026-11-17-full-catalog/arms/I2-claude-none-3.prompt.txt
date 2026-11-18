@@ -1,0 +1,1 @@
+Here's two months of our API event logs (`/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I2-claude-none-3-g6yxmuig/data/events.csv`). Nobody has looked at it closely. Take a look, tell me what's going on, and if anything looks like a real problem, check whether it actually holds up before you tell me it's real.

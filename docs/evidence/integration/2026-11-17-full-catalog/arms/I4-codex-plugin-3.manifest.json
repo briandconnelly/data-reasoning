@@ -1,0 +1,18 @@
+{
+  "name": "I4-codex-plugin-3",
+  "cell": "I4",
+  "host": "codex",
+  "condition": "plugin",
+  "skills_ref": "7e18ddbf5b8808019ef0ae31224193ec8e96085e",
+  "host_version": "codex-cli 0.169.1",
+  "model": "gpt-6.2-sol",
+  "exit": 0,
+  "duration_s": 185,
+  "observed_route": [
+    "hypothesis-driven-analysis",
+    "causal-identification-review",
+    "decision-analysis",
+    "causal-identification-review"
+  ],
+  "ran_at": "2026-11-18T05:49:41+00:00"
+}

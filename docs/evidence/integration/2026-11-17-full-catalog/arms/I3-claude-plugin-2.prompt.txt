@@ -1,0 +1,1 @@
+We rolled out the new checkout flow to the West region on 2026-03-15; East stayed on the old flow. Median checkout completion time in West dropped afterwards. How much faster did the new flow make checkout? I need a number for the Q2 review. Data is in `/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I3-claude-plugin-2-r9kfl0io/data`.

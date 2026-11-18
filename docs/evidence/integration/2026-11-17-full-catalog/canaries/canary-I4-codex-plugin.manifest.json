@@ -1,0 +1,20 @@
+{
+  "name": "canary-I4-codex-plugin",
+  "cell": "I4",
+  "host": "codex",
+  "condition": "plugin",
+  "skills_ref": "1f133452455959c47bf1d62586e556b642da89c1",
+  "host_version": "codex-cli 0.169.1",
+  "model": "gpt-6.2-sol",
+  "exit": 0,
+  "duration_s": 147,
+  "observed_route": [
+    "hypothesis-driven-analysis",
+    "causal-identification-review",
+    "decision-analysis",
+    "causal-identification-review",
+    "hypothesis-driven-analysis"
+  ],
+  "ran_at": "2026-11-18T05:42:55+00:00",
+  "model_source": "CODEX_HOME session rollout, backfilled after harness fix"
+}

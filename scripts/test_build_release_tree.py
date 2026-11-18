@@ -234,7 +234,7 @@ def test_url_and_absolute_targets_are_not_cited():
     assert cited_relative_paths("[a](https://x.y/z.md) [b](/abs/c.md) [c](#frag)") == set()
 
 
-REPOSITORY_ONLY_SEGMENTS = {"tests", "scripts", "jev", ".superpowers"}
+REPOSITORY_ONLY_SEGMENTS = {"tests", "scripts", "jev", ".superpowers", "evidence"}
 REPOSITORY_ONLY_FILES = {"AGENTS.md"}
 PLACEHOLDERS = {"NNN-slug.md", "ledger.md", "exploration-log.md", "deploys/2026-07-07.log"}
 # Names that are not pointers into this tree: a note deleted before it was

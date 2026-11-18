@@ -1,0 +1,14 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I2-codex-plugin-1-nrhakbs_",
+  "argv": [
+    "codex",
+    "exec",
+    "--json",
+    "--skip-git-repo-check",
+    "-s",
+    "workspace-write",
+    "-C",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I2-codex-plugin-1-nrhakbs_",
+    "<prompt.txt>"
+  ]
+}

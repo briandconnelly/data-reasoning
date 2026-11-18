@@ -1,0 +1,5 @@
+**Q2 review wording:** “West checkout times dropped by about 38 seconds relative to East at the March 15 launch, after accounting for West’s pre-launch improvement trend. That estimate captures the combined change at launch. The new checkout flow’s individual effect can’t be isolated because a West-only promotion started the same day.”
+
+West’s median daily checkout time fell from **196.59 to 146.62 seconds** across the observed pre- and post-launch periods. West was already gaining about **0.51 seconds per day** relative to East while a separate shipping-form cleanup was underway. Fitting separate trends to the daily West–East gap before and after March 15 gives the **38-second** estimate at launch.
+
+The extract ends April 11, so this is an early rollout result. [Daily data](/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I3-codex-none-1-g12s7ifc/data/daily.csv) · [UX cleanup note](/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I3-codex-none-1-g12s7ifc/data/ux_cleanup_note.md) · [Promotion log](/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-I3-codex-none-1-g12s7ifc/data/promotions.log)
