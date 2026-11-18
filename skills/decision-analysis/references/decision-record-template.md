@@ -57,7 +57,7 @@ The skeletons show the exact label and the bare shape of each value; everything 
 ## Verdict
 
 - Verdict: <value>
-- Recommended action: <action A or action B exactly as written in Actions, or returned to owner>
+- Recommended action: <action A or action B exactly as written in Actions, or returned to owner, or no preference>
 - Conditions: <the prior class, loss provenance, and assumptions the verdict is conditional on>
 
 ## Handoff
@@ -103,7 +103,7 @@ Provenance is exactly one class from `../SKILL.md` § Numeric Policy on the deci
 `derived` is not a class; a threshold derived from an elicited loss ratio carries the loss ratio's class.
 
 Sentinels replace the whole value and appear bare, with no suffix and no provenance.
-The decide record's sentinels, by slot, are `none stated` (Decision threshold); `none needed` (Favored if true, Prior odds, Posterior odds, Prior class swept, Crossover); `none supported — see Robustness` (Prior odds and Posterior odds, always both together); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` (Recommended action); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
+The decide record's sentinels, by slot, are `none stated` (Decision threshold); `none needed` (Favored if true, Loss ratio, Prior odds, Posterior odds, Prior class swept, Loss range swept, Crossover); `none supported — see Robustness` (Prior odds and Posterior odds, always both together); `none within swept class` (Crossover); `single item` (Independence); `returned to owner` or `no preference` (Recommended action); `NONE` (Identification basis); and `none` (Identification conditions, Ledger mapping, the three Handoff slots).
 An evidence item with no supportable ratio writes `none supported` in both its LR cell and its provenance cell, and the reason in its source cell; a supported item keeps its number and class.
 When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's to say; a stated Crossover is a bare number or ordered range, optionally introduced by `flips at prior odds`, `flips at loss ratio`, or `flips at likelihood ratio`, and which quantity the slot carries under each verdict is § Numeric Policy's to say.
 
