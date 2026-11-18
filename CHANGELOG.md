@@ -19,6 +19,9 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Fixed
 
+- Decision analysis now checks whether the supplied signal probabilities and prior describe a consistent model before pricing information (#94).
+  An inconsistent model yields a perfect-information bound when the remaining inputs support one.
+  Behavioral impact is unmeasured.
 - The record validator no longer rejects an identification review whose Handoff lists more than one disposition (`- Dispositions: identified-if, unresolved`), which the template allows for a multi-design review. Every listed item must still be a closed-set value.
 - The record validator checks two closed slots it used to pass unread: a decision or VoI record's `Route` (`decide` or `voi`), and a VoI record's `Value basis` (`signal-model` or `upper-bound`).
 - Without `python3`, the hook's shell fallback now reports a record that sits behind CRLF frontmatter as not validated; it used to miss it and stay silent.

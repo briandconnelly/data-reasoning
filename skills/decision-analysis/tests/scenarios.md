@@ -1,7 +1,7 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status (2026-11-10):** DA-S1, DA-S1x, DA-S3, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2 and DA-S4–S7 have no arm.
+**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4–S7, and DA-S11 have no arm.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
 Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
@@ -17,6 +17,8 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 - As of 2026-08-09 every scenario below had 0 arms run; the 2026-09-15 and 2026-11-08 entries below record the arms since.
 - The SKILL.md description's routing behavior: unmeasured.
 - The two HDA seam sentences: recorded as HDA's own debt in `skills/hypothesis-driven-analysis/tests/scenarios.md` § Owed measurements.
+- The 2026-11-17 signal-coherence change (#94) reaches DA-S5, DA-S7, and DA-S11; all are unmeasured.
+  The attached decision context in DA-S5 and DA-S7 must supply a priceable signal model to exercise their expected pricing outcomes.
 - The post-2026-09-04 VoI wording that permits a bound-determined `not-worth-it` verdict, accepts mixed signal-model provenance, and requires the tight binary loss-matrix bound: unmeasured.
 - The 2026-09-15 wording: § Verdict's precedence rule when both sensitivities fire (`prior-sensitive`, loss crossover in Conditions), and § Degraded Modes' no-defensible-prior procedure with its worked example: unmeasured.
   Reachability: DA-S1 (an `UNRESOLVED` ledger with one sourced LR and no elicited prior) traverses the degraded mode's no-supported-prior branch and must keep that LR in the sweep; a scenario whose sweep flips on both axes traverses the precedence rule.
@@ -147,3 +149,29 @@ Added 2026-11-09 for § Numeric Policy's orientation rule (`decisions/007`); sco
 - [ ] Favored if true reads `hold one week`; Loss ratio reads `9 — provenance: user-elicited`; the threshold stated or implied is 1/9 ≈ 0.111, not 0.1.
 - [ ] Verdict `robust`, Recommended action `ship now`.
 - [ ] Baseline expectation: reads the matrix as 10:1 and holds, or recommends without a threshold.
+
+### DA-S11 — pricing a signal from reported posteriors
+
+Run each variant as a separate request using the shared prompt and its own vendor figures.
+
+**Prompt:** "I must choose which of two states holds, H or its complement.
+My independently established prior for H is [prior].
+A wrong choice costs me $100 and a correct choice costs $0.
+A vendor offers one report for a total cost of $20 including fees, delay and opportunity cost.
+Its only possible returns are red and blue.
+The vendor gives the following exact probabilities for this population: [vendor figures].
+Should I buy the report?"
+
+**Expected:** voi route for every variant.
+Added 2026-11-17 for #94.
+
+| Variant | Prior | Vendor figures (red, blue) | Expected record |
+| --- | --- | --- | --- |
+| Conflicting prior | 50% | Return probabilities (50%, 50%); P(H given return) (90%, 90%). | Identifies the implied 90% prior versus 50%; uses `unavailable`, `upper-bound`, bound `50 USD`, and `upper-bound-only`. |
+| Coherent control | 50% | Return probabilities (50%, 50%); P(H given return) (90%, 10%). | Uses `signal-model`; current expected loss $50, expected loss after the report $10, gross value $40, net value $20, verdict `worth-it`. |
+| Incomplete distribution | 50% | Return probabilities (40%, 40%); P(H given return) (75%, 50%). | Identifies total probability 80% even though the weighted sum for H is 50%; same bound and verdict as the conflicting-prior case. |
+| Independently established lower prior | 20% | Return probabilities (50%, 50%); P(H given return) (90%, 90%). | Identifies the conflict and uses the prior-specific bound `20 USD`; the equal cost yields `not-worth-it`. |
+
+- [ ] Each record passes `check_decision.py`, states full cost as `20 USD`, and reproduces its row's reasoning and verdict.
+- [ ] The conflicting-prior case reports the failed check in Value calculation and assigns no gross or net value to the pull.
+- [ ] Baseline failure to watch for: the agent buys the report in the conflicting-prior case on a spurious $40 gross value.

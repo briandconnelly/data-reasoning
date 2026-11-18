@@ -166,8 +166,14 @@ The two actions and the current leaning — by pointer when a decide record or c
 When no decision can be named after one clarifying question, decline the route: information has value only through a decision it could change.
 
 **Signal model.**
-Record what the pull could return, each return's predictive probability, and the conditional state probabilities after each return, with provenance per § Numeric Policy.
-An absent model is recorded as exactly `unavailable`, without an annotation; explain the missing inputs in Value calculation.
+Record what the pull could return, each return's predictive probability, and the conditional state probabilities for each return with positive probability, with provenance per § Numeric Policy.
+Before pricing the signal, check that its mutually exclusive, exhaustive returns have probabilities in [0, 1] that sum to 1 and that each positive-probability return has P(H | return) in [0, 1].
+Check that the sum of P(return) × P(H | return) over those returns equals the current P(H) used for R0.
+When sweeping priors with a supported model of P(return | state), verify that each state's return probabilities form a distribution and derive the predictive and posterior probabilities at each prior used for pricing.
+For rounded inputs, require a joint distribution satisfying all checks within the source's stated rounding precision (for example, ±0.5 percentage points for rounding to the nearest whole percent).
+Use exact figures as given, carry supported uncertainty through the verdict, and do not invent a tolerance to reconcile conflicting inputs.
+If the model is absent or fails these checks, record Signal model as exactly `unavailable`, use `upper-bound`, and identify the missing inputs or failed check in Value calculation.
+Use independently supported priors and losses for the bound under Upper-bound semantics below.
 
 **Value basis.**
 The closed set is `signal-model` or `upper-bound`.
