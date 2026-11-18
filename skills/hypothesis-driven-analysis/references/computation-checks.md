@@ -13,11 +13,13 @@ Compare the row count before and after each join, and count rows per original gr
 A distinct count of the grain key cannot detect it, because duplicated rows keep the same key.
 
 Fan-out does not distort every aggregate.
-The duplicated rows carry the original side's values unchanged, so what follows holds for aggregates over those values; a field the joined side contributes is a different input, and its maximum or distinct count can move even when no original row is lost.
-When every original row repeats the same number of times, counts and sums scale by that factor, a signed sum included, while a mean, a minimum, a maximum, a distinct count, and a ratio whose numerator and denominator both scale stay unchanged — values 2 and 4 duplicated once each still average 3.
+What follows holds only for aggregates over the original side's values, computed over the metric's filtered and grouped input, with every intended row retained: a field the joined side contributes is a different input, and a join that also drops rows — an inner join with unmatched keys, or a filter on a joined-side field — can change any aggregate, a maximum and a distinct count included.
+When every original row in a reported group repeats the same number of times, that group's counts and sums scale by that factor, a signed sum included, while its mean, minimum, maximum, distinct count, and any ratio whose numerator and denominator both scale stay unchanged — values 2 and 4 duplicated once each still average 3.
+Duplication that is uniform across the whole table can still be uneven within a group, once a filter or grouping splits it.
 When rows repeat unevenly, a mean, a rate, or a signed sum can move in either direction — duplicating only the 2 lowers that average to 8/3 — while a minimum, a maximum, and a distinct count of those values still hold.
-So fan-out found in a join is not yet the cause of a discrepancy in the reported metric.
-Recompute that metric with the join corrected to its intended cardinality, holding the population, filters, metric definition, and snapshot fixed — for example, aggregate the joined side to one row per grain key before joining, or replace a many-match lookup with the as-of or current-row match it was meant to be — and compare it with the figure in question.
+
+Before attributing a discrepancy in the reported metric to fan-out, recompute that metric with the join corrected to its intended cardinality and compare the two.
+Hold the population, filters, metric definition, and snapshot fixed — for example, aggregate the joined side to one row per grain key before joining, or replace a many-match lookup with the as-of or current-row match it was meant to be.
 Only when that correction keeps every intended match is the difference fan-out's effect on the metric; arbitrarily keeping one row per grain key can attach the wrong match and change the metric for a different reason.
 
 ## Average of averages

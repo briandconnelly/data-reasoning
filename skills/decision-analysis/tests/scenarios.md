@@ -97,7 +97,7 @@ Score record shape with `check_decision.py`; anything asserting an action did NO
 **Prompt:** "What's the probability churn exceeds 5% next quarter?"
 **Expected:** not hosted here.
 
-- [ ] Hands toward `hypothesis-driven-analysis` estimation in the same response, without waiting on a clarifying question; an invitation to name the decision the forecast would inform is allowed alongside the handoff, not instead of it.
+- [ ] Either `hypothesis-driven-analysis` is activated directly, or, if `decision-analysis` was selected, it hands toward `hypothesis-driven-analysis` in the same response without waiting on a clarifying question; an invitation to name the decision the forecast would inform is allowed alongside the handoff, not instead of it.
 - [ ] No probability, posterior, or decision record produced by this skill.
 
 ### DA-S7 — voi with no stated cost (trigger)
