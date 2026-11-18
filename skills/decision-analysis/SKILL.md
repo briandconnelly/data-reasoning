@@ -19,7 +19,7 @@ Route on the inferential shape of the ask, not its phrasing or its price.
 | Route | Observable condition | Ceremony |
 | --- | --- | --- |
 | out: direct | A bounded, unasserted fact the records themselves settle — non-causal, non-generalizing | None; answer and stop — not this skill's work |
-| out: adjudicate | What happened, what's true, or what's driving a change — including a "should we X" whose real blocker is an unadjudicated factual dispute, and a bare probability forecast no decision frames | Hand to `hypothesis-driven-analysis`; this skill weighs evidence, it does not manufacture it |
+| out: adjudicate | What happened, what's true, or what's driving a change — including a "should we X" whose real blocker is an unadjudicated factual dispute, and a bare probability forecast no decision frames | Hand to `hypothesis-driven-analysis`; this skill weighs evidence, it does not manufacture it. A bare forecast hands off in the same response, toward that skill's estimation route, with no probability from this skill; asking which decision it would inform may accompany the handoff but never replaces it |
 | out: explore | No decision and no claim — open-ended orientation or lead-seeking | Hand to `exploratory-data-analysis` |
 | out: review | Whether a design identifies a causal effect, or a causal question needing a design | Hand to `causal-identification-review` |
 | voi | A specified information-acquisition option for an already-framed decision — whether or not a price is stated | One-block VoI record |
@@ -28,7 +28,6 @@ Route on the inferential shape of the ask, not its phrasing or its price.
 `voi` outranks `decide` only as the narrower condition; a voi ask embedded in a bigger open decision takes `decide`.
 Cost never selects a route: a stated price makes a pull expensive, not a decision voi-shaped, and a free but slow experiment routes voi the same as a metered query.
 The costly-collection and authorization gates bind when a pull is executed, never for analyzing a hypothetical one.
-A "how likely is X" ask with no decision behind it gets one question — "what decision would this inform?" — and routes on the answer; unframed, it leaves for `hypothesis-driven-analysis`'s estimation route rather than being answered here.
 A co-loaded data-access, analytics, or visualization skill is a tool for collection and display on any route, never a route itself; compose with it and still run the route the ask selects.
 v1 scope is one binary uncertain proposition and two actions; an ask needing more states or actions is reported as out of this skill's scope, with the binary reduction offered only when it is honest.
 
