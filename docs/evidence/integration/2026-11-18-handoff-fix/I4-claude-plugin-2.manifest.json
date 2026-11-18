@@ -1,0 +1,13 @@
+{
+  "name": "I4-claude-plugin-2",
+  "cell": "I4",
+  "host": "claude",
+  "condition": "plugin",
+  "skills_ref": "6f2b35c89f08b0e457a93439486d645d2a4b3370",
+  "host_version": "2.1.327 (Claude Code)",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "duration_s": 130,
+  "observed_route": [],
+  "ran_at": "2026-11-18T15:00:48+00:00"
+}
