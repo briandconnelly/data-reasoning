@@ -127,7 +127,7 @@ def observed_route(events: list[dict], host: str) -> list[str]:
                 route.append(skill)
         for m in pat.finditer(text):
             route.append(m.group(1))
-    return list(dict.fromkeys(route))
+    return [s for i, s in enumerate(route) if i == 0 or s != route[i - 1]]
 
 
 def _tool_inputs(events: list[dict], host: str):
@@ -189,7 +189,7 @@ def read_events(path: Path) -> list[dict]:
 
 def model_of(events: list[dict], stderr: str, host: str) -> str | None:
     if host == "codex":
-        m = re.search(r"model:\s*(\S+)", stderr)
+        m = re.search(r"model:\s*(\S+)", stderr, re.IGNORECASE)
         return m.group(1) if m else None
     for ev in events:
         if ev.get("type") == "system" and ev.get("subtype") == "init":

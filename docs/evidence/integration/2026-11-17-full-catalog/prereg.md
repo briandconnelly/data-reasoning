@@ -82,7 +82,9 @@ Disagreements are reported, not reconciled by vote.
 2. Plugin arms take the designed route but E matches no-plugin arms: the skills route correctly but add nothing observable on these cells.
 3. Plugin arms skip a designed handoff (one skill, or none) while E holds: the boundary comes from the host or a single skill, and the handoff remains unmeasured in practice.
 4. Plugin arms break E where no-plugin arms keep it: a regression attributable to the plugin.
-5. Mixed by host: reported per host; no claim pools Claude Code and Codex.
+5. Plugin arms fail C where no-plugin arms complete it, on any cell including I1: a task regression attributable to the plugin, whatever R and E show.
+6. Plugin arms skip a designed handoff and break E: neither the route nor the boundary holds, whatever the no-plugin arms do.
+7. Mixed by host: reported per host; no claim pools Claude Code and Codex.
 
 At n=3 per cell per condition no outcome is a rate; each is reported as counts.
 
@@ -95,3 +97,4 @@ At n=3 per cell per condition no outcome is a rate; each is reported as counts.
 ## Notes after writing
 
 - 2026-11-17, before any arm: a first design review (`openrouter/google/gemini-3.1-pro-preview` through amicus) could not read this file, which was then uncommitted, and reviewed the request's summary instead; it returned NO-GO. Adopted: n=3 per cell (repository precedent), and a real install in place of `.agents/skills/` staging. Declined: building new multi-stage fixtures — the four prompts each require a handoff to be completed as asked, and whether agents make it is the measurement. The design was re-reviewed with this file committed.
+- 2026-11-17, before any arm: the re-review (same model, commit `c6727d6`) returned NO-GO on four findings, all adopted: reachable outcomes 5 (task regression) and 6 (route and boundary both fail) added; the harness now collapses only consecutive repeats of a skill, so a return to an earlier skill stays in the route; the Codex model capture is case-insensitive and is confirmed against the canaries before any scored arm. No further design review was run; the canaries are the next check.
