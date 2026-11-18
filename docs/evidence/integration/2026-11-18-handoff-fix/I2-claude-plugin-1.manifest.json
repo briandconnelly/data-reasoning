@@ -1,0 +1,16 @@
+{
+  "name": "I2-claude-plugin-1",
+  "cell": "I2",
+  "host": "claude",
+  "condition": "plugin",
+  "skills_ref": "619b14730f01a54a491b646587dbddf3613dd13f",
+  "host_version": "2.1.327 (Claude Code)",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "duration_s": 98,
+  "observed_route": [
+    "exploratory-data-analysis",
+    "hypothesis-driven-analysis"
+  ],
+  "ran_at": "2026-11-18T14:43:29+00:00"
+}
