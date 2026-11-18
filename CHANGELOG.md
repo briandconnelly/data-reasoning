@@ -6,6 +6,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-18
+
 ### Changed
 
 - Exploratory and hypothesis-driven analysis: cross-skill handoffs now say to load the destination skill in the same turn (naming the Claude Code `Skill` call) rather than only naming it, and the investigation skill states a causal estimate limit: with no identifying design, no point, adjusted, or range estimate is given as the effect.
@@ -24,7 +26,6 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 - Decision analysis records `indifferent` with `no preference` when both actions have equal losses in each state (#95).
   Both record checkers accept the new verdict and enforce its required slot values.
-
 - Decision analysis now checks whether the supplied signal probabilities and prior describe a consistent model before pricing information (#94).
   An inconsistent model yields a perfect-information bound when the remaining inputs support one.
   Behavioral impact is unmeasured.
@@ -98,7 +99,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 - The `exploratory-data-analysis`, `hypothesis-driven-analysis`, and `causal-identification-review` skills.
 - The plugin manifest, README, and repository conventions.
 
-[Unreleased]: https://github.com/briandconnelly/data-reasoning/compare/v0.4.0...dev
+[Unreleased]: https://github.com/briandconnelly/data-reasoning/compare/v0.5.0...dev
+[0.5.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/briandconnelly/data-reasoning/compare/v0.1.0...v0.2.0
