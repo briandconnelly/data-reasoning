@@ -23,7 +23,9 @@ Route on the shape of the ask, not its phrasing — "explore why churn rose" is 
 | profile | An open-ended orientation ask over a dataset or a named entity — "what's in this data", "profile this", "any quality problems", "summarize this dataset", "tell me about this account" | Frame-lite + Orient; § Profile Route states what each profile delivers |
 | explore | Open-ended lead-seeking with no named effect — "what's interesting", "any anomalies", "what does this data suggest" | The full lifecycle below |
 
-When exploration surfaces a claim the user wants settled, hand off rather than settling it here; the lead enters the investigation as `retrospective`, promotable only on evidence that did not inform it.
+When exploration surfaces a claim the user wants settled, hand off rather than settling it here: load `hypothesis-driven-analysis` in the same turn, before touching any evidence reserved for confirmation (on Claude Code, call the `Skill` tool with `data-reasoning:hypothesis-driven-analysis`; on a host that exposes skills as files, read its `SKILL.md`).
+The lead enters the investigation as `retrospective`, promotable only on evidence that did not inform it.
+Naming the skill in the report is not the handoff; if it cannot be loaded, report the lead and what confirmation would need.
 A co-loaded data-access, analytics, or visualization skill answers where the data lives and how to display it — a tool for collection and display on any route, never a route itself; compose with it and still run the route the ask selects.
 
 ## Gates
