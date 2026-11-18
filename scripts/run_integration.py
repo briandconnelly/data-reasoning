@@ -163,7 +163,8 @@ def host_command(args: argparse.Namespace, base: Path, root: Path, prompt: str):
     if args.host == "claude":
         cmd = ["claude", "-p", prompt, "--model", "sonnet", "--output-format", "stream-json"]
         cmd += ["--verbose", "--setting-sources", "project"]
-        cmd += ["--permission-mode", "bypassPermissions"]
+        tools = "Read,Write,Edit,Bash,Glob,Grep,Skill"
+        cmd += ["--tools", tools, "--allowedTools", tools]
         if args.condition == "plugin":
             build_release(release)
             cmd += ["--plugin-dir", str(release)]
