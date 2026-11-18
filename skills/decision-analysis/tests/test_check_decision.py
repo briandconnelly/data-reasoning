@@ -1867,3 +1867,50 @@ def test_robust_may_state_the_likelihood_ratio_crossover():
     assert _says(bad, "likelihood-ratio Crossover must lie in the computed interval")
     loss_axis = ok.replace("flips at likelihood ratio 3.175", "flips at loss ratio 9.5")
     assert _says(loss_axis, "names prior odds or a likelihood ratio")
+
+
+def test_identical_loss_vectors_are_indifferent_under_renaming_and_reordering():
+    ship_losses = (Fraction("1.0"), Fraction(2))
+    hold_losses = (Fraction(1), Fraction("2.0"))
+    for actions in ((SHIP, HOLD), ("z", "a")):
+        rows = list(zip(actions, (ship_losses, hold_losses), strict=True))
+        for losses in (dict(rows), dict(reversed(rows))):
+            assert orient(losses) == ("indifferent", None, None)
+            assert preferred_action(losses, Fraction(3)) is None
+
+
+def test_one_state_tie_preserves_the_unique_statewise_winner():
+    winner_losses = (Fraction(1), Fraction(2))
+    for loser_losses in ((Fraction(1), Fraction(3)), (Fraction(2), Fraction(2))):
+        for winner, loser in (("a", "z"), ("z", "a")):
+            losses = {loser: loser_losses, winner: winner_losses}
+            assert orient(losses) == ("dominated", winner, None)
+            assert preferred_action(losses, Fraction(3)) == winner
+
+
+def test_indifferent_record_contract_in_both_checkers():
+    record = _dominated_decide()
+    for old, new in (
+        ("- Verdict: dominated", "- Verdict: indifferent"),
+        (
+            "- Decision threshold (posterior odds): 0.1 — provenance: user-elicited",
+            "- Decision threshold (posterior odds): none stated",
+        ),
+        ("- Recommended action: hold one week", "- Recommended action: no preference"),
+        ("- Loss ratio: 10 — provenance: user-elicited", "- Loss ratio: none needed"),
+        ("- Loss range swept: 5–20 — provenance: user-elicited", "- Loss range swept: none needed"),
+        ("| ship now | incident | on-time release |", "| ship now | 1 | 2 |"),
+        ("| hold one week | delay, no incident | needless delay |", "| hold one week | 1 | 2 |"),
+    ):
+        record = replace_once(record, old, new)
+    assert check(record) == []
+    assert cr.check(record, final=True) == []
+    for label, wrong in (
+        ("Recommended action", "returned to owner"),
+        ("Loss ratio", "1 — provenance: user-elicited"),
+        ("Favored if true", "ship now"),
+    ):
+        expected = "no preference" if label == "Recommended action" else "none needed"
+        bad = replace_once(record, f"- {label}: {expected}", f"- {label}: {wrong}")
+        assert any(label in finding for finding in check(bad))
+        assert any(label in finding for finding in cr.check(bad, final=True))
