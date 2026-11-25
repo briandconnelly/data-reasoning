@@ -1,0 +1,12 @@
+{
+ "G01": "X2-claude-none-2",
+ "G02": "X3-claude-none-2",
+ "G03": "X3-claude-forced-2",
+ "G04": "X3-claude-none-3",
+ "G05": "X3-claude-forced-1",
+ "G06": "X2-claude-forced-2",
+ "G07": "X2-claude-none-3",
+ "G08": "X2-claude-forced-3",
+ "G09": "X2-claude-forced-1",
+ "G10": "X3-claude-forced-3"
+}

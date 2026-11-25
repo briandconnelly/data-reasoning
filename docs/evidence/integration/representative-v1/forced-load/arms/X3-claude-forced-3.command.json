@@ -1,0 +1,21 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-arm-z0155ukw",
+  "argv": [
+    "claude",
+    "-p",
+    "First load the data-reasoning:hypothesis-driven-analysis skill and follow its instructions. We have two candidate churn models scored on last quarter's holdout customers, with who actually churned: `data/holdout_scores.csv`. Next quarter our retention team will call the 500 customers the deployed model scores highest on one list like this one. Which model should we deploy?",
+    "--model",
+    "claude-sonnet-5-5",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--allowedTools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--plugin-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-plugin-jliszb9s/data-reasoning"
+  ]
+}
