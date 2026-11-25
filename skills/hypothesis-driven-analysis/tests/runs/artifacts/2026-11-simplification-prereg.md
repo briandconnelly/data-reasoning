@@ -83,7 +83,7 @@ S9a and S9b are the two randomized-estimate cells added by PR #110 and first run
 
 ## Conditions and arms
 
-Five cells × two conditions × n=3 = 30 scored arms, one host (Claude Code), model `sonnet` on both harnesses (`run_arm.py --model sonnet`; `run_integration.py` passes `--model sonnet` on its Claude path).
+Five cells × two conditions × n=3 = 30 scored arms, one host (Claude Code), model `sonnet` on both harnesses (`run_arm.py --model sonnet`; `run_integration.py --model sonnet`, which the representative cells require).
 One canary per cell on the short condition runs first and is excluded from scoring.
 
 ### Staging, traced in the scripts
@@ -94,10 +94,10 @@ One canary per cell on the short condition runs first and is excluded from scori
 - `scripts/run_integration.py --condition plugin` builds the runtime tree with `scripts/build-release-tree.py`, which copies from the checkout's working tree.
   It refuses to run while `skills`, `hooks`, `instruments`, `.claude-plugin`, `.codex-plugin`, or `.agents/plugins` differ from HEAD (untracked files count), and records `git rev-parse HEAD` and `host_version`.
   So it stages HEAD of the checkout it runs from, and R1 and R2 exist only on the #115 lineage.
-- Integration source commit, pinned: `7dc22ac` (the #115 branch commit this prereg sits on; its `SKILL.md` is `dev`'s, `9acd7f62…`).
-  Current runs from a checkout detached at `7dc22ac`.
-  Short runs from a checkout detached at `7dc22ac` with `f9db019` and `b98339b` cherry-picked, whose tree must be `43b28090053793535b9d8a783eefa36bf5072203`; a dry build of that tree on 2026-11-24 gave the short `SKILL.md` sha256 above.
-  If the #115 rebase changes `scripts/run_integration.py`, the pinned commit and tree are updated by a dated note before any arm.
+- Integration source commit, pinned: `10fae92` (the #115 branch commit this prereg sits on; its `SKILL.md` is `dev`'s, `9acd7f62…`).
+  Current runs from a checkout detached at `10fae92`.
+  Short runs from a checkout detached at `10fae92` with `f9db019` and `b98339b` cherry-picked, whose tree must be `abe097b865b6a02229736b32df3e314a1591a5cc`; a dry build of that tree on 2026-11-24 gave the short `SKILL.md` sha256 above.
+  Updated 2026-11-24 after the #115 branch revised `scripts/run_integration.py`: the pin moved from `7dc22ac` (old) to the commit above and the tree was rebuilt; any later change to that script moves the pin again by a dated note before any arm.
 - Arm output goes to a directory outside both checkouts, so no arm makes a checkout dirty; it is committed after the last arm.
 
 ### Commands
@@ -105,10 +105,10 @@ One canary per cell on the short condition runs first and is excluded from scori
 Set once, from the repository root of the working checkout:
 
 ```sh
-git worktree add --detach ../h118-current 7dc22ac
-git worktree add --detach ../h118-short 7dc22ac
+git worktree add --detach ../h118-current 10fae92
+git worktree add --detach ../h118-short 10fae92
 git -C ../h118-short cherry-pick f9db019 b98339b
-git -C ../h118-short rev-parse 'HEAD^{tree}'   # must print 43b28090053793535b9d8a783eefa36bf5072203
+git -C ../h118-short rev-parse 'HEAD^{tree}'   # must print abe097b865b6a02229736b32df3e314a1591a5cc
 OUT="$(mktemp -d)/simplification-118"
 P=skills/hypothesis-driven-analysis/tests/runs/artifacts
 ```
@@ -132,9 +132,9 @@ uv run skills/hypothesis-driven-analysis/tests/run_arm.py --name "s9b-$C-$K" \
   --fixture skills/hypothesis-driven-analysis/tests/fixtures/s9b-incomplete \
   --out "$OUT" --model sonnet
 uv run scripts/run_integration.py --cell R1 --host claude --condition plugin \
-  --name "R1-$C-$K" --out "$OUT"
+  --name "R1-$C-$K" --out "$OUT" --model sonnet
 uv run scripts/run_integration.py --cell R2 --host claude --condition plugin \
-  --name "R2-$C-$K" --out "$OUT"
+  --name "R2-$C-$K" --out "$OUT" --model sonnet
 ```
 
 The `run_arm.py` arms could run from either checkout, since `--skill-ref` stages from git; running them from the condition's checkout keeps one rule for every arm.
@@ -145,7 +145,7 @@ All of these must hold, and the result is recorded in the results record:
 
 - `git diff --stat 0187202 b98339b` lists only `skills/hypothesis-driven-analysis/SKILL.md`.
 - `uv run scripts/build-release-tree.py <dir>` in each checkout gives two trees that `diff -r` shows differ only in `skills/hypothesis-driven-analysis/SKILL.md`, with the two sha256s in the conditions table.
-- `uv run scripts/run_integration.py --cell R1 --host claude --condition plugin --name dry --out "$OUT/dry" --dry-run` (and the same for R2) prints the same `sha256=` in both checkouts, equal to the #115 prereg's.
+- `uv run scripts/run_integration.py --cell R1 --host claude --condition plugin --name dry --out "$OUT/dry" --model sonnet --dry-run` (and the same for R2) prints the same `sha256=` in both checkouts, equal to the #115 prereg's.
 - `shasum -a 256` of both prompt files and the three fixtures equals the Cells table, in both checkouts.
 - In every S9-family canary manifest, `skill_files_sha256` matches the condition's `SKILL.md` digest and `fixture_files_sha256` matches the Cells table.
 
