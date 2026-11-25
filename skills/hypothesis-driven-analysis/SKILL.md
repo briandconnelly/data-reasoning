@@ -335,7 +335,7 @@ Report the answer first, then the per-hypothesis evidence summary, then limitati
 
 State the decision or knowledge goal, the estimand, its population, the uncertainty method, and the practical threshold that would change the decision; no competing hypotheses are required.
 The gates, the data rules, and the full route's data-validity obligations apply at the estimate's grain: the coverage matrix and its baseline (§ Plan), and completeness semantics and the confound check (§ Analysis).
-Randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias the comparison.
+Randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias the comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded.
 For incomplete binary outcomes with known arm totals, bound the completed-sample difference (B minus A): unknowns in B as failures and in A as successes for the lower bound, reversed for the upper.
 State which conclusions survive both the missing outcomes and sampling uncertainty.
 
