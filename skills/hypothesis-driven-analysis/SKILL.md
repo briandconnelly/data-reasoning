@@ -41,9 +41,9 @@ Deferring to it wholesale is how a multi-explanation question gets answered as a
 Ask what assigned the exposure, and route on what you are *told* assigned it — not on what the phrasing implies.
 For explicitly randomized comparisons, use **estimation**, or `mini` for a stated claim, subject to the coverage and completeness checks in [Estimation Route](#estimation-route).
 "Is B better than A, and by how much" over an assignment you have been told was random is an estimation task, however causal it sounds — the design already did the discriminating that the loop would otherwise have to do.
-For any other known assignment mechanism without an identifying design, including self-selection or targeted assignment, route **full** to investigate rival explanations.
 A stated quasi-experimental structure — an as-if-random natural experiment, a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: before estimating anything from it, load `causal-identification-review` in the same turn (on Claude Code, call the `Skill` tool with `data-reasoning:causal-identification-review`; on a host that exposes skills as files, read its `SKILL.md`), and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
 A before/after or treated-vs-untreated comparison the user implies ("we rolled it out here, not there") is such a structure even when nobody calls it a design.
+For any other known assignment mechanism without an identifying design, including self-selection or targeted assignment, route **full** to investigate rival explanations.
 "How much did launching the campaign improve conversion" is the unidentified-assignment case wearing the identified one's clothes: a causal question carrying a number, with no design behind it.
 The loop's job there is not to produce the number — it is to establish that the number is not available from this data, and to report what is.
 
@@ -338,7 +338,8 @@ State the estimand, the population it describes, the uncertainty method, and the
 No competing hypotheses are required.
 The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix and its baseline in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
 Stated randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias a randomized comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded against those obligations.
-For incomplete binary outcomes, use the assigned counts to bound the completed-sample contrast when possible, and state which conclusions survive both the missing outcomes and sampling uncertainty.
+For incomplete binary outcomes with known arm totals, bound the completed-sample difference (B minus A) by treating every unknown in B as a failure and every unknown in A as a success for the lower bound, then reversing those assignments for the upper bound.
+State which conclusions survive both the missing outcomes and sampling uncertainty.
 
 ## Record Delivery
 
