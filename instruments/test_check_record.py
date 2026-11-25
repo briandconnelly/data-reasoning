@@ -475,16 +475,14 @@ def test_comment_stripping_preserves_line_count():
 
 
 def test_unclosed_html_comment_hides_everything_after_it():
-    """Unlike an unterminated fence, an unclosed comment gets no raw-body
-    fallback in detect(): headings only after it leave the file unrecognized."""
     rec = (
         "# Decision Record: d\n\n<!--\n## Decision frame\n\nx\n\n## Decision-state model\n\nx\n\n"
         "## Evidence and update\n\nx\n\n## Robustness\n\nx\n\n## Verdict\n\n- Verdict: robust\n\n"
         "## Handoff\n\nx\n"
     )
-    assert cr.detect(rec) is None
-    with pytest.raises(ValueError, match="not a recognized record"):
-        cr.check(rec)
+    assert cr.detect(rec) == "decision"
+    findings = cr.check(rec)
+    assert any("required section missing: ## Verdict" in f for f in findings)
 
 
 def test_comment_opener_inside_a_fence_is_code_not_a_comment():
@@ -784,13 +782,13 @@ def test_comment_delimiter_inside_inline_code_is_visible_text():
         "- The token `<!--` opens a comment.\n\n"
         "## Hypotheses\n\n| id |\n| --- |\n| H1 |\n"
     )
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" in visible, visible
 
 
 def test_a_real_comment_after_inline_code_still_hides_the_rest():
     doc = "# Investigation: x\n\n- token `<!--` here\n<!--\n## Hypotheses\n"
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" not in visible, visible
 
 
@@ -832,13 +830,13 @@ def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
     """CommonMark forbids a backtick in a backtick fence's info string, so
     the line is ordinary text and the content after it stays visible."""
     doc = "# Investigation: x\n\n## Problem\n\n```bad`info\n\n## Hypotheses\n\n- a\n"
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" in visible, visible
 
 
 def test_a_well_formed_unclosed_fence_still_hides_what_follows():
     doc = "# Investigation: x\n\n## Problem\n\n```python\n\n## Hypotheses\n\n- a\n"
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" not in visible, visible
 
 
@@ -1862,3 +1860,9 @@ def test_heading_only_after_an_unterminated_fence_is_still_a_record():
     text = "# Investigation: x\n\n```\nnever closed\n\n## Problem\n"
     assert cr.detect(text) == "ledger"
     assert any("fence" in f for f in cr.check(text))
+
+
+def test_comment_opener_inside_a_closed_fence_does_not_trigger_the_fallback():
+    note = "# Investigation: sync notes\n\n```markdown\n<!--\n## Tests\n```\n\nNo actions.\n"
+    assert cr._strip_hidden(note)[1:] == (False, False)
+    assert cr.detect(note) is None

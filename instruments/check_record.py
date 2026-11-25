@@ -364,13 +364,14 @@ def _opens_fence(line: str, m) -> bool:
     return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
 
 
-def _strip_hidden(text: str) -> tuple[str, bool]:
+def _strip_hidden(text: str) -> tuple[str, bool, bool]:
     """Blank out what a reader never sees — fenced code blocks and HTML
     comments — in one pass, so the two cannot hide each other's delimiters.
     Line count is preserved. Per CommonMark: a fence closes only on a same-
     character run at least as long as the opener with nothing but whitespace
     after it; `<!--` inside a fence is code; a comment never closed runs to
-    the end of the document. Returns (body, fence_still_open_at_eof)."""
+    the end of the document. Returns
+    (body, fence_still_open_at_eof, comment_still_open_at_eof)."""
     out: list[str] = []
     fence: tuple[str, int] | None = None
     in_comment = False
@@ -400,7 +401,7 @@ def _strip_hidden(text: str) -> tuple[str, bool]:
         if opened:
             in_comment = True
         out.append(visible.rstrip())
-    return "\n".join(out), fence is not None
+    return "\n".join(out), fence is not None, in_comment
 
 
 # The colon must be present, either inside the emphasis ("**Verdict:**") or
@@ -493,10 +494,11 @@ def detect(text: str) -> str | None:
     """Kind of record, or None. A title signature alone is not enough: a
     user's own note titled `# Investigation: …` is not a ledger. The record
     must also carry at least one of its kind's required headings, visible to
-    a reader: one quoted inside a fence or an HTML comment does not count.
-    An unterminated fence blanks everything after it, so when one is open
-    at EOF and nothing visible corroborates, the raw body is searched
-    instead and check() then reports the open fence."""
+    a reader: one quoted inside a closed fence or closed HTML comment does
+    not count. An unterminated fence or comment blanks everything after it,
+    so when either is open at EOF and nothing visible corroborates, the raw
+    body is searched instead: a malformed real record stays recognized and
+    check() reports what it could not see (fail closed)."""
     text = strip_frontmatter(text)
     kind = title_kind(text.lstrip().split("\n", 1)[0])
     if kind is None:
@@ -506,8 +508,8 @@ def detect(text: str) -> str | None:
         body = "\n" + "\n".join(line.rstrip() for line in src.split("\n")) + "\n"
         return any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind])
 
-    visible, fence_open = _strip_hidden(text)
-    if has_heading(visible) or (fence_open and has_heading(text)):
+    visible, fence_open, comment_open = _strip_hidden(text)
+    if has_heading(visible) or ((fence_open or comment_open) and has_heading(text)):
         return kind
     return None
 
@@ -1175,7 +1177,7 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    body, unterminated_fence = _strip_hidden(text)
+    body, unterminated_fence, _ = _strip_hidden(text)
     # An unterminated fence blanks everything after it (including any
     # genuinely-present later sections), so completeness findings there
     # would fail correct work — treat the record as in-progress instead.
