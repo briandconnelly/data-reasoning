@@ -1,0 +1,22 @@
+{
+  "name": "X3-codex-none-1",
+  "cell": "X3",
+  "host": "codex",
+  "condition": "none",
+  "skills_ref": "95b03369ba2a6a3899580c3cc29bf0bef795b528",
+  "host_version": "codex-cli 0.172.0",
+  "requested_model": "gpt-6.2-sol",
+  "model": "gpt-6.2-sol",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 18,
+  "observed_route": [],
+  "ran_at": "2026-11-25T17:24:50+00:00",
+  "prompt_sha256": "bb80c360a92e3f7677a27c8af75cbac772ef93c93c9b601e86e5e9e2c3dae13b",
+  "fixture_sha256": {
+    "holdout_scores.csv": "139bb2c7f5a531be624bbd213f77dce571c1d9d9b70f01cdc23603473371ebce",
+    "models.md": "183710c26a152baccbc6069e23065261aca3eca0d6eb77ee6478bef57ede01eb"
+  },
+  "workspace_files": [],
+  "data_modified": false
+}

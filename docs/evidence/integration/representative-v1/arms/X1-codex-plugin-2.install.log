@@ -1,0 +1,9 @@
+$ codex plugin marketplace add /var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-plugin-87z22r_p/data-reasoning
+exit=0
+Added marketplace `data-reasoning` from /private/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-plugin-87z22r_p/data-reasoning.
+Installed marketplace root: /private/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-plugin-87z22r_p/data-reasoning
+
+$ codex plugin add data-reasoning@data-reasoning
+exit=0
+Added plugin `data-reasoning` from marketplace `data-reasoning`.
+Installed plugin root: /private/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-codex-home-l09qxv04/plugins/cache/data-reasoning/data-reasoning/0.5.0

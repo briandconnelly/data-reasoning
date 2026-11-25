@@ -1,0 +1,1 @@
+We have to pick one supplier for all 100,000 units next year: stay with Acme or move to Brightline. Brightline's trial batch, our Acme history, and the contract terms are in `data`. Brightline's trial had fewer defects than Acme usually has, and it is all we know about Brightline. Which supplier should we sign with?

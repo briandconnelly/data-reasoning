@@ -183,7 +183,9 @@ Three pieces of evidence were named as owed by the external review of 2026-09-15
   The catalogs' rule that a baseline already passing means the scenario is too easy finds failures; it cannot estimate practical benefit, because ordinary tasks a baseline already handles still pay the skill's context and ceremony.
   The representative suite keeps such tasks, and scores accuracy, unnecessary ceremony, latency, and total context cost.
   Preregistered 2026-11-24 (`docs/evidence/integration/representative-v1/prereg.md`, issue #115): five runnable cells (two routine, three challenge), their fixtures with validators that fail on degenerate copies, and harness support in `scripts/run_integration.py`.
-  Not yet built: the two representative cells, R3 and R4, which await real anonymized user requests from the owner; no arm, canary included, has run.
+  First run 2026-11-25 (`docs/evidence/integration/representative-v1/results.md`): 40 scored arms, Codex at n=3 per condition and Claude Code at one arm per condition, with a blind scorer agreeing on all 40.
+  On Codex the plugin and no-plugin conditions both passed four of five cells 3/3, and the fifth (two churn models) shows a directional lift in what the answer says about the rejected metric, not in which model it recommends; Claude Code loaded no skill in any plugin arm and has no verdict.
+  Not yet built: the two representative cells, R3 and R4, which await real anonymized user requests from the owner.
 - Measured simplification experiments: the repository's checkers preserve wording and provenance, but nothing yet establishes whether each accumulated rule still earns its context cost.
 
 Cell-level debts are the `unrun`, "no arm", and `withdrawn` rows above.

@@ -1,0 +1,6 @@
+**Stay with Acme.** With all 100,000 units committed to one supplier, I’d prioritize limiting exposure to the $1 million penalty. Brightline’s trial suggests lower returns costs, but one batch gives too little evidence about how it will perform across a full production year.
+
+- **Acme** had 1,000 defects in 50,000 units over 12 months, a 2.00% defect rate. At that rate, next year’s returns would cost **$30,000**. [Acme history](data/acme_history.csv)
+- **Brightline** had 1 defect in 150 units, a 0.67% defect rate. If that rate holds, returns would cost **$10,000**, saving **$20,000**. At 3,001 defects, just over the contract threshold, returns and the penalty would total **$1,045,015**. [Brightline trial](data/brightline_trial.csv) · [Contract terms](data/contract_terms.md)
+
+If Acme holds at 2% and Brightline either matches its trial rate or just crosses the penalty threshold, a **1.93% chance of the penalty** wipes out Brightline’s expected savings. That’s a break-even scenario. The trial alone can’t establish Brightline’s annual penalty probability, and Acme’s history is also an assumption about next year. The recommendation rests on limiting the downside of a year-long commitment. [Decision record](decision-record.md)

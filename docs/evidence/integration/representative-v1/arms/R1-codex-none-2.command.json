@@ -1,0 +1,16 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-arm-74sem7cb",
+  "argv": [
+    "codex",
+    "exec",
+    "--json",
+    "--skip-git-repo-check",
+    "-s",
+    "workspace-write",
+    "-m",
+    "gpt-6.2-sol",
+    "-C",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-arm-74sem7cb",
+    "<prompt.txt>"
+  ]
+}
