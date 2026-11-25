@@ -9,9 +9,13 @@ Two suites share this harness, and each preregistration defines its cells,
 conditions, and scoring; this script only runs and archives.
 
 - I1-I4: the full-catalog suite (issue #96),
-  `docs/evidence/integration/2026-11-17-full-catalog/prereg.md`. Its behaviour
-  is unchanged by the representative suite: absolute data paths in the prompt,
-  a workspace named after the arm, the host's model alias.
+  `docs/evidence/integration/2026-11-17-full-catalog/prereg.md`. Since issue
+  #128 these cells also get a relative `data/` path and a generated workspace
+  directory named `int-arm-*`, so the arm's name and condition never reach the
+  prompt or that directory name (the 2026-11-17 and 2026-11-18 runs predate
+  this); they keep the host's model alias. The workspace is created under the
+  system temp parent (`TMPDIR`), and its full path is the host's cwd: keeping
+  that parent free of labels is the operator's responsibility.
 - R1, R2, X1-X3: the representative suite (issue #115),
   `docs/evidence/integration/representative-v1/prereg.md`. Before any host
   call these cells check that the fixture, prompt, prereg, and harness match
@@ -148,10 +152,11 @@ Arm outputs under representative-v1/arms/ are deliberately outside it, so a
 replicate block runs without a commit after every arm."""
 
 
-def data_path(cell: str, root: Path) -> Path:
-    """What `{DATA}` renders as: relative for the representative suite, so the
-    workspace path (and any name in it) never reaches the prompt."""
-    return Path("data") if cell in REPRESENTATIVE else root / "data"
+def data_path(cell: str, root: Path) -> Path:  # noqa: ARG001 (interface kept for callers)
+    """What `{DATA}` renders as: relative for every cell, so the workspace path
+    (and any name in it) never reaches the prompt.
+    Both arguments are ignored since issue #128."""
+    return Path("data")
 
 
 def file_digests(fixture: Path) -> dict[str, str]:
@@ -487,8 +492,7 @@ def main(argv: list[str] | None = None) -> None:
     ).stdout.strip()
     args.out.mkdir(parents=True, exist_ok=True)
     base = args.out / args.name
-    prefix = "int-arm-" if representative else f"int-{args.name}-"
-    root = Path(tempfile.mkdtemp(prefix=prefix))
+    root = Path(tempfile.mkdtemp(prefix="int-arm-"))
     data = root / "data"
     shutil.copytree(CELLS[args.cell][0], data)
     integrity = {}

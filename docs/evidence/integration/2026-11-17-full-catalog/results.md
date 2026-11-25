@@ -61,3 +61,11 @@ For Claude Code the handoff remains unmeasured in practice: the one gain observe
 The route extractor this run used also searched Codex command output, where one skill's text can name the others.
 After that was fixed, all 12 Codex plugin transcripts here were re-extracted from command text alone: every route equals the one in its manifest, so the Codex route counts above stand, including every skill of the designed route read in 9 of 9 I2–I4 arms.
 The over-count appeared only on later transcripts (seven arms of `docs/evidence/integration/representative-v1/`).
+
+## Note, 2026-11-25: the prompt named the condition (#128)
+
+Every one of the 56 archived prompts here (`*.prompt.txt`: 48 scored arms and 8 canaries) shows an absolute data path inside a workspace named after the arm, `int-<name>-*`.
+The name carries the condition, so `plugin` appears in the path of all 32 plugin-condition prompts and `none` in all 24 no-plugin prompts.
+The two conditions therefore differed in a second way besides the plugin: each prompt showed which condition it was in.
+No count above changes; read each plugin-versus-none contrast here with that second difference in mind.
+The harness no longer does this, so I-cell runs after this date see a neutral `int-arm-*` workspace and a relative `data` path.
