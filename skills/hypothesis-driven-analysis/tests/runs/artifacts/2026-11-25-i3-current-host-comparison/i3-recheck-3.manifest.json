@@ -1,0 +1,16 @@
+{
+  "name": "i3-recheck-3",
+  "cell": "I3",
+  "host": "claude",
+  "condition": "plugin",
+  "skills_ref": "746d10b7a6f23730dc8f0be6af61dac5a987a4ac",
+  "host_version": "2.1.332 (Claude Code)",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "duration_s": 48,
+  "observed_route": [
+    "hypothesis-driven-analysis",
+    "causal-identification-review"
+  ],
+  "ran_at": "2026-11-25T02:23:22+00:00"
+}

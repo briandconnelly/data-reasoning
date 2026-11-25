@@ -1,0 +1,21 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-i3-dev-pebybiuy",
+  "argv": [
+    "claude",
+    "-p",
+    "<prompt.txt>",
+    "--model",
+    "sonnet",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--allowedTools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--plugin-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-plugin-dppcx7j_/data-reasoning"
+  ]
+}
