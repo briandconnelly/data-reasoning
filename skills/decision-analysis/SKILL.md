@@ -84,7 +84,7 @@ Record provenance for every source, including the source of every number the rec
 This section is how the skill coexists with `hypothesis-driven-analysis`'s rule "Do not invent numeric confidence values": every number here is either sourced or explicitly hypothetical, and the two are never mixed.
 
 Every prior, likelihood ratio, loss, threshold, and signal-model number carries exactly one provenance class: `user-elicited`, `externally-sourced`, `estimated-from-data-in-hand`, or `sensitivity-only`.
-A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), and the voi route's bounds under § The VoI Route — never in Evidence and update as an update, and never reported as a probability the analysis holds.
+A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), a resolved record's surviving-state losses and difference (where the comparison below returns the choice to the owner), and the voi route's bounds under § The VoI Route — never in Evidence and update as an update, and never reported as a probability the analysis holds.
 An `externally-sourced` or `estimated-from-data-in-hand` likelihood ratio names its source, reference class, and conditioning set; a number that cannot name them is `sensitivity-only`, whatever it looks like.
 
 Priors are robustness-first: the analysis may posit reference or skeptical priors as `sensitivity-only`, and elicitation refines the prior class; it never gates the sensitivity analysis.
@@ -121,12 +121,13 @@ A record where both the prior and the losses flip the action reports both crosso
 
 A state is eliminated only when a structural exclusion in the stated model (a logical or mechanical reason, never a frequency) makes the whole accepted evidence impossible under that state while it stays possible under the other; the record is then `resolved`, outside the odds form, and likelihood ratios stay strictly positive in every record.
 If doubt about an exclusion assumption leaves the evidence possible under both states, it is not elimination: use a supportable ratio, or the missing-ratio form.
-Zero events in a finite sample eliminates nothing unless the model requires an event on every trial under one state, and an upper confidence bound on a rate is not a likelihood.
+Zero events in a finite sample eliminates a state only when the stated model makes the complete zero-event observation impossible under it.
+An upper confidence bound on a rate is not a likelihood.
 Evidence impossible under both states reaches no verdict: the disposition is model review, because the binary model or its exclusion assumptions are wrong.
 `resolved` is decided before the ordered rule, which then does not run; only surviving-state losses enter the comparison below, so `dominated` never fires on losses in the eliminated state.
 
-The surviving-state comparison reads the loss difference: the first row of the Surviving-state losses table minus the second, computed jointly when both losses depend on one uncertain quantity, and otherwise the endpoint interval [low(first) − high(second), high(first) − low(second)].
-With belief-grade provenance, a difference whose high endpoint is below 0 recommends the first row's action, one whose low endpoint is above 0 the second row's, and exactly the point 0 `no preference`; any other difference, including one reaching or spanning 0 and `none supported`, returns the choice to the owner.
+The surviving-state comparison reads the loss difference: the first row of the Surviving-state losses table minus the second, computed jointly only when both losses depend on one uncertain quantity, which Conditions then names, and otherwise the endpoint interval [low(first) − high(second), high(first) − low(second)].
+With belief-grade provenance on both losses and the difference, a difference whose high endpoint is below 0 recommends the first row's action, one whose low endpoint is above 0 the second row's, and exactly the point 0 `no preference`; any other difference, including one reaching or spanning 0 and `none supported`, returns the choice to the owner.
 A structural exclusion licenses causal wording only for the negation of the excluded causal proposition, and only when every causal path it names requires a condition the accepted evidence shows absent; what did cause the outcome stays an identification gap, and asserting a cause needs an ordinary licensing basis.
 
 Evidence items multiplied together state why they are conditionally independent given each state, or are combined into one item; sequential multiplication of unconditional likelihood ratios double-counts shared evidence.

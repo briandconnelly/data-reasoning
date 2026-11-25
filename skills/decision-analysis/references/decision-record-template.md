@@ -171,12 +171,11 @@ When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's
 
 The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
 
-The resolved record carries none of the decide record's odds-only fields, and exactly one `- Verdict:` line, reading `resolved` bare.
-Its Resolution labels appear once each, in the skeleton's order.
-Excluded state and Surviving state each read `proposition true` or `proposition false`, differing; Surviving state reads `none` only on a model-review draft (`../SKILL.md` § The Decide Route).
-The Observations table has exactly the columns `observation` and `source`, every cell filled.
-The Surviving-state losses table has exactly the columns `action`, `loss`, and `provenance`, in that order, and one row per action written as Actions writes it; a loss is a nonnegative number or `<low>–<high>` range, and a loss nobody supplied writes `none supported` in both its loss and provenance cells.
-The Surviving-state loss difference is the first losses row's loss minus the second's, a signed decimal (`-1`, `0`, `2.5`) or `<low> to <high>` range with an ASCII `-` sign, followed by one provenance suffix; it reads `none supported`, bare, exactly when a losses row does.
+The resolved record's Verdict line is exactly `- Verdict: resolved`, and its Resolution labels appear once each, in the skeleton's order.
+Excluded state and Surviving state each read `proposition true` or `proposition false`; Surviving state reads `none` only on a model-review draft (`../SKILL.md` § The Decide Route).
+The Observations table has exactly the columns `observation` and `source`, one observation per row, every cell filled.
+The Surviving-state losses table has exactly the columns `action`, `loss`, and `provenance`, in that order, one row per action written as Actions writes it; a loss is a nonnegative number or `<low>–<high>` range, and an unsupplied loss writes `none supported` in both its loss and provenance cells.
+The Surviving-state loss difference is a signed decimal (`-1`, `0`, `2.5`) or a `<low> to <high>` range, with an ASCII `-` sign and one provenance suffix, or `none supported` bare; what it is the difference of is `../SKILL.md` § Numeric Policy's.
 The four prose slots never read `none`.
 
 The VoI record's slots are not bare-value slots: `../SKILL.md` § The VoI Route says what each carries, including which VoI numbers carry a provenance class and where a missing input's explanation goes (the Value calculation slot, whose continuation paragraphs may follow the line).
