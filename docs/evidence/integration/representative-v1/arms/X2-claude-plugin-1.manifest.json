@@ -1,0 +1,25 @@
+{
+  "name": "X2-claude-plugin-1",
+  "cell": "X2",
+  "host": "claude",
+  "condition": "plugin",
+  "skills_ref": "95b03369ba2a6a3899580c3cc29bf0bef795b528",
+  "host_version": "2.1.332 (Claude Code)",
+  "requested_model": "claude-sonnet-5-5",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 30,
+  "observed_route": [],
+  "ran_at": "2026-11-25T17:26:43+00:00",
+  "prompt_sha256": "af193ef90ea11d5a3e3f95a5610e329ba6107de30889742a4ee92ea46d890319",
+  "fixture_sha256": {
+    "analyst_model.py": "e2a1dde3f836d59fbde611aa369f47be00c93fa9f142a7ea863fc273892ada34",
+    "analyst_notes.md": "e4fd4e40fe56ac4ecadfe7ea5ae6ed849febf92d0a63e2062c70e8690793db52",
+    "daily_tickets.csv": "bc7a603a1eb8f797aa4e7ffc7f82b82b2049489f2ef0f2738db3a31cbd1369bd"
+  },
+  "workspace_files": [
+    "data/__pycache__/analyst_model.cpython-315.pyc"
+  ],
+  "data_modified": true
+}

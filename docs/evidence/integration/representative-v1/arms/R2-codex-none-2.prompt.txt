@@ -1,0 +1,1 @@
+Using `data/orders.csv`, what was the average order total at each store in February 2026? An order's total is unit_price times quantity.

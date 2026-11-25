@@ -1,0 +1,21 @@
+{
+  "name": "R1-codex-plugin-2",
+  "cell": "R1",
+  "host": "codex",
+  "condition": "plugin",
+  "skills_ref": "95b03369ba2a6a3899580c3cc29bf0bef795b528",
+  "host_version": "codex-cli 0.172.0",
+  "requested_model": "gpt-6.2-sol",
+  "model": "gpt-6.2-sol",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 13,
+  "observed_route": [],
+  "ran_at": "2026-11-25T17:29:09+00:00",
+  "prompt_sha256": "7acbe2b4590cc4e2f4e7503b3190942777a49964421e2fa6f97be90f9c3a2c03",
+  "fixture_sha256": {
+    "orders.csv": "8828d775e7566bd80f44da81acfbfd205b9f75aa78a1556e3037503fcbf9e648"
+  },
+  "workspace_files": [],
+  "data_modified": false
+}

@@ -1,0 +1,28 @@
+{
+  "name": "X1-codex-plugin-1",
+  "cell": "X1",
+  "host": "codex",
+  "condition": "plugin",
+  "skills_ref": "95b03369ba2a6a3899580c3cc29bf0bef795b528",
+  "host_version": "codex-cli 0.172.0",
+  "requested_model": "gpt-6.2-sol",
+  "model": "gpt-6.2-sol",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 56,
+  "observed_route": [
+    "decision-analysis",
+    "hypothesis-driven-analysis"
+  ],
+  "ran_at": "2026-11-25T17:28:06+00:00",
+  "prompt_sha256": "b6533ba6367afa8747308af958ccdfb722cf81b46dff4784abdd6e38b931dfe5",
+  "fixture_sha256": {
+    "acme_history.csv": "191979a86e7aac3b2dfced353f3c4e0182fbcc24ab73861d456fd8531b049a3c",
+    "brightline_trial.csv": "5fecbcae033bc3660824b255eb483b7a5f54c527b9abf600326ba886a0d71164",
+    "contract_terms.md": "5052ba4cc56c9b103b341b7ca6538c13325281b15385a24d053b32ee7160c524"
+  },
+  "workspace_files": [
+    "supplier-decision.md"
+  ],
+  "data_modified": false
+}

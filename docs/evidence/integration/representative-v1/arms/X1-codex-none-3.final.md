@@ -1,0 +1,5 @@
+**Sign with Acme for all 100,000 units.** Brightline’s trial had a lower defect rate, but one 150-unit batch leaves enough uncertainty about full-year quality to outweigh the likely savings on returns.
+
+Acme recorded **1,000 defects in 50,000 units (2.00%)** across 12 months. Brightline recorded **1 defect in 150 units (0.67%)**. If those observed rates held next year, Brightline would save about **$20,000** in returns. That saving would be erased by even a **2% chance** of triggering the **$1 million penalty** for more than 3,000 defects. [Acme history](data/acme_history.csv) · [Brightline trial](data/brightline_trial.csv) · [Contract terms](data/contract_terms.md)
+
+Assuming each supplier has a stable defect rate and the samples are representative, two standard Bayesian priors put Brightline’s chance of triggering the penalty at **2.8% to 5.7%**, with expected returns and penalties totaling **$43,000 to $77,000**. The same model puts Acme at about **$30,000**, with a negligible chance of triggering the penalty. Those estimates depend on the model, and a single trial batch gives no way to measure how Brightline’s quality varies across production runs.

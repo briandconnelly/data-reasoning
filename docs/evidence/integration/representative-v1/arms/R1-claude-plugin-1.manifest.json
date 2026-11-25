@@ -1,0 +1,21 @@
+{
+  "name": "R1-claude-plugin-1",
+  "cell": "R1",
+  "host": "claude",
+  "condition": "plugin",
+  "skills_ref": "95b03369ba2a6a3899580c3cc29bf0bef795b528",
+  "host_version": "2.1.332 (Claude Code)",
+  "requested_model": "claude-sonnet-5-5",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 6,
+  "observed_route": [],
+  "ran_at": "2026-11-25T17:25:50+00:00",
+  "prompt_sha256": "7acbe2b4590cc4e2f4e7503b3190942777a49964421e2fa6f97be90f9c3a2c03",
+  "fixture_sha256": {
+    "orders.csv": "8828d775e7566bd80f44da81acfbfd205b9f75aa78a1556e3037503fcbf9e648"
+  },
+  "workspace_files": [],
+  "data_modified": false
+}
