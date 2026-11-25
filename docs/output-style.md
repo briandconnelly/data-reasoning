@@ -7,7 +7,8 @@ It supplies presentation and answer hygiene, not analysis method.
 The skills decide what an answer must disclose and what a report must contain; the style yields to a skill's report format, its ordering, and its placement rules wherever one applies.
 
 It adds no record-keeping to hypothesis-driven-analysis's ceremony-free `direct` route, but it does shape a direct answer: a source-and-freshness footer, an offer of the query.
-Whether the split between the two holds under a real run is untested; treat it as a design claim, like the routing and handoffs in [Evidence status](evidence-status.md).
+Whether the split between the two holds under a real run is untested; treat it as a design claim.
+What has been measured for routing and handoffs is on [Evidence status](evidence-status.md).
 
 Select it with `/output-style data-reasoning:Data Answer`, or through `/config` → Output style.
 A plugin style is namespaced by its plugin, so the bare name `Data Answer` is rejected as unknown.

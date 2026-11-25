@@ -6,10 +6,21 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Added
+
+- The evidence page opens with a capability map: for each kind of question, whether the plugin offers a measured workflow, unmeasured guidance, or a handoff out of scope, with the host, model, and revision of each measured claim and a pointer to the run record, skill section, or decision record behind it.
+
+### Changed
+
+- The evidence page reports the 2026-11-18 and 2026-11-25 Claude Code handoff runs beside the 2026-11-17 run, per cell, host version, and revision, and no longer calls the Claude Code handoff unverified.
+  The installing guide notes that exploration's routing has also been measured against the full catalog.
+
 ### Fixed
 
 - Explicitly randomized comparisons can report the effect of assignment directly after checking outcome coverage.
   The routing instructions clarify that as-if-random natural experiments require identification review.
+- The record validator no longer treats a required heading that appears only inside a closed fenced block or a closed HTML comment as proof that a note is a record.
+  A heading after a fence or comment left open at the end of the file still counts, so the validator reports the unfinished block instead of going silent.
 
 ## [0.5.0] - 2026-11-18
 
