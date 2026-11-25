@@ -1,7 +1,7 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm.
+**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm; DA-S12 and DA-S13 (added 2026-11-24) are unrun.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
 Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
@@ -176,3 +176,27 @@ Added 2026-11-17 for #94.
 - [ ] Each record passes `check_decision.py`, states full cost as `20 USD`, and reproduces its row's reasoning and verdict.
 - [ ] The conflicting-prior case reports the failed check in Value calculation and assigns no gross or net value to the pull.
 - [ ] Baseline failure to watch for: the agent buys the report in the conflicting-prior case on a spurious $40 gross value.
+
+### DA-S12 — an observation impossible under one state (ruled-out state)
+
+**Status:** unrun; added 2026-11-24 for issue #114 and `decisions/008`, which is proposed, so no wording it would measure exists yet.
+**Prompt:** "We suspect last night's data loss came from the new compaction job in build 412, and we must choose by noon between rolling back to build 411 and keeping 412 with a hotfix. Here is the incident packet (`{FIXTURE_PATH}`). Roll back or hotfix?"
+**Fixture sketch:** to be generated with a validator; a packet whose verified, checksummed audit log shows the loss on a host that never ran build 412, with a build manifest showing the compaction job exists only in 412, so the loss is impossible if the compaction job caused it and possible under the alternative; a four-cell loss table supplied by the owner.
+**Expected:** decide route; the record states the eliminating observation, why it is impossible under the eliminated state, and why the observation is not in doubt, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
+
+- [ ] No evidence row carries an invented small positive ratio standing in for impossibility.
+- [ ] The decisive observation is not discarded as `none supported`.
+- [ ] The recommendation follows from the losses in the surviving state, with the eliminating observation cited by file.
+- [ ] Baseline expectation: writes a token ratio such as 0.01, or drops the observation and returns an undecided record.
+
+### DA-S13 — zero events in a finite sample (must keep its uncertainty)
+
+**Status:** unrun; added 2026-11-24 as DA-S12's pair for issue #114 and `decisions/008`.
+**Prompt:** "The vendor's new disk firmware has shown zero corruption events across the hosts we piloted it on. Should we roll it out fleet-wide this week or keep piloting another month? Packet: `{FIXTURE_PATH}`."
+**Fixture sketch:** to be generated with a validator; a pilot log with zero corruption events in a stated finite number of host-weeks, a sourced historical corruption rate for the old firmware, and owner-supplied losses; nothing in the packet makes corruption mechanically impossible under the new firmware.
+**Expected:** decide route; the zero count is recorded as finite evidence with a strictly positive ratio and its reference class, never as elimination, and the sweep and verdict rules run as usual.
+
+- [ ] No ratio of `0` and no claim that corruption is ruled out; the record states that zero of n bounds the rate only from above.
+- [ ] Any upper bound the record states recomputes from the pilot's n (for 95%, 1 − 0.05^(1/n)).
+- [ ] The verdict comes from the existing ordered rule in `../SKILL.md` § Numeric Policy, not from a resolved-proposition form.
+- [ ] Baseline expectation: reads "zero events" as "the firmware does not corrupt" and recommends the rollout unconditionally.
