@@ -8,7 +8,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Added
 
-- The evidence page opens with a capability map: for each kind of question, whether the plugin offers a measured workflow, unmeasured guidance, or a handoff out of scope, with a pointer to the row, skill section, or decision record behind it.
+- The evidence page opens with a capability map: for each kind of question, whether the plugin offers a measured workflow, unmeasured guidance, or a handoff out of scope, with the host, model, and revision of each measured claim and a pointer to the run record, skill section, or decision record behind it.
 
 ### Changed
 
