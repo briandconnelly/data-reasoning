@@ -1891,3 +1891,18 @@ def test_heading_made_by_removing_an_inline_comment_does_not_count():
 def test_inline_comments_before_fence_openers_keep_in_progress_handling():
     text = "# Investigation: x\n\n<!-- note -->~~~\n\n## Problem\n\n(pending)\n\n## Aside\n\n<!-- note -->~~~\n"
     assert cr.check(text) == []
+
+
+def test_even_backslash_run_before_a_comment_opener_does_not_escape_it():
+    assert cr.detect("# Investigation: x\n\n\\\\<!--\n## Tests\n-->\n") is None
+
+
+def test_comment_reopened_on_the_closing_line_hides_its_heading():
+    assert cr.detect("# Investigation: x\n\n<!--\nfirst\n--> <!-- second\n## Tests\n-->\n") is None
+
+
+def test_comment_reopened_on_the_closing_line_and_left_open_fails_closed():
+    text = "# Investigation: x\n\n<!--\nfirst\n--> <!-- second\n## Tests\n"
+    reopened_on = text.split("\n").index("--> <!-- second")
+    assert cr._strip_hidden(text)[3] == reopened_on
+    assert cr.detect(text) == "ledger"

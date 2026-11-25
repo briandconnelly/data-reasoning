@@ -356,6 +356,7 @@ MIN_TABLE_ROWS = 2  # header + at least one data row
 FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 CELL_SPLIT = re.compile(r"(?<!\\)\|")
 INLINE_COMMENT = re.compile(r"<!--.*?-->")
+ESCAPED_LT = re.compile(r"(?<!\\)((?:\\\\)*)\\<")
 
 
 def _opens_fence(line: str, m) -> bool:
@@ -390,9 +391,17 @@ def _strip_hidden(text: str) -> tuple[str, bool, bool, int | None]:
             out.append("")
             continue
         if in_comment:
-            out.append("")
-            if "-->" in line:
-                in_comment = False
+            close = line.find("-->")
+            if close == -1:
+                out.append("")
+                continue
+            # The rest of the closing line is ordinary text and may open
+            # another comment.
+            visible, opened = _strip_comment(line[close + 3 :])
+            in_comment = opened
+            if opened:
+                opened_at = i
+            out.append(visible.rstrip())
             continue
         m = FENCE.match(line)
         if m and _opens_fence(line, m):
@@ -472,8 +481,9 @@ def _mask_code_pipes(line: str) -> str:
 def _strip_comment(line: str) -> tuple[str, bool]:
     """Drop HTML comments a reader never sees, ignoring `<!--` and `-->` that
     Markdown renders as code. Returns (visible, comment_left_open)."""
-    # A backslash-escaped `\<` is literal text, not a comment opener.
-    masked = _blank_code_spans(line, "\x01").replace("\\<", "\x01\x01")
+    # `<` after an odd run of backslashes is escaped literal text, not a
+    # comment opener; an even run escapes only the backslashes themselves.
+    masked = ESCAPED_LT.sub(lambda m: m.group(1) + "\x01\x01", _blank_code_spans(line, "\x01"))
     for m in reversed(list(INLINE_COMMENT.finditer(masked))):
         line = line[: m.start()] + line[m.end() :]
         masked = masked[: m.start()] + masked[m.end() :]
