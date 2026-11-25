@@ -50,6 +50,8 @@ Where results.md is coarser than the transcripts:
 - No memo in I4 uses the decision-record template's blocks, so the "memo" results.md counts as the DA record is not one in template form.
 
 Nothing in these arms was retained in the workspace except the memos, so on this evidence "retained" and "pointed" are almost empty columns and "created" is where the arms actually differ.
+The arms that wrote under /tmp were following the shipped default: the ledger and exploration-log templates name scratch space as the default location (`skills/hypothesis-driven-analysis/references/ledger-template.md` and `skills/exploratory-data-analysis/references/exploration-log-template.md`, each in its opening lines).
+The empty "retained" column is therefore not evidence of an arm disobeying the skills.
 
 `docs/evidence/integration/2026-11-18-handoff-fix/results.md` reran Claude Code only; its I4 arms took the designed route 0/3 and loaded no skill in 3/3 (line 16), so it is no evidence about records on I4.
 
@@ -77,9 +79,11 @@ These stay in force under either position below, and this record does not restat
 
 ## Positions
 
-*Proposed: on a route that already requires a record, the record is owed as a file that is created before the work it governs and that the user can retrieve afterwards.*
+*Proposed: on a route that already requires a record, the record is owed in the form and at the time its owning route sets, and a record that is file-based under its route is also owed retrievable afterwards.*
+The form and timing stay with the owning route, including the forms that are not files: the mini route's inline one-paragraph ledger (`skills/hypothesis-driven-analysis/references/ledger-template.md` § Mini Route Template) and the response-text precommitments the EDA and DA § Degraded Modes allow without file tools.
 A plan written before the results is the point of those skills; a memo assembled afterwards cannot show that the plan preceded the results, however good the memo is.
-A scratch-only record — written to a temporary directory, never retained in the workspace and never pointed to — does not meet this, even where a route leaves delivery open, because nobody but the run can check its ordering.
+The new part is retrievability, and only for file-based records: a file written to a temporary directory, never retained in the workspace and never pointed to, would not meet it, because nobody but the run can check its ordering.
+This goes beyond the shipped instructions, which make scratch the default location and whose § Record Delivery requires validation, not retention; an agent following them today can fail this proposal.
 A memo-only answer on such a route is scored as a record miss, separately from answer quality, and is not grounds for relaxing the rule.
 Beyond the obligations listed above, how much of a retained record the user is shown is left open.
 
@@ -110,6 +114,8 @@ That file lands with PR #125 (the #115 work), so this record must not merge befo
 - The timing boundary for "record written before results" has to be set per owning route: an upstream skill's computed results legitimately precede a downstream skill's record on a correct handoff (EDA results in `I2-codex-plugin-1.jsonl` around line 15 precede the HDA ledger at line 20).
   Its definition belongs in the preregistration, not here.
 - When first activation or a handoff is missed, is a record column not applicable under the observed route, or is there a separate measure of records owed under the designed route?
+- If the proposal is accepted, reconciling the owning instructions is outstanding work: the scratch-space default in `skills/hypothesis-driven-analysis/references/ledger-template.md` and `skills/exploratory-data-analysis/references/exploration-log-template.md`, and `scripts/shared-sections/record-delivery.md` (rendered into each SKILL.md's § Record Delivery), would need to say where a file-based record is kept or pointed to, in one home per decision 004.
+  That change is agent-read prose and owes measured arms under decision 001.
 - Is "retrievable" satisfied by a path reported in the final message to a file outside the workspace, or only by a file in the workspace?
 
 ## Reopening condition
@@ -121,4 +127,5 @@ Separately, a scoring method that can show ordering from the memo alone would re
 
 The record requirements and the reporting obligations live at the skill sections listed above.
 The scoring-column definitions live in the preregistration named in § Scoring columns.
-If this proposal is adopted unchanged, no skill text changes; if the alternative is adopted, the exemption gets one home in the skills, and this section points at it.
+If this proposal is adopted, its retrievability part needs skill-text changes that are not made here (see § Open questions for the owner), and this section then points at their home.
+If the alternative is adopted, the exemption gets one home in the skills, and this section points at it.
