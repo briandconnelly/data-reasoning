@@ -421,3 +421,161 @@ def test_codex_route_resolves_a_glob_anywhere_in_the_skill_path(command):
 def test_codex_route_ignores_a_glob_that_is_not_a_skill_read():
     out = "---\nname: decision-analysis\n---\n"
     assert ri.observed_route([_codex_cmd("ls data/*.csv; cat notes.md", out)], "codex") == []
+
+
+# Scratch capture and the named-path check (wave-2 preregistration,
+# docs/evidence/integration/2026-11-wave2/prereg.md § G).
+
+
+@pytest.fixture
+def temp_root(monkeypatch, tmp_path):
+    root = (tmp_path / "tmp").resolve()
+    root.mkdir()
+    monkeypatch.setattr(ri, "TEMP_ROOTS", (root,))
+    return root
+
+
+def _write(path: Path, text: str = "x\n") -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
+def test_scratch_capture_finds_a_mktemp_directory_known_only_from_output(temp_root, tmp_path):
+    # I4-codex-plugin-3 (2026-11-17) wrote "$D/ledger.md" after `mktemp -d` printed $D.
+    ledger = _write(temp_root / "assist.N7pl00" / "ledger.md", "# Investigation: x\n")
+    events = [
+        _codex_cmd('D=$(mktemp -d /tmp/assist.XXXXXX); echo "$D"', f"{ledger.parent}\n"),
+        _codex_cmd('cat > "$D/ledger.md" <<EOF'),
+    ]
+    paths = ri.mentioned_paths(events, "codex", "done")
+    assert ri.scratch_files(paths, tmp_path / "ws", since=0) == [ledger]
+
+
+def test_scratch_capture_skips_workspace_harness_dirs_old_files_and_other_roots(
+    temp_root, tmp_path
+):
+    ws = temp_root / "int-arm-abc"
+    inside = _write(ws / "memo.md")
+    plugin = _write(temp_root / "int-plugin-x" / "data-reasoning" / "SKILL.md")
+    home = _write(temp_root / "int-codex-home-y" / "sessions" / "s.jsonl")
+    old = _write(temp_root / "old" / "ledger.md")
+    ri.os.utime(old, (1, 1))
+    outside = _write(tmp_path / "home" / "notes.md")
+    named = {str(p) for p in (inside, plugin, home, old, outside, temp_root)}
+    assert ri.scratch_files(named, ws, since=100) == []
+
+
+def test_scratch_capture_finds_a_claude_write_and_maps_its_bytes(temp_root, tmp_path):
+    log = _write(temp_root / "explore" / "exploration-log.md", "# Exploration: y\n")
+    use = {"type": "tool_use", "input": {"file_path": str(log), "content": "."}}
+    events = [{"type": "assistant", "message": {"content": [use]}}]
+    files = ri.scratch_files(ri.mentioned_paths(events, "claude", ""), tmp_path / "ws", 0)
+    mapping = ri.archive_scratch(files, tmp_path / "arm.scratch")
+    entry = mapping[str(log)]
+    assert (tmp_path / entry["archived"]).read_text(encoding="utf-8") == "# Exploration: y\n"
+    assert entry["sha256"] == ri.hashlib.sha256(log.read_bytes()).hexdigest()
+
+
+def test_named_paths_are_checked_from_outside_after_the_turn(tmp_path):
+    ws = tmp_path / "ws"
+    rel = _write(ws / "out" / "decision-record.md")
+    absolute = _write(tmp_path / "scratch" / "ledger.md")
+    locked = _write(tmp_path / "scratch" / "review.md")
+    locked.chmod(0)
+    final = (
+        f"The ledger is at `{absolute}`, the record at out/decision-record.md, "
+        f"the review at {locked}, and the log at /gone/exploration-log.md. "
+        "See https://example.com/a/b.md, e.g. the notes."
+    )
+    try:
+        got = {d["named"]: d for d in ri.named_paths(final, ws)}
+    finally:
+        locked.chmod(0o600)
+    assert set(got) == {
+        str(absolute),
+        "out/decision-record.md",
+        str(locked),
+        "/gone/exploration-log.md",
+    }
+    assert got[str(absolute)]["readable"]
+    assert got[str(absolute)]["sha256"]
+    assert got["out/decision-record.md"]["resolved"] == str(rel)
+    assert got["out/decision-record.md"]["readable"]
+    assert got[str(locked)]["exists"]
+    assert not got[str(locked)]["readable"]
+    assert not got["/gone/exploration-log.md"]["exists"]
+
+
+def test_clear_scratch_removes_files_and_empty_dirs_but_never_the_root(temp_root):
+    keep = _write(temp_root / "shared" / "other.md")
+    gone = _write(temp_root / "shared" / "deep" / "ledger.md")
+    solo = _write(temp_root / "solo" / "review.md")
+    ri.clear_scratch([gone, solo])
+    assert not gone.exists()
+    assert not (temp_root / "shared" / "deep").exists()
+    assert not (temp_root / "solo").exists()
+    assert keep.exists()
+    assert temp_root.is_dir()
+
+
+def test_capture_flags_scratch_under_a_preexisting_entry_and_checks_before_clearing(
+    temp_root, tmp_path
+):
+    earlier = temp_root / "earlier"
+    earlier.mkdir()
+    before = ri.temp_entries()
+    fresh = _write(temp_root / "new-dir" / "ledger.md")
+    reused = _write(earlier / "ledger.md")
+    events = [_codex_cmd(f"cat {fresh} {reused}")]
+    files = ri.scratch_files(ri.mentioned_paths(events, "codex", ""), tmp_path / "ws", 0)
+    named = ri.named_paths(f"See {fresh}.", tmp_path / "ws")
+    got = ri.capture(files, named, before, tmp_path / "arm", clear=True)
+    assert got["scratch_files"][str(fresh)]["top_entry_preexisted"] is False
+    assert got["scratch_files"][str(reused)]["top_entry_preexisted"] is True
+    assert got["named_paths"][0]["readable"]  # checked before clearing
+    assert not fresh.exists()
+    assert not reused.exists()
+    assert got["scratch_cleared"]
+
+
+def test_an_i_cell_arm_archives_its_workspace_scratch_and_named_paths(
+    monkeypatch, temp_root, tmp_path
+):
+    scratch = temp_root / "assist-review" / "ledger.md"
+
+    def fake_run(cmd, *_a, **kw):
+        if cmd[0] == "git":
+            return subprocess.CompletedProcess(cmd, 0, stdout="abc\n", stderr="")
+        if cmd[1:] == ["--version"]:
+            return subprocess.CompletedProcess(cmd, 0, stdout="2.1.0\n", stderr="")
+        _write(scratch, "# Investigation: x\n")
+        _write(Path(kw["cwd"]) / "memo.md", "# memo\n")
+        use = {"type": "tool_use", "input": {"file_path": str(scratch), "content": "."}}
+        events = [
+            {"type": "system", "subtype": "init", "model": "m"},
+            {"type": "assistant", "message": {"content": [use]}},
+            {"type": "result", "subtype": "success", "result": f"Ledger: {scratch}; memo.md"},
+        ]
+        kw["stdout"].write("\n".join(ri.json.dumps(e) for e in events) + "\n")
+        return subprocess.CompletedProcess(cmd, 0)
+
+    workspace = temp_root / "int-arm-ws"
+    workspace.mkdir()
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(ri.tempfile, "mkdtemp", lambda **_k: str(workspace))
+    out = tmp_path / "o"
+    argv = ["--cell", "I4", "--host", "claude", "--condition", "none", "--name", "I4-a"]
+    ri.main([*argv, "--out", str(out), "--clear-scratch"])
+    manifest = ri.json.loads((out / "I4-a.manifest.json").read_text(encoding="utf-8"))
+    assert manifest["status"] == "completed"
+    assert manifest["workspace_files"] == ["memo.md"]
+    assert list(manifest["scratch_files"]) == [str(scratch)]
+    archived = out / manifest["scratch_files"][str(scratch)]["archived"]
+    assert archived.read_text(encoding="utf-8") == "# Investigation: x\n"
+    assert {d["named"]: d["readable"] for d in manifest["named_paths"]} == {
+        str(scratch): True,
+        "memo.md": True,
+    }
+    assert not scratch.exists()
+    assert manifest["data_modified"] is False

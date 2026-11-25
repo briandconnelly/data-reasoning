@@ -323,3 +323,9 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
 - The archived manifests are not rewritten: those of the six X2 and X3 Codex plugin arms and of `X2-codex-canary` still list `causal-identification-review` and `decision-analysis`, which the fixed extractor does not.
   `results.md` and `scores-primary.md` already score routing from hand-confirmed loads, so no score changes.
 - No prompt, fixture, or scoring rule changed; any arm run from here on records routes with the fixed extractor.
+
+2026-11-25, harness change for the wave-2 preregistration (`docs/evidence/integration/2026-11-wave2/prereg.md` § G):
+
+- `scripts/run_integration.py` now, for every cell, copies changed workspace files into `<name>.workspace/` (I1–I4 included), archives scratch files the arm wrote under a system temp directory into `<name>.scratch/` with their path mapping and digests (`scratch_files`), and checks every file path the final message names from outside the arm after the turn (`named_paths`); `--clear-scratch` removes the archived scratch originals.
+- For this suite's cells the change only adds manifest fields and archive directories: no prompt, fixture, hash, model pin, staging, or scoring rule moved, and `scripts/test_run_integration.py`'s prompt and hash tests pass unchanged.
+- The archived arms of this suite are not rewritten.

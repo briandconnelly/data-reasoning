@@ -31,8 +31,19 @@ which records host version, requested and resolved model, the staged commit,
 the observed skill route, and an execution `status` (`completed`, or
 `invalid-execution: ...` on a timeout, a nonzero exit, a malformed line,
 or no terminal success event, written even then). Representative cells also
-record the prompt hash and per-file fixture digests, and copy every file the
-arm created or changed in its workspace into `<name>.workspace/`.
+record the prompt hash and per-file fixture digests. Every cell copies each file
+the arm created or changed in its workspace into `<name>.workspace/` (I1-I4
+since the wave-2 preregistration, `docs/evidence/integration/2026-11-wave2/`).
+
+After the turn, from outside the arm, every cell also archives scratch files:
+files under a system temp directory, outside the workspace and the harness's own
+directories, that a tool call, tool output, or the final message names (or that
+sit under a directory one names) and that were written after the arm started.
+Each is copied to `<name>.scratch/<its absolute path>` and mapped in the
+manifest's `scratch_files` with its digest. `named_paths` records every file
+path the final message names, resolved against the arm's working directory,
+with whether it exists and is readable and its digest. `--clear-scratch` then
+removes the archived scratch originals so a later arm cannot read them.
 
     uv run scripts/run_integration.py --cell X2 --host claude --condition plugin \\
         --model claude-sonnet-4-5 --name X2-claude-plugin-1 \\
@@ -439,6 +450,141 @@ def archive_workspace(root: Path, dest: Path, staged: dict[str, str]) -> list[st
     return kept
 
 
+# Where an arm's scratch writes land outside its workspace: the system temp
+# directories. A path elsewhere (a home directory, the repository) is never
+# walked or copied.
+TEMP_ROOTS = tuple(
+    dict.fromkeys(Path(p).resolve() for p in ("/tmp", tempfile.gettempdir()) if Path(p).is_dir())
+)
+# Directories the harness itself creates for an arm (the built plugin and the
+# Codex home), never the arm's own writes.
+HARNESS_DIRS = ("int-plugin-", "int-codex-home-")
+PATH_TOKEN = re.compile(r"(?<![\w.~-])(/[^\s\"'`<>|;&()*?\[\]{}$,\\]+)")
+NAMED_TOKEN = re.compile(
+    r"(?<![\w~/:.-])((?:/|\.{1,2}/)?[\w.~-]+(?:/[\w.~-]+)*"
+    r"\.(?:md|txt|csv|tsv|json|ya?ml|py|ipynb|html|log|sql))(?![\w/-])"
+)
+
+
+def _under(path: Path, roots: tuple[Path, ...]) -> Path | None:
+    return next((r for r in roots if path != r and path.is_relative_to(r)), None)
+
+
+def mentioned_paths(events: list[dict], host: str, final: str) -> set[str]:
+    """Absolute paths any tool request, tool output, or the final message names.
+    Output is searched here (not for routes): a `mktemp -d` directory is often
+    known only from what the command printed."""
+    texts = [final]
+    for request, output in _tool_requests(events, host):
+        texts += [request.replace("\\n", "\n"), output]
+    return {m.rstrip(".:") for t in texts for m in PATH_TOKEN.findall(t)}
+
+
+def scratch_files(
+    paths: set[str], root: Path, since: float, temp_roots: tuple[Path, ...] | None = None
+) -> list[Path]:
+    """Files under a temp root, outside the workspace and the harness's own
+    directories, that a named path points at (or that sit under a named
+    directory) and that were written at or after the arm started."""
+    temp_roots = temp_roots or TEMP_ROOTS
+    root = root.resolve()
+    found: set[Path] = set()
+    for raw in paths:
+        p = Path(raw)
+        with contextlib.suppress(OSError):
+            p = p.resolve()
+        temp = _under(p, temp_roots)
+        if temp is None or p == root or p.is_relative_to(root):
+            continue
+        if any(part.startswith(HARNESS_DIRS) for part in p.relative_to(temp).parts):
+            continue
+        candidates = [p] if p.is_file() else sorted(p.rglob("*")) if p.is_dir() else []
+        for f in candidates:
+            with contextlib.suppress(OSError):
+                if f.is_file() and f.stat().st_mtime >= since and not f.is_relative_to(root):
+                    found.add(f)
+    return sorted(found)
+
+
+def archive_scratch(files: list[Path], dest: Path) -> dict[str, dict]:
+    """Copy each scratch file to `dest`, keeping its absolute path below it, and
+    return the mapping from original path to archived copy and digest."""
+    mapping = {}
+    for f in files:
+        rel = Path(*f.parts[1:])
+        (dest / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(f, dest / rel)
+        mapping[str(f)] = {
+            "archived": str(Path(dest.name) / rel),
+            "sha256": hashlib.sha256(f.read_bytes()).hexdigest(),
+        }
+    return mapping
+
+
+def named_paths(final: str, root: Path) -> list[dict]:
+    """Every file path the final message names, checked from outside the arm
+    after the turn: whether it resolves (absolute, or relative to the arm's
+    working directory) to a regular file the harness user can read, and its
+    digest, so a scorer can match it to a record's archived bytes."""
+    out = []
+    for named in dict.fromkeys(NAMED_TOKEN.findall(final)):
+        p = Path(named).expanduser()
+        p = p if p.is_absolute() else root / p
+        exists = p.is_file()
+        readable = exists and os.access(p, os.R_OK)
+        digest = hashlib.sha256(p.read_bytes()).hexdigest() if readable else None
+        out.append(
+            {
+                "named": named,
+                "resolved": str(p),
+                "exists": exists,
+                "readable": readable,
+                "sha256": digest,
+            }
+        )
+    return out
+
+
+def clear_scratch(files: list[Path], temp_roots: tuple[Path, ...] | None = None) -> None:
+    """Remove an arm's archived scratch originals and any directory they leave
+    empty, up to the temp root, so the next arm cannot read or append to them."""
+    temp_roots = temp_roots or TEMP_ROOTS
+    for f in files:
+        f.unlink(missing_ok=True)
+        parent, temp = f.parent, _under(f, temp_roots)
+        while temp is not None and parent != temp and parent.is_relative_to(temp):
+            try:
+                parent.rmdir()
+            except OSError:
+                break
+            parent = parent.parent
+
+
+def temp_entries(temp_roots: tuple[Path, ...] | None = None) -> set[str]:
+    """The top-level entries of each temp root, before an arm starts."""
+    entries: set[str] = set()
+    for r in temp_roots or TEMP_ROOTS:
+        with contextlib.suppress(OSError):
+            entries.update(str(n) for n in Path(r).iterdir())
+    return entries
+
+
+def capture(
+    files: list[Path], named: list[dict], before: set[str], dest_base: Path, clear: bool
+) -> dict:
+    """The manifest's capture fields: each scratch file's archived copy, digest,
+    and whether its top-level temp entry predates the arm; and the named-path
+    check, which `named` already holds because it ran before any clearing."""
+    scratch = archive_scratch(files, dest_base.with_suffix(".scratch"))
+    for path, entry in scratch.items():
+        temp = _under(Path(path), TEMP_ROOTS)
+        top = str(temp / Path(path).relative_to(temp).parts[0]) if temp else None
+        entry["top_entry_preexisted"] = top in before
+    if clear:
+        clear_scratch(files)
+    return {"scratch_files": scratch, "named_paths": named, "scratch_cleared": clear}
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cell", required=True, choices=sorted(CELLS))
@@ -456,6 +602,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--dry-run",
         action="store_true",
         help="stage the fixture, print the prompt and its hash, and stop before any host call",
+    )
+    ap.add_argument(
+        "--clear-scratch",
+        action="store_true",
+        help="after archiving, remove the arm's scratch files outside its workspace so a "
+        "later arm cannot read or append to them",
     )
     return ap.parse_args(argv)
 
@@ -506,13 +658,22 @@ def main(argv: list[str] | None = None) -> None:
     base.with_suffix(".command.json").write_text(
         json.dumps({"cwd": str(root), "argv": shown}, indent=2) + "\n", encoding="utf-8"
     )
+    staged = integrity.get("fixture_sha256") or file_digests(data)
+    before, since = temp_entries(), time.time() - 1
     code, status, duration = run_host(cmd, root, env, base, args)
 
     events = read_events(base.with_suffix(".jsonl"))
     model = model_of(events, env.get("CODEX_HOME"), args.host)
     route = observed_route(events, args.host)
-    base.with_suffix(".final.md").write_text(
-        final_message(events, args.host) + "\n", encoding="utf-8"
+    final = final_message(events, args.host)
+    base.with_suffix(".final.md").write_text(final + "\n", encoding="utf-8")
+    # Both run from outside the arm, after the turn, and before any clearing.
+    captured = capture(
+        scratch_files(mentioned_paths(events, args.host, final), root, since),
+        named_paths(final, root),
+        before,
+        base,
+        clear=args.clear_scratch,
     )
     manifest = {
         "name": args.name,
@@ -529,12 +690,10 @@ def main(argv: list[str] | None = None) -> None:
         "observed_route": route,
         "ran_at": datetime.now(UTC).isoformat(timespec="seconds"),
     }
-    if representative:
-        manifest |= integrity
-        manifest["workspace_files"] = archive_workspace(
-            root, base.with_suffix(".workspace"), integrity["fixture_sha256"]
-        )
-        manifest["data_modified"] = file_digests(data) != integrity["fixture_sha256"]
+    manifest |= integrity
+    manifest["workspace_files"] = archive_workspace(root, base.with_suffix(".workspace"), staged)
+    manifest["data_modified"] = file_digests(data) != staged
+    manifest |= captured
     base.with_suffix(".manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
