@@ -37,3 +37,14 @@ The measured arms for the description decision 005 adopted are the 2026-08-15 wi
 The seam ran in `tests/runs/artifacts/2026-08-15-widening/seam-gate4.md`, where T13 routed 5/5 to `exploratory-data-analysis` and T14 routed 5/5 to `hypothesis-driven-analysis` under C3. `[measured: skill=exploratory-data-analysis state=current evidence=eda-widening-2026-08-15-seam]`
 The decision itself stands — that wave measured the widening against a two-skill catalog, not routing across the four shipped skills — but the freeze's justification is "unmeasured against the shipped catalog", not "unmeasured".
 `causal-identification-review`'s description likewise has n=1 trigger cells (CS1, CS2, CS6a in its `tests/scenarios.md`) against a three-skill catalog. `[measured: skill=causal-identification-review state=current evidence=cir-trigger-2026-08-09]`
+
+## Addendum 2026-11-25
+
+The Context above says every cross-skill routing seam rests on zero arms; since then integration runs have exposed the four-skill catalog to ordinary prompts, so that sentence no longer describes the evidence (issue #127).
+This also supersedes the 2026-08-22 addendum's "unmeasured against the shipped catalog", which stays above as dated history: routing has been observed with the full catalog, and a candidate description edit still needs the evidence § Decision requires.
+Those runs, their counts, and their limits are in `docs/evidence-status.md` § Handoffs and routing and § Owed evidence, including the first representative run (`docs/evidence/integration/representative-v1/results.md`).
+On cells I1–I4 of the 2026-11-17 run the arm's condition, `plugin` or `none`, was visible in the prompt's data path, so that run's plugin-versus-no-plugin contrasts carry a second difference (issue #128).
+The 2026-11-18 rerun was plugin-only, so its prompts all showed `plugin` and it has no within-run contrast for that cue to qualify.
+The forced-load diagnostic (`docs/evidence/integration/representative-v1/forced-load/results.md`) loaded a skill on instruction on Claude Code for two synthetic asks, and under its preregistered reading neither cell justified first-activation work there.
+None of the cited runs included a trigger arm covering an edit to a frozen description, which is what § Decision requires to unfreeze one.
+The procedure in § Decision is unchanged, and the freeze and its goldens stand.
