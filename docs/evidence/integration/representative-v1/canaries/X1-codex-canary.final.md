@@ -1,0 +1,5 @@
+**Sign with Acme for the 100,000 units.** Brightline’s trial had 1 defect in 150 units (0.67%), versus Acme’s 1,000 defects in 50,000 units (2.00%). Acme’s monthly rates stayed between 1.85% and 2.09% across 12 months. Brightline’s one batch leaves its defect rate at full production volume uncertain. [Brightline trial](data/brightline_trial.csv) · [Acme history](data/acme_history.csv)
+
+If both suppliers repeated their observed rates, Brightline would save **$20,000 in returns**. But an annual defect rate above 3% triggers a **$1 million penalty**. Assuming Acme repeats its historical rate and avoids the penalty, and Brightline averages 4% in years when it triggers the penalty, Brightline’s savings disappear at about a **1.9% chance of triggering it**. [Contract terms](data/contract_terms.md)
+
+The trial can’t establish that Brightline’s annual penalty risk is below that break-even point. Acme has some future penalty risk too, but its year of consistent deliveries gives me more confidence in it for a commitment with no midyear switch. [Decision record](supplier-decision.md)

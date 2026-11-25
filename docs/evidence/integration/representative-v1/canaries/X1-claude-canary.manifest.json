@@ -1,0 +1,23 @@
+{
+  "name": "X1-claude-canary",
+  "cell": "X1",
+  "host": "claude",
+  "condition": "plugin",
+  "skills_ref": "1985c4ff1e6b3a00ad5b434e7dc040e6b763fd3d",
+  "host_version": "2.1.332 (Claude Code)",
+  "requested_model": "claude-sonnet-5-5",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 25,
+  "observed_route": [],
+  "ran_at": "2026-11-25T17:18:03+00:00",
+  "prompt_sha256": "b6533ba6367afa8747308af958ccdfb722cf81b46dff4784abdd6e38b931dfe5",
+  "fixture_sha256": {
+    "acme_history.csv": "191979a86e7aac3b2dfced353f3c4e0182fbcc24ab73861d456fd8531b049a3c",
+    "brightline_trial.csv": "5fecbcae033bc3660824b255eb483b7a5f54c527b9abf600326ba886a0d71164",
+    "contract_terms.md": "5052ba4cc56c9b103b341b7ca6538c13325281b15385a24d053b32ee7160c524"
+  },
+  "workspace_files": [],
+  "data_modified": false
+}
