@@ -1,0 +1,1 @@
+The vendor's new disk firmware has shown zero corruption events in our pilot. Should we roll it out fleet-wide this week or keep piloting another month? Packet: {FIXTURE_PATH}.
