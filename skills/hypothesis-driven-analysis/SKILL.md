@@ -39,16 +39,15 @@ Deferring to it wholesale is how a multi-explanation question gets answered as a
 ### A causal question routes on its design, not its wording
 
 Ask what assigned the exposure, and route on what you are *told* assigned it — not on what the phrasing implies.
-Randomization stated, or assignment stated to be plausibly independent of the outcome, with a comparison group that would have moved the same way had the cause been absent: the effect is identified and no rival explanations need telling apart, so the work is **estimation** — or `mini`, if someone has already stated a claim, numeric or qualitative, for you to check.
-"Is B better than A, and by how much" over an assignment you have been told was random is an estimation task, however causal it sounds — the design already did the discriminating that the loop would otherwise have to do.
-Assigned by anything else — someone launched it, it shipped to whoever got it, it happened in a week when other things also happened: nothing identifies the effect, every co-occurring change is a live rival, and that is **full**.
+When assignment to comparison arms was explicitly randomized, route directly to **estimation**, or to `mini` for a stated claim.
+Use the analysis-population and outcome checks in [Estimation Route](#estimation-route) before interpreting either result as the effect of assignment.
+When exposure followed a launch with no identifying design, co-occurring changes are live rivals, so route **full**.
 A stated quasi-experimental structure — a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: before estimating anything from it, load `causal-identification-review` in the same turn (on Claude Code, call the `Skill` tool with `data-reasoning:causal-identification-review`; on a host that exposes skills as files, read its `SKILL.md`), and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
 A before/after or treated-vs-untreated comparison the user implies ("we rolled it out here, not there") is such a structure even when nobody calls it a design.
 "How much did launching the campaign improve conversion" is the unidentified-assignment case wearing the identified one's clothes: a causal question carrying a number, with no design behind it.
 The loop's job there is not to produce the number — it is to establish that the number is not available from this data, and to report what is.
 
-**Causal estimate limit.** This holds whether or not `causal-identification-review` is installed or was loaded, and whatever the user says they need the number for.
-Until an identification review ends `identified-if` with its probes run, give no point estimate, adjusted estimate, or sensitivity range as the effect or as a stand-in for it — a caveat beside a number does not make it associative.
+**Causal estimate limit for nonrandomized or unknown assignment.** Unless an identification review ends `identified-if` with its probes run, give no point estimate, adjusted estimate, or sensitivity range as the effect or as a stand-in for it — a caveat beside a number does not make it associative.
 The direct answer is that the magnitude is not determinable from this data, which threats block it, and what design or data would identify it; observed contrasts may be reported only as labelled descriptive differences.
 
 **Unstated assignment is the common case, and it is not an invitation to assume.**
@@ -338,7 +337,9 @@ Define the knowledge goal or the decision the estimate informs.
 State the estimand, the population it describes, the uncertainty method, and the practical threshold that would change the decision.
 No competing hypotheses are required.
 The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix and its baseline in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
-Stated randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias a randomized comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded against those obligations.
+For a randomized comparison, reconcile outcomes to all assigned units by arm and check that each arm has comparable follow-up.
+If outcome loss could change the conclusion, label the observed contrast as descriptive and explain what recovering the missing outcomes would resolve.
+With adequate coverage and complete outcomes, estimate the effect of assignment with uncertainty.
 
 ## Record Delivery
 

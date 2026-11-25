@@ -6,6 +6,10 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Fixed
+
+- Randomized comparisons with complete outcomes can report the effect of assignment directly. The investigation skill now checks outcome coverage by arm before interpreting the contrast.
+
 ## [0.5.0] - 2026-11-18
 
 ### Changed
