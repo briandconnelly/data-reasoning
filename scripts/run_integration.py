@@ -256,29 +256,47 @@ def install_codex_plugin(release: Path, env: dict[str, str]) -> str:
 
 
 def observed_route(events: list[dict], host: str) -> list[str]:
+    """The data-reasoning skills an arm loaded, in order, from what it asked to read.
+
+    Only the request counts: a tool call's input (Claude Code) or a command's text (Codex).
+    A command's output is never searched for skill names, because one SKILL.md names the
+    others; it is read only to resolve a glob (`skills/*/SKILL.md`), and then only for the
+    frontmatter `name:` line of each file the glob printed."""
     route: list[str] = []
     # A shell read may brace-expand several skills: skills/{a,b}/SKILL.md.
     pat = re.compile(r"(?:\{([^{}]*)\}|([\w-]+))/SKILL\.md")
-    for text in _tool_inputs(events, host):
+    for text, output in _tool_requests(events, host):
         for skill in SKILLS:
             if f"data-reasoning:{skill}" in text or text.strip('"') == skill:
                 route.append(skill)
         for m in pat.finditer(text):
             names = m.group(1).split(",") if m.group(1) is not None else [m.group(2)]
             route.extend(n for n in names if n in SKILLS)
+        if GLOB_SKILL_READ.search(text):
+            route.extend(n for n in FRONTMATTER_NAME.findall(output) if n in SKILLS)
     return [s for i, s in enumerate(route) if i == 0 or s != route[i - 1]]
 
 
-def _tool_inputs(events: list[dict], host: str):
+GLOB_SKILL_READ = re.compile(r"[*?\]]/SKILL\.md")
+FRONTMATTER_NAME = re.compile(r"^name: ([\w-]+)\s*$", re.M)
+
+
+def _tool_requests(events: list[dict], host: str):
+    """(request text, output) per tool call; output is empty where none is recorded."""
     for ev in events:
         if host == "claude" and ev.get("type") == "assistant":
             for block in ev.get("message", {}).get("content", []):
                 if block.get("type") == "tool_use":
-                    yield json.dumps(block.get("input", {}))
+                    yield json.dumps(block.get("input", {})), ""
         if host == "codex" and ev.get("type") == "item.completed":
             item = ev.get("item", {})
             if item.get("type") in ("command_execution", "file_read", "mcp_tool_call"):
-                yield json.dumps(item)
+                output = str(item.get("aggregated_output") or "")
+                request = {k: v for k, v in item.items() if k not in OUTPUT_KEYS}
+                yield json.dumps(request), output
+
+
+OUTPUT_KEYS = {"aggregated_output", "output", "result", "content", "stdout", "stderr"}
 
 
 def final_message(events: list[dict], host: str) -> str:

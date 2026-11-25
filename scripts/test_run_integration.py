@@ -352,3 +352,47 @@ def test_a_modified_fixture_trips_the_clean_check(tmp_path):
     fixture.write_text("changed\n", encoding="utf-8")
     with pytest.raises(SystemExit, match="commit first"):
         ri.require_clean(repo=repo)
+
+
+def _codex_cmd(command: str, output: str = "") -> dict:
+    item = {"type": "command_execution", "command": command, "aggregated_output": output}
+    return {"type": "item.completed", "item": item}
+
+
+def test_codex_route_ignores_skills_named_only_in_command_output():
+    # Reading one SKILL.md prints text that names the other skills (#129).
+    out = (
+        "name: hypothesis-driven-analysis\n"
+        "see data-reasoning:decision-analysis and causal-identification-review/SKILL.md"
+    )
+    events = [_codex_cmd("cat /cache/skills/hypothesis-driven-analysis/SKILL.md", out)]
+    assert ri.observed_route(events, "codex") == ["hypothesis-driven-analysis"]
+
+
+def test_codex_route_counts_each_skill_a_command_names():
+    events = [
+        _codex_cmd("cat /c/skills/decision-analysis/SKILL.md"),
+        _codex_cmd(
+            "cat /c/skills/{hypothesis-driven-analysis,causal-identification-review}/SKILL.md"
+        ),
+    ]
+    assert ri.observed_route(events, "codex") == [
+        "decision-analysis",
+        "hypothesis-driven-analysis",
+        "causal-identification-review",
+    ]
+
+
+def test_codex_route_resolves_a_glob_read_from_the_frontmatter_it_printed():
+    # `skills/*/SKILL.md` names no skill; the files it printed do, in their `name:` lines.
+    out = (
+        "---\nname: decision-analysis\ndescription: x\n---\n"
+        "body mentions hypothesis-driven-analysis\n"
+    )
+    events = [_codex_cmd("cat /c/skills/*/SKILL.md", out)]
+    assert ri.observed_route(events, "codex") == ["decision-analysis"]
+
+
+def test_codex_route_is_empty_when_no_skill_file_is_read():
+    out = "skills/decision-analysis/SKILL.md\nskills/hypothesis-driven-analysis/SKILL.md"
+    assert ri.observed_route([_codex_cmd("rg --files", out)], "codex") == []

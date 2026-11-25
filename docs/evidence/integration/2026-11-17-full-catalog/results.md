@@ -55,3 +55,9 @@ For Claude Code the handoff remains unmeasured in practice: the one gain observe
 - Codex's route is read from file reads; a batched `cat` of several `SKILL.md` files shows the skill text entered context, not that each skill was followed, so the records each arm wrote are reported beside it.
 - Three harness defects found by the Codex canaries were fixed before any scored Codex arm (`prereg.md` § Notes after writing); Claude Code routes were recomputed with the fixed extractor and did not change.
 - n=3 per cell per condition: counts, not rates.
+
+## Note, 2026-11-25: route counts rechecked (#129)
+
+The route extractor this run used also searched Codex command output, where one skill's text can name the others.
+After that was fixed, all 12 Codex plugin transcripts here were re-extracted from command text alone: every route equals the one in its manifest, so the Codex route counts above stand, including every skill of the designed route read in 9 of 9 I2–I4 arms.
+The over-count appeared only on later transcripts (seven arms of `docs/evidence/integration/representative-v1/`).
