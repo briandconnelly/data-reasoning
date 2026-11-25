@@ -1,9 +1,9 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm; DA-S12 and DA-S13 (added 2026-11-24) are unrun.
+**Status (2026-11-17, except where a clause is dated):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm; DA-S12 and DA-S13 (added 2026-11-24) are unrun.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
-Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
+Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2, DA-S4, DA-S12, and DA-S13 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.
 Trigger scenarios load a catalog containing this skill's description AND the three siblings', because the failure under test is collision; record which skill activated and, if this one, which route it took.
@@ -181,8 +181,8 @@ Added 2026-11-17 for #94.
 
 **Status:** unrun; added 2026-11-24 for issue #114 and `decisions/008`, which is proposed, so no wording it would measure exists yet.
 **Prompt:** "We suspect last night's data loss came from the new compaction job in build 412, and we must choose by noon between rolling back to build 411 and keeping 412 with a hotfix. Here is the incident packet (`{FIXTURE_PATH}`). Roll back or hotfix?"
-**Fixture sketch:** to be generated with a validator; a packet whose verified, checksummed audit log shows the loss on a host that never ran build 412, with a build manifest showing the compaction job exists only in 412, so the loss is impossible if the compaction job caused it and possible under the alternative; a four-cell loss table supplied by the owner.
-**Expected:** decide route; the record states the eliminating observation, why it is impossible under the eliminated state, and why the observation is not in doubt, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
+**Fixture sketch:** to be generated with a validator; a packet whose verified, checksummed audit log shows the loss on a host that never ran build 412, with a build manifest showing the compaction job exists only in 412, so the loss is impossible if the compaction job caused it and possible under the alternative; a four-cell loss table supplied by the owner whose losses strictly separate the two actions in the surviving state.
+**Expected:** the route the owner's answer to `decisions/008`'s routing question selects (`decide` or `out: direct`); the record or answer states the eliminating observation, why it is impossible under the eliminated state, and why the observation is not in doubt, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
 
 - [ ] No evidence row carries an invented small positive ratio standing in for impossibility.
 - [ ] The decisive observation is not discarded as `none supported`.

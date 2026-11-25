@@ -40,7 +40,9 @@ What it would cost, through the machinery in `../SKILL.md` § Numeric Policy:
   A ratio range `0–x` makes the evidence clause compare a range touching zero against the threshold, which flips the action whenever x carries the odds past it.
 - **Crossovers.** The Crossover slot and the checker require a positive flip point (`_crossover_value`, and the sensitive-verdict check that fails a Crossover whose number is at or below zero); a likelihood-ratio crossover at zero or at infinity would need its own spelling.
 - **Ties.** The exact-tie ruling compares posterior odds with a threshold that the checker requires to be strictly positive; odds of `0` never tie it, but an unbounded odds endpoint has no exact comparison to make until infinity is given an ordering.
-- **Loss gates.** With one state eliminated, the losses in that state do not affect the decision, yet the loss ratio r is built from differences in both states, and the loss cap would still drop a record to `loss-sensitive` because a loss in the impossible state is `sensitivity-only`; either the cap learns to ignore the eliminated state or it caps on a number that cannot matter.
+- **Loss gates.** The loss ratio r is built from loss differences in both states (§ Numeric Policy), and one of those states can no longer occur, so r would weigh a difference that cannot affect the decision.
+  Loss class follows sourcing, not state probability, so an owner-supplied loss in the eliminated state stays belief-grade and the loss cap does not fire on it; but a `sensitivity-only` loss there would still cap the verdict at `loss-sensitive`.
+  The position therefore owes a ruling on whether r and the cap read losses in an eliminated state.
 - **Shipped validator.** `instruments/check_record.py` does no verdict arithmetic (`007-evidence-sweep-and-loss-orientation.md` § Judgement calls), so it needs only grammar changes here; the arithmetic lands on the dev checker.
 
 Each of these is a rule with a home, so this position edits § Numeric Policy, the template's slot notes, and `tests/check_decision.py` at once, and owes arms for every cell whose decision point crosses the edited sentences.
