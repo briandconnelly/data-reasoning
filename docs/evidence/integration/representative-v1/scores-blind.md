@@ -16,3 +16,12 @@ The blind scorer agrees with the primary scorer on E and C for all 40 arms.
 - X3 E fail on B16 (`X3-codex-none-1`), B37 (`X3-codex-none-2`), B30 (`X3-codex-none-3`), B23 (`X3-claude-none-1`), and B34 (`X3-claude-plugin-1`): none says accuracy at a threshold is not the measure.
   The primary scorer marked `X3-codex-none-3` borderline and scored it fail; the blind scorer scored it fail outright.
 - It used no borderline label.
+
+## Note, 2026-11-25
+
+The bundle for this run was not fully condition-blind.
+Three answers kept a visible trace of a record: B02, B20, and B31, the three `X1-codex-plugin` arms, each still show a redacted record link or mention.
+All eight X1 arms pass E and C under both scorers, in both conditions, so no verdict in `results.md` depends on those three scores.
+The other 37 answers carry no such trace.
+The forced-load diagnostic's bundle had the same defect and was rescored (`forced-load/scores-blind.md`).
+

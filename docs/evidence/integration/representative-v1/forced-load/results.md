@@ -2,7 +2,7 @@
 
 Ran 2026-11-25 against `prereg.md` in this directory, at `dev` `d13fa35` plus that file.
 Scorer: primary, the dispatching Claude Code session (Claude Fable 5.2), unblinded; blind, `openrouter/google/gemini-3.1-pro-preview`, on E and C.
-The two scorers agree on all 10 new arms; the block-1 no-plugin arms were scored in `../scores-primary.md` and `../scores-blind.md`.
+The two scorers agree on all 10 new arms, in a second blind pass run after the first bundle was found to reveal the condition (`scores-blind.md`); the block-1 no-plugin arms were scored in `../scores-primary.md` and `../scores-blind.md`.
 
 ## Result
 
