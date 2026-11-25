@@ -1,0 +1,19 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-arm-wnys4i9i",
+  "argv": [
+    "claude",
+    "-p",
+    "<prompt.txt>",
+    "--model",
+    "claude-sonnet-5-5",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--allowedTools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill"
+  ]
+}

@@ -1,0 +1,1 @@
+First load the data-reasoning:hypothesis-driven-analysis skill and follow its instructions. We have two candidate churn models scored on last quarter's holdout customers, with who actually churned: `data/holdout_scores.csv`. Next quarter our retention team will call the 500 customers the deployed model scores highest on one list like this one. Which model should we deploy?

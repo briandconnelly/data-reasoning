@@ -1,0 +1,21 @@
+{
+  "cwd": "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-arm-0f60_3v7",
+  "argv": [
+    "claude",
+    "-p",
+    "First load the data-reasoning:hypothesis-driven-analysis skill and follow its instructions. Our analyst built a model for daily support ticket volume; the notes, code, and two years of data (through September 30, 2026) are in `data`. They report under 4% error on held-out days. Today, with data through September, we set staffing for October, November, and December from each month's forecast total, and that works if the three monthly totals are within 10% of actual on average. Can we use it?",
+    "--model",
+    "claude-sonnet-5-5",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--setting-sources",
+    "project",
+    "--tools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--allowedTools",
+    "Read,Write,Edit,Bash,Glob,Grep,Skill",
+    "--plugin-dir",
+    "/var/folders/4_/s6fbcjyn4b13xdxkd3lv0kw00000gn/T/int-plugin-k7op96w3/data-reasoning"
+  ]
+}

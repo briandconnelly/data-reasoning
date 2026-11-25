@@ -1,0 +1,22 @@
+{
+  "name": "X3-claude-none-2",
+  "cell": "X3",
+  "host": "claude",
+  "condition": "none",
+  "skills_ref": "8c07b7d0d40761e821103addd0711b1d2a3fd629",
+  "host_version": "2.1.332 (Claude Code)",
+  "requested_model": "claude-sonnet-5-5",
+  "model": "claude-sonnet-5-5",
+  "exit": 0,
+  "status": "completed",
+  "duration_s": 17,
+  "observed_route": [],
+  "ran_at": "2026-11-25T17:56:01+00:00",
+  "prompt_sha256": "bb80c360a92e3f7677a27c8af75cbac772ef93c93c9b601e86e5e9e2c3dae13b",
+  "fixture_sha256": {
+    "holdout_scores.csv": "139bb2c7f5a531be624bbd213f77dce571c1d9d9b70f01cdc23603473371ebce",
+    "models.md": "183710c26a152baccbc6069e23065261aca3eca0d6eb77ee6478bef57ede01eb"
+  },
+  "workspace_files": [],
+  "data_modified": false
+}
