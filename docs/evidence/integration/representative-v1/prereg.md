@@ -311,3 +311,8 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
   If none does, Claude Code stops at block 1: its comparisons are reported with their counts as incomplete, with no verdict, and no maintenance signal is drawn from that host.
 - Scored arms are named `<cell>-<host>-<condition>-<replicate>`; a replacement adds `-r`.
 - The `data_modified` flag is set by any new file under `data/`, including an interpreter cache (`__pycache__`) written when an arm imports the fixture's code; the results record reports the flag with what changed, and such a cache alone is not a modified fixture.
+
+2026-11-25, after the first run's results:
+
+- Four further Claude Code no-plugin arms run out of block order for the forced-load diagnostic in `forced-load/prereg.md`: `X2-claude-none-2`, `X2-claude-none-3`, `X3-claude-none-2`, `X3-claude-none-3`.
+  They are this file's own slots and are scored as written; Claude Code's plugin slots for blocks 2 and 3 stay unrun, so its suite comparisons stay incomplete.
