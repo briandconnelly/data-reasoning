@@ -41,6 +41,7 @@ The plugin is also listed in [briandconnelly-plugins](https://github.com/briandc
 - [Record validation](docs/record-validation.md): what the hook checks, which writes it covers, and how to run the validator by hand.
 - [Output style](docs/output-style.md): what `Data Answer` adds and how to select it.
 - [Evidence status](docs/evidence-status.md): what has been measured, what has not, and what each skill costs in context.
+- [Capability map](docs/evidence-status.md#capability-map): look up a kind of question to see whether the plugin offers a measured workflow, unmeasured guidance, or a handoff.
 
 ## Development
 
