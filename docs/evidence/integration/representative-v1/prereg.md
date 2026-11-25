@@ -290,3 +290,13 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
 - The full-catalog cells I1–I4 keep that suite's behaviour, including a workspace named after the arm (`int-<name>-*`, where the name carries the condition) inside the absolute data path their prompts show; that condition leak is not fixed here, so the full-catalog comparisons are not changed after the fact.
 
 ## Notes after writing
+
+2026-11-25, before the first canary:
+
+- Models pinned: Claude Code `--model claude-sonnet-5-5`; Codex `-m gpt-6.2-sol`.
+  Host versions at this note: Claude Code 2.1.332, codex-cli 0.172.0.
+- The owner confirmed the four calls this file makes on their behalf: X1's prior family Beta(a, a) for a from 0.5 to 1, X3's one pooled list, the ±3 tolerances on X2's backtest error and X3's hit counts, and the cap of three replacements per host.
+- Canaries run in the plugin condition, one per runnable cell per host, into `canaries/` beside this file, named `<cell>-<host>-canary`.
+  A canary passes when its manifest status is `completed`, its resolved model and host version match this note, its prompt hash and fixture digests match this file, the plugin install succeeded, and its workspace files were archived.
+  Canary answers are not scored.
+- Scored arms wait for the owner's go-ahead after the canaries are reported.
