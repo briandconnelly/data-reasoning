@@ -8,7 +8,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Fixed
 
-- Randomized comparisons with complete outcomes can report the effect of assignment directly. The investigation skill now checks outcome coverage by arm before interpreting the contrast.
+- Explicitly randomized comparisons can report the effect of assignment directly after checking outcome coverage.
+  The routing instructions clarify that as-if-random natural experiments require identification review.
 
 ## [0.5.0] - 2026-11-18
 
