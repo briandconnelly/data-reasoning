@@ -21,6 +21,10 @@ DEFAULT_TIMEOUT = 1800  # the harness default, unchanged by this suite
 # edit that moves one fails here.
 I_PROMPTS = {
     "I1": "How many orders in `/d/orders.csv` were placed on 2026-06-10 (UTC)?",
+    "I2": "Here's two months of our API event logs (`/d/events.csv`). "
+    "Nobody has looked at it closely. Take a look, tell me what's going on, "
+    "and if anything looks like a real problem, check whether it actually "
+    "holds up before you tell me it's real.",
     "I3": "We rolled out the new checkout flow to the West region on 2026-03-15; "
     "East stayed on the old flow. Median checkout completion time in West "
     "dropped afterwards. How much faster did the new flow make checkout? "
@@ -51,7 +55,22 @@ def test_new_prompts_expand_data_and_match_the_prereg_hash(cell):
     prompt = ri.cell_prompt(cell, Path("/d"))
     assert "{DATA}" not in prompt
     assert "/d" in prompt
-    assert f"`{ri.prompt_sha256(cell)}`" in PREREG.read_text(encoding="utf-8")
+    assert f"Prompt SHA-256: `{ri.prompt_sha256(cell)}`." in prereg_section(cell)
+
+
+def prereg_section(cell):
+    """The prereg's `### <cell> —` section, up to the next heading."""
+    text = PREREG.read_text(encoding="utf-8")
+    start = text.index(f"\n### {cell} \u2014")
+    end = text.find("\n#", start + 1)
+    return text[start:end]
+
+
+def test_each_hash_sits_only_in_its_own_cell_section():
+    for cell in NEW:
+        for other in NEW:
+            if other != cell:
+                assert ri.prompt_sha256(other) not in prereg_section(cell)
 
 
 @pytest.mark.parametrize("cell", ["R3", "R4"])

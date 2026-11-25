@@ -47,6 +47,48 @@ def test_x1_fails_when_the_trial_is_large_enough_to_settle_the_rate(tmp_path):
     assert any("no longer picks Acme" in p for p in problems)
 
 
+def test_x1_fails_when_the_point_estimate_no_longer_picks_brightline(tmp_path):
+    generate.build_x1(tmp_path / "x1", trial_units=150, trial_defects=5)
+    problems, _ = validate_x1.check(tmp_path / "x1")
+    assert any("point estimate no longer picks Brightline" in p for p in problems)
+
+
+def test_x2_fails_when_the_random_split_no_longer_passes(tmp_path):
+    generate.build_x2(tmp_path / "x2", noise=0.15)
+    problems, _ = validate_x2.check(tmp_path / "x2")
+    assert any("random-split" in p for p in problems)
+
+
+def _write_scores(fixture, rows):
+    fixture.mkdir()
+    with (fixture / "holdout_scores.csv").open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["customer_id", "model_a_score", "model_b_score", "churned"])
+        for i, (a, b, y) in enumerate(rows):
+            w.writerow([f"C{i:05d}", f"{a:.6f}", f"{b:.6f}", y])
+
+
+def test_x3_fails_when_a_tie_straddles_the_cut(tmp_path):
+    rows = [(r[0], 0.5, r[2]) for r in validate_x3.load(FIXTURES / "x3-churn")]
+    _write_scores(tmp_path / "x3", rows)
+    problems, _ = validate_x3.check(tmp_path / "x3")
+    assert any("tie straddles rank 500" in p for p in problems)
+
+
+def test_x3_fails_when_b_loses_at_a_deeper_cut(tmp_path):
+    # B's top 500 all churn, its next 1,000 none; A ranks the other 500 churners first.
+    n, top, deep = 2000, 500, 1500
+    rows = []
+    for i in range(n):
+        churned = int(i < top or i >= deep)
+        b = 1 - i / n
+        a = 0.4 + (i - deep) / n if i >= deep else (0.3 - i / n / 10 if i < top else 0.01)
+        rows.append((a, b, churned))
+    _write_scores(tmp_path / "x3", rows)
+    problems, _ = validate_x3.check(tmp_path / "x3")
+    assert any("top 1000 no longer picks B" in p for p in problems)
+
+
 def test_x2_fails_when_the_series_has_no_annual_cycle(tmp_path):
     generate.build_x2(tmp_path / "x2", annual_amplitude=0.0)
     problems, _ = validate_x2.check(tmp_path / "x2")
@@ -77,6 +119,7 @@ def test_r_fails_when_a_row_moves_the_answer(tmp_path):
         csv.writer(f, lineterminator="\n").writerows(rows)
     problems, _ = validate_r.check(fixture)
     assert any("R1 is 98" in p for p in problems)
+    assert any("unit count is" in p for p in problems)
 
 
 def test_r_fails_when_units_equal_orders(tmp_path):

@@ -31,6 +31,7 @@ from _common import regenerated_matches, report
 from generate import build_r_sales
 
 R1_EXPECTED = 99
+R1_UNITS_EXPECTED = 242
 ROUNDING_GUARD = 0.01
 """An R2 mean within this many cents of a half cent is ambiguous to round."""
 R2_EXPECTED = {"Harbor": 117.15, "Hillcrest": 101.80, "Old Town": 113.85, "Riverside": 111.25}
@@ -59,6 +60,8 @@ def check(fixture: Path) -> tuple[list[str], dict[str, object]]:
     problems = []
     if r1 != R1_EXPECTED:
         problems.append(f"R1 is {r1}, not the preregistered {R1_EXPECTED}")
+    if units != R1_UNITS_EXPECTED:
+        problems.append(f"R1's unit count is {units}, not the preregistered {R1_UNITS_EXPECTED}")
     if units == r1:
         problems.append(
             "R1's order count equals its unit count, so a misreading cannot be told apart"

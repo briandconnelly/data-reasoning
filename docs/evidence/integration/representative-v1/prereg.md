@@ -70,6 +70,7 @@ Prompt: "We have to pick one supplier for all 100,000 units next year: stay with
 Prompt SHA-256: `937402c9bfdda5b78cc3d919319d5824969424b519107ad2fdd60bcfba3ec18e`.
 Ground truth: treating the trial rate (0.67%) as known costs Brightline $10,000 against Acme's $30,000, so a point estimate picks Brightline.
 Carrying the trial's uncertainty, a beta posterior gives Brightline a 5.7% (uniform prior) or 2.8% (Jeffreys prior) chance of exceeding 3%, so expected cost is $76,769 or $42,607 against Acme's $30,029 or $30,014: Acme.
+Acme's posterior cost differs from $30,000 because its posterior mean rate (1,001/50,002 under the uniform prior) is slightly above 2%, not because of the penalty, whose probability for Acme is effectively zero.
 Designed route: `decision-analysis`.
 
 ### X2 — a random split passes and a backtest fails (challenge)
@@ -87,7 +88,9 @@ Fixture: `fixtures/x3-churn/`: 10,000 holdout customers (13.8% churned) with eac
 Prompt: "We have two candidate churn models scored on last quarter's holdout customers, with who actually churned: `{DATA}/holdout_scores.csv`. Our retention team can call 500 customers a month. Which model should we deploy?"
 Prompt SHA-256: `4e1cf77f40205682bbd002246e2566d2d24ac40010db11da3fbff7a2f662fcbe`.
 Ground truth: accuracy at a 0.5 threshold picks A (84.6% against 79.5%); precision among each model's top 500 picks B (60.4% against 34.6%).
-For a team that can call 500 customers, B.
+The prompt's 500 calls a month can be read against a quarter's holdout as 500, 1,000, or 1,500 contacts; B also wins at 1,000 (50.5% against 30.5%) and 1,500 (44.0% against 28.5%).
+The winner does not depend on the reading: for a team that can call 500 customers a month, B.
+`validate_x3.py` asserts B's win at all three cuts.
 Designed route: `hypothesis-driven-analysis`; a first load of `decision-analysis` that hands the comparison to it is also on route.
 
 ## Conditions
@@ -135,12 +138,17 @@ This section is the single home of the six column definitions below; other files
   Read from the final message only, for every arm, plugin or not.
   R1, R2: `n/a`.
   X1: Brightline's trial rate is not treated as its known rate; the answer says the trial is too small to rule out a rate above the 3% clause, and that this risk drives the choice.
-  X2: the answer says the random-split figure does not measure forecasting months ahead, and either reports a time-ordered evaluation that misses the 10% bar or states that the held-out figure cannot support the claim.
-  X3: the answer says accuracy at a threshold is not the measure for a 500-call limit and compares the models at the top 500 or an equivalent ranking measure at that limit.
+  X2: the answer says the random-split figure does not measure forecasting months ahead and names why: the held-out days were drawn at random, so the model was scored on days with training days on both sides of them (interpolation, leakage across time, or ignoring time order all qualify).
+  It then either reports a time-ordered evaluation (any backtest whose test days all follow its training days) that misses the 10% bar, or states that the held-out figure cannot support the three-month claim for that reason.
+  Generic caution ("validate further", "forecasts are uncertain", "monitor in production") without naming the time-order problem fails.
+  X3: the answer says accuracy at a threshold is not the measure for a 500-call limit and compares the models by a measure taken at that depth of each model's ranking.
+  Qualifying measures: precision (hit rate) in the top k, churners caught in the top k, lift or gains in the top k, or a precision-at-k curve read at k, for k of 500, 1,000, or 1,500.
+  Not qualifying on their own: AUC, accuracy, F1, precision, or recall at a probability threshold, log loss, or calibration.
 - **Task (C).**
   Read from the final message only.
   R1: 99.
-  R2: all four store means within 0.01 of the ground truth.
+  R2: every one of the four store means within 0.01 of the ground truth, inclusive (|reported − truth| ≤ 0.01).
+  An answer that rounds to one decimal passes when each value is within 0.05 of the truth, inclusive, so Harbor's exact 117.15 passes as 117.1 or 117.2.
   X1: Acme, or "do not switch on this trial" with Acme for the year.
   X2: no, not for three-month staffing as evaluated.
   X3: B.
@@ -150,6 +158,7 @@ Three further measures, per arm:
 - **Unnecessary ceremony.**
   Scored on R1 and R2 only, `n/a` elsewhere.
   Fail when any of these occurs before or instead of the direct answer: a data-reasoning skill load, a record file written, a preregistration or plan the user did not ask for, or a stop for authorization or clarification.
+  A plan is a set of steps, hypotheses, or criteria written out before the answer, in a file or in more than two sentences of the reply; one or two sentences saying what will be computed are not a plan.
   Pass otherwise.
   A skill load that routes straight out to a direct answer with none of the rest still fails; this column counts the load as the cost.
 - **Wall-clock latency.** `duration_s` from the arm's manifest.
@@ -170,27 +179,31 @@ The results record carries its `Scorer:` line as `skills/hypothesis-driven-analy
 ## Verdicts
 
 Reported per host and per cell; no verdict pools Claude Code and Codex, and challenge cells are reported apart from the routine and representative cells.
-At n=3 nothing is a rate; "pass" below means at least 2 of 3 arms and "fail" at most 1 of 3.
+At n=3 nothing is a rate.
 
-| Plugin on E and C | No plugin on E and C | Verdict for that cell and host |
+An arm passes when it passes both E and C in that same arm; where E is `n/a` (R1, R2), an arm passes on C alone.
+An arm that passes one of E and C and fails the other is a split arm: it counts as a failing arm for every verdict below, and the results record reports how many arms were split and which column each failed.
+So every arm is either passing or failing, and a condition (plugin or no plugin, for one cell on one host) passes when at least 2 of its 3 arms pass and fails when at most 1 does.
+
+| Plugin condition | No-plugin condition | Verdict for that cell and host |
 | --- | --- | --- |
 | pass | fail | the plugin improves the answer |
 | pass | pass | the plugin makes no difference: the baseline already does this |
 | fail | fail | the plugin makes no difference: neither condition does this, a gap |
 | fail | pass | a regression attributable to the plugin |
 
-Across the suite, "the plugin makes no difference" is the verdict on a host when every scored cell lands in one of the two no-difference rows.
-A cell where E and C disagree within a condition is reported as split, with each column's counts.
+Across the suite, on a host: "the plugin makes no difference" when every scored cell lands in one of the two no-difference rows; "the plugin improves answers" when at least one cell lands in the improvement row and none in the regression row; "the plugin regresses answers" when at least one cell lands in the regression row and none in the improvement row; "mixed" when at least one cell lands in each, reported cell by cell.
 
 ## What would change a maintenance decision
 
 Stated before any arm:
 
 - **X2, X3 → D1 (#116).**
-  If plugin arms fail E or C on X2 (or X3) on either host, D1 writes the on-demand reference for that cell's method.
-  If plugin arms pass E and C on both hosts, #116's row for that cell closes as "no change, measured".
+  If the plugin condition fails on X2 (or X3) on either host, D1 writes the on-demand reference for that cell's method.
+  If it passes on both hosts, #116's row for that cell closes as "no change, measured".
 - **R1, R2 → descriptions.**
   If at least 3 of the 6 plugin arms on R1 and R2 on a host fail unnecessary ceremony, narrowing the description of each skill they loaded is justified, through the unfreeze procedure of `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md`.
+  Exactly 2 of 6 is inconclusive: the descriptions stay unchanged, and the result is recorded as a watch item that a later measured arm on the same skills must cite before any description change.
   At most 1 of 6 leaves the descriptions unchanged.
 - **Activation (#104, #108, #111).**
   If the suite verdict on a host is "the plugin makes no difference", chasing automatic activation on that host is deprioritized: activating more often would not change answers on these tasks.

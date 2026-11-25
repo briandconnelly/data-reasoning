@@ -6,9 +6,10 @@
 """Fail if the X3 fixture's two metrics stop picking different winners.
 
 The discriminating property: at the conventional 0.5 threshold model A has
-the higher overall accuracy, while among each model's 500 highest-scored
-customers (the contact limit the prompt states) model B's precision is
-higher, each by a stated margin.
+the higher overall accuracy, while among each model's highest-scored
+customers model B's precision is higher, each by a stated margin. The prompt's
+500 calls a month can be read against a quarter's holdout as 500, 1,000, or
+1,500 contacts, so B must win at every one of those cuts.
 
     uv run scripts/representative/validate_x3.py \
         docs/evidence/integration/representative-v1/fixtures/x3-churn
@@ -26,12 +27,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 from _common import regenerated_matches, report
 from generate import build_x3
 
-CONTACT_LIMIT = 500
+CUTS = (500, 1000, 1500)
+"""Readings of "500 calls a month" against a quarter's holdout."""
 THRESHOLD = 0.5
 ACCURACY_MARGIN = 0.02
 """A's accuracy must beat B's by at least two points."""
 PRECISION_MARGIN = 0.10
-"""B's precision in its top 500 must beat A's by at least ten points."""
+"""At every cut, B's precision in its top k must beat A's by at least ten points."""
 
 
 def load(fixture: Path) -> list[tuple[float, float, int]]:
@@ -56,23 +58,22 @@ def precision_at(rows: list[tuple[float, float, int]], col: int, k: int) -> tupl
 def check(fixture: Path) -> tuple[list[str], dict[str, object]]:
     rows = load(fixture)
     acc = {"A": accuracy(rows, 0), "B": accuracy(rows, 1)}
-    pa, tie_a = precision_at(rows, 0, CONTACT_LIMIT)
-    pb, tie_b = precision_at(rows, 1, CONTACT_LIMIT)
-    facts = {
+    facts: dict[str, object] = {
         "rows": len(rows),
         "churn rate": f"{sum(r[2] for r in rows) / len(rows):.1%}",
         "accuracy at 0.5": {k: f"{v:.1%}" for k, v in acc.items()},
-        f"precision in top {CONTACT_LIMIT}": {"A": f"{pa:.1%}", "B": f"{pb:.1%}"},
     }
     problems = []
     if not acc["A"] - acc["B"] >= ACCURACY_MARGIN:
         problems.append("overall accuracy no longer picks A by the margin")
-    if not pb - pa >= PRECISION_MARGIN:
-        problems.append(f"precision in the top {CONTACT_LIMIT} no longer picks B by the margin")
-    if tie_a or tie_b:
-        problems.append(
-            f"a score tie straddles rank {CONTACT_LIMIT}, so the top {CONTACT_LIMIT} is ambiguous"
-        )
+    for k in CUTS:
+        pa, tie_a = precision_at(rows, 0, k)
+        pb, tie_b = precision_at(rows, 1, k)
+        facts[f"precision in top {k}"] = {"A": f"{pa:.1%}", "B": f"{pb:.1%}"}
+        if not pb - pa >= PRECISION_MARGIN:
+            problems.append(f"precision in the top {k} no longer picks B by the margin")
+        if tie_a or tie_b:
+            problems.append(f"a score tie straddles rank {k}, so the top {k} is ambiguous")
     return problems, facts
 
 

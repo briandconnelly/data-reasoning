@@ -144,7 +144,7 @@ X2_DAYS = 730
 X2_WEEKDAY = (1.12, 1.08, 1.04, 1.0, 0.96, 0.82, 0.74)
 
 
-def build_x2(out: Path, *, annual_amplitude: float = 0.30) -> None:
+def build_x2(out: Path, *, annual_amplitude: float = 0.30, noise: float = 0.03) -> None:
     rng = random.Random(SEED + 3)
     out.mkdir(parents=True, exist_ok=True)
     rows = []
@@ -154,7 +154,7 @@ def build_x2(out: Path, *, annual_amplitude: float = 0.30) -> None:
             2 * math.pi * (d.timetuple().tm_yday - 15) / 365.25
         )
         level = 1200 * (1 + 0.10 * t / 365) * season * X2_WEEKDAY[d.weekday()]
-        rows.append([d.isoformat(), max(0, round(level * (1 + rng.gauss(0, 0.03))))])
+        rows.append([d.isoformat(), max(0, round(level * (1 + rng.gauss(0, noise))))])
     _write_csv(out / "daily_tickets.csv", ["date", "tickets"], rows)
     (out / "analyst_model.py").write_text(ANALYST_MODEL, encoding="utf-8")
     (out / "analyst_notes.md").write_text(
