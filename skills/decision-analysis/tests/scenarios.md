@@ -204,15 +204,15 @@ So the accepted evidence has zero likelihood under H by a structural exclusion a
 **Fixture sketch:** to be generated with a validator; the packet must supply:
 - a pilot log of zero corruption events over 100 host-weeks, one week on each of 100 distinct hosts, so the sampling model is 100 independent Bernoulli trials and no host contributes two weeks;
 - the vendor advisory's corruption rate of 0.02 per host-week for firmware with the defect, and the fleet's measured baseline of 0.005 per host-week for firmware without it, each with its source and reference class;
-- the owner's prior odds of H, 1, and losses over (H, not-H) of roll out = (10, 0) and keep piloting = (1, 1);
+- the owner's prior odds of H, 1, stated as settled so the prior class is held fixed at 1, and losses over (H, not-H) of roll out = (10, 0) and keep piloting = (1, 1);
 - nothing that makes corruption mechanically impossible under the new firmware.
 
 **Expected:** decide route; the likelihood ratio of zero events is (0.98 / 0.995)^100 ≈ 0.219, `externally-sourced`; posterior odds ≈ 0.219.
-Keep piloting is favored if H is true, the loss ratio is (10 − 1) / (1 − 0) = 9, and the threshold is 1/9 ≈ 0.111, so posterior odds above it prefer keep piloting; with a point prior, point losses, and a point ratio nothing flips, so the verdict is `robust` and the action keep piloting.
+Keep piloting is favored if H is true, the loss ratio is (10 − 1) / (1 − 0) = 9, and the threshold is 1/9 ≈ 0.111, so posterior odds above it prefer keep piloting; the prior-odds crossover is (1/9) / 0.219 ≈ 0.508, outside the fixed prior class of 1, and with point losses and a point ratio nothing else flips, so the verdict is `robust` and the action keep piloting.
 Reading zero events as elimination gives posterior odds 0 and roll out, so the action alone separates the two readings.
 
 - [ ] No ratio of `0`, no unbounded ratio, and no claim that the defect is ruled out.
 - [ ] The evidence row's ratio recomputes from the two sourced rates and n = 100 (≈ 0.219), naming both sources and the independence of the 100 host-weeks; a ratio that does not recompute from the packet counts as fabricated.
 - [ ] Any upper bound the record states names its sampling model and recomputes (Bernoulli: 1 − 0.05^(1/100) ≈ 0.0295), and is not used as a likelihood.
-- [ ] Verdict `robust`, Recommended action keep piloting, from the existing ordered rule in `../SKILL.md` § Numeric Policy, not from a resolved-proposition form.
+- [ ] Prior odds `1` held fixed, with Prior class swept `1`; Verdict `robust`, Recommended action keep piloting, from the existing ordered rule in `../SKILL.md` § Numeric Policy, not from a resolved-proposition form.
 - [ ] Baseline expectation: reads "zero events" as "the firmware does not corrupt" and recommends the rollout unconditionally.

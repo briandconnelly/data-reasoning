@@ -32,7 +32,8 @@ For example, 100 independent weeks with p = 0.02 under H and p = 0.005 under not
 A zero count alone supports an upper confidence bound on the rate: for zero of n Bernoulli trials the exact one-sided 95% bound is 1 − 0.05^(1/n) (≈ 0.0295 at n = 100), and under a Poisson model over n exposure units it is −ln(0.05)/n (≈ 0.0300), the "rule of three".
 The sampling model must be named, because host-weeks drawn from the same hosts can share host-level failures and are then not independent trials.
 A confidence bound is neither a state-conditional predictive probability, so it supplies no likelihood ratio by itself, nor evidence of a structural zero.
-The current positive-ratio rule stops a zero count from being recorded as elimination, and any change must keep it doing so.
+A zero count alone does not establish impossibility; it eliminates a state only when the model structurally requires an event on every trial under that state (p = 1) while p < 1 under the other, which is a structural exclusion, not a frequency.
+The current positive-ratio rule stops a zero count from being recorded as elimination without such an exclusion, and any change must keep it doing so.
 
 ## Positions
 
@@ -52,7 +53,7 @@ What it would cost, through the machinery in `../SKILL.md` § Numeric Policy:
   Loss class follows sourcing, not state probability, so an owner-supplied loss in the eliminated state stays belief-grade and the loss cap does not fire on it; but a `sensitivity-only` loss there would still cap the verdict at `loss-sensitive`.
   The position therefore owes a ruling on whether r and the cap read losses in an eliminated state.
 - **Validators.** The positivity check is a numeric guard in the dev checker, `tests/check_decision.py`.
-  The shipped validator, `instruments/check_record.py`, parses no numeric ratio: it checks each evidence row's provenance class and the paired missing-ratio sentinels, so it changes only if the chosen form adds a sentinel or slot.
+  The shipped validator, `instruments/check_record.py`, parses no numeric ratio: it checks each evidence row's provenance class and the paired missing-ratio sentinels, but it also enforces the closed verdict set and the coupling between a verdict and its slots, so it changes whenever the chosen form adds a sentinel, a slot, a verdict, or a new verdict-to-slot coupling.
 
 *B. Exact endpoints, decided by the one-state comparison.*
 Record the exact `0` or unbounded ratio in the Evidence table, so the evidence keeps a numeric form, but take the verdict from the surviving-state comparison in C rather than from the odds arithmetic.
@@ -69,7 +70,8 @@ It cannot reuse the `dominated` clause as written: with losses A = (1, 0) and B 
 Likelihood ratios stay strictly positive, so the zero-count guard keeps working unchanged, and the sweeps, crossovers, ties, and loss ratio never meet `0` or infinity.
 
 *D. Ranges that reach an endpoint.*
-A range such as `0.5` to unbounded still admits finite values on both sides of the threshold, so it is not elimination and C does not apply; it would need its own sweep semantics.
+A range such as `0.5` to unbounded is not elimination, because it admits finite values, so C does not apply.
+Whether it carries the posterior across the threshold depends on the prior and losses: at prior odds 1 and a threshold of 0.1 every ratio in it gives posterior odds above the threshold and the action never flips, while at a higher threshold it can; either way it would need its own sweep semantics.
 `../SKILL.md` § Numeric Policy already counts a range endpoint that reaches the threshold as a flip there, and that rule would have to say what an endpoint at infinity does.
 This is a separate owner choice and not part of the recommendation.
 
@@ -92,13 +94,13 @@ Routing it to `out: direct` would change § Routing, because a resolved causal p
 
 If the owner prefers A, the work is:
 
-1. Decide in § Numeric Policy that an exact `0` or unbounded ratio is admissible only under the elimination condition above, that a finite-sample zero count never qualifies, and that the both-zero case goes to model review.
+1. Decide in § Numeric Policy that an exact `0` or unbounded ratio is admissible only under the elimination condition above, that a zero count alone never establishes impossibility (it qualifies only when a structural exclusion in the model gives it zero likelihood under one state), and that the both-zero case goes to model review.
 2. Give the template's slot notes a spelling for an unbounded endpoint and for zero and unbounded posterior odds.
 3. Rule, in § Numeric Policy, what each verdict clause and the exact-tie rule do at those endpoints, and whether r and the loss cap read losses in an eliminated state.
-4. Change the parse and positivity checks in `tests/check_decision.py` (prior odds, evidence ratio, crossover, threshold) to match, with fixtures for each endpoint, and touch `instruments/check_record.py` only if a sentinel or slot is added.
+4. Change the parse and positivity checks in `tests/check_decision.py` (prior odds, evidence ratio, crossover, threshold) to match, with fixtures for each endpoint, and change `instruments/check_record.py` wherever the form adds a sentinel, a slot, a verdict, or a verdict-to-slot coupling.
 5. Measure DA-S12 and DA-S13 and every existing cell the edited sentences reach.
 
-Reversing to B is steps 1, 2, and 4 plus the surviving-state comparison of C; D is a separate change on top of either.
+Reversing to B is steps 1, 2, 4, and 5 plus the surviving-state comparison of C, since B also changes the record form and the verdict path; D is a separate change on top of either.
 
 ## Open owner questions
 
@@ -110,10 +112,10 @@ Reversing to B is steps 1, 2, and 4 plus the surviving-state comparison of C; D 
 
 ## Reopening condition
 
-A measured arm shows agents misclassifying a finite-sample zero count as elimination under whichever form ships, or a real decision arrives where the eliminated state cannot be cleanly separated from a surviving one and the chosen form cannot express it.
+A measured arm shows agents recording a zero count with no structural exclusion as elimination under whichever form ships, or a real decision arrives where the eliminated state cannot be cleanly separated from a surviving one and the chosen form cannot express it.
 
 ## Where the rules live
 
 Nothing here is a rule yet.
-Once the owner decides, semantics go in `../SKILL.md` § Numeric Policy, routing in § Routing, the record shape and verdict list in § The Decide Route, the representation in `../references/decision-record-template.md` § Slot notes, and enforcement in `tests/check_decision.py` (and `instruments/check_record.py` if the form adds a sentinel or slot), each in its one home; this record will point at them.
+Once the owner decides, semantics go in `../SKILL.md` § Numeric Policy, routing in § Routing, the record shape and verdict list in § The Decide Route, the representation in `../references/decision-record-template.md` § Slot notes, and enforcement in `tests/check_decision.py` (and `instruments/check_record.py` if the form adds a sentinel, a slot, a verdict, or a verdict-to-slot coupling), each in its one home; this record will point at them.
 The paired scenario cells are DA-S12 and DA-S13 in `../tests/scenarios.md`.
