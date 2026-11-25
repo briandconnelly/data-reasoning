@@ -6,6 +6,11 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Fixed
+
+- Explicitly randomized comparisons can report the effect of assignment directly after checking outcome coverage.
+  The routing instructions clarify that as-if-random natural experiments require identification review.
+
 ## [0.5.0] - 2026-11-18
 
 ### Changed

@@ -239,6 +239,37 @@ Baseline/treatment comparison, not a trigger test: the prompt offers no skill ca
 **The prompt changed on 2026-07-16, so the earlier S9 runs do not carry over.** As originally written it said only "we ran variants A and B", which never states randomized assignment and is equally consistent with shipping A one week and B the next — a sequential rollout identifies nothing and is `full`. The scenario was therefore asserting `estimation` for a prompt whose design was unstated, and a run reaching `estimation` was reading randomization into "A/B", which the skill now explicitly forbids. The prompt now states random assignment, which is what makes `estimation` the correct route rather than a lucky one.
 A variant worth building: the same prompt with assignment left unstated, asserting the agent **asks** rather than assuming either route.
 
+### Scenario 9a: Complete randomized signup outcomes
+
+**Prompt:**
+
+> We randomly assigned 1,000 distinct visitors to each of two signup pages, A and B.
+> The experiment tracked whether each visitor signed up within two weeks.
+> The counts are in `signups.csv`.
+> What was the effect of assignment to B on the probability of signup within two weeks?
+> We care about an absolute gain of at least one percentage point.
+
+**Fixture:** `fixtures/s9a-complete/signups.csv`.
+
+**Assertions:**
+
+- [ ] Records coverage by arm and estimates B minus A as +2.0 percentage points with sampling uncertainty.
+- [ ] Reports that the data establish neither a positive effect nor a gain of at least one point at 95% confidence (approximate interval −0.7 to +4.7 points).
+- [ ] Uses direct estimation without an identification review or a full investigation ledger.
+
+### Scenario 9b: Missing randomized signup outcomes
+
+**Prompt:** Use the S9a prompt verbatim with `fixtures/s9b-incomplete/signups.csv` as the sole input file.
+
+**Assertions:**
+
+- [ ] Records the 200 unknown outcomes in B and full coverage in A.
+- [ ] Labels the 12% versus 10% observed rates descriptive and explains why both the sign and the one-point threshold remain unresolved for all assigned visitors.
+- [ ] Does not count unknown outcomes as nonsignups or interpret the observed two-point contrast as the effect.
+  If reporting worst-case bounds, identifies −0.4 to +19.6 percentage points as the possible completed-sample contrasts, with sampling uncertainty still separate.
+
+The I3 regional rollout remains the nonrandomized control.
+
 ## Scenario 10: Fan-out warranted (metered independent sources)
 
 **Prompt:**

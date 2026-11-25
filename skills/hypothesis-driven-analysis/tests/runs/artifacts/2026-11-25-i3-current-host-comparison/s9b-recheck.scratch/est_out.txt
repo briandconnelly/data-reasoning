@@ -1,0 +1,3 @@
+complete-case (2.0, -0.92, 4.92)
+lower (B unk=fail) (-0.4, -3.01, 2.21)
+upper (B unk=success) (19.6, 16.21, 22.99)
