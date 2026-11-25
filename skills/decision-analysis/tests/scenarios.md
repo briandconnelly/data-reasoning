@@ -180,9 +180,16 @@ Added 2026-11-17 for #94.
 ### DA-S12 — an observation impossible under one state (ruled-out state)
 
 **Status:** unrun; added 2026-11-24 for issue #114 and `decisions/008`, which is proposed, so no wording it would measure exists yet.
-**Prompt:** "We suspect last night's data loss came from the new compaction job in build 412, and we must choose by noon between rolling back to build 411 and keeping 412 with a hotfix. Here is the incident packet (`{FIXTURE_PATH}`). Roll back or hotfix?"
-**Fixture sketch:** to be generated with a validator; a packet whose verified, checksummed audit log shows the loss on a host that never ran build 412, with a build manifest showing the compaction job exists only in 412, so the loss is impossible if the compaction job caused it and possible under the alternative; a four-cell loss table supplied by the owner whose losses strictly separate the two actions in the surviving state.
-**Expected:** the route the owner's answer to `decisions/008`'s routing question selects (`decide` or `out: direct`); the record or answer states the eliminating observation, why it is impossible under the eliminated state, and why the observation is not in doubt, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
+**Prompt:** "We suspect last night's loss of the orders partition on db-03 came from the new compaction job in build 412, and we must choose by noon between rolling back to build 411 and keeping 412 with a hotfix. Here is the incident packet (`{FIXTURE_PATH}`). Roll back or hotfix?"
+**Proposition:** H = the build-412 compaction job caused the loss of the orders partition on db-03; not-H = something other than that job caused it.
+**Fixture sketch:** to be generated with a validator; the packet must establish, each from its own file:
+- the lost partition lived only on db-03's local disk, with no replica, shared volume, or network storage holding it (a storage-topology document);
+- the compaction job can modify data only by executing on the host that holds it (the job's design document), and no component able to touch the partition ran the job (process accounting for db-03 and the deploy log showing db-03 never ran build 412);
+- the full observation, the loss together with the job's absence from db-03, is possible under not-H, with a named alternative such as a disk fault in db-03's device log;
+- a four-cell loss table supplied by the owner whose losses strictly separate the two actions in the surviving state.
+
+So the accepted evidence has zero likelihood under H by a structural exclusion and positive likelihood under not-H.
+**Expected:** the route the owner's answer to `decisions/008`'s routing question selects; the response states the accepted evidence, the structural reason it is impossible under H, and why it is possible under not-H, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
 
 - [ ] No evidence row carries an invented small positive ratio standing in for impossibility.
 - [ ] The decisive observation is not discarded as `none supported`.
@@ -192,11 +199,20 @@ Added 2026-11-17 for #94.
 ### DA-S13 — zero events in a finite sample (must keep its uncertainty)
 
 **Status:** unrun; added 2026-11-24 as DA-S12's pair for issue #114 and `decisions/008`.
-**Prompt:** "The vendor's new disk firmware has shown zero corruption events across the hosts we piloted it on. Should we roll it out fleet-wide this week or keep piloting another month? Packet: `{FIXTURE_PATH}`."
-**Fixture sketch:** to be generated with a validator; a pilot log with zero corruption events in a stated finite number of host-weeks, a sourced historical corruption rate for the old firmware, and owner-supplied losses; nothing in the packet makes corruption mechanically impossible under the new firmware.
-**Expected:** decide route; the zero count is recorded as finite evidence with a strictly positive ratio and its reference class, never as elimination, and the sweep and verdict rules run as usual.
+**Prompt:** "The vendor's new disk firmware has shown zero corruption events in our pilot. Should we roll it out fleet-wide this week or keep piloting another month? Packet: `{FIXTURE_PATH}`."
+**Proposition:** H = the new firmware carries the defect the vendor's advisory describes; not-H = it does not.
+**Fixture sketch:** to be generated with a validator; the packet must supply:
+- a pilot log of zero corruption events over 100 host-weeks, one week on each of 100 distinct hosts, so the sampling model is 100 independent Bernoulli trials and no host contributes two weeks;
+- the vendor advisory's corruption rate of 0.02 per host-week for firmware with the defect, and the fleet's measured baseline of 0.005 per host-week for firmware without it, each with its source and reference class;
+- the owner's prior odds of H, 1, and losses over (H, not-H) of roll out = (10, 0) and keep piloting = (1, 1);
+- nothing that makes corruption mechanically impossible under the new firmware.
 
-- [ ] No ratio of `0` and no claim that corruption is ruled out; the record states that zero of n bounds the rate only from above.
-- [ ] Any upper bound the record states recomputes from the pilot's n (for 95%, 1 − 0.05^(1/n)).
-- [ ] The verdict comes from the existing ordered rule in `../SKILL.md` § Numeric Policy, not from a resolved-proposition form.
+**Expected:** decide route; the likelihood ratio of zero events is (0.98 / 0.995)^100 ≈ 0.219, `externally-sourced`; posterior odds ≈ 0.219.
+Keep piloting is favored if H is true, the loss ratio is (10 − 1) / (1 − 0) = 9, and the threshold is 1/9 ≈ 0.111, so posterior odds above it prefer keep piloting; with a point prior, point losses, and a point ratio nothing flips, so the verdict is `robust` and the action keep piloting.
+Reading zero events as elimination gives posterior odds 0 and roll out, so the action alone separates the two readings.
+
+- [ ] No ratio of `0`, no unbounded ratio, and no claim that the defect is ruled out.
+- [ ] The evidence row's ratio recomputes from the two sourced rates and n = 100 (≈ 0.219), naming both sources and the independence of the 100 host-weeks; a ratio that does not recompute from the packet counts as fabricated.
+- [ ] Any upper bound the record states names its sampling model and recomputes (Bernoulli: 1 − 0.05^(1/100) ≈ 0.0295), and is not used as a likelihood.
+- [ ] Verdict `robust`, Recommended action keep piloting, from the existing ordered rule in `../SKILL.md` § Numeric Policy, not from a resolved-proposition form.
 - [ ] Baseline expectation: reads "zero events" as "the firmware does not corrupt" and recommends the rollout unconditionally.
