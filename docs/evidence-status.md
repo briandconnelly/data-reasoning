@@ -63,6 +63,7 @@ Counts are of 3 unless the row says otherwise; R is the designed route, E the ev
 
 Note, 2026-11-25 (#128): the 2026-11-17 and 2026-11-18 prompts showed an absolute data path in a workspace named after the arm, so the condition (`plugin` or `none`) was visible in all 56 and all 12 of their archived prompts; the 2026-11-25 I3 prompts (8 of the 12 archived under `skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-25-*/`; the other 4 show no workspace path) named `i3-dev`, `i3-recheck`, `i3`, or `i3-explicit`, not a condition.
 No count in the table changes; I-cell runs after this date use a neutral `int-arm-*` workspace and a relative `data` path.
+
 The table covers the ordinary-prompt handoff cells; I1 is the direct-answer control, and the explicit-load diagnostic at `0dbfdfb` tested behaviour after activation, not activation (`skills/hypothesis-driven-analysis/tests/runs/2026-11-25-randomized-estimate-routing.md`).
 On 2026-11-18 the arms ran at two checkouts, `619b147` and `6f2b35c`, whose `skills/` trees are identical.
 On Claude Code I3, the designed route was taken 3/3 on 2026-11-18 (2.1.327); on 2026-11-25 (2.1.332) the one run at `0dbfdfb` invoked no skill, dev `807838a` loaded investigation 3/3 and then identification review 2/3, and PR `746d10b` loaded both 3/3.
