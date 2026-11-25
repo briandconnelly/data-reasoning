@@ -1924,15 +1924,15 @@ RESOLVED_DECISION = """\
 - Deadline or forcing event: noon today
 - Consequences:
 
-  | | the job directly modified the partition true | the job directly modified the partition false |
+  | | the job wrote to or deleted a partition file in the window true | the job wrote to or deleted a partition file in the window false |
   | --- | --- | --- |
   | roll back to build 411 | the faulty job is removed | a build is withdrawn; any indirect build-412 cause is removed too |
   | keep build 412 with a hotfix | the faulty job runs until the hotfix | the build stays and the hotfix work goes to the found cause |
 
 ## Decision-state model
 
-- Proposition: the build-412 compaction job, executing, directly modified or deleted the orders partition on db-03
-- Residual reading: the partition was lost by anything other than that job's direct action, including a disk fault, another process, build 412 acting by another path, and causes nobody named
+- Proposition: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job, executing, wrote to or deleted a file of the orders partition on db-03
+- Residual reading: false: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job wrote to or deleted no file of the orders partition on db-03, so the loss came from anything else, including a disk fault, another process, build 412 acting by another path, and causes nobody named
 - Claim class: causal
 - Identification basis: structural exclusion — see Resolution
 - Identification conditions: the partition was held only on db-03's local disk; the job modifies data only on the host where it executes; process accounting and the deploy log are complete for the incident window
@@ -2184,16 +2184,15 @@ def test_resolved_duplicate_loss_rows_fail():
 
 def test_duplicate_verdict_line_fails():
     bad = _edit("- Verdict: resolved\n", "- Verdict: resolved\n- Verdict: robust\n")
-    assert _says(bad, "exactly one is allowed")
-    ordinary = GOOD_DECISION.replace(
-        "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
-    )
-    assert any("exactly one is allowed" in f for f in cr.check(ordinary, final=True))
+    assert _says(bad, "exactly one '- Verdict:' line")
 
 
 @pytest.mark.parametrize("annotated", ["resolved — the job is excluded", "resolved (structural)"])
 def test_annotated_resolved_fails(annotated):
-    assert _says(_edit("- Verdict: resolved", f"- Verdict: {annotated}"), "reads 'resolved' bare")
+    assert _says(
+        _edit("- Verdict: resolved", f"- Verdict: {annotated}"),
+        "must read exactly '- Verdict: resolved'",
+    )
 
 
 @pytest.mark.parametrize(("open_", "close"), [("```markdown", "```"), ("<!--", "-->")])
@@ -2231,3 +2230,152 @@ def test_resolved_slots_exist_in_the_shipped_template():
         for label in labels:
             assert f"- {label}:" in cr._section(blocks[0], heading), (heading, label)
     assert "Surviving-state loss difference" in cr.RESOLVED_SLOTS["## Resolution"]
+
+
+# PR #137 review round, mirrored in the dev suite: both checkers agree.
+
+_RESOLUTION = RESOLVED_DECISION[
+    RESOLVED_DECISION.index("## Resolution") : RESOLVED_DECISION.index("## Verdict")
+]
+
+
+@pytest.mark.parametrize(
+    ("row", "difference"),
+    [
+        ("| roll back to build 411 | 4 | sensitivity-only |", "user-elicited"),
+        ("| roll back to build 411 | 4 | estimated-from-data-in-hand |", "user-elicited"),
+        ("| roll back to build 411 | 4 | user-elicited |", "estimated-from-data-in-hand"),
+    ],
+)
+def test_resolved_named_action_needs_every_loss_belief_grade(row, difference):
+    mixed = _edit("| roll back to build 411 | 4 | user-elicited |", row)
+    mixed = _edit(
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        f"- Surviving-state loss difference: 3 — provenance: {difference}",
+        mixed,
+    )
+    assert _says(mixed, "'returned to owner'")
+    assert _says(_recommend("no preference", mixed), "'returned to owner'")
+    assert cr.check(_recommend("returned to owner", mixed), final=True) == []
+
+
+def test_a_second_resolution_section_fails_and_is_read_for_model_review():
+    second = _RESOLUTION.replace("- Surviving state: proposition false", "- Surviving state: none")
+    bad = _edit("## Verdict", second + "## Verdict")
+    assert _says(bad, "duplicate section '## Resolution'")
+    assert _says(bad, "model review, never a verdict")
+
+
+def test_observations_rows_are_exactly_two_cells_and_filled():
+    wide = _edit("| packet file: incident timeline |", "| packet file: incident timeline | extra |")
+    assert _says(wide, "'- Observations:' row 1 must be exactly two cells")
+    header = _edit("| observation | source |", "| observation | source | note |")
+    assert _says(header, "header must be exactly 'observation | source'")
+    blank = _edit("| packet file: incident timeline |", "| <file or source it comes from> |")
+    assert _says(blank, "still unfilled")
+    assert cr.check(_edit("| packet file: incident timeline |", "| <source> |"), final=True) == []
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- Posterior odds: 0",
+        "- Prior odds: 1 — provenance: user-elicited",
+        "- Crossover: none within swept class",
+        "- Independence: single item",
+    ],
+)
+def test_resolved_rejects_an_odds_only_label_anywhere(line):
+    bad = _edit("- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    label = line[2:].split(":", 1)[0]
+    assert _says(bad, f"found '- {label}:'")
+    prose = _edit(
+        "- VoI question: none\n", "- VoI question: none\n\nNo posterior odds were computed.\n"
+    )
+    assert cr.check(prose, final=True) == []
+
+
+def test_unfilled_difference_defers_the_recommendation_coupling_by_default():
+    draft = _edit(
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        "- Surviving-state loss difference: <signed number or range> — provenance: <class>",
+    )
+    assert not any("Recommended action" in f for f in cr.check(draft))
+    assert _says(draft, "still unfilled")
+
+
+def test_odds_only_field_in_template_state_waits_for_final():
+    leftover = _edit(
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: <multiple> — provenance: <class>\n",
+    )
+    assert not any("odds-only" in f for f in cr.check(leftover))
+    assert _says(leftover, "found '- Loss ratio:'")
+    filled = _edit(
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: 3 — provenance: user-elicited\n",
+    )
+    assert _says(filled, "found '- Loss ratio:'", final=False)
+
+
+def test_ordinary_records_keep_their_verdict_line_tolerance():
+    second = GOOD_DECISION.replace(
+        "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    assert cr.check(second, final=True) == []
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- **Verdict:** resolved",
+        "- Verdict: `resolved`",
+        "- Verdict: **resolved**",
+        "- Verdict: resolved (structural)",
+    ],
+)
+def test_a_resolved_verdict_line_is_exactly_the_bare_token(line):
+    assert _says(_edit("- Verdict: resolved", line), "must read exactly '- Verdict: resolved'")
+
+
+def test_a_second_verdict_line_beside_resolved_fails():
+    bad = _edit("- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n")
+    assert _says(bad, "exactly one '- Verdict:' line")
+
+
+def test_resolved_sections_keep_the_skeleton_order():
+    late = RESOLVED_DECISION.replace(_RESOLUTION, "") + "\n" + _RESOLUTION
+    assert _says(late, "sections must appear in the order")
+
+
+def _skeleton_labels(block: str) -> dict[str, list[str]]:
+    """Each `## Section` of a template block mapped to its top-level `- Label:` bullets."""
+    out: dict[str, list[str]] = {}
+    current = None
+    for line in block.splitlines():
+        if line.startswith("## "):
+            current = line.rstrip()
+            out[current] = []
+        elif current and (m := re.match(r"^- ([^<:\n]+):", line)):
+            out[current].append(m.group(1))
+    return out
+
+
+def test_each_decision_skeleton_matches_its_own_required_set():
+    """Per skeleton, per section: the template's labels equal the validator's
+    required slots plus that skeleton's nested-table labels, so dropping a
+    label from one skeleton fails even when another skeleton still has it."""
+    text = TEMPLATE_FILES[-1].read_text(encoding="utf-8")
+    blocks = [
+        b for b in re.findall(r"```markdown\n(.*?)```", text, re.S) if cr.detect(b) == "decision"
+    ]
+    assert len(blocks) == 2  # noqa: PLR2004 -- ordinary and resolved
+    for block in blocks:
+        resolved = "## Resolution" in block
+        required = cr.RESOLVED_SLOTS if resolved else cr.REQUIRED_SLOTS["decision"]
+        nested = cr.RESOLVED_NESTED_TABLES if resolved else cr.DECISION_NESTED_TABLES
+        expected = {h: set(labels) for h, labels in required.items()}
+        for heading, label in nested:
+            expected[heading].add(label)
+        got = {h: set(labels) for h, labels in _skeleton_labels(block).items()}
+        assert got == expected, (resolved, got, expected)

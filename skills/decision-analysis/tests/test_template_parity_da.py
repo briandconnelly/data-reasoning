@@ -56,3 +56,30 @@ def test_label_sets_are_equal():
 def test_resolved_labels_are_in_the_template():
     assert "Surviving-state loss difference:" in template_labels()
     assert set(RESOLVED_LABELS["Resolution"]) <= template_labels()
+
+
+def skeleton_sections(block: str) -> dict[str, tuple[str, ...]]:
+    """Each `## Section` of one template block mapped to its `- Label:` bullets."""
+    out: dict[str, list[str]] = {}
+    current = None
+    for line in block.splitlines():
+        if line.startswith("## "):
+            current = line[3:].strip()
+            out[current] = []
+        elif current is not None and (m := _TEMPLATE_BULLET.match(line)):
+            out[current].append(m.group(1).strip())
+    return {k: tuple(v) for k, v in out.items()}
+
+
+def test_each_skeleton_matches_its_own_label_set():
+    """Per skeleton, per section, in order: a label dropped from one skeleton
+    fails here even when another skeleton still carries it."""
+    text = TEMPLATE.read_text(encoding="utf-8")
+    blocks = re.findall(r"```markdown\n(.*?)```", text, re.S)
+    by_title = {"Decision Record": [], "VoI Record": []}
+    for block in blocks:
+        by_title[block.split(":", 1)[0].removeprefix("# ")].append(block)
+    ordinary, resolved = sorted(by_title["Decision Record"], key=lambda b: "## Resolution" in b)
+    assert skeleton_sections(ordinary) == DECIDE_LABELS
+    assert skeleton_sections(resolved) == RESOLVED_LABELS
+    assert skeleton_sections(by_title["VoI Record"][0]) == VOI_LABELS

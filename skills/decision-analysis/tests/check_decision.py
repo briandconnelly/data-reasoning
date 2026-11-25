@@ -153,7 +153,18 @@ RESOLVED_LABELS: dict[str, tuple[str, ...]] = {
     "Handoff": DECIDE_LABELS["Handoff"],
 }
 ODDS_ONLY_SECTIONS = ("Evidence and update", "Robustness")
-ODDS_ONLY_FRAME_SLOTS = ("Favored if true:", "Loss ratio:", "Decision threshold (posterior odds):")
+# Every odds-only slot label, rejected anywhere in a visible resolved record.
+ODDS_ONLY_LABELS = (
+    "Favored if true:",
+    "Loss ratio:",
+    "Decision threshold (posterior odds):",
+    *DECIDE_LABELS["Evidence and update"],
+    *DECIDE_LABELS["Robustness"],
+)
+RESOLVED_ORDER = tuple(RESOLVED_LABELS)
+# A `- Verdict:` line, with or without emphasis on the label, and its value.
+_VERDICT_LINE = re.compile(r"^\s*- (?:(\*\*|__|\*|_)Verdict(?::\1|\1:)|Verdict:)(.*)$")
+_READS_RESOLVED = re.compile(r"^[`*_\s]*resolved(?![\w-])")
 STATES = ("proposition true", "proposition false")
 STRUCTURAL_BASIS = "structural exclusion — see Resolution"
 RESOLVED_PROSE = (
@@ -193,6 +204,10 @@ _QUANTITY = re.compile(r"^\s*(\d+(?:\.\d+)?)\s+([A-Za-z][A-Za-z0-9 _/-]*)\s*$")
 _SEPARATOR_CELL = re.compile(r"^:?-+:?$")
 _SIGNED = r"-?\d+(?:\.\d+)?"
 _DIFFERENCE = re.compile(rf"^({_SIGNED})(?: to ({_SIGNED}))?$")
+# A template blank: angle brackets around words with a space, the template's
+# own placeholder shape; a single word (`<source>`) is an HTML tag name to the
+# shipped validator, so it is not one here either.
+_TEMPLATE_BLANK = re.compile(r"<[A-Za-z][^<>\n=]* [^<>\n=]*>")
 _FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 _REL_TOLERANCE = 0.01
 
@@ -486,16 +501,20 @@ def check(text: str) -> list[str]:  # noqa: PLR0912 -- one pass per route
             )
 
     if route == "decide":
-        verdict_lines = [ln for ln in text.splitlines() if ln.strip().startswith("- Verdict:")]
-        if len(verdict_lines) > 1:
-            failures.append(
-                f"the record carries {len(verdict_lines)} '- Verdict:' lines; "
-                "exactly one is allowed"
-            )
-        failures.extend(_check_model_review(sections))
+        failures.extend(_check_model_review(text))
         raw_verdict = (field(sections.get("Verdict", ""), "Verdict:") or "").strip()
-        if _bare(raw_verdict) == "resolved" or raw_verdict.startswith("resolved"):
-            failures.extend(_check_resolved(sections, raw_verdict))
+        verdict_lines = [m for ln in text.splitlines() if (m := _VERDICT_LINE.match(ln))]
+        if any(_READS_RESOLVED.match(m.group(2)) for m in verdict_lines):
+            if (
+                len(verdict_lines) != 1
+                or verdict_lines[0].group(0).strip() != "- Verdict: resolved"
+            ):
+                failures.append(
+                    "a resolved record carries exactly one '- Verdict:' line, which must read "
+                    "exactly '- Verdict: resolved' (no emphasis, code, or annotation); found "
+                    f"{[m.group(0).strip() for m in verdict_lines]!r}"
+                )
+            failures.extend(_check_resolved(sections, text))
             return failures
         if "Resolution" in sections:
             failures.append(
@@ -649,10 +668,23 @@ def _check_structural_basis(model: str, excluded: str | None) -> list[str]:
     ]
 
 
-def _check_model_review(sections: dict[str, str]) -> list[str]:
-    """Evidence impossible under both states reaches no verdict, under any."""
-    surviving = (field(sections.get("Resolution", ""), "Surviving state:") or "").strip()
-    if surviving.lower() != "none":
+def _resolution_bodies(text: str) -> list[str]:
+    """Every visible `## Resolution` section, duplicates included."""
+    matches = list(_SECTION.finditer(text))
+    return [
+        text[m.end() : matches[i + 1].start() if i + 1 < len(matches) else len(text)]
+        for i, m in enumerate(matches)
+        if m.group(1) == "Resolution"
+    ]
+
+
+def _check_model_review(text: str) -> list[str]:
+    """Evidence impossible under both states reaches no verdict, under any;
+    every Resolution section is read, so a duplicate cannot hide the marker."""
+    if not any(
+        (field(body, "Surviving state:") or "").strip().lower() == "none"
+        for body in _resolution_bodies(text)
+    ):
         return []
     return [
         "'- Surviving state:' reads 'none': evidence impossible under both states goes to "
@@ -683,21 +715,22 @@ def _difference(value: str) -> Interval | None:
     return (low, high) if low <= high else None
 
 
-def _check_resolved(sections: dict[str, str], raw_verdict: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one pass over the resolved record
+def _check_resolved(sections: dict[str, str], text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one pass over the resolved record
     """A resolved record (SKILL.md § The Decide Route; § Numeric Policy for the
     surviving-state comparison). The ordered rule never runs on it."""
     failures: list[str] = []
-    if raw_verdict != "resolved":
-        failures.append(
-            f"a resolved verdict reads 'resolved' bare, with no annotation; found {raw_verdict!r}"
-        )
     for name in ODDS_ONLY_SECTIONS:
         if name in sections:
             failures.append(f"a resolved record carries no odds-only field; found '## {name}'")
-    frame = sections.get("Decision frame", "")
-    for label in ODDS_ONLY_FRAME_SLOTS:
-        if field(frame, label) is not None:
+    for label in ODDS_ONLY_LABELS:
+        if any(ln.strip().startswith(f"- {label}") for ln in text.splitlines()):
             failures.append(f"a resolved record carries no odds-only field; found '- {label}'")
+    headings = [m.group(1) for m in _SECTION.finditer(text) if m.group(1) in RESOLVED_ORDER]
+    if [h for h in RESOLVED_ORDER if h in headings] != list(dict.fromkeys(headings)):
+        failures.append(
+            f"a resolved record's sections must appear in the order {list(RESOLVED_ORDER)}"
+        )
+    frame = sections.get("Decision frame", "")
     _require_slots(sections, RESOLVED_LABELS, failures)
     if any(f.startswith("record is missing") for f in failures):
         return failures
@@ -741,9 +774,14 @@ def _check_resolved(sections: dict[str, str], raw_verdict: str) -> list[str]:  #
         rows = _data_rows(observations)
         if not rows:
             failures.append("'- Observations:' table must have at least one row")
-        for row in rows:
-            if len(row) != 2 or not all(row):  # noqa: PLR2004 -- two columns
-                failures.append(f"'- Observations:' row {row!r} must fill both cells")
+        for i, row in enumerate(rows, 1):
+            if len(row) != 2:  # noqa: PLR2004 -- two columns
+                failures.append(
+                    f"'- Observations:' row {i} must be exactly two cells; found {row!r}"
+                )
+            for cell in row:
+                if not cell or _TEMPLATE_BLANK.search(cell):
+                    failures.append(f"'- Observations:' row {i} cell still unfilled: {cell!r}")
 
     losses_rows = _table_rows(_span(resolution, "Surviving-state losses:"))
     losses: list[tuple[str, Interval | None, str]] = []
@@ -807,7 +845,12 @@ def _check_resolved(sections: dict[str, str], raw_verdict: str) -> list[str]:  #
             failures.append(
                 "'- Surviving-state loss difference:' must carry exactly one provenance class"
             )
-        belief = len(provs) == 1 and provs[0] in BELIEF_LOSS_PROVENANCE
+        belief = (
+            len(provs) == 1
+            and provs[0] in BELIEF_LOSS_PROVENANCE
+            and len(losses) == _SCOPE_ACTIONS
+            and all(prov in BELIEF_LOSS_PROVENANCE for _, _, prov in losses)
+        )
         diff = _difference(_bare(raw_diff))
         if diff is None:
             failures.append(

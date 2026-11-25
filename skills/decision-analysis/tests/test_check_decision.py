@@ -1945,15 +1945,15 @@ RESOLVED = """\
 - Deadline or forcing event: noon today
 - Consequences:
 
-  | | the job directly modified the partition true | the job directly modified the partition false |
+  | | the job wrote to or deleted a partition file in the window true | the job wrote to or deleted a partition file in the window false |
   | --- | --- | --- |
   | roll back to build 411 | the faulty job is removed | a build is withdrawn; any indirect build-412 cause is removed too |
   | keep build 412 with a hotfix | the faulty job runs until the hotfix | the build stays and the hotfix work goes to the found cause |
 
 ## Decision-state model
 
-- Proposition: the build-412 compaction job, executing, directly modified or deleted the orders partition on db-03
-- Residual reading: the partition was lost by anything other than that job's direct action, including a disk fault, another process, build 412 acting by another path, and causes nobody named
+- Proposition: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job, executing, wrote to or deleted a file of the orders partition on db-03
+- Residual reading: false: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job wrote to or deleted no file of the orders partition on db-03, so the loss came from anything else, including a disk fault, another process, build 412 acting by another path, and causes nobody named
 - Claim class: causal
 - Identification basis: structural exclusion — see Resolution
 - Identification conditions: the partition was held only on db-03's local disk; the job modifies data only on the host where it executes; process accounting and the deploy log are complete for the incident window
@@ -2318,17 +2318,19 @@ def test_duplicate_verdict_line_fails():
     bad = replace_once(
         RESOLVED, "- Verdict: resolved\n", "- Verdict: resolved\n- Verdict: robust\n"
     )
-    _both_say(bad, "exactly one is allowed", "exactly one is allowed")
+    _both_say(bad, "exactly one '- Verdict:' line", "exactly one '- Verdict:' line")
     elsewhere = replace_once(
         RESOLVED, "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
     )
-    _both_say(elsewhere, "exactly one is allowed", "exactly one is allowed")
+    _both_say(elsewhere, "exactly one '- Verdict:' line", "exactly one '- Verdict:' line")
 
 
 @pytest.mark.parametrize("annotated", ["resolved — the job is excluded", "resolved (structural)"])
 def test_annotated_resolved_fails(annotated):
     bad = replace_once(RESOLVED, "- Verdict: resolved", f"- Verdict: {annotated}")
-    _both_say(bad, "reads 'resolved' bare", "reads 'resolved' bare")
+    _both_say(
+        bad, "must read exactly '- Verdict: resolved'", "must read exactly '- Verdict: resolved'"
+    )
 
 
 def _hide_resolution(open_: str, close: str) -> str:
@@ -2451,3 +2453,151 @@ def _without_resolved(findings: list[str]) -> list[str]:
         f.replace("'prior-sensitive', 'resolved', 'robust'", "'prior-sensitive', 'robust'")
         for f in findings
     ]
+
+
+# PR #137 review round: each case below failed in at least one checker
+# before its fix, and both checkers must agree on it.
+
+_ROLLBACK_ROW = "| roll back to build 411 | 4 | user-elicited |"
+_RESOLUTION = RESOLVED[RESOLVED.index("## Resolution") : RESOLVED.index("## Verdict")]
+
+
+@pytest.mark.parametrize(
+    ("rows", "difference"),
+    [
+        (("sensitivity-only", "user-elicited"), "user-elicited"),
+        (("user-elicited", "estimated-from-data-in-hand"), "user-elicited"),
+        (("user-elicited", "user-elicited"), "estimated-from-data-in-hand"),
+    ],
+)
+def test_resolved_named_action_needs_every_loss_belief_grade(rows, difference):
+    mixed = _resolved(provs=rows, difference=f"3 — provenance: {difference}")
+    _both_say(
+        mixed, "requires '- Recommended action:' to read 'returned to owner'", "'returned to owner'"
+    )
+    tie = _resolved(
+        losses=("2", "2"),
+        provs=rows,
+        difference=f"0 — provenance: {difference}",
+        rec="no preference",
+    )
+    _both_say(
+        tie, "requires '- Recommended action:' to read 'returned to owner'", "'returned to owner'"
+    )
+    owner = _resolved(provs=rows, difference=f"3 — provenance: {difference}", rec=OWNER)
+    assert _both(owner) == ([], [])
+
+
+def test_a_second_resolution_section_fails_and_is_read_for_model_review():
+    second = _RESOLUTION.replace("- Surviving state: proposition false", "- Surviving state: none")
+    bad = replace_once(RESOLVED, "## Verdict", second + "## Verdict")
+    _both_say(bad, "duplicate section '## Resolution'", "duplicate section '## Resolution'")
+    _both_say(bad, "model review, never a verdict", "model review, never a verdict")
+
+
+def test_observations_rows_are_exactly_two_cells_and_filled():
+    wide = replace_once(
+        RESOLVED, "| packet file: incident timeline |", "| packet file: incident timeline | extra |"
+    )
+    _both_say(
+        wide,
+        "'- Observations:' row 1 must be exactly two cells",
+        "'- Observations:' row 1 must be exactly two cells",
+    )
+    header = replace_once(RESOLVED, "| observation | source |", "| observation | source | note |")
+    _both_say(
+        header,
+        "header must be exactly 'observation | source'",
+        "header must be exactly 'observation | source'",
+    )
+    blank = replace_once(
+        RESOLVED, "| packet file: incident timeline |", "| <file or source it comes from> |"
+    )
+    _both_say(blank, "still unfilled", "still unfilled")
+    # `<source>` is an HTML element name, not a template blank, to both.
+    tag = replace_once(RESOLVED, "| packet file: incident timeline |", "| <source> |")
+    assert _both(tag) == ([], [])
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- Posterior odds: 0",
+        "- Prior odds: 1 — provenance: user-elicited",
+        "- Crossover: none within swept class",
+        "- Independence: single item",
+    ],
+)
+def test_resolved_rejects_an_odds_only_label_anywhere(line):
+    bad = replace_once(RESOLVED, "- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    label = line[2:].split(":", 1)[0]
+    _both_say(bad, f"found '- {label}:'", f"found '- {label}:'")
+    prose = replace_once(
+        RESOLVED,
+        "- VoI question: none\n",
+        "- VoI question: none\n\nNo posterior odds were computed.\n",
+    )
+    assert _both(prose) == ([], [])
+
+
+def test_unfilled_difference_defers_the_recommendation_coupling_by_default():
+    draft = replace_once(
+        RESOLVED,
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        "- Surviving-state loss difference: <signed number or range> — provenance: <class>",
+    )
+    assert not any("Recommended action" in f for f in cr.check(draft))
+    assert any("still unfilled" in f for f in cr.check(draft, final=True))
+    assert _says(draft, "must parse as a signed number")
+
+
+def test_odds_only_field_in_template_state_waits_for_final():
+    leftover = replace_once(
+        RESOLVED,
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: <multiple> — provenance: <class>\n",
+    )
+    assert not any("odds-only" in f for f in cr.check(leftover))
+    _both_say(leftover, "found '- Loss ratio:'", "found '- Loss ratio:'")
+    filled = replace_once(
+        RESOLVED,
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: 3 — provenance: user-elicited\n",
+    )
+    assert any("found '- Loss ratio:'" in f for f in cr.check(filled))
+
+
+def test_ordinary_records_keep_their_verdict_line_tolerance():
+    second = replace_once(
+        VALID_DECIDE, "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    assert check(second) == []
+    assert cr.check(second, final=True) == []
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- **Verdict:** resolved",
+        "- Verdict: `resolved`",
+        "- Verdict: **resolved**",
+        "- Verdict: resolved (structural)",
+    ],
+)
+def test_a_resolved_verdict_line_is_exactly_the_bare_token(line):
+    bad = replace_once(RESOLVED, "- Verdict: resolved", line)
+    _both_say(
+        bad, "must read exactly '- Verdict: resolved'", "must read exactly '- Verdict: resolved'"
+    )
+
+
+def test_a_second_verdict_line_beside_resolved_fails():
+    bad = replace_once(
+        RESOLVED, "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    _both_say(bad, "exactly one '- Verdict:' line", "exactly one '- Verdict:' line")
+
+
+def test_resolved_sections_keep_the_skeleton_order():
+    late = RESOLVED.replace(_RESOLUTION, "") + "\n" + _RESOLUTION
+    _both_say(late, "sections must appear in the order", "sections must appear in the order")
