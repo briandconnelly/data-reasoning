@@ -156,7 +156,53 @@ DECIDE_VERDICTS = {
     "evidence-sensitive",
     "dominated",
     "indifferent",
+    "resolved",
 }
+# A resolved record (decision-analysis decisions/008) takes its own sections
+# and slots: no odds-only field, and a Resolution section in this order.
+RESOLVED_SECTIONS = [
+    "## Decision frame",
+    "## Decision-state model",
+    "## Resolution",
+    "## Verdict",
+    "## Handoff",
+]
+RESOLVED_SLOTS = {
+    "## Decision frame": REQUIRED_SLOTS["decision"]["## Decision frame"][:5],
+    "## Decision-state model": REQUIRED_SLOTS["decision"]["## Decision-state model"],
+    "## Resolution": [
+        "Excluded state",
+        "Surviving state",
+        "Accepted evidence",
+        "Structural exclusion",
+        "Exclusion assumptions",
+        "Surviving-state possibility",
+        "Surviving-state loss difference",
+    ],
+    "## Verdict": REQUIRED_SLOTS["decision"]["## Verdict"],
+    "## Handoff": REQUIRED_SLOTS["decision"]["## Handoff"],
+}
+RESOLUTION_ORDER = [
+    "Excluded state",
+    "Surviving state",
+    "Observations",
+    "Accepted evidence",
+    "Structural exclusion",
+    "Exclusion assumptions",
+    "Surviving-state possibility",
+    "Surviving-state losses",
+    "Surviving-state loss difference",
+]
+ODDS_ONLY_SECTIONS = ["## Evidence and update", "## Robustness"]
+ODDS_ONLY_FRAME_SLOTS = ["Favored if true", "Loss ratio", "Decision threshold (posterior odds)"]
+RESOLVED_STATES = {"proposition true", "proposition false"}
+RESOLVED_PROSE = [
+    "Accepted evidence",
+    "Structural exclusion",
+    "Exclusion assumptions",
+    "Surviving-state possibility",
+]
+RESOLVED_RECOMMENDATIONS = {"no preference", "returned to owner"}
 VOI_VERDICTS = {"worth-it", "not-worth-it", "sensitive", "break-even-only", "upper-bound-only"}
 VOI_VALUE_BASES = {"signal-model", "upper-bound"}
 
@@ -572,7 +618,22 @@ def _frame_heading(body: str) -> str:
     return body[m.start() : body.find("\n", m.start())].rstrip()
 
 
+def _decide_verdict(body: str) -> str | None:
+    """The first visible Verdict slot's leading token, when it is a decide
+    verdict; it selects the resolved or the ordinary required set."""
+    value = _slot_value(_section(body, "## Verdict"), "Verdict")
+    if value is None or _unfilled(value):
+        return None
+    return _leading_token(value, DECIDE_VERDICTS)
+
+
+def _resolved(body: str, kind: str) -> bool:
+    return kind == "decision" and _decide_verdict(body) == "resolved"
+
+
 def _required_sections(body: str, kind: str) -> list[str]:
+    if _resolved(body, kind):
+        return RESOLVED_SECTIONS
     headings = REQUIRED_SECTIONS[kind]
     if kind != "exploration":
         return headings
@@ -580,6 +641,8 @@ def _required_sections(body: str, kind: str) -> list[str]:
 
 
 def _required_slots(body: str, kind: str) -> dict[str, list[str]]:
+    if _resolved(body, kind):
+        return RESOLVED_SLOTS
     slots = REQUIRED_SLOTS.get(kind, {})
     if kind != "exploration":
         return slots
@@ -821,6 +884,8 @@ NESTED_TABLE_COLUMNS = {
     "Evidence": ["item", "lr", "provenance", "source, reference class, conditioning"],
     "Assumption probes": ["assumption", "probe", "assessment", "evidence or reason"],
     "Threat register": ["threat", "probe", "result"],
+    "Observations": ["observation", "source"],
+    "Surviving-state losses": ["action", "loss", "provenance"],
 }
 NESTED_TABLE_MIN_WIDTH = {"Consequences": 3}
 
@@ -907,7 +972,7 @@ def _check_table_cells(body: str, kind: str, final: bool, findings: list[str]) -
 
     Exception: a Tests row whose outcome is NOT_TESTED may carry `pending`
     evidence. That is the row's honest state, not template residue."""
-    for heading in REQUIRED_SECTIONS.get(kind, []):
+    for heading in _required_sections(body, kind) if kind in REQUIRED_SECTIONS else []:
         rows = _toplevel_table(_section(body, heading))
         if len(rows) < MIN_TABLE_ROWS:
             continue  # no table here, or the empty-table finding covers it
@@ -941,10 +1006,16 @@ def _check_nested_tables(body: str, kind: str, final: bool, findings: list[str])
     of the 2026-09-15 review reproduced."""
     if kind != "decision":
         return
-    for heading, label in (
-        ("## Decision frame", "Consequences"),
-        ("## Evidence and update", "Evidence"),
-    ):
+    tables = (
+        (
+            ("## Decision frame", "Consequences"),
+            ("## Resolution", "Observations"),
+            ("## Resolution", "Surviving-state losses"),
+        )
+        if _resolved(body, kind)
+        else (("## Decision frame", "Consequences"), ("## Evidence and update", "Evidence"))
+    )
+    for heading, label in tables:
         section = _section(body, heading)
         if section.strip():
             _check_nested_table(section, heading, label, final, findings)
@@ -1116,6 +1187,14 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
     verdict = _leading_token(verdict_value, DECIDE_VERDICTS)
     if verdict is None:
         return
+    if verdict == "resolved":
+        _check_resolved(body, verdict_value, final, findings)
+        return
+    if "\n## Resolution\n" in body:
+        findings.append(
+            f"## Resolution: '## Resolution' belongs only to a resolved record; found it under "
+            f"{verdict!r} (SKILL.md § The Decide Route)"
+        )
     if verdict == "robust":
         _check_robust_has_a_supported_ratio(body, findings)
     if verdict in ("robust", "prior-sensitive", "evidence-sensitive"):
@@ -1130,6 +1209,169 @@ def _check_verdict_coupling(body: str, final: bool, findings: list[str]) -> None
         findings.append(
             "## Verdict: '- Recommended action:' must read 'no preference' "
             "exactly when the verdict is indifferent (SKILL.md § The Decide Route)"
+        )
+
+
+def _check_model_review(body: str, findings: list[str]) -> None:
+    """Evidence impossible under both states reaches no verdict, under any."""
+    value = _slot_value(_section(body, "## Resolution"), "Surviving state")
+    if value is not None and _normalize(value).lower() == "none":
+        findings.append(
+            "## Resolution: '- Surviving state:' reads 'none': evidence impossible under both "
+            "states goes to model review, never a verdict (SKILL.md § Numeric Policy)"
+        )
+
+
+def _check_resolution_slots(resolution: str, final: bool, findings: list[str]) -> None:
+    """Order, state tokens, and the prose slots of a resolved record."""
+    lines = [_unemphasize(ln.strip()) for ln in resolution.splitlines()]
+    order = [
+        next((i for i, ln in enumerate(lines) if ln.startswith(f"- {label}:")), -1)
+        for label in RESOLUTION_ORDER
+    ]
+    if -1 not in order and order != sorted(order):
+        findings.append("## Resolution: the labels must appear in the skeleton's order")
+    for label in RESOLUTION_ORDER:
+        if sum(ln.startswith(f"- {label}:") for ln in lines) > 1:
+            findings.append(f"## Resolution: '- {label}:' must appear exactly once")
+    excluded = _slot_value(resolution, "Excluded state")
+    surviving = _slot_value(resolution, "Surviving state")
+    if (
+        excluded is not None
+        and (final or not _unfilled(excluded))
+        and _normalize(excluded) not in RESOLVED_STATES
+    ):
+        findings.append(
+            f"## Resolution: '- Excluded state:' must read one of "
+            f"{sorted(RESOLVED_STATES)}; found {excluded!r}"
+        )
+    if surviving is not None and (final or not _unfilled(surviving)):
+        s = _normalize(surviving)
+        if s.lower() != "none" and s not in RESOLVED_STATES:
+            findings.append(
+                f"## Resolution: '- Surviving state:' must read one of "
+                f"{sorted(RESOLVED_STATES)} or 'none'; found {surviving!r}"
+            )
+        elif excluded is not None and s == _normalize(excluded):
+            findings.append(
+                "## Resolution: '- Excluded state:' and '- Surviving state:' must differ"
+            )
+    for label in RESOLVED_PROSE:
+        value = _slot_value(resolution, label)
+        if value is not None and _normalize(value).lower() == "none":
+            findings.append(f"## Resolution: '{label}' must state its content, not 'none'")
+
+
+def _check_resolved(body: str, verdict_value: str, final: bool, findings: list[str]) -> None:  # noqa: PLR0912, PLR0915 -- one pass over the resolved coupling
+    """A resolved record's coupling (decision-analysis decisions/008): a bare
+    verdict, no odds-only field, the Resolution slots, the losses table, the
+    difference's provenance, and the recommendation it allows. The sign of the
+    difference is arithmetic, so it is the dev checker's alone."""
+    if _normalize(verdict_value) != "resolved":
+        findings.append(
+            f"## Verdict: a resolved verdict reads 'resolved' bare, with no annotation; "
+            f"found {verdict_value!r}"
+        )
+    for heading in ODDS_ONLY_SECTIONS:
+        if f"\n{heading}\n" in body:
+            findings.append(
+                f"## Verdict: a resolved record carries no odds-only field; found '{heading}'"
+            )
+    frame = _section(body, "## Decision frame")
+    for label in ODDS_ONLY_FRAME_SLOTS:
+        if _slot_value(frame, label) is not None:
+            findings.append(
+                f"## Verdict: a resolved record carries no odds-only field; found '- {label}:'"
+            )
+    resolution = _section(body, "## Resolution")
+    if not resolution.strip():
+        return  # the missing-section finding covers it
+    _check_resolution_slots(resolution, final, findings)
+
+    actions_value = _slot_value(frame, "Actions") or ""
+    names = [a.strip() for a in re.split(r"\s+vs\s+", _normalize(actions_value))]
+    span = _nested_span(resolution, "Surviving-state losses")
+    rows = _table_rows(span) if span is not None else []
+    unsupported = False
+    if rows:
+        if [_header_key(h) for h in rows[0]] != ["action", "loss", "provenance"]:
+            findings.append(
+                "## Resolution: '- Surviving-state losses:' table header must be exactly "
+                "'action | loss | provenance'"
+            )
+        listed = []
+        for row in rows[1:]:
+            if len(row) != 3:  # noqa: PLR2004 -- action, loss, provenance
+                findings.append(
+                    f"## Resolution: '- Surviving-state losses:' row {row!r} must be three "
+                    "cells wide"
+                )
+                continue
+            action, loss, prov = (_normalize(c) for c in row)
+            listed.append(action)
+            if NO_LR_SENTINEL in (loss, prov):
+                unsupported = True
+                if loss != prov:
+                    findings.append(
+                        f"## Resolution: '- Surviving-state losses:' row {action!r}: "
+                        f"{NO_LR_SENTINEL!r} fills the loss and provenance cells together"
+                    )
+            elif not _unfilled(prov) and prov not in PROVENANCE:
+                findings.append(
+                    f"## Resolution: '- Surviving-state losses:' row {action!r}: {prov!r} is "
+                    "not a provenance class"
+                )
+        if not any(_unfilled(a) for a in listed) and (
+            sorted(listed) != sorted(names) or len(listed) != len(names)
+        ):
+            findings.append(
+                "## Resolution: '- Surviving-state losses:' must carry exactly one row per "
+                f"framed action {names!r}; found {listed!r}"
+            )
+
+    difference = _slot_value(resolution, "Surviving-state loss difference")
+    belief = False
+    if difference is not None and (final or not _unfilled(difference)):
+        if _normalize(difference) == NO_LR_SENTINEL:
+            if not unsupported:
+                findings.append(
+                    "## Resolution: '- Surviving-state loss difference:' reads 'none supported' "
+                    "exactly when a losses row does"
+                )
+        else:
+            if unsupported:
+                findings.append(
+                    "## Resolution: '- Surviving-state loss difference:' reads 'none supported' "
+                    "exactly when a losses row does"
+                )
+            provs = PROVENANCE_MENTION.findall(difference)
+            if len(provs) != 1:
+                findings.append(
+                    "## Resolution: '- Surviving-state loss difference:' must carry exactly one "
+                    "provenance class"
+                )
+            elif provs[0] not in PROVENANCE:
+                findings.append(
+                    f"## Resolution: provenance {provs[0]!r} is not in the closed set "
+                    f"{sorted(PROVENANCE)}"
+                )
+            belief = len(provs) == 1 and provs[0] in LOSS_PROVENANCE_FOR_ROBUST
+
+    recommended = _slot_value(_section(body, "## Verdict"), "Recommended action")
+    if recommended is None or (not final and _unfilled(recommended)):
+        return
+    rec = _normalize(recommended)
+    if rec not in (*names, *RESOLVED_RECOMMENDATIONS):
+        findings.append(
+            "## Verdict: a resolved verdict's '- Recommended action:' must name one of the "
+            f"framed actions {names!r}, or read 'no preference' or 'returned to owner'; "
+            f"found {recommended!r}"
+        )
+    elif not belief and difference is not None and rec != "returned to owner":
+        findings.append(
+            "## Verdict: a resolved verdict whose surviving-state loss difference is not "
+            "belief-grade or reads 'none supported' requires '- Recommended action:' to read "
+            f"'returned to owner'; found {recommended!r} (SKILL.md § Numeric Policy)"
         )
 
 
@@ -1351,6 +1593,15 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
                         f"from the closed set {sorted(tokens)}"
                     )
         if kind == "decision":
+            verdict_lines = [
+                ln for ln in body.splitlines() if _unemphasize(ln.strip()).startswith("- Verdict:")
+            ]
+            if len(verdict_lines) > 1:
+                findings.append(
+                    f"## Verdict: the record carries {len(verdict_lines)} '- Verdict:' lines; "
+                    "exactly one is allowed"
+                )
+            _check_model_review(body, findings)
             _check_decision_provenance(body, final, findings)
 
     return findings

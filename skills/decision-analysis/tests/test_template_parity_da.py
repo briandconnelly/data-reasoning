@@ -5,14 +5,16 @@ record's shape; `check_decision.py` is the operable one. The slot labels live
 in both -- a template is read, a checker runs -- so this check keeps the two
 sets from diverging silently, in either direction: a template-only label the
 checker never enforces, or a checker label the template no longer shows.
-The checker-side set is its DECIDE_LABELS/VOI_LABELS constants, which
-_require_slots actually iterates, so every label asserted here is enforced.
+The checker-side set is the union of its DECIDE_LABELS, RESOLVED_LABELS, and
+VOI_LABELS constants, which _require_slots actually iterates, so every label
+asserted here is enforced; RESOLVED_LABELS is the resolved skeleton's set
+(decisions/008).
 """
 
 import re
 from pathlib import Path
 
-from check_decision import DECIDE_LABELS, VOI_LABELS
+from check_decision import DECIDE_LABELS, RESOLVED_LABELS, VOI_LABELS
 
 TEMPLATE = Path(__file__).resolve().parents[1] / "references" / "decision-record-template.md"
 
@@ -23,7 +25,11 @@ _TEMPLATE_BULLET = re.compile(r"^- ([^<\n]+?:)")
 
 def checker_labels() -> set[str]:
     labels: set[str] = set()
-    for section_labels in (*DECIDE_LABELS.values(), *VOI_LABELS.values()):
+    for section_labels in (
+        *DECIDE_LABELS.values(),
+        *RESOLVED_LABELS.values(),
+        *VOI_LABELS.values(),
+    ):
         labels.update(section_labels)
     return labels
 
@@ -45,3 +51,8 @@ def test_extractors_surface_known_positives():
 
 def test_label_sets_are_equal():
     assert checker_labels() == template_labels()
+
+
+def test_resolved_labels_are_in_the_template():
+    assert "Surviving-state loss difference:" in template_labels()
+    assert set(RESOLVED_LABELS["Resolution"]) <= template_labels()

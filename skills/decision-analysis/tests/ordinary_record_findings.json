@@ -1,0 +1,570 @@
+{
+ "docs/evidence/integration/representative-v1/arms/X1-codex-plugin-1.workspace/supplier-decision.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "docs/evidence/integration/representative-v1/arms/X1-codex-plugin-2.workspace/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "docs/evidence/integration/representative-v1/arms/X1-codex-plugin-3.workspace/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "docs/evidence/integration/representative-v1/canaries/X1-codex-canary.workspace/supplier-decision.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/canary-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['Ship the release Friday', 'Hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/canary-da-s3-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a loss-sensitive verdict's Crossover names a loss ratio; found 'flips at prior odds 0.22'"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/canary-da-s8-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions [\"ship the release at Friday's freeze\", 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s1-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship the release on schedule', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "loss-sensitive verdict, but varying the prior flips the action (computed [0.0025, 0.166667] meets the swept class); the ordered rule gives prior-sensitive (SKILL.md § Numeric Policy)"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s1x-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions [\"ship the release on Friday's freeze\", 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s1x-pre.scratch/decision_record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship the 2026-09-12 release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s3-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the 2026-09-12 release', 'hold the 2026-09-12 release'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s3-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a loss-sensitive verdict's Crossover names a loss ratio; found 'flips at prior odds 0.22'"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s8-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive crossover 'flips at prior odds 0.111 at loss ratio 2; 0.0444 at 5; 0.0222 at 10; 0.0111 (below class) at 20. Hold if prior odds × 4.5 × L > 1.' does not fall in the computed prior-odds interval [0.0111111, 0.111111]"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/da-s8-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship', 'hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/w2-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the 2026-09-12 release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/w2-da-s1x-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship', 'hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-08-no-supported-prior/w2-da-s8-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship', 'hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/canary-da-s1-post.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/canary-da-s10-post.scratch/decision_record.md": {
+  "dev": [
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']"
+  ],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/canary-da-s8-post.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/canary-da-s9-post.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/canary2-da-s10-post.scratch/decision-record.md": {
+  "dev": [
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']"
+  ],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s1-post.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s1-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s10-post-1.scratch/decision_record.md": {
+  "dev": [
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']"
+  ],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s10-post-2.scratch/decision-record.md": {
+  "dev": [
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']"
+  ],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s10-post-3.scratch/decision-record.md": {
+  "dev": [
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']"
+  ],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s10-pre-1.scratch/decision_record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "'- Favored if true:' must name one of the framed actions ['ship now', 'hold one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s10-pre-2.scratch/decision_record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "'- Favored if true:' must name one of the framed actions ['ship now', 'hold one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s10-pre-3.scratch/decision_record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "Claim class value 'predictive' is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "'- Favored if true:' must name one of the framed actions ['ship now', 'hold one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s8-post.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s8-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release with the pool change', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s9-post-1.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s9-post-2.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s9-post-3.scratch/decision-record.md": {
+  "dev": [],
+  "shipped_final": []
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s9-pre-1.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions [\"restore db-07 from last night's backup now\", 'keep db-07 serving and investigate in the morning'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive verdict, but the computed prior-odds crossover [0.125, 1] does not intersect the swept prior class"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s9-pre-2.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions [\"Restore db-07 from last night's backup now\", 'Keep db-07 serving and investigate in the morning'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive verdict, but the computed prior-odds crossover [0.0833333, 1] does not intersect the swept prior class"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/da-s9-pre-3.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions [\"restore db-07 from last night's backup now\", 'keep db-07 serving and investigate in the morning'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive verdict, but the computed prior-odds crossover [0.0833333, 1] does not intersect the swept prior class"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/canary-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "section 'Decision frame' is missing required slot '- Decision threshold (posterior odds):'",
+   "section 'Decision-state model' is missing required slot '- Proposition:'",
+   "slot '- Crossover:' in 'Robustness' is empty",
+   "slot '- Decision threshold (posterior odds):' must carry exactly one provenance class",
+   "slot '- Prior odds:' must carry exactly one provenance class",
+   "Claim class value 'descriptive (per ledger H1/H2 claim-class field)' is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "'- Favored if true:' must name one of the framed actions ['Ship', 'Hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a robust verdict requires '- Loss ratio:' and '- Loss range swept:' to each carry exactly one user-elicited or externally-sourced provenance; any other class caps the verdict at loss-sensitive (SKILL.md § Numeric Policy)",
+   "Prior odds sentinel 'none supported — see Robustness' must appear bare, with no annotation",
+   "Prior odds reads 'none supported — see Robustness', so Posterior odds must read the same sentinel, bare; found 'none supported — see Robustness (prior is unsupported; Robustness applies the LR above to a swept prior class instead)'",
+   "Evidence LR '4.5 (= 0.9/0.2)' must parse as a positive ratio or range",
+   "Prior class swept must parse as a number or ordered range",
+   "'- Loss range swept:' must parse as a positive number or ordered range; found '5 to 20 (Ship-when-H-true relative to Hold-when-H-false)'",
+   "Decision threshold must be 'none stated' or parse as a number",
+   "a robust verdict requires Crossover 'none within swept class'; found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Decision frame: required '- Decision threshold (posterior odds):' slot is missing",
+   "## Decision-state model: required '- Proposition:' slot is missing",
+   "## Robustness: a robust verdict requires '- Loss range swept:' to carry exactly one provenance from ['externally-sourced', 'user-elicited']; any other class caps the verdict at loss-sensitive; found '5 to 20 (Ship-when-H-true relative to Hold-when-H-false) — provenance: sensitivity-only (brackets the user\\'s \"roughly ten\" around the stated central value)' (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/canary-da-s8-post.scratch/decision-record-ship-or-hold.md": {
+  "dev": [
+   "provenance value 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']",
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "section 'Decision frame' is missing required slot '- Decision threshold (posterior odds):'",
+   "section 'Decision-state model' is missing required slot '- Proposition:'",
+   "section 'Decision-state model' is missing required slot '- Residual reading:'",
+   "slot '- Crossover:' in 'Robustness' is empty",
+   "slot '- Decision threshold (posterior odds):' must carry exactly one provenance class",
+   "Claim class value \"descriptive (ledger's own classification for H1)\" is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "'- Favored if true:' must name one of the framed actions ['Ship (release the connection-pool change on schedule)', \"Hold (delay past Friday's freeze)\"] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "Prior odds must parse as a positive number or ordered range",
+   "Evidence row 'Raw access-log check for exporter-artifact vs real latency (T2)': 'none supported' must fill both the LR and the provenance cell together",
+   "Posterior odds must parse as a number or ordered range",
+   "Prior class swept must parse as a number or ordered range",
+   "'- Loss ratio:' must parse as a positive number or ordered range; found 'cost of shipping a real regression, as a multiple of the cost of a needless one-week hold'",
+   "Decision threshold must be 'none stated' or parse as a number",
+   "a prior-sensitive verdict requires a Crossover naming a positive flip point; found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Decision frame: required '- Decision threshold (posterior odds):' slot is missing",
+   "## Decision-state model: required '- Proposition:' slot is missing",
+   "## Decision-state model: required '- Residual reading:' slot is missing",
+   "## Decision frame: provenance 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']",
+   "## Evidence and update: row 2: 'none supported' fills the LR and provenance cells together, or neither"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/da-s1-post.scratch/decision-record-p95-regression-ship-or-hold.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Consequences:'",
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "section 'Decision-state model' is missing required slot '- Proposition:'",
+   "slot '- Prior odds:' must carry exactly one provenance class",
+   "Claim class value \"descriptive (per ledger: H1's claim class is descriptive, estimand = canary minus control served checkout p95 on 2026-09-09, ms)\" is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "a robust verdict requires '- Recommended action:' to name one of the framed actions [\"Ship (proceed with the release carrying the pool change at Friday's freeze)\", \"Hold (delay the release past Friday's freeze pending further investigation)\"]; found \"Hold (delay the release past Friday's freeze, pending further investigation)\"",
+   "'- Favored if true:' must name one of the framed actions [\"Ship (proceed with the release carrying the pool change at Friday's freeze)\", \"Hold (delay the release past Friday's freeze pending further investigation)\"] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a robust verdict requires '- Loss ratio:' and '- Loss range swept:' to each carry exactly one user-elicited or externally-sourced provenance; any other class caps the verdict at loss-sensitive (SKILL.md § Numeric Policy)",
+   "Prior odds sentinel 'none supported — see Robustness' must appear bare, with no annotation",
+   "Prior odds reads 'none supported — see Robustness', so Posterior odds must read the same sentinel, bare; found 'none supported — see Robustness (prior is unsupported per Degraded Modes; robustness below applies the 4.5 LR to a swept prior class instead of a point prior)'",
+   "Prior class swept must parse as a number or ordered range",
+   "'- Loss ratio:' must parse as a positive number or ordered range; found '10 (cost of shipping a real regression ÷ cost of a needless hold)'",
+   "'- Loss range swept:' must parse as a positive number or ordered range; found '5 to 20 (around the user\\'s \"roughly ten,\" which is not stated as an exact point)'",
+   "Decision threshold must be 'none stated' or parse as a number",
+   "a robust verdict requires Crossover 'none within swept class'; found 'applying the 4.5 LR, posterior odds = prior odds × 4.5. The action flips from Hold to Ship when posterior odds fall below the loss-ratio threshold (1/loss-ratio):'"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Decision-state model: required '- Proposition:' slot is missing",
+   "## Decision frame: required '- Consequences:' slot is missing",
+   "## Robustness: a robust verdict requires '- Loss range swept:' to carry exactly one provenance from ['externally-sourced', 'user-elicited']; any other class caps the verdict at loss-sensitive; found '5 to 20 (around the user\\'s \"roughly ten,\" which is not stated as an exact point) — provenance: sensitivity-only around a user-elicited central value of 10' (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/da-s1-pre.scratch/decision-record-p95-ship-or-hold.md": {
+  "dev": [
+   "provenance value 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']",
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "Claim class value 'descriptive (estimand: canary minus control served checkout p95 on 2026-09-09, ms)' is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "a robust verdict requires '- Recommended action:' to name one of the framed actions ['Ship (proceed with the pending release now)', 'Hold (delay ~one week, using the window to restore S3 and run T2)']; found 'Hold'",
+   "'- Favored if true:' must name one of the framed actions ['Ship (proceed with the pending release now)', 'Hold (delay ~one week, using the window to restore S3 and run T2)'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "Prior odds must parse as a positive number or ordered range",
+   "Evidence LR '4.5 (0.9/0.2) — treat as approximate given the small quota-drawn strata (10 per stratum)' must parse as a positive ratio or range",
+   "Posterior odds must parse as a number or ordered range",
+   "Prior class swept must parse as a number or ordered range",
+   "'- Loss ratio:' must parse as a positive number or ordered range; found \"10 (cost of shipping a real regression, in units of one needless-hold's cost)\"",
+   "'- Loss range swept:' must parse as a positive number or ordered range; found \"5–15 (multiple of one needless-hold's cost)\"",
+   "a robust verdict requires Crossover 'none within swept class'; found 'none within swept class — Hold is preferred at every combination of prior odds in [0.1, 4] and loss ratio in [5, 15]. The tightest corner of the swept class (prior odds 0.1, loss ratio 5) still gives posterior odds 0.45 against a threshold of 0.2. Flipping to Ship would require either a prior odds below ≈0.044 (loss ratio 5) to ≈0.022 (loss ratio 10) — i.e., starting out already near-certain (>95%) this is not a real regression — or a loss ratio far below the user\\'s stated \"roughly ten times.\" Both lie outside the swept class as stated.'"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Decision frame: provenance 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/da-s8-post.scratch/decision-record.md": {
+  "dev": [
+   "provenance value 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']",
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "section 'Decision frame' is missing required slot '- Loss ratio:'",
+   "section 'Decision frame' is missing required slot '- Decision threshold (posterior odds):'",
+   "slot '- Decision threshold (posterior odds):' must carry exactly one provenance class",
+   "slot '- Loss ratio:' must carry exactly one provenance class",
+   "Claim class value 'descriptive (per ledger H1 row: estimand = canary minus control served checkout p95 on 2026-09-09, ms)' is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "Verdict value 'prior-sensitive (the preferred action flips within the stated prior class, and separately within the stated loss range' is not in the closed set ['dominated', 'evidence-sensitive', 'indifferent', 'loss-sensitive', 'prior-sensitive', 'robust']",
+   "Prior odds must parse as a positive number or ordered range",
+   "Posterior odds must parse as a number or ordered range",
+   "Prior class swept must parse as a number or ordered range",
+   "'- Loss ratio:' must parse as a positive number or ordered range; found ''",
+   "'- Loss range swept:' must parse as a positive number or ordered range; found 'loss ratio 2–20 (threshold odds 0.05–0.5)'",
+   "Decision threshold must be 'none stated' or parse as a number"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Decision frame: required '- Loss ratio:' slot is missing",
+   "## Decision frame: required '- Decision threshold (posterior odds):' slot is missing",
+   "## Decision frame: provenance 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/da-s8-pre.scratch/decision-record-p95-regression.md": {
+  "dev": [
+   "provenance value 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']",
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "section 'Decision-state model' is missing required slot '- Proposition:'",
+   "section 'Decision-state model' is missing required slot '- Residual reading:'",
+   "Claim class value \"descriptive (ledger's own label for H1's row)\" is not in the closed set ['causal', 'data-artifact', 'descriptive']",
+   "Verdict value 'prior-sensitive (the preferred action flips within the stated prior class for part of the stated loss range; the loss ratio is independently outcome-determining across most of that same prior range' is not in the closed set ['dominated', 'evidence-sensitive', 'indifferent', 'loss-sensitive', 'prior-sensitive', 'robust']",
+   "Prior odds must parse as a positive number or ordered range",
+   "Evidence LR '4.5 (= 0.9 / 0.2)' must parse as a positive ratio or range",
+   "Posterior odds must parse as a number or ordered range",
+   "Prior class swept must parse as a number or ordered range",
+   "'- Loss ratio:' must parse as a positive number or ordered range; found '`k` = cost of missing a real regression, in units of one needless one-week hold'",
+   "'- Loss range swept:' must parse as a positive number or ordered range; found '2–20 (as user-elicited)'",
+   "Decision threshold must be 'none stated' or parse as a number"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Decision-state model: required '- Proposition:' slot is missing",
+   "## Decision-state model: required '- Residual reading:' slot is missing",
+   "## Decision frame: provenance 'derived' is not in the closed set ['estimated-from-data-in-hand', 'externally-sourced', 'sensitivity-only', 'user-elicited']"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/w2-canary-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['Ship', 'Hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a robust verdict requires Crossover 'none within swept class' or the flip point outside the swept class (computed [0.0185185, 0.0277778]); found 'preferred action flips to Ship only below prior odds ≈0.0185–0.0278 (~1:54 to ~1:36, depending on where the loss ratio sits in 8–12) — below the entire swept prior class of 0.25–4; within the swept prior class and loss range, Hold is preferred at every point (posterior odds range 1.125–18 against thresholds 0.083–0.125)'"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/w2-da-s1-post.scratch/decision-record-ship-or-hold.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship', 'hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a robust verdict requires '- Loss ratio:' and '- Loss range swept:' to each carry exactly one user-elicited or externally-sourced provenance; any other class caps the verdict at loss-sensitive (SKILL.md § Numeric Policy)"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Robustness: a robust verdict requires '- Loss range swept:' to carry exactly one provenance from ['externally-sourced', 'user-elicited']; any other class caps the verdict at loss-sensitive; found '5–15 — provenance: sensitivity-only' (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/w2-da-s8-post.scratch/decision-record-p95-regression.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['Ship the 2026-09-12 release', \"Hold the release past Friday's freeze\"] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive crossover 'Ship is preferred where prior_odds × 4.5 < 1/loss_ratio. At the low end of the swept prior (0.02), the flip is at loss ratio ≈11.1 — inside the swept loss range, so Ship is preferred below ≈11.1 and Hold above it. At the high end of the swept prior (0.2), the flip is at loss ratio ≈1.1 — below the swept loss floor of 2, so Hold is preferred across the entire swept loss range at that prior. Equivalently: at the low end of the swept loss range (2), the flip is at prior odds ≈0.111 — inside the swept prior class, so Ship is preferred below it and Hold above. At the high end of the swept loss range (20), the flip is at prior odds ≈0.011 — below the swept prior floor of 0.02, so Hold is preferred across the entire swept prior class at that loss.' does not fall in the computed prior-odds interval [0.0111111, 0.111111]"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/w3-canary-da-s8-post.scratch/decision-record-p95-regression.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['Ship (release 2026-09-12 with the connection-pool change)', 'Hold (delay past the Friday freeze)'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive crossover 'two crossovers, since the preferred action flips on both axes —' does not fall in the computed prior-odds interval [0.0111111, 0.111111]"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-09-15-remediation-wave/w3-da-s8-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release (one week)'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "prior-sensitive crossover \"Ship is preferred only where prior odds × 4.5 < 1/loss ratio (equivalently, posterior probability of a real regression below the loss-implied threshold probability). Within the swept classes: for prior probability above ≈10% (prior odds above ≈0.111), Hold is preferred at every loss ratio 2–20. For prior probability below ≈1.1% (prior odds below ≈0.0111), Ship would be preferred at every loss ratio 2–20, but this floor sits below the stated prior class's own floor (2%), so it is never reached inside the swept class. Between 2% and 10% prior probability, the flip depends on the loss ratio: Ship needs a loss ratio below 1/(4.5 × prior odds) — about 10.9 at the 2% prior floor, falling to about 2.0 near a 9–10% prior — both values inside the stated 2–20 loss-ratio range.\" does not fall in the computed prior-odds interval [0.0111111, 0.111111]"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship', 'hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/da-s1-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/probe-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship', 'hold'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "Prior odds must parse as a positive number or ordered range",
+   "Posterior odds must parse as a number or ordered range"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: '- Prior odds:' reads 'none needed', which is reserved for dominated or indifferent records as specified for this slot; found 'robust' (SKILL.md § The Decide Route)",
+   "## Evidence and update: '- Posterior odds:' reads 'none needed', which is reserved for dominated or indifferent records as specified for this slot; found 'robust' (SKILL.md § The Decide Route)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/probe-da-s1-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/w2-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "sensitivity-only provenance may not appear in Evidence and update; it belongs in Robustness",
+   "'- Favored if true:' must name one of the framed actions ['ship the release on Friday', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''",
+   "a prior-sensitive verdict requires '- Loss ratio:' and '- Loss range swept:' to each carry exactly one user-elicited or externally-sourced provenance; any other class caps the verdict at loss-sensitive (SKILL.md § Numeric Policy)"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing",
+   "## Evidence and update: sensitivity-only provenance may not appear here; it belongs in Robustness (SKILL.md § Numeric Policy)",
+   "## Robustness: a prior-sensitive verdict requires '- Loss range swept:' to carry exactly one provenance from ['externally-sourced', 'user-elicited']; any other class caps the verdict at loss-sensitive; found '5–20 — provenance: sensitivity-only' (SKILL.md § Numeric Policy)"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/w3-da-s1-post.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ },
+ "skills/hypothesis-driven-analysis/tests/runs/artifacts/2026-11-08-record-delivery/w3-da-s1-pre.scratch/decision-record.md": {
+  "dev": [
+   "section 'Decision frame' is missing required slot '- Favored if true:'",
+   "'- Favored if true:' must name one of the framed actions ['ship the 2026-09-12 release', 'hold the release one week'] exactly (or read 'none needed' under a dominated or indifferent verdict); found ''"
+  ],
+  "shipped_final": [
+   "## Decision frame: required '- Favored if true:' slot is missing"
+  ]
+ }
+}
