@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import subprocess
 from pathlib import Path
@@ -15,6 +16,7 @@ _spec.loader.exec_module(ri)
 
 PREREG = SCRIPT.parents[1] / "docs/evidence/integration/representative-v1/prereg.md"
 NEW = ("R1", "R2", "X1", "X2", "X3")
+HOST_ARGS = argparse.Namespace(timeout=5, host="claude")
 DEFAULT_TIMEOUT = 1800  # the harness default, unchanged by this suite
 
 # I1-I4 prompts as they stood before the representative suite was added, so an
@@ -225,14 +227,14 @@ def test_a_timeout_is_an_invalid_execution(monkeypatch, tmp_path):
         raise subprocess.TimeoutExpired(cmd, 5)
 
     monkeypatch.setattr(subprocess, "run", slow)
-    code, status, _ = ri.run_host(["host"], tmp_path, {}, tmp_path / "arm", 5)
+    code, status, _ = ri.run_host(["host"], tmp_path, {}, tmp_path / "arm", HOST_ARGS)
     assert code is None
     assert status == "invalid-execution: timeout after 5s"
 
 
 def test_an_empty_transcript_is_an_invalid_execution(monkeypatch, tmp_path):
     monkeypatch.setattr(subprocess, "run", lambda *_a, **_k: subprocess.CompletedProcess([], 0))
-    code, status, _ = ri.run_host(["host"], tmp_path, {}, tmp_path / "arm", 5)
+    code, status, _ = ri.run_host(["host"], tmp_path, {}, tmp_path / "arm", HOST_ARGS)
     assert code == 0
     assert status.startswith("invalid-execution: empty")
 
@@ -270,3 +272,83 @@ def test_codex_gets_the_pinned_model(monkeypatch, tmp_path):
     )
     cmd, _ = ri.host_command(args, tmp_path / "arm", tmp_path, "p")
     assert cmd[cmd.index("-m") + 1] == "m-1"
+
+
+CLAUDE_INIT = '{"type": "system", "subtype": "init", "model": "m"}'
+CLAUDE_OK = '{"type": "result", "subtype": "success", "is_error": false, "result": "99"}'
+CODEX_OK = '{"type": "turn.completed", "usage": {"input_tokens": 1}}'
+
+
+def _host_writes(monkeypatch, lines, code):
+    def fake(cmd, *, stdout, **_k):
+        stdout.write("".join(f"{line}\n" for line in lines))
+        return subprocess.CompletedProcess(cmd, code)
+
+    monkeypatch.setattr(subprocess, "run", fake)
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        ("claude", [CLAUDE_INIT, CLAUDE_OK], 0, "completed"),
+        ("codex", ['{"type": "thread.started"}', CODEX_OK], 0, "completed"),
+        ("claude", [CLAUDE_INIT], 1, "invalid-execution: host exit 1"),
+        ("claude", [CLAUDE_INIT, CLAUDE_OK, '{"type": "resu'], 0, "invalid-execution: malformed"),
+        ("claude", [CLAUDE_INIT, '{"type": "assistant"}'], 0, "invalid-execution: no terminal"),
+        ("codex", ['{"type": "turn.started"}'], 0, "invalid-execution: no terminal"),
+        (
+            "claude",
+            [CLAUDE_INIT, '{"type": "result", "subtype": "error_max_turns", "is_error": true}'],
+            0,
+            "invalid-execution: no terminal",
+        ),
+    ],
+    ids=["claude-ok", "codex-ok", "exit-1", "truncated", "no-result", "codex-no-turn", "error"],
+)
+def test_completed_needs_exit_0_clean_lines_and_a_success_event(monkeypatch, tmp_path, case):
+    host, lines, code, want = case
+    _host_writes(monkeypatch, lines, code)
+    args = argparse.Namespace(timeout=5, host=host)
+    _, status, _ = ri.run_host(["h"], tmp_path, {}, tmp_path / "arm", args)
+    assert status.startswith(want)
+    assert (tmp_path / "arm.jsonl").read_text(encoding="utf-8").count("\n") == len(lines)
+
+
+def _repo(tmp_path):
+    repo = tmp_path / "repo"
+    for rel in ri.FROZEN_PATHS:
+        p = repo / rel
+        p = p / "f.txt" if not p.suffix else p
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("x\n", encoding="utf-8")
+    git = [
+        "git",
+        "-C",
+        str(repo),
+        "-c",
+        "user.name=t",
+        "-c",
+        "user.email=t@t",
+        "-c",
+        "commit.gpgsign=false",
+    ]
+    subprocess.run([*git[:3], "init", "-q"], check=True)
+    subprocess.run([*git, "add", "-A"], check=True)
+    subprocess.run([*git, "commit", "-qm", "init"], check=True)
+    return repo
+
+
+def test_untracked_arm_output_does_not_trip_the_clean_check(tmp_path):
+    repo = _repo(tmp_path)
+    arms = repo / "docs/evidence/integration/representative-v1/arms"
+    arms.mkdir(parents=True)
+    (arms / "X1-claude-plugin-1.jsonl").write_text("{}\n", encoding="utf-8")
+    ri.require_clean(repo=repo)
+
+
+def test_a_modified_fixture_trips_the_clean_check(tmp_path):
+    repo = _repo(tmp_path)
+    fixture = repo / "docs/evidence/integration/representative-v1/fixtures/f.txt"
+    fixture.write_text("changed\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match="commit first"):
+        ri.require_clean(repo=repo)

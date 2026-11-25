@@ -29,10 +29,10 @@ Archived under --out as `<name>.prompt.txt`, `.command.json`, `.jsonl`
 (the host's JSON event stream), `.stderr`, `.final.md`, and `.manifest.json`,
 which records host version, requested and resolved model, the staged commit,
 the observed skill route, and an execution `status` (`completed`, or
-`invalid-execution: ...` on a timeout or an empty transcript, written even
-then). Representative cells also record the prompt hash and per-file fixture
-digests, and copy every file the arm left in its workspace outside `data/`
-into `<name>.workspace/`.
+`invalid-execution: ...` on a timeout, a nonzero exit, a malformed line,
+or no terminal success event, written even then). Representative cells also
+record the prompt hash and per-file fixture digests, and copy every file the
+arm created or changed in its workspace into `<name>.workspace/`.
 
     uv run scripts/run_integration.py --cell X2 --host claude --condition plugin \\
         --model claude-sonnet-4-5 --name X2-claude-plugin-1 \\
@@ -138,10 +138,14 @@ PLACEHOLDERS = frozenset({"R3", "R4"})
 REPRESENTATIVE = frozenset({"R1", "R2", "X1", "X2", "X3"})
 PREREG = REPO / "docs/evidence/integration/representative-v1/prereg.md"
 FROZEN_PATHS = (
-    "docs/evidence/integration/representative-v1",
+    "docs/evidence/integration/representative-v1/prereg.md",
+    "docs/evidence/integration/representative-v1/fixtures",
     "scripts/run_integration.py",
     "scripts/representative",
 )
+"""The frozen inputs: prereg, fixtures, and the harness that holds the prompts.
+Arm outputs under representative-v1/arms/ are deliberately outside it, so a
+replicate block runs without a commit after every arm."""
 
 
 def data_path(cell: str, root: Path) -> Path:
@@ -182,9 +186,9 @@ def verify_cell(cell: str, staged: Path, prereg: Path = PREREG) -> tuple[str, di
     return got_prompt, got_files
 
 
-def require_clean(paths: tuple[str, ...] = FROZEN_PATHS) -> None:
+def require_clean(paths: tuple[str, ...] = FROZEN_PATHS, repo: Path = REPO) -> None:
     dirty = subprocess.run(
-        ["git", "-C", str(REPO), "status", "--porcelain", "--", *paths],
+        ["git", "-C", str(repo), "status", "--porcelain", "--", *paths],
         check=True,
         capture_output=True,
         text=True,
@@ -339,8 +343,43 @@ def model_of(events: list[dict], codex_home: str | None, host: str) -> str | Non
     return None
 
 
-def run_host(cmd, root: Path, env: dict[str, str], base: Path, timeout: int):
-    """Run the host; a timeout or an empty transcript is an invalid execution, not a crash."""
+def terminal_success(events: list[dict], host: str) -> bool:
+    """The host's own successful-completion event closes the transcript: Claude
+    Code's stream-json ends in a `result` event with subtype `success`, and
+    `codex exec --json` in `turn.completed` (as every archived 2026-11-17 arm does)."""
+    if not events:
+        return False
+    last = events[-1]
+    if host == "claude":
+        return (
+            last.get("type") == "result"
+            and last.get("subtype") == "success"
+            and not last.get("is_error")
+        )
+    return last.get("type") == "turn.completed"
+
+
+def execution_status(path: Path, host: str, code: int | None) -> str:
+    """`completed` only on exit 0, every line parsing, and a terminal success event."""
+    lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    events = []
+    for line in lines:
+        try:
+            events.append(json.loads(line))
+        except json.JSONDecodeError:
+            return "invalid-execution: malformed transcript line"
+    if code != 0:
+        return f"invalid-execution: host exit {code}"
+    if not events:
+        return "invalid-execution: empty transcript"
+    if not terminal_success(events, host):
+        return "invalid-execution: no terminal success event"
+    return "completed"
+
+
+def run_host(cmd, root: Path, env: dict[str, str], base: Path, args: argparse.Namespace):
+    """Run the host; anything short of a clean, successful run is an invalid
+    execution with an explicit status, and everything is still archived."""
     start = time.monotonic()
     status, code = "completed", None
     with base.with_suffix(".jsonl").open("w") as out, base.with_suffix(".stderr").open("w") as err:
@@ -352,14 +391,14 @@ def run_host(cmd, root: Path, env: dict[str, str], base: Path, timeout: int):
                 stdout=out,
                 stderr=err,
                 stdin=subprocess.DEVNULL,
-                timeout=timeout,
+                timeout=args.timeout,
                 check=False,
             )
             code = proc.returncode
         except subprocess.TimeoutExpired:
-            status = f"invalid-execution: timeout after {timeout}s"
-    if status == "completed" and not read_events(base.with_suffix(".jsonl")):
-        status = "invalid-execution: empty or malformed transcript"
+            status = f"invalid-execution: timeout after {args.timeout}s"
+    if status == "completed":
+        status = execution_status(base.with_suffix(".jsonl"), args.host, code)
     return code, status, round(time.monotonic() - start)
 
 
@@ -448,7 +487,7 @@ def main(argv: list[str] | None = None) -> None:
     base.with_suffix(".command.json").write_text(
         json.dumps({"cwd": str(root), "argv": shown}, indent=2) + "\n", encoding="utf-8"
     )
-    code, status, duration = run_host(cmd, root, env, base, args.timeout)
+    code, status, duration = run_host(cmd, root, env, base, args)
 
     events = read_events(base.with_suffix(".jsonl"))
     model = model_of(events, env.get("CODEX_HOME"), args.host)
