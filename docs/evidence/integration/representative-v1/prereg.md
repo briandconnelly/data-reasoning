@@ -113,6 +113,7 @@ Each condition is set up as `docs/evidence/integration/2026-11-17-full-catalog/p
 
 - The workspace is named `int-arm-*`, and `{DATA}` renders as the relative path `data`, so neither the arm's name nor its condition reaches the prompt.
 - Before any host call the harness refuses to run unless the fixtures, prompts, this file, and the harness match HEAD, and the staged fixture bytes and the prompt match the hashes above.
+  Arm outputs under `arms/` beside this file are outside that check, so a replicate block runs without a commit after each arm.
 - Each manifest records the prompt hash, per-file fixture digests, the requested and resolved model, the host version, and an execution status; every file the arm created or changed in its workspace is copied into `<name>.workspace/`.
 
 ### Models and host versions
@@ -134,7 +135,7 @@ R3 and R4 slots are added to every block, by the same rule, in the dated note th
 ### Invalid executions
 
 An invalid execution is not a failing answer; it is not scored.
-It is any arm whose manifest status starts `invalid-execution` (a timeout or an empty or malformed transcript), whose resolved model or host version differs from the pinned one, or whose plugin install failed.
+It is any arm whose manifest status starts `invalid-execution` (a timeout, a nonzero host exit, a transcript line that does not parse, or a transcript without the host's own terminal success event), whose resolved model or host version differs from the pinned one, or whose plugin install failed.
 An invalid arm is rerun once, in a new slot at the end of its block; at most three replacements are made per host.
 A slot still invalid after its replacement, or beyond the cap, leaves its cell's comparison on that host incomplete: it is reported with the counts of valid arms and gets no verdict.
 
@@ -182,8 +183,9 @@ This section is the single home of the column definitions below; other files poi
   X2 has two columns, both required for E:
   - **E(a) leakage recognized**: the answer says the random-split figure does not measure forecasting months ahead and names why: the held-out days were drawn at random, so the model was scored on days with training days on both sides of them (interpolation, leakage across time, or ignoring time order all qualify).
     Generic caution ("validate further", "forecasts are uncertain", "monitor in production") without naming the time-order problem fails.
-  - **E(b) horizon-matched backtest executed and interpreted**: the transcript shows a computed backtest whose training data all precede October 2025 and whose test window is October to December 2025, scored on monthly totals, and the final message reports its error within 3 points of 23.8% and concludes the model fails the 10% bar for this staffing use.
-    A backtest only at another origin fails E(b), whatever it concludes.
+  - **E(b) horizon-matched backtest reported and interpreted**: the final message reports a backtest whose training data all precede October 2025 and whose test window is October to December 2025, scored on monthly totals, gives its error within 3 points of 23.8%, and concludes the model fails the 10% bar for this staffing use.
+    A backtest reported only at another origin fails E(b), whatever it concludes.
+    Like every E and C column, E(b) is read from the final message alone, so both scorers apply it to the same evidence.
   X3: the answer says accuracy at a threshold is not the measure for a 500-call list and compares the models by a measure taken at that depth of each model's ranking.
   Qualifying measures: precision (hit rate) in the top 500, churners caught in the top 500, lift or gains at 500, or a precision-at-k curve read at 500.
   Not qualifying on their own: AUC, accuracy, F1, precision, or recall at a probability threshold, log loss, or calibration.
@@ -196,6 +198,17 @@ This section is the single home of the column definitions below; other files poi
   An unconditional Brightline fails.
   X2: no, not for October to December staffing as evaluated.
   X3: B, with the top-500 churner counts reported for both models within 3 of the ground truth (B 302, A 173), or the equivalent precision within 0.6 points (60.4%, 34.6%).
+
+One orchestrator-only column, not blind-scored and outside every verdict:
+
+- **X2 backtest computed (transcript).**
+  Pass: the transcript shows a tool call that computes the October to December 2025 backtest E(b) describes, from training data that all precede October 2025.
+  Fail: no such computation appears.
+  Not applicable: every cell but X2.
+  The X2 verdict and the X2 D1 signal use E(b), which both scorers score; this column is reported beside E(b), and an arm that passes E(b) and fails this column is listed as an unsupported report in the results record.
+  It is the only answer-related column read from the transcript; X1's and X3's E and C columns have no transcript component, since each is settled by what the final message states.
+
+The routing, record, and ceremony columns are read from the transcript and workspace too, and are likewise scored by the orchestrator only.
 
 Three further measures, per arm, all descriptive:
 
@@ -219,7 +232,7 @@ The question's cost half is answered by that report, not by a verdict.
 ### Scorers
 
 Primary: the dispatching Claude Code session (the orchestrator), unblinded, scores every arm.
-Blind: `openrouter/google/gemini-3.1-pro-preview` through amicus, a model that runs no arm, scores E and C on every arm from final messages with skill names, record headings, and condition redacted.
+Blind: `openrouter/google/gemini-3.1-pro-preview` through amicus, a model that runs no arm, scores E and C on every arm from final messages with skill names, record headings, and condition redacted; it scores no transcript-based column.
 Disagreements are reported, not reconciled.
 The results record carries its `Scorer:` line as `skills/hypothesis-driven-analysis/tests/PROTOCOL.md` § Who scored it requires.
 
