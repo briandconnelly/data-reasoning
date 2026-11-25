@@ -300,3 +300,14 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
   A canary passes when its manifest status is `completed`, its resolved model and host version match this note, its prompt hash and fixture digests match this file, the plugin install succeeded, and its workspace files were archived.
   Canary answers are not scored.
 - Scored arms wait for the owner's go-ahead after the canaries are reported.
+
+2026-11-25, after the canaries and before any scored arm:
+
+- All ten canaries passed the criteria above; they are archived under `canaries/`.
+- Observed in the canaries, unscored: Claude Code loaded no skill on any of the five cells; Codex loaded skills on X1, X2, and X3.
+- Deviation, decided by the owner on budget grounds before any scored arm: Codex runs all three replicate blocks (30 arms).
+  Claude Code runs block 1 only (10 arms).
+  If any Claude Code plugin arm in block 1 loads a skill, blocks 2 and 3 run as written.
+  If none does, Claude Code stops at block 1: its comparisons are reported with their counts as incomplete, with no verdict, and no maintenance signal is drawn from that host.
+- Scored arms are named `<cell>-<host>-<condition>-<replicate>`; a replacement adds `-r`.
+- The `data_modified` flag is set by any new file under `data/`, including an interpreter cache (`__pycache__`) written when an arm imports the fixture's code; the results record reports the flag with what changed, and such a cache alone is not a modified fixture.
