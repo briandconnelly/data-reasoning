@@ -11,7 +11,7 @@ This repository is its own plugin marketplace.
 A skill loads automatically only when the host routes your request to it, and that routing depends on how you phrase the ask.
 For `exploratory-data-analysis`, the phrasing figures below were measured against a reduced catalog, not the four shipped skills.
 Against the full four-skill catalog, its routing was measured on the I2 integration cell, reported in `docs/evidence/integration/2026-11-17-full-catalog/results.md` and `docs/evidence/integration/2026-11-18-handoff-fix/results.md` on the `dev` branch.
-In that run, asks phrased "Profile ..." loaded the skill 30/30 times, "Give me a rundown on ..." 23/30, "Give me an overview of ..." 21/30, and "Tell me about ..." 8/30.
+In the reduced-catalog run, asks phrased "Profile ..." loaded the skill 30/30 times, "Give me a rundown on ..." 23/30, "Give me an overview of ..." 21/30, and "Tell me about ..." 8/30.
 The run's per-invocation results are in `skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-fresh/results.jsonl` on the `dev` branch ([pinned copy](https://github.com/briandconnelly/data-reasoning/blob/5fc87dca1358ef41173924ad0ce1ecb9ef35a4f3/skills/exploratory-data-analysis/tests/runs/artifacts/2026-08-15-widening/BvC-fresh/results.jsonl)), which an install does not carry.
 
 To make sure a skill loads, invoke it explicitly:
