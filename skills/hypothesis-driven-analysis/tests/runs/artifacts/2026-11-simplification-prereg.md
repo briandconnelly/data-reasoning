@@ -94,9 +94,9 @@ One canary per cell on the short condition runs first and is excluded from scori
 - `scripts/run_integration.py --condition plugin` builds the runtime tree with `scripts/build-release-tree.py`, which copies from the checkout's working tree.
   It refuses to run while `skills`, `hooks`, `instruments`, `.claude-plugin`, `.codex-plugin`, or `.agents/plugins` differ from HEAD (untracked files count), and records `git rev-parse HEAD` and `host_version`.
   So it stages HEAD of the checkout it runs from, and R1 and R2 exist only on the #115 lineage.
-- Integration source commit, pinned: `10fae92` (the #115 branch commit this prereg sits on; its `SKILL.md` is `dev`'s, `9acd7f62…`).
-  Current runs from a checkout detached at `10fae92`.
-  Short runs from a checkout detached at `10fae92` with `f9db019` and `b98339b` cherry-picked, whose tree must be `abe097b865b6a02229736b32df3e314a1591a5cc`; a dry build of that tree on 2026-11-24 gave the short `SKILL.md` sha256 above.
+- Integration source commit, pinned: `d5d8111` (the #115 branch commit this prereg sits on; its `SKILL.md` is `dev`'s, `9acd7f62…`).
+  Current runs from a checkout detached at `d5d8111`.
+  Short runs from a checkout detached at `d5d8111` with `f9db019` and `b98339b` cherry-picked, whose tree must be `75ccea797c7e731599f795dd6134297161938b78`; a dry build of that tree on 2026-11-24 gave the short `SKILL.md` sha256 above.
   Updated 2026-11-24 after the #115 branch revised `scripts/run_integration.py`: the pin moved from `7dc22ac` (old) to the commit above and the tree was rebuilt; any later change to that script moves the pin again by a dated note before any arm.
 - Arm output goes to a directory outside both checkouts, so no arm makes a checkout dirty; it is committed after the last arm.
 
@@ -106,16 +106,16 @@ Set once, from the repository root of a checkout of this preregistration's branc
 The pinned integration commit predates this branch's `2026-11-simplification-prereg/prompts/s9a-s9b.txt`, so prompt paths are absolute into the preregistration checkout, never relative to a condition checkout:
 
 ```sh
-git worktree add --detach ../h118-current 10fae92
-git worktree add --detach ../h118-short 10fae92
+git worktree add --detach ../h118-current d5d8111
+git worktree add --detach ../h118-short d5d8111
 git -C ../h118-short cherry-pick f9db019 b98339b
-git -C ../h118-short rev-parse 'HEAD^{tree}'   # must print abe097b865b6a02229736b32df3e314a1591a5cc
+git -C ../h118-short rev-parse 'HEAD^{tree}'   # must print 75ccea797c7e731599f795dd6134297161938b78
 OUT="$(mktemp -d)/simplification-118"
 PREREG="$(git rev-parse --show-toplevel)"
 P="$PREREG/skills/hypothesis-driven-analysis/tests/runs/artifacts"
 ```
 
-Every other path the commands name exists at `10fae92` and is read from the condition checkout: `run_arm.py`, `run_integration.py`, `build-release-tree.py`, `instruments/check_record.py`, the S9 prompt file, and the three S9-family fixtures and `r-sales/orders.csv`.
+Every other path the commands name exists at `d5d8111` and is read from the condition checkout: `run_arm.py`, `run_integration.py`, `build-release-tree.py`, `instruments/check_record.py`, the S9 prompt file, and the three S9-family fixtures and `r-sales/orders.csv`.
 Only `s9a-s9b.txt` is missing there, which is why `P` is absolute.
 
 Each arm runs from the condition's checkout (`cd ../h118-current` or `cd ../h118-short`), with `REF` set to `0187202090bc00d960aee4112356909ce702dfdb` (current) or `b98339bdc1a2a0e4a1010637bbd9c89960b33812` (short), `C` to `current` or `short`, and `K` to the replicate (1–3, or `canary`):
