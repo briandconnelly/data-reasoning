@@ -456,17 +456,17 @@ def test_required_headings_exist_in_shipped_templates():
 
 
 def test_html_commented_structure_is_not_record_content():
-    """A record whose headings and verdict sit only inside <!-- --> has none of
-    them: commented text is never loaded as content."""
+    """A file whose headings and verdict sit only inside <!-- --> has none of
+    them: commented text is never loaded as content, so nothing corroborates
+    the title and the file is not a record (#112)."""
     hidden = (
         "# Decision Record: d\n\n<!--\n## Decision frame\n\n## Decision-state model\n\n"
         "## Evidence and update\n\n## Robustness\n\n## Verdict\n\n- Verdict: robust\n\n"
         "## Handoff\n-->\n"
     )
-    findings = cr.check(hidden)
-    assert any("required section missing: ## Verdict" in f for f in findings)
-    assert any("required section missing: ## Decision frame" in f for f in findings)
-    assert not any("verdict 'robust'" in f for f in findings)
+    assert cr.detect(hidden) is None
+    with pytest.raises(ValueError, match="not a recognized record"):
+        cr.check(hidden)
 
 
 def test_comment_stripping_preserves_line_count():
@@ -475,13 +475,16 @@ def test_comment_stripping_preserves_line_count():
 
 
 def test_unclosed_html_comment_hides_everything_after_it():
+    """Unlike an unterminated fence, an unclosed comment gets no raw-body
+    fallback in detect(): headings only after it leave the file unrecognized."""
     rec = (
         "# Decision Record: d\n\n<!--\n## Decision frame\n\nx\n\n## Decision-state model\n\nx\n\n"
         "## Evidence and update\n\nx\n\n## Robustness\n\nx\n\n## Verdict\n\n- Verdict: robust\n\n"
         "## Handoff\n\nx\n"
     )
-    findings = cr.check(rec)
-    assert any("required section missing: ## Verdict" in f for f in findings)
+    assert cr.detect(rec) is None
+    with pytest.raises(ValueError, match="not a recognized record"):
+        cr.check(rec)
 
 
 def test_comment_opener_inside_a_fence_is_code_not_a_comment():
@@ -1829,3 +1832,33 @@ def test_validator_does_no_verdict_arithmetic():
         .replace("- Recommended action: returned to owner", "- Recommended action: wait")
     )
     assert cr.check(rec, final=True) == []
+
+
+NOTE_FENCED = "# Investigation: sync notes\n\nExample:\n\n```markdown\n## Tests\n| id | test |\n```\n\nNo actions.\n"
+NOTE_COMMENTED = "# Investigation: sync notes\n\n<!--\n## Tests\n-->\n\nNo actions.\n"
+
+
+def test_required_heading_only_inside_a_fence_is_not_a_record():
+    assert cr.detect(NOTE_FENCED) is None
+    with pytest.raises(ValueError, match="not a recognized record"):
+        cr.check(NOTE_FENCED)
+
+
+def test_required_heading_only_inside_a_comment_is_not_a_record():
+    assert cr.detect(NOTE_COMMENTED) is None
+
+
+def test_ordinary_title_quoting_a_required_heading_is_not_a_record():
+    assert cr.detect("# Meeting notes\n\n```markdown\n## Tests\n```\n") is None
+
+
+def test_visible_heading_before_an_unterminated_fence_is_still_a_record():
+    text = "# Investigation: x\n\n## Problem\n\n```\nnever closed\n"
+    assert cr.detect(text) == "ledger"
+    assert any("fence" in f for f in cr.check(text))
+
+
+def test_heading_only_after_an_unterminated_fence_is_still_a_record():
+    text = "# Investigation: x\n\n```\nnever closed\n\n## Problem\n"
+    assert cr.detect(text) == "ledger"
+    assert any("fence" in f for f in cr.check(text))

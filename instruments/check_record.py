@@ -492,13 +492,22 @@ def strip_frontmatter(text: str) -> str:
 def detect(text: str) -> str | None:
     """Kind of record, or None. A title signature alone is not enough: a
     user's own note titled `# Investigation: …` is not a ledger. The record
-    must also carry at least one of its kind's required headings."""
+    must also carry at least one of its kind's required headings, visible to
+    a reader: one quoted inside a fence or an HTML comment does not count.
+    An unterminated fence blanks everything after it, so when one is open
+    at EOF and nothing visible corroborates, the raw body is searched
+    instead and check() then reports the open fence."""
     text = strip_frontmatter(text)
     kind = title_kind(text.lstrip().split("\n", 1)[0])
     if kind is None:
         return None
-    body = "\n" + "\n".join(line.rstrip() for line in text.split("\n")) + "\n"
-    if any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind]):
+
+    def has_heading(src: str) -> bool:
+        body = "\n" + "\n".join(line.rstrip() for line in src.split("\n")) + "\n"
+        return any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind])
+
+    visible, fence_open = _strip_hidden(text)
+    if has_heading(visible) or (fence_open and has_heading(text)):
         return kind
     return None
 
