@@ -1,6 +1,6 @@
 # Evidence status
 
-What this plugin's skills claim versus what has been measured, as of 2026-11-08 (`dev` at `5fc87dc`).
+What this plugin's skills claim versus what has been measured, as of 2026-11-25 (`dev` at `0187202`); § Scenario status was last checked at `5fc87dc`.
 This page carries the measurement status that the README used to; the decision records and run records it cites remain the authorities.
 
 ## Handoffs and routing
@@ -10,13 +10,33 @@ Exploration generates hypotheses and never confirms them; adjudication is `hypot
 All four skills carry the same authorization gate and the same Record Delivery section; each text lives once in `scripts/shared-sections/` and is rendered into each skill by `scripts/check-shared-sections.py`, which fails when a rendered copy drifts or is hidden.
 Paths under `tests/`, `scripts/`, `jev/`, and `docs/evidence/` in these records refer to the development repository (<https://github.com/briandconnelly/data-reasoning>); an installed plugin does not carry them.
 
-The full-catalog integration suite (`docs/evidence/integration/2026-11-17-full-catalog/results.md`, issue #96) ran all four skills as an install exposes them, n=3 per cell, on Claude Code (`claude-sonnet-5-5`) and Codex (`gpt-6.2-sol`).
-On Codex the plugin arms took the designed handoffs — exploration to adjudication on the E1 seam fixture, adjudication to identification review on CS3 — and kept the evidence boundary across them; on E1 the no-plugin arms broke it (0/3 against 3/3).
-On Claude Code no arm made any multi-skill handoff: the boundary gain on E1 came from exploration alone, and on CS3 adjudication loaded without identification review and every arm, with or without the plugin, offered the flow an effect size.
+Integration runs on three dates measured the designed handoffs of the four-skill workflow; only the 2026-11-17 run has no-plugin arms.
+Each row is copied from the record in its last column; a host version or score that record does not state is marked "not recorded" unless issue #111 states it.
+Counts are of 3 unless the row says otherwise; R is the designed route, E the evidence boundary, and C the task criterion, each as its record defines it.
+
+| Date | Host and version | Model | Skills ref | Cell | R (plugin) | E plugin, primary / blind | C plugin, primary / blind | Record |
+|---|---|---|---|---|---|---|---|---|
+| 2026-11-17 | Claude Code, version not recorded | `claude-sonnet-5-5` | `1f13345` | I2 | 0/3 (EDA only, 3/3) | 3 (none: 0) / agreed | 3 (none: 3) / not reported as differing | `docs/evidence/integration/2026-11-17-full-catalog/results.md` |
+| 2026-11-17 | Claude Code, version not recorded | `claude-sonnet-5-5` | `1f13345` | I3 | 0/3 (HDA only, 3/3; no ledger) | 0 (+1 borderline) (none: 0) / I3-claude-plugin-3 scored fail | 1 (none: 0) / I3-claude-plugin-1 and -2 scored pass | `docs/evidence/integration/2026-11-17-full-catalog/results.md` |
+| 2026-11-17 | Claude Code, version not recorded | `claude-sonnet-5-5` | `1f13345` | I4 | 0/3 (none 2/3, HDA only 1/3) | 3 (none: 3) / agreed | 3 (none: 3) / not reported as differing | `docs/evidence/integration/2026-11-17-full-catalog/results.md` |
+| 2026-11-17 | Codex CLI, version not recorded | `gpt-6.2-sol` | `7e18ddb` | I2 | 2/3 with both records; 1/3 read both, wrote the exploration log only | 3 (none: 0) / agreed | 3 (none: 3) / not reported as differing | `docs/evidence/integration/2026-11-17-full-catalog/results.md` |
+| 2026-11-17 | Codex CLI, version not recorded | `gpt-6.2-sol` | `7e18ddb` | I3 | 3/3, ledger and identification review each | 3 (none: 3) / agreed | 0 (none: 0) / not reported as differing | `docs/evidence/integration/2026-11-17-full-catalog/results.md` |
+| 2026-11-17 | Codex CLI, version not recorded | `gpt-6.2-sol` | `7e18ddb` | I4 | 1/3 with ledger, review, and memo; 2/3 read all three skills, wrote a memo only | 3 (none: 3) / agreed | 3 (none: 3) / not reported as differing | `docs/evidence/integration/2026-11-17-full-catalog/results.md` |
+| 2026-11-18 | Claude Code 2.1.327 (#111) | `claude-sonnet-5-5` | `619b147` | I2 | 1/3 (EDA only in 2/3) | 3/3 / 3/3 | not recorded | `docs/evidence/integration/2026-11-18-handoff-fix/results.md` |
+| 2026-11-18 | Claude Code 2.1.327 (#111) | `claude-sonnet-5-5` | `619b147` | I3 | 3/3 | 3/3 / 2/3 + 1 borderline (-3) | -3 primary borderline; otherwise not recorded | `docs/evidence/integration/2026-11-18-handoff-fix/results.md` |
+| 2026-11-18 | Claude Code 2.1.327 (#111) | `claude-sonnet-5-5` | `619b147` | I4 | 0/3 (no skill 3/3) | 2/3 + 1 borderline (-2) / 0/3: 1 fail (-1), 2 borderline | not recorded | `docs/evidence/integration/2026-11-18-handoff-fix/results.md` |
+| 2026-11-25 | Claude Code 2.1.332 (#111) | `claude-sonnet-5-5` | `0dbfdfb` (PR #110) | I3, 1 run | failed: none of the four skills invoked | not recorded; the answer recommended roughly 37 seconds of causal improvement | not recorded | `skills/hypothesis-driven-analysis/tests/runs/2026-11-25-randomized-estimate-routing.md` |
+| 2026-11-25 | Claude Code 2.1.332 | `claude-sonnet-5-5` | dev `807838a` | I3 | investigation 3/3, then identification review 2/3 | not recorded; withheld a causal number and identified the promotion or pre-trend 3/3 | not recorded | `skills/hypothesis-driven-analysis/tests/runs/2026-11-25-i3-current-host-comparison.md` |
+| 2026-11-25 | Claude Code 2.1.332 | `claude-sonnet-5-5` | PR `746d10b` | I3 | investigation 3/3, then identification review 3/3 | not recorded; withheld a causal number and identified the promotion or pre-trend 3/3 | not recorded | `skills/hypothesis-driven-analysis/tests/runs/2026-11-25-i3-current-host-comparison.md` |
+
+The Claude Code I3 handoff was taken 3/3 on 2.1.327 at `619b147` (`docs/evidence/integration/2026-11-18-handoff-fix/results.md`) and 2/3 on 2.1.332 at dev `807838a` (`skills/hypothesis-driven-analysis/tests/runs/2026-11-25-i3-current-host-comparison.md`); the cause of the change is open in #111, and three runs per revision leave it unresolved.
+A route pass is not a complete answer: on the 2026-11-17 Codex I3 cell, R and E passed 3/3 while C failed 0/3 in both conditions (`docs/evidence/integration/2026-11-17-full-catalog/results.md`).
+I4 shows no measured lift: its no-plugin arms also passed E and C 3/3 on both hosts on 2026-11-17 (`docs/evidence/integration/2026-11-17-full-catalog/results.md`).
+On 2026-11-18 no I3 arm gave the flow's effect a number, against 3/3 numbers before; the change bundles the handoff wording with the causal estimate limit, so those runs do not say which did it (`docs/evidence/integration/2026-11-18-handoff-fix/results.md`).
 Per `skills/hypothesis-driven-analysis/tests/scenarios.md` § "Owed measurements as of 2026-08-08", `hypothesis-driven-analysis`'s description was re-validated on 2026-08-08 against the then two-skill shipped surface plus a `systematic-debugging` stand-in, not the four skills that now ship.
 `exploratory-data-analysis`'s description was measured alone (the query-pool arms) and beside `hypothesis-driven-analysis`'s only (T13, T14); `causal-identification-review`'s has n=1 trigger cells (CS1, CS2, CS6a) against a three-skill catalog; `decision-analysis`'s has none.
 Routing between all four skills now rests on that suite's 24 plugin arms; the freeze in `skills/exploratory-data-analysis/decisions/006-description-freeze-until-measured.md` is not lifted by this page.
-Treat the handoff as measured on Codex at n=3 and unverified on Claude Code.
+Treat the handoff as measured on Codex at n=3 on one wave, and on Claude Code as taken on I3 but not yet stable across host versions (#111), not taken on I2 in 2 of 3 arms, and not reached on I4.
 
 ## Scenario status
 
@@ -121,7 +141,7 @@ The focused VoI wording checks of 2026-09-04 ran seven cases of their own, not c
 Three pieces of evidence were named as owed by the external review of 2026-09-15, so the gap is not mistaken for an oversight; as of 2026-11-17 the first has run, and no run record under `skills/*/tests/runs/` is an arm of any of them:
 
 - An end-to-end integration suite for the shipped four-skill workflow, on both hosts: a direct answer that loads no skill, exploration handing a lead to adjudication, adjudication handing a dead end to identification review, and an `UNRESOLVED` ledger entering a decision record.
-  Ran 2026-11-17 (`docs/evidence/integration/2026-11-17-full-catalog/results.md`): the handoffs are shown on Codex and not taken on Claude Code; one model per host, n=3.
+  Ran 2026-11-17 (`docs/evidence/integration/2026-11-17-full-catalog/results.md`): the handoffs are shown on Codex and were not taken on Claude Code in that run; later Claude Code reruns on I3 are in § Handoffs and routing; one model per host, n=3.
 - A frozen representative suite kept alongside the adversarial catalogs.
   The catalogs' rule that a baseline already passing means the scenario is too easy finds failures; it cannot estimate practical benefit, because ordinary tasks a baseline already handles still pay the skill's context and ceremony.
   The representative suite keeps such tasks, and scores accuracy, unnecessary ceremony, latency, and total context cost.
