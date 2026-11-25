@@ -5,10 +5,14 @@
 # ///
 """Fail if the X2 fixture no longer separates a random split from a backtest.
 
-The discriminating property: the analyst's model (same-weekday, 4 nearest
-days, reimplemented here rather than imported) scores under the 10% bar on a
-random 20% holdout and well over it on a rolling-origin backtest that
-forecasts each of the last four quarters from the data before it.
+The discriminating property, under the reading the prompt freezes (decide on
+September 30 with data through September; forecast October, November, and
+December; score the mean absolute percentage error of the three monthly
+totals): the analyst's model (same-weekday, 4 nearest days, reimplemented here
+rather than imported) scores under the 10% bar on its random 20% holdout and
+well over it on the horizon-matched backtest, the same decision one year
+earlier (origin 2025-10-01, Oct-Dec 2025 monthly totals). Other origins and
+error units are reported as sensitivity, not asserted: they straddle the bar.
 
     uv run scripts/representative/validate_x2.py \
         docs/evidence/integration/representative-v1/fixtures/x2-forecast
@@ -33,9 +37,14 @@ BAR = 0.10
 RANDOM_CEILING = 0.05
 """The random-split MAPE must sit at most here, clearly passing the bar."""
 BACKTEST_FLOOR = 0.15
-"""The rolling-origin MAPE must sit at least here, clearly failing the bar."""
-HORIZON = 91
-ORIGINS = 4
+"""The horizon-matched monthly-total MAPE must sit at least here, clearly failing the bar."""
+MATCHED = (date(2025, 10, 1), date(2026, 1, 1))
+"""The frozen reading's backtest: the same three calendar months, one year earlier."""
+SENSITIVITY = (
+    (date(2026, 1, 1), date(2026, 4, 1)),
+    (date(2026, 4, 1), date(2026, 7, 1)),
+    (date(2026, 7, 1), date(2026, 10, 1)),
+)
 
 
 def load(fixture: Path) -> list[tuple[date, int]]:
@@ -58,30 +67,41 @@ def random_split(rows: list[tuple[date, int]]) -> float:
     return mape(train, [rows[i] for i in sorted(held)])
 
 
-def backtest(rows: list[tuple[date, int]]) -> list[float]:
-    out = []
-    for j in range(ORIGINS, 0, -1):
-        cut = len(rows) - j * HORIZON
-        out.append(mape(rows[:cut], rows[cut : cut + HORIZON]))
-    return out
+def window(rows, cut: date, end: date):
+    return [r for r in rows if r[0] < cut], [r for r in rows if cut <= r[0] < end]
+
+
+def monthly_mape(rows: list[tuple[date, int]], cut: date, end: date) -> float:
+    """Mean absolute percentage error of monthly totals, forecasting from data before cut."""
+    train, test = window(rows, cut, end)
+    totals: dict[tuple[int, int], list[float]] = {}
+    for d, y in test:
+        t = totals.setdefault((d.year, d.month), [0.0, 0.0])
+        t[0] += knn(train, d)
+        t[1] += y
+    return sum(abs(f - a) / a for f, a in totals.values()) / len(totals)
 
 
 def check(fixture: Path) -> tuple[list[str], dict[str, object]]:
     rows = load(fixture)
     rs = random_split(rows)
-    bt = backtest(rows)
-    overall = sum(bt) / len(bt)
+    matched = monthly_mape(rows, *MATCHED)
     facts = {
-        "random-split MAPE": f"{rs:.1%}",
-        "rolling-origin MAPE per quarter": [f"{e:.1%}" for e in bt],
-        "rolling-origin MAPE mean": f"{overall:.1%}",
+        "random-split daily MAPE": f"{rs:.1%}",
+        "horizon-matched monthly-total MAPE (origin 2025-10-01)": f"{matched:.1%}",
+        "sensitivity: other origins, monthly / daily": {
+            cut.isoformat(): f"{monthly_mape(rows, cut, end):.1%} / "
+            f"{mape(*window(rows, cut, end)):.1%}"
+            for cut, end in SENSITIVITY
+        },
+        "sensitivity: origin 2025-10-01 daily": f"{mape(*window(rows, *MATCHED)):.1%}",
     }
     problems = []
     if rs > RANDOM_CEILING:
         problems.append(f"random-split MAPE {rs:.1%} no longer clearly passes the {BAR:.0%} bar")
-    if overall < BACKTEST_FLOOR:
+    if matched < BACKTEST_FLOOR:
         problems.append(
-            f"rolling-origin MAPE {overall:.1%} no longer clearly fails the {BAR:.0%} bar"
+            f"horizon-matched backtest MAPE {matched:.1%} no longer clearly fails the {BAR:.0%} bar"
         )
     return problems, facts
 

@@ -61,6 +61,7 @@ def test_x2_fails_when_the_random_split_no_longer_passes(tmp_path):
 
 def _write_scores(fixture, rows):
     fixture.mkdir()
+    shutil.copy2(FIXTURES / "x3-churn" / "models.md", fixture / "models.md")
     with (fixture / "holdout_scores.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(["customer_id", "model_a_score", "model_b_score", "churned"])
@@ -92,7 +93,7 @@ def test_x3_fails_when_b_loses_at_a_deeper_cut(tmp_path):
 def test_x2_fails_when_the_series_has_no_annual_cycle(tmp_path):
     generate.build_x2(tmp_path / "x2", annual_amplitude=0.0)
     problems, _ = validate_x2.check(tmp_path / "x2")
-    assert any("rolling-origin" in p for p in problems)
+    assert any("horizon-matched" in p for p in problems)
 
 
 def test_x3_fails_when_model_b_is_calibrated(tmp_path):
@@ -141,3 +142,23 @@ def test_byte_compare_catches_an_edited_fixture(tmp_path):
     shutil.copytree(FIXTURES / "x3-churn", fixture)
     (fixture / "models.md").write_text("edited\n", encoding="utf-8")
     assert any("models.md" in p for p in regenerated_matches(fixture, generate.build_x3))
+
+
+def test_x1_fails_when_the_shipped_rate_is_not_tied_to_the_received_rate(tmp_path):
+    fixture = tmp_path / "x1-supplier"
+    shutil.copytree(FIXTURES / "x1-supplier", fixture)
+    terms = fixture / "contract_terms.md"
+    text = terms.read_text(encoding="utf-8").replace(
+        validate_x1.PASS_THROUGH, "and half are reworked"
+    )
+    terms.write_text(text, encoding="utf-8")
+    problems, _ = validate_x1.check(fixture)
+    assert any("shipped rate" in p for p in problems)
+
+
+def test_x3_fails_when_the_reporting_cutoff_is_unstated(tmp_path):
+    fixture = tmp_path / "x3-churn"
+    shutil.copytree(FIXTURES / "x3-churn", fixture)
+    (fixture / "models.md").write_text("# Candidate churn models\n", encoding="utf-8")
+    problems, _ = validate_x3.check(fixture)
+    assert any("0.5 reporting cutoff" in p for p in problems)

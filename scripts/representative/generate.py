@@ -127,8 +127,11 @@ def build_x1(out: Path, *, trial_units: int = 150, trial_defects: int = 1) -> No
         "\n"
         f"- Volume: {X1_VOLUME:,} units over the year, all from one supplier.\n"
         "- Unit price: identical for both suppliers.\n"
-        f"- Each defective unit that reaches us costs ${X1_DEFECT_COST:.0f}"
-        " in rework and returns.\n"
+        "- We do not inspect on receipt: every defective unit we receive is shipped"
+        " to our retail partner, so the defect rate of the units we ship equals"
+        " the supplier's defect rate.\n"
+        f"- Each defective unit we receive costs ${X1_DEFECT_COST:.0f}"
+        " in returns once the partner sends it back.\n"
         f"- Our retail partner's quality clause: if the annual defect rate"
         " of the units we ship exceeds"
         f" {X1_PENALTY_RATE:.0%}, we owe a one-time penalty of ${X1_PENALTY:,}.\n"
@@ -233,7 +236,9 @@ def build_x3(out: Path, *, b_noise: float = 0.25, b_inflation: float = 0.25) -> 
         "Both models were trained on the same data and scored on"
         " last quarter's holdout customers.\n"
         "Each score is the model's churn probability for that customer;"
-        " `churned` is what actually happened.\n",
+        " `churned` is what actually happened.\n"
+        "The team currently reports each model's accuracy at a 0.5 cutoff:"
+        " a customer scoring 0.5 or more counts as a predicted churner.\n",
         encoding="utf-8",
     )
 

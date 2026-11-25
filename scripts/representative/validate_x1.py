@@ -7,8 +7,13 @@
 
 The discriminating property: plugging the trial's observed defect rate in as
 if it were known picks Brightline, while integrating over a posterior for
-that rate (under both a uniform and a Jeffreys prior) picks Acme, because the
-contract's penalty cliff sits inside the posterior's plausible range.
+that rate picks Acme, because the contract's penalty cliff sits inside the
+posterior's plausible range. The prereg freezes the prior family as the
+symmetric Beta(a, a) for a from 0.5 (Jeffreys) to 1 (uniform); Acme must win
+across that whole range. The crossover a below which Brightline wins is
+reported as sensitivity, not asserted. The contract must also state that
+shipped units carry the received defect rate, so one rate drives both the
+per-unit cost and the penalty clause.
 Everything is recomputed from the CSVs and contract_terms.md; nothing is
 imported from the generator except for the byte-compare.
 
@@ -30,6 +35,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 from _common import regenerated_matches, report
 from generate import build_x1
 
+PRIORS = (0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+"""Beta(a, a) prior parameters the prereg's stated family spans."""
+SENSITIVITY = (0.01, 0.1, 0.2, 0.25, 0.3, 0.4)
+"""Smaller a, outside the stated family: reported to locate the crossover."""
+PASS_THROUGH = "so the defect rate of the units we ship equals the supplier's defect rate"
 MARGIN = 0.25
 """Each decision must win by at least this fraction of the loser's expected
 cost, so a flip is not a rounding artefact."""
@@ -62,7 +72,7 @@ def terms(fixture: Path) -> dict[str, float]:
 
     return {
         "volume": num(r"Volume: ([\d,]+) units"),
-        "defect_cost": num(r"costs \$([\d,.]+) in rework"),
+        "defect_cost": num(r"costs \$([\d,.]+) in returns"),
         "penalty_rate": num(r"exceeds ([\d.]+)%") / 100,
         "penalty": num(r"penalty of \$([\d,]+)"),
     }
@@ -90,6 +100,9 @@ def check(fixture: Path) -> tuple[list[str], dict[str, object]]:
     bn, bd, an, ad = counts(fixture)
     facts: dict[str, object] = {"brightline trial": f"{bd}/{bn}", "acme history": f"{ad}/{an}"}
     problems = []
+    text = (fixture / "contract_terms.md").read_text(encoding="utf-8")
+    if PASS_THROUGH not in text:
+        problems.append("contract_terms.md no longer ties the shipped rate to the received rate")
 
     # Point estimate: the observed rate treated as known;
     # the cliff binds only if that rate is over it.
@@ -101,16 +114,25 @@ def check(fixture: Path) -> tuple[list[str], dict[str, object]]:
     if not point["brightline"] < (1 - MARGIN) * point["acme"]:
         problems.append("the point estimate no longer picks Brightline by the margin")
 
-    for prior, a0 in (("uniform", 1.0), ("jeffreys", 0.5)):
+    def posterior(a0: float) -> dict[str, float]:
         post = {}
         for name, n, d in (("acme", an, ad), ("brightline", bn, bd)):
             a, b = d + a0, n - d + a0
             post[name] = expected_cost(t, a / (a + b), beta_sf(t["penalty_rate"], a, b))
-        facts[f"posterior cost ({prior})"] = {k: round(v) for k, v in post.items()}
+        return post
+
+    for a0 in PRIORS:
+        post = posterior(a0)
+        facts[f"posterior cost (Beta({a0}, {a0}))"] = {k: round(v) for k, v in post.items()}
         if not post["acme"] < (1 - MARGIN) * post["brightline"]:
             problems.append(
-                f"carrying the uncertainty ({prior} prior) no longer picks Acme by the margin"
+                f"carrying the uncertainty (Beta({a0}, {a0}) prior) no longer picks Acme"
+                " by the margin"
             )
+    facts["sensitivity outside the family"] = {
+        a0: "acme" if (p := posterior(a0))["acme"] < p["brightline"] else "brightline"
+        for a0 in SENSITIVITY
+    }
     return problems, facts
 
 
