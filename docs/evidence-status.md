@@ -170,6 +170,8 @@ The focused VoI wording checks of 2026-09-04 ran seven cases of their own, not c
 | DA-S9 | 2026-11-10: baseline, pre ×3, post ×3, plus an excluded canary | `a470770` | no — the VoI edit (#94) postdates this digest | `measured, no lift` — preregistration row 7: pre passed the rationale and action assertions 3/3, so the new text is unnecessary for behavior on this cell at n=3; all three pre arms chose `prior-sensitive`, which failed the base checker 3/3 (the old checkers wrongly accept `robust` on these inputs), while every post record took `evidence-sensitive` and passed both checkers | `skills/decision-analysis/tests/runs/2026-11-10-evidence-sweep.md`; `skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/prereg.md` |
 | DA-S10 | 2026-11-10: baseline, pre ×3, post ×3, plus two excluded canaries (the first on a retired packet) | `a470770` | no — the VoI edit (#94) postdates this digest | `measured, no lift` — preregistration row 7: pre passed rationale, verdict, action, and crossover 3/3 and the baseline reached the right action too; every arm, pre and post, wrote an out-of-set claim class | `skills/decision-analysis/tests/runs/2026-11-10-evidence-sweep.md`; `skills/decision-analysis/tests/runs/artifacts/2026-11-09-evidence-sweep/prereg.md` |
 | DA-S11 | none | — | — | `unrun` | — |
+| DA-S12 | none | — | — | `unrun` | — |
+| DA-S13 | none | — | — | `unrun` | — |
 
 ## Owed evidence
 

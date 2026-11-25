@@ -1,9 +1,9 @@
 # Test Scenarios for decision-analysis
 
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
-**Status (2026-11-17):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm.
+**Status (2026-11-17, except where a clause is dated):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm; DA-S12 and DA-S13 (added 2026-11-24) are unrun.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
-Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
+Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2, DA-S4, DA-S12, and DA-S13 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.
 Trigger scenarios load a catalog containing this skill's description AND the three siblings', because the failure under test is collision; record which skill activated and, if this one, which route it took.
@@ -176,3 +176,43 @@ Added 2026-11-17 for #94.
 - [ ] Each record passes `check_decision.py`, states full cost as `20 USD`, and reproduces its row's reasoning and verdict.
 - [ ] The conflicting-prior case reports the failed check in Value calculation and assigns no gross or net value to the pull.
 - [ ] Baseline failure to watch for: the agent buys the report in the conflicting-prior case on a spurious $40 gross value.
+
+### DA-S12 — an observation impossible under one state (ruled-out state)
+
+**Status:** unrun; added 2026-11-24 for issue #114 and `decisions/008`, which is proposed, so no wording it would measure exists yet.
+**Prompt:** "We suspect last night's loss of the orders partition on db-03 came from the new compaction job in build 412, and we must choose by noon between rolling back to build 411 and keeping 412 with a hotfix. Here is the incident packet (`{FIXTURE_PATH}`). Roll back or hotfix?"
+**Proposition:** H = the build-412 compaction job caused the loss of the orders partition on db-03; not-H = something other than that job caused it.
+**Fixture sketch:** to be generated with a validator; the packet must establish, each from its own file:
+- the lost partition lived only on db-03's local disk, with no replica, shared volume, or network storage holding it (a storage-topology document);
+- the compaction job can modify data only by executing on the host that holds it (the job's design document), and no component able to touch the partition ran the job (process accounting for db-03 and the deploy log showing db-03 never ran build 412);
+- the full observation, the loss together with the job's absence from db-03, is possible under not-H, with a named alternative such as a disk fault in db-03's device log;
+- a four-cell loss table supplied by the owner whose losses strictly separate the two actions in the surviving state.
+
+So the accepted evidence has zero likelihood under H by a structural exclusion and positive likelihood under not-H.
+**Expected:** the route the owner's answer to `decisions/008`'s routing question selects; the response states the accepted evidence, the structural reason it is impossible under H, and why it is possible under not-H, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
+
+- [ ] No evidence row carries an invented small positive ratio standing in for impossibility.
+- [ ] The decisive observation is not discarded as `none supported`.
+- [ ] The recommendation follows from the losses in the surviving state, with the eliminating observation cited by file.
+- [ ] Baseline expectation: writes a token ratio such as 0.01, or drops the observation and returns an undecided record.
+
+### DA-S13 — zero events in a finite sample (must keep its uncertainty)
+
+**Status:** unrun; added 2026-11-24 as DA-S12's pair for issue #114 and `decisions/008`.
+**Prompt:** "The vendor's new disk firmware has shown zero corruption events in our pilot. Should we roll it out fleet-wide this week or keep piloting another month? Packet: `{FIXTURE_PATH}`."
+**Proposition:** H = the new firmware carries the defect the vendor's advisory describes; not-H = it does not.
+**Fixture sketch:** to be generated with a validator; the packet must supply:
+- a pilot log of zero corruption events over 100 host-weeks, one week on each of 100 distinct hosts, so the sampling model is 100 independent Bernoulli trials and no host contributes two weeks;
+- the vendor advisory's corruption rate of 0.02 per host-week for firmware with the defect, and the fleet's measured baseline of 0.005 per host-week for firmware without it, each with its source and reference class;
+- the owner's prior odds of H, 1, stated as settled so the prior class is held fixed at 1, and losses over (H, not-H) of roll out = (10, 0) and keep piloting = (1, 1);
+- nothing that makes corruption mechanically impossible under the new firmware.
+
+**Expected:** decide route; the likelihood ratio of zero events is (0.98 / 0.995)^100 ≈ 0.219, `externally-sourced`; posterior odds ≈ 0.219.
+Keep piloting is favored if H is true, the loss ratio is (10 − 1) / (1 − 0) = 9, and the threshold is 1/9 ≈ 0.111, so posterior odds above it prefer keep piloting; the prior-odds crossover is (1/9) / 0.219 ≈ 0.508, outside the fixed prior class of 1, and with point losses and a point ratio nothing else flips, so the verdict is `robust` and the action keep piloting.
+Reading zero events as elimination gives posterior odds 0 and roll out, so the action alone separates the two readings.
+
+- [ ] No ratio of `0`, no unbounded ratio, and no claim that the defect is ruled out.
+- [ ] The evidence row's ratio recomputes from the two sourced rates and n = 100 (≈ 0.219), naming both sources and the independence of the 100 host-weeks; a ratio that does not recompute from the packet counts as fabricated.
+- [ ] Any upper bound the record states names its sampling model and recomputes (Bernoulli: 1 − 0.05^(1/100) ≈ 0.0295), and is not used as a likelihood.
+- [ ] Prior odds `1` held fixed, with Prior class swept `1`; Verdict `robust`, Recommended action keep piloting, from the existing ordered rule in `../SKILL.md` § Numeric Policy, not from a resolved-proposition form.
+- [ ] Baseline expectation: reads "zero events" as "the firmware does not corrupt" and recommends the rollout unconditionally.
