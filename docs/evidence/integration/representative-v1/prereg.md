@@ -326,6 +326,7 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
 
 2026-11-25, harness change for I1–I4 (#128):
 
-- The limit above held for the runs before it; I-cell runs from here on do not keep it.
-  `scripts/run_integration.py` now stages I1–I4 in a neutrally named `int-arm-*` workspace and renders their data path as the relative `data`, as it does for this suite's cells, so neither the arm's name nor its condition reaches the prompt or the working directory.
+- The limit above held for the 2026-11-17 and 2026-11-18 full-catalog runs; I-cell runs from here on do not keep it.
+  `scripts/run_integration.py` now gives I1–I4 a generated workspace directory named `int-arm-*` and renders their data path as the relative `data`, as it does for this suite's cells, so neither the arm's name nor its condition reaches the prompt or that directory name.
+  The directory is created under the system temp parent, and its full path is the host's working directory: a temp parent free of labels is the operator's responsibility.
 - This file's cells, prompts, fixtures, and hashes are unchanged, and no count here changes.

@@ -200,9 +200,19 @@ def test_every_cell_renders_a_relative_data_path(cell):
     assert ri.data_path(cell, Path("/w/int-I3-claude-plugin-1-abc")) == Path("data")
 
 
-def run_main_with_stubbed_host(monkeypatch, tmp_path, cell, condition, name):
-    """Drive main() with no host: record the cwd and prompt the host would get."""
-    seen = argparse.Namespace(name=name, cwd=None, prompt=None)
+def run_main_with_stubbed_host(monkeypatch, tmp_path, arm, parent=None):
+    """Drive main() with no host: record the cwd and prompt the host would get.
+    The workspace is created under `parent` (default: a fresh dir in tmp_path)
+    with the prefix main() supplies, so nothing is left in the system temp dir."""
+    cell, condition, name = arm
+    parent = parent or tmp_path / "tmp"
+    parent.mkdir(parents=True, exist_ok=True)
+    seen = argparse.Namespace(name=name, cwd=None, prompt=None, prefixes=[])
+    real_mkdtemp = ri.tempfile.mkdtemp
+
+    def contained_mkdtemp(*, prefix):
+        seen.prefixes.append(prefix)
+        return real_mkdtemp(prefix=prefix, dir=parent)
 
     def fake_command(_args, _base, root, prompt):
         seen.cwd, seen.prompt = root, prompt
@@ -212,6 +222,7 @@ def run_main_with_stubbed_host(monkeypatch, tmp_path, cell, condition, name):
         base.with_suffix(".jsonl").write_text("", encoding="utf-8")
         return 0, "completed", 0
 
+    monkeypatch.setattr(ri.tempfile, "mkdtemp", contained_mkdtemp)
     monkeypatch.setattr(ri, "host_command", fake_command)
     monkeypatch.setattr(ri, "run_host", fake_run)
     monkeypatch.setattr(
@@ -225,12 +236,26 @@ def run_main_with_stubbed_host(monkeypatch, tmp_path, cell, condition, name):
 @pytest.mark.parametrize("condition", ["plugin", "none"])
 @pytest.mark.parametrize("cell", ["I1", "I2", "I3", "I4"])
 def test_staged_arm_shows_no_condition(cell, condition, monkeypatch, tmp_path):
-    seen = run_main_with_stubbed_host(
-        monkeypatch, tmp_path, cell, condition, name=f"{cell}-claude-{condition}-1"
-    )
+    arm = (cell, condition, f"{cell}-claude-{condition}-1")
+    seen = run_main_with_stubbed_host(monkeypatch, tmp_path, arm)
+    assert seen.prefixes == ["int-arm-"]
+    assert seen.cwd.parent == tmp_path / "tmp"
     for leak in ("plugin", "none", seen.name):
         assert leak not in seen.prompt
-        assert leak not in str(seen.cwd)
+        assert leak not in seen.cwd.name
+
+
+def test_a_labelled_temp_parent_is_the_operators_to_avoid(monkeypatch, tmp_path):
+    # The harness controls the generated directory name and the prompt, not the
+    # temp parent: a label there still reaches the host's cwd, never the prompt.
+    label = "I3-claude-plugin-1"
+    seen = run_main_with_stubbed_host(
+        monkeypatch, tmp_path, ("I3", "plugin", label), parent=tmp_path / label
+    )
+    assert seen.cwd.name.startswith("int-arm-")
+    assert label in str(seen.cwd)
+    for leak in ("plugin", label, str(tmp_path)):
+        assert leak not in seen.prompt
 
 
 @pytest.mark.parametrize("cell", ["I1", "I2", "I3", "I4"])

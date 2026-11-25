@@ -38,6 +38,7 @@ n=3 per cell; these are counts, not rates.
 ## Note, 2026-11-25: the prompt named the condition (#128)
 
 All 12 archived prompts here show an absolute data path inside a workspace named after the arm (`int-<cell>-claude-plugin-<n>-*`), so `plugin` appears in every one.
-This run is plugin-only, so the cue makes no difference between conditions within it.
-It matters only when these arms are compared with the 2026-11-17 full-catalog run, whose prompts carried the same cue for both conditions (`docs/evidence/integration/2026-11-17-full-catalog/results.md` § Note, 2026-11-25: the prompt named the condition).
+This run is plugin-only, so every arm saw the same `plugin` label and the cue makes no difference between arms within it.
+Disclose it in any comparison with a run whose prompt exposure differed: the 2026-11-17 full-catalog run, whose prompts named `plugin` or `none` by condition (`docs/evidence/integration/2026-11-17-full-catalog/results.md` § Note, 2026-11-25: the prompt named the condition), and the 2026-11-25 I3 runs, whose prompts showed other labels (`docs/evidence-status.md` § Handoffs and routing).
+The cue's effect on behaviour is unknown.
 No count above changes.
