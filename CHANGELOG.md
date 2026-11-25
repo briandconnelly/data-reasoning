@@ -6,6 +6,11 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Changed
+
+- The evidence page reports the 2026-11-18 and 2026-11-25 Claude Code handoff runs beside the 2026-11-17 run, per cell, host version, and revision, and no longer calls the Claude Code handoff unverified.
+  The installing guide notes that exploration's routing has also been measured against the full catalog.
+
 ### Fixed
 
 - Explicitly randomized comparisons can report the effect of assignment directly after checking outcome coverage.
