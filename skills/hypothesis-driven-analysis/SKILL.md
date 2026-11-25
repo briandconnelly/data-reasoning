@@ -333,12 +333,10 @@ Report the answer first, then the per-hypothesis evidence summary, then limitati
 
 ## Estimation Route
 
-Define the knowledge goal or the decision the estimate informs.
-State the estimand, the population it describes, the uncertainty method, and the practical threshold that would change the decision.
-No competing hypotheses are required.
-The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix and its baseline in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
-Stated randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias a randomized comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded against those obligations.
-For incomplete binary outcomes with known arm totals, bound the completed-sample difference (B minus A) by treating every unknown in B as a failure and every unknown in A as a success for the lower bound, then reversing those assignments for the upper bound.
+State the decision or knowledge goal, the estimand, its population, the uncertainty method, and the practical threshold that would change the decision; no competing hypotheses are required.
+The gates, the data rules, and the full route's data-validity obligations apply at the estimate's grain: the coverage matrix and its baseline (§ Plan), and completeness semantics and the confound check (§ Analysis).
+Randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias the comparison.
+For incomplete binary outcomes with known arm totals, bound the completed-sample difference (B minus A): unknowns in B as failures and in A as successes for the lower bound, reversed for the upper.
 State which conclusions survive both the missing outcomes and sampling uncertainty.
 
 ## Record Delivery
