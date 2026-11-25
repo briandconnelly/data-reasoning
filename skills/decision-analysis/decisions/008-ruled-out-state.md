@@ -151,25 +151,61 @@ The positive-ratio rule is unchanged: likelihood ratios stay strictly positive i
 ## Record contract
 
 This section fixes the record shape `resolved` takes, for the change to the two checkers, the template, and `../SKILL.md` that implements it.
-It specifies what that change will put where and is not a home for any rule: once the change lands, each rule lives where the list below says, and this section is history.
+It specifies what that change will put where and is not a home for any rule.
+Revised 2026-11-25, before any implementation, after a cross-model design review; the first draft (every existing slot kept and filled with a sentinel) was never committed to any checker and is not kept.
 
-- `../SKILL.md` § Numeric Policy: the elimination condition (answer 4 above), the zero-count guard, the both-impossible disposition, the surviving-state comparison (answer 2), and the precedence of `resolved` over the ordered rule's statewise clauses, each once.
-- `../SKILL.md` § The Decide Route: `resolved` in the closed verdict list, the Resolution block, and the Recommended action reading under `resolved`, each pointing at § Numeric Policy.
+- `../SKILL.md` § Numeric Policy: the elimination condition (answer 4 above), the zero-count guard, the both-impossible disposition, the surviving-state comparison (answer 2), the precedence of `resolved` over the ordered rule's statewise clauses, and what qualifies a structural exclusion to license causal wording (§ Causal basis below), each once.
+- `../SKILL.md` § The Decide Route: `resolved` in the closed verdict list, the resolved record's blocks, the Recommended action reading under `resolved`, and the model-review handoff (§ Model review below), each pointing at § Numeric Policy for meaning.
 - `../SKILL.md` § Routing: only what answer 3's adjudication-first ruling needs.
-- `../references/decision-record-template.md`: the Resolution block skeleton, and § Slot notes for its labels and for the sentinel.
+- `../references/decision-record-template.md`: the resolved skeleton, and § Slot notes for its labels and value grammar.
 - `tests/check_decision.py` and `instruments/check_record.py`: enforcement, split as § Who enforces what says.
+
+### Instruction to the implementing change
+
+In the same change that puts these rules in `../SKILL.md`, the template, and the tests, reduce this record to the selected option, its rationale, the choices below, and pointers to each rule's home.
+`decisions/` ships in the installed tree, so a contract left here after that change is a second statement of every rule (HDA decision 004).
 
 ### Shape
 
-A `resolved` record keeps every existing section and every existing slot label, in the template's order.
-It adds one section, `## Resolution`, placed between `## Decision-state model` and `## Evidence and update`, carrying these top-level bullets in this order, labels spelled exactly:
+A `resolved` record is a complete record of its own, with its own skeleton in the template, a third fenced block after the decide and VoI skeletons:
 
 ```markdown
+# Decision Record: <one-line decision>
+
+## Decision frame
+
+- Route: decide
+- Actions: <action A> vs <action B>
+- Decision owner: <who decides and acts>
+- Reversibility: <what undoing each action costs>
+- Deadline or forcing event: <date or event, or none>
+- Consequences:
+
+  | | <proposition> true | <proposition> false |
+  | --- | --- | --- |
+  | <action A> | <outcome> | <outcome> |
+  | <action B> | <outcome> | <outcome> |
+
+## Decision-state model
+
+- Proposition: <the binary proposition the decision turns on>
+- Residual reading: <what "false" includes, covering explanations nobody named>
+- Claim class: <value>
+- Identification basis: <design or review licensing the causal conclusion, structural exclusion — see Resolution, or NONE>
+- Identification conditions: <identifying assumptions as explicit conditions, or none>
+- Ledger mapping: <which UNRESOLVED rows fold into which state and what the residual absorbs, or none>
+
 ## Resolution
 
 - Excluded state: <proposition true or proposition false>
-- Surviving state: <proposition true or proposition false, the other one>
-- Accepted evidence: <the whole observation as recorded, with the file or source of each part>
+- Surviving state: <the other one, or none>
+- Observations:
+
+  | observation | source |
+  | --- | --- |
+  | <one verified part of the accepted evidence> | <file or source it comes from> |
+
+- Accepted evidence: <the whole observation, as the conjunction of the rows above>
 - Structural exclusion: <the logical or mechanical reason the accepted evidence is impossible under the excluded state>
 - Exclusion assumptions: <the assumptions of the stated model the exclusion rests on>
 - Surviving-state possibility: <why the accepted evidence is possible under the surviving state>
@@ -179,95 +215,130 @@ It adds one section, `## Resolution`, placed between `## Decision-state model` a
   | --- | --- | --- |
   | <action A> | <loss or range> | <class> |
   | <action B> | <loss or range> | <class> |
+
+- Surviving-state loss difference: <signed number or range> — provenance: <class>
+
+## Verdict
+
+- Verdict: resolved
+- Recommended action: <action A or action B exactly as written in Actions, or returned to owner, or no preference>
+- Conditions: <the exclusion assumptions and loss provenance the verdict is conditional on>
+
+## Handoff
+
+- Open factual disputes: <what would change the verdict and needs adjudication, or none>
+- Identification gaps: <causal propositions lacking a licensing design or review, or none>
+- VoI question: <the collect-more option worth pricing, or none>
 ```
 
-The template carries this block as its own fenced skeleton after the decide skeleton, introduced as used only under the `resolved` verdict.
+The required sections and slots are verdict-dependent; under every verdict other than `resolved` nothing changes.
+Under `resolved`:
+
+- Required sections: `## Decision frame`, `## Decision-state model`, `## Resolution`, `## Verdict`, `## Handoff`.
+- Absent, and a finding when present: the sections `## Evidence and update` and `## Robustness`, and the Decision frame slots `Favored if true:`, `Loss ratio:`, and `Decision threshold (posterior odds):`.
+  That is every odds-only field: prior odds, the evidence table and its ratios, independence, posterior odds, threshold, loss ratio, favored-if-true, both sweeps, and the crossover.
+- Required in `## Resolution`, each label exactly once, in the skeleton's order: `Excluded state:`, `Surviving state:`, `Observations:`, `Accepted evidence:`, `Structural exclusion:`, `Exclusion assumptions:`, `Surviving-state possibility:`, `Surviving-state losses:`, `Surviving-state loss difference:`.
+- `## Resolution` under any verdict other than `resolved` is a finding.
+
+No sentinel is added.
 
 Slot values:
 
-- `Excluded state:` and `Surviving state:` each read exactly `proposition true` or `proposition false`, naming a state of the Proposition slot; the two differ.
-  `Surviving state:` reads exactly `none` when the accepted evidence is impossible under both states, and such a record is a model-review finding, never a verdict.
+- `Excluded state:` reads exactly `proposition true` or `proposition false`, naming a state of the Proposition slot.
+  `Surviving state:` reads exactly the other of the two, or exactly `none` (§ Model review).
+- `Observations:` heads a table with exactly the columns `observation` and `source` and at least one row, every cell filled.
 - `Accepted evidence:`, `Structural exclusion:`, `Exclusion assumptions:`, and `Surviving-state possibility:` are prose, non-empty, and never `none`.
-- `Surviving-state losses:` heads a table with exactly the columns `action`, `loss`, `provenance` and exactly two data rows.
-  Each `action` cell is one of the two actions exactly as the Actions slot writes them, each appearing once.
-  Each `loss` cell is a nonnegative decimal or a `<low>–<high>` range with low ≤ high, in the grammar of the template's numeric slots; zero is allowed, because a loss is not an odds.
-  Each `provenance` cell is one class from § Numeric Policy.
-  A loss nobody supplied writes `none supported` in both its `loss` and `provenance` cells, the missing-ratio form's spelling.
+- `Surviving-state losses:` heads a table with exactly the columns `action`, `loss`, `provenance`, in that order, and exactly one row per framed action: two rows, each action cell one of the two actions exactly as the Actions slot writes them, neither repeated, every row three cells wide.
+  A `loss` cell is a nonnegative decimal or a `<low>–<high>` range with low ≤ high, in the template's numeric grammar; a `provenance` cell is one class from § Numeric Policy; a loss nobody supplied writes `none supported` in both its `loss` and `provenance` cells, together.
+- `Surviving-state loss difference:` is L(first action in Actions) − L(second action in Actions) in the surviving state, written as a signed decimal (`-1`, `0`, `2.5`) or `<low> to <high>` with low ≤ high (`-5 to 3`), using ASCII `-` for the sign, followed by ` — provenance: <class>`; or exactly `none supported`, bare.
+  It reads `none supported` exactly when a losses row does.
 
-The sentinel is `not applicable — resolved`, with an em dash, written bare and replacing the whole value.
-Under `resolved` it fills exactly these existing slots, and it is valid nowhere else in any record:
+The Verdict section carries exactly one visible `- Verdict:` line, and under `resolved` it reads `resolved` bare: `resolved — <anything>` or `resolved (…)` is a finding.
 
-| slot | section |
-| --- | --- |
-| Favored if true | Decision frame |
-| Loss ratio | Decision frame |
-| Decision threshold (posterior odds) | Decision frame |
-| Prior odds | Evidence and update |
-| Independence | Evidence and update |
-| Posterior odds | Evidence and update |
-| Prior class swept | Robustness |
-| Loss range swept | Robustness |
-| Crossover | Robustness |
-| every Evidence table row's LR cell and provenance cell, together | Evidence and update |
+### The surviving-state comparison
 
-No existing slot is absent under `resolved`.
-Every other existing slot keeps its ordinary form: Route `decide`, Actions, Decision owner, Reversibility, Deadline or forcing event, the Consequences table over both states, the Decision-state model's six slots, Conditions, and the three Handoff slots.
-The Evidence table keeps at least one row; each row's item and source cells are filled, the source cell naming where the item comes from.
+The ruling is about the sign of the loss difference throughout its supported range, so the record states the difference, not only the two marginal losses.
+When the losses share a parameter (each is a function of the same uncertain quantity), the difference is computed jointly and can be narrower than the marginals allow.
+When only unpaired bounds are supplied, the difference is the marginal endpoint interval: [low(A) − high(B), high(A) − low(B)].
+Either way the stated difference must lie inside that endpoint interval, since a joint difference can only be tighter.
 
-The verdict line is `- Verdict: resolved`, bare.
+Recommended action under `resolved`:
 
-### Recommended action
+- the first action in Actions when the difference's provenance is belief-grade (`user-elicited` or `externally-sourced`) and its high endpoint is below zero; the second action when its low endpoint is above zero;
+- `no preference` when the provenance is belief-grade and the difference is exactly the point `0`;
+- `returned to owner` otherwise: provenance not belief-grade, `none supported`, or a range that reaches or spans zero without being the point `0`.
 
-The existing `- Recommended action:` slot carries the three outcomes of answer 2, in the spellings it already uses:
+Comparisons are exact, each decimal read as a fraction.
+Only surviving-state losses enter; the Consequences table's eliminated-state column plays no part, which is how `dominated` is kept from firing on eliminated-state losses.
 
-- one of the two actions exactly as the Actions slot writes them, when both `provenance` cells of the Surviving-state losses table are belief-grade (`user-elicited` or `externally-sourced`) and that action's loss interval lies strictly below the other's, its high endpoint below the other's low endpoint;
-- `no preference`, when both provenance cells are belief-grade and the two losses are equal points;
-- `returned to owner` in every other case: a provenance cell that is not belief-grade or reads `none supported`, or loss intervals that overlap or touch without being equal points.
+Worked cases, with marginal losses A = 1–5 and B = 2–6, all `user-elicited`, A listed first:
 
-Loss comparisons are exact, each decimal read as an exact fraction, as the dev checker already reads thresholds.
-Only the surviving-state losses enter; the Consequences table's eliminated-state column plays no part.
+- Shared parameter, A = t and B = t + 1 for the same t in [1, 5]: the difference is `-1` throughout; it lies in the endpoint interval [−5, 3]; its high endpoint is below zero, so the record names A.
+- Shared parameter, A = B = t for t in [1, 5] (marginals A = 1–5, B = 1–5): the difference is `0`; it lies in [−4, 4]; the record reads `no preference`.
+- Unpaired, the same marginals as the first case with no stated relation: the difference is `-5 to 3`; it spans zero; the record reads `returned to owner`.
 
 ### Causal basis
 
-The causal-basis gate in `tests/check_decision.py` is unchanged: a `causal` Claim class needs an Identification basis other than `NONE`, and then Identification conditions other than `none`.
-Under `resolved`, Identification basis may read exactly `structural exclusion — see Resolution`, and Identification conditions then restate the Exclusion assumptions as explicit conditions.
-That basis value is valid only under `resolved`; an existing licensing basis (the causal-wording bar or an `identified-if` disposition) is also accepted there.
+The dev checker's causal-basis gate is unchanged: a `causal` Claim class needs an Identification basis other than `NONE`, and then Identification conditions other than `none`; it checks presence, not adequacy.
+`structural exclusion — see Resolution` is an accepted Identification basis only under `resolved` and only when `Excluded state:` reads `proposition true`; elsewhere it is a finding in the dev checker.
+The rule § Numeric Policy states: a structural exclusion licenses causal wording only for the negation of the excluded causal proposition, and only when every causal path the proposition names requires a condition the accepted evidence shows absent; it licenses no causal claim about what did cause the outcome, which stays an identification gap for the Handoff.
+Asserting a cause (excluding `proposition false`) needs an ordinary licensing basis, because it would require excluding every path in the residual, including ones nobody named.
+Whether the stated paths really all require the absent condition is a reviewer's judgement, not a checker's.
+
+### Model review
+
+When the accepted evidence is impossible under both states, no verdict is reached.
+The disposition's home is § Numeric Policy; the handoff's is § The Decide Route, which will say:
+
+- the draft record keeps `Surviving state: none` and its Verdict slot unfilled, is not completed, and is not rewritten to clear a finding;
+- the response delivers no recommendation; it states the accepted evidence, the reason it is impossible under each state, and the exclusion assumptions or binary framing that must be wrong for both to hold, with the draft's path;
+- the response reports the record as not validated, naming the validator's model-review finding as the expected limitation, per § Record Delivery;
+- the conflict is handed to `hypothesis-driven-analysis` as a factual dispute about the observation or the model, in the same response.
+
+Both checkers keep rejecting `Surviving state: none` under every verdict, with a finding that says the disposition is model review, never a verdict.
+Agent behaviour in this case, in the routing of a disputed exclusion to `out: adjudicate`, and in a surviving-state tie despite apparent two-state dominance is tested by measured arms, not by the checkers.
 
 ### Plan stage and `--final`
 
 The dev checker has no plan-stage mode: it reads every record as complete, as it does today.
 The shipped validator keeps its two modes.
-In its default mode a record still carrying template placeholders or `pending` is in progress and completeness findings are suspended, as today, so a `## Resolution` section written from the skeleton before the verdict is known is not a finding.
-Otherwise, and always under `--final`, the shipped validator applies the `resolved` requirements when the Verdict slot is filled with `resolved`, and the outside-`resolved` prohibitions when it is filled with another verdict; a slot still in template state is skipped in default mode and is a finding under `--final`, as in every coupling check today.
+In its default mode a record still carrying template placeholders or `pending` is in progress and completeness findings are suspended, as today, so the resolved skeleton validates clean and a half-filled record is not a finding.
+Otherwise, and always under `--final`, the shipped validator chooses the required set from the single visible Verdict slot: `resolved` selects the resolved set, any other filled verdict the ordinary set, and an unfilled Verdict slot under `--final` is a finding, as today.
 
 ### Who enforces what
 
-The shipped validator, `instruments/check_record.py`, checks structure and coupling and parses no number:
+Both checkers, on visible Markdown only (each strips fenced code and HTML comments before locating sections; the shipped validator already does, the dev checker must start to, so a `## Resolution` inside a fence or comment counts as absent):
 
-1. `resolved` is in `DECIDE_VERDICTS`.
-2. Under `resolved`, `## Resolution` is present and non-empty; its six inline slots are present and non-empty (under `--final`, filled); `Surviving-state losses:` heads a table with the columns `action`, `loss`, `provenance` and at least one data row as wide as its header.
-3. Under `resolved`, `Excluded state:` and `Surviving state:` read the closed tokens and differ, and none of the four prose slots reads `none`.
-4. Under `resolved`, each slot and cell in the sentinel table reads the sentinel exactly; any other value, `none needed` and `none supported — see Robustness` included, is a finding.
-5. Under `resolved`, Recommended action is one of the two framed actions, `no preference`, or `returned to owner`, and it is `returned to owner` when any Surviving-state losses `provenance` cell is not belief-grade.
-6. Under any verdict, `Surviving state: none` is a finding whose text says the disposition is model review, never a verdict.
-7. Under any verdict other than `resolved`, a `## Resolution` section, or the sentinel in any slot or cell, is a finding; `no preference` stays a finding outside `indifferent` and `resolved`.
-8. Every other check is unchanged for every other verdict, and the provenance vocabulary check reads the sentinel as a sentinel, not as an unknown class.
+1. `resolved` is in the closed verdict set; exactly one visible `- Verdict:` line; under `resolved` the token is bare.
+2. The verdict-dependent section and slot sets above, including the absence of every odds-only field under `resolved` and the absence of `## Resolution` under every other verdict.
+3. `Excluded state:` and `Surviving state:` read the closed tokens and differ; `Surviving state: none` is a model-review finding under every verdict.
+4. The four prose slots are non-empty and not `none`; `Observations:` has its two columns and at least one filled row.
+5. The losses table: exact headers in order, exactly one row per framed action, every row three cells wide, each provenance a class or the paired `none supported`.
+6. The loss difference carries exactly one provenance class, or reads `none supported` bare exactly when a losses row does.
+7. Recommended action under `resolved` is one of the two framed actions, `no preference`, or `returned to owner`, and is `returned to owner` when the difference's provenance is not belief-grade or reads `none supported`; `no preference` stays a finding outside `indifferent` and `resolved`.
 
-The dev checker, `tests/check_decision.py`, enforces the same structure and adds arithmetic and provenance:
+The dev checker alone, which parses numbers:
 
-1. Everything in the shipped list, with the Resolution labels held in a label constant of their own, required only under `resolved`.
-2. The Surviving-state losses table has exactly two data rows, the two framed actions each once, each loss parsing as a nonnegative number or ordered range, and each provenance a class or the paired `none supported`.
-3. The recommendation matches the table per § Recommended action: a named action must be the strictly lower one, `no preference` needs equal belief-grade points, and `returned to owner` is required, not merely allowed, in every other case.
-4. Under `resolved`, the ordered rule, the posterior recomputation, and the statewise sentinel checks do not run: `resolved` is dispatched before them.
-5. The causal-basis gate holds per § Causal basis, and `structural exclusion — see Resolution` outside `resolved` is a finding.
-6. Every Evidence LR cell that is not the sentinel still parses as a strictly positive number or range under every verdict, so a `0` or unbounded ratio fails everywhere.
+8. Each loss parses as a nonnegative number or ordered range, and the difference as a signed number or ordered `<low> to <high>` range.
+9. The difference lies within the marginal endpoint interval.
+10. The recommendation matches the difference per § The surviving-state comparison: a named action must be the one the sign gives, `no preference` needs the belief-grade point `0`, and `returned to owner` is required, not merely allowed, otherwise.
+11. Under `resolved`, the ordered rule, the posterior recomputation, and the statewise sentinel checks do not run: `resolved` is dispatched first.
+12. The causal-basis rule of § Causal basis.
+13. `- Surviving-state losses:` and `- Observations:` are table headings, exempt from the empty-value check beside Consequences and Evidence.
 
-A human reviewer checks what neither checker can: that the exclusion is structural (logical or mechanical) and not a frequency, a zero count included; that the accepted evidence is the whole observation; that the exclusion is not itself in dispute, which would route `out: adjudicate`; and that the Exclusion assumptions are the ones the exclusion actually needs.
+Unchanged and stated exactly: in a `robust`, `prior-sensitive`, `loss-sensitive`, or `evidence-sensitive` record, every Evidence row is either a strictly positive ratio or range or the paired `none supported` form.
+`dominated` and `indifferent` records return before any LR cell is read, so an LR of `0` in one passes the dev checker today; that is a known gap, out of scope here, to be filed separately.
+
+The shipped validator's template parity (`test_required_slots_exist_in_shipped_templates`) gains a resolved required-slot set checked against the template's resolved block, which `detect()` classifies as a decision record by its title; the dev checker's parity test compares the template's bullets with the union of its ordinary and resolved label sets.
+
+A human reviewer checks what neither checker can: that the exclusion is structural (logical or mechanical) and not a frequency, a zero count included; that the observations are the whole accepted evidence; that the exclusion is not itself in dispute, which would route `out: adjudicate`; that a causal exclusion meets § Causal basis; and that a jointly computed difference really rests on a shared parameter.
 
 ### Worked example (DA-S12)
 
-The DA-S12 shape from `../tests/scenarios.md`, with an illustrative owner loss table over (H, not-H) of roll back = (2, 4) and keep with a hotfix = (8, 1), until the fixture fixes real numbers.
-Across both states neither action dominates; in the surviving state, not-H, the hotfix costs 1 against 4, so the record names it.
+The proposition is narrowed to direct modification by the job, because "the job caused the loss" is not excluded by the job's absence from db-03: a remote run could trigger a local process.
+The narrowing does not make the decision trivial: the residual now includes build 412 acting on db-03 by some other path, so the owner's surviving-state losses must price that, and rolling back keeps a positive value there.
+The packet facts align: storage topology (local-only partition), the job's design document (it modifies data only where it runs), process accounting and the deploy log (it never ran on db-03), and the device log (a named alternative).
+The losses are illustrative until the fixture fixes them.
 
 ```markdown
 # Decision Record: roll back to build 411 or keep build 412 with a hotfix after the db-03 partition loss
@@ -281,32 +352,38 @@ Across both states neither action dominates; in the surviving state, not-H, the 
 - Deadline or forcing event: noon today
 - Consequences:
 
-  | | compaction job caused the loss true | compaction job caused the loss false |
+  | | the job directly modified the partition true | the job directly modified the partition false |
   | --- | --- | --- |
-  | roll back to build 411 | the faulty job is removed | a working build is withdrawn and the disk fault stays unaddressed |
-  | keep build 412 with a hotfix | the faulty job keeps running until the hotfix | the build stays and the hotfix work goes to the disk fault |
-
-- Favored if true: not applicable — resolved
-- Loss ratio: not applicable — resolved
-- Decision threshold (posterior odds): not applicable — resolved
+  | roll back to build 411 | the faulty job is removed | a build is withdrawn; any indirect build-412 cause is removed too |
+  | keep build 412 with a hotfix | the faulty job runs until the hotfix | the build stays and the hotfix work goes to the found cause |
 
 ## Decision-state model
 
-- Proposition: the build-412 compaction job caused the loss of the orders partition on db-03
-- Residual reading: something other than that job caused it, including causes nobody named
+- Proposition: the build-412 compaction job, executing, directly modified or deleted the orders partition on db-03
+- Residual reading: the partition was lost by anything other than that job's direct action, including a disk fault, another process, build 412 acting by another path, and causes nobody named
 - Claim class: causal
 - Identification basis: structural exclusion — see Resolution
-- Identification conditions: the storage topology, process accounting, and deploy log are complete for the incident window; the compaction job modifies data only on the host where it runs
+- Identification conditions: the partition was held only on db-03's local disk; the job modifies data only on the host where it executes; process accounting and the deploy log are complete for the incident window
 - Ledger mapping: none
 
 ## Resolution
 
 - Excluded state: proposition true
 - Surviving state: proposition false
-- Accepted evidence: the orders partition on db-03 was lost overnight, and neither db-03's process accounting nor the deploy log shows build 412 or its compaction job running on db-03 (packet files: process accounting, deploy log)
-- Structural exclusion: the partition lived only on db-03's local disk (packet file: storage topology), and the compaction job can modify data only by executing on the host that holds it (packet file: compaction design), so it could not have touched a partition on a host where it never ran
+- Observations:
+
+  | observation | source |
+  | --- | --- |
+  | the orders partition on db-03 was lost overnight | packet file: incident timeline |
+  | the partition lived only on db-03's local disk, with no replica, shared volume, or network storage | packet file: storage topology |
+  | the compaction job modifies data only by executing on the host that holds it | packet file: compaction design |
+  | the job never executed on db-03, and db-03 never ran build 412 | packet files: process accounting, deploy log |
+  | db-03's device log records a disk fault in the window | packet file: db-03 device log |
+
+- Accepted evidence: the partition was lost while the compaction job never executed on db-03, the only host holding it
+- Structural exclusion: the job can modify data only where it executes and the partition existed only on db-03, where it never executed, so direct modification by the job is impossible
 - Exclusion assumptions: the storage topology, process accounting, and deploy log are complete for the incident window, and the design document's locality claim holds for build 412
-- Surviving-state possibility: a loss without the job is possible under not-H; db-03's device log records a disk fault in the window (packet file: db-03 device log)
+- Surviving-state possibility: a loss without the job's direct action is possible under not-H, and the device log names one such cause, a disk fault
 - Surviving-state losses:
 
   | action | loss | provenance |
@@ -314,100 +391,94 @@ Across both states neither action dominates; in the surviving state, not-H, the 
   | roll back to build 411 | 4 | user-elicited |
   | keep build 412 with a hotfix | 1 | user-elicited |
 
-## Evidence and update
-
-- Prior odds: not applicable — resolved
-- Evidence:
-
-  | item | LR | provenance | source, reference class, conditioning |
-  | --- | --- | --- | --- |
-  | partition lost while build 412 never ran on db-03 | not applicable — resolved | not applicable — resolved | packet files: process accounting, deploy log; see Resolution |
-
-- Independence: not applicable — resolved
-- Posterior odds: not applicable — resolved
-
-## Robustness
-
-- Prior class swept: not applicable — resolved
-- Loss range swept: not applicable — resolved
-- Crossover: not applicable — resolved
+- Surviving-state loss difference: 3 — provenance: user-elicited
 
 ## Verdict
 
 - Verdict: resolved
 - Recommended action: keep build 412 with a hotfix
-- Conditions: the exclusion assumptions in Resolution, and the owner's surviving-state losses of 1 and 4
+- Conditions: the exclusion assumptions in Resolution, and the owner's surviving-state losses of 4 and 1
 
 ## Handoff
 
 - Open factual disputes: none
-- Identification gaps: none
+- Identification gaps: what caused the loss is not identified; the device log's disk fault is a candidate, not an established cause
 - VoI question: none
 ```
 
-Slot by slot, what each checker accepts and rejects on this example:
+Slot by slot on this example (✓ accept, ✗ reject):
 
-| slot | both checkers accept | both checkers reject | the dev checker alone also rejects |
-| --- | --- | --- | --- |
-| the nine sentinel slots | the bare sentinel | any number, `none needed`, `none stated`, `single item`, `none supported — see Robustness`, the sentinel with an annotation | — |
-| Evidence row LR and provenance | the sentinel in both cells | the sentinel in one cell only; a class or a number in either | a `0` or other non-positive ratio, as under every verdict |
-| Claim class, Identification basis, Identification conditions | `causal`, `structural exclusion — see Resolution`, conditions restated | — | that basis with conditions `none`; `causal` with basis `NONE` |
-| Excluded state, Surviving state | `proposition true` and `proposition false`, differing | equal values or any other token; `Surviving state: none`, as model review | — |
-| Accepted evidence, Structural exclusion, Exclusion assumptions, Surviving-state possibility | non-empty prose | missing, empty, or `none` | — |
-| Surviving-state losses | the two framed actions, decimal losses, belief-grade classes | a missing table or column | a third row, an action not in Actions, an unparseable or negative loss, an unpaired `none supported` |
-| Recommended action | `keep build 412 with a hotfix` | a value outside the three forms; anything but `returned to owner` when a class is not belief-grade | `roll back to build 411`, `no preference`, or `returned to owner`, since 1 lies strictly below 4 under belief-grade losses |
-| Verdict | `resolved` | — | — |
+| slot or field | both checkers | dev checker alone also rejects |
+| --- | --- | --- |
+| `## Evidence and update`, `## Robustness`, Favored if true, Loss ratio, Decision threshold | ✗ if any is present | — |
+| Verdict | ✓ one bare `resolved`; ✗ a second Verdict line, `resolved — …` | — |
+| Claim class, Identification basis, Identification conditions | ✓ `causal`, `structural exclusion — see Resolution`, conditions restated | that basis with conditions `none`, or with `Excluded state: proposition false` |
+| Excluded state, Surviving state | ✓ the two tokens, differing; ✗ equal, other tokens, or `Surviving state: none` (model review) | — |
+| Observations | ✓ two columns, filled rows; ✗ missing table or column | — |
+| the four prose slots | ✓ non-empty prose; ✗ missing, empty, `none` | — |
+| Surviving-state losses | ✓ one row per action; ✗ a missing row, a duplicate action, a wrong header, a short row, an unknown class, an unpaired `none supported` | an unparseable or negative loss |
+| Surviving-state loss difference | ✓ `3 — provenance: user-elicited`; ✗ no class, two classes | any value but `3`, since both losses are points and the endpoint interval is [3, 3] |
+| Recommended action | ✓ `keep build 412 with a hotfix`; ✗ a value outside the three forms | `roll back to build 411`, `no preference`, `returned to owner` |
+| `## Resolution` inside a fence or comment | ✗ counts as absent | — |
+
+The difference here is L(roll back) − L(hotfix) = 4 − 1 = 3, a point, so its endpoint interval is exactly [3, 3]; a positive low endpoint names the second action.
 
 ### Choices made in the contract
 
-1. *Every existing slot stays, filled with a sentinel, rather than going absent.*
-   The shipped validator's `REQUIRED_SLOTS` and the dev checker's `DECIDE_LABELS` require every slot in every decide record, and `test_required_slots_exist_in_shipped_templates` and `tests/test_template_parity_da.py` tie both to the template; absent slots would make both required-slot sets verdict-dependent.
-   Cost if wrong: nine sentinel lines per record, which an agent may annotate or replace and then fail; the DA-S12 arm measures that.
-2. *A new sentinel, `not applicable — resolved`, not `none needed`.*
-   The shipped validator reserves `none needed` for `dominated` and `indifferent` and flags it under any other verdict; reusing it would weaken that check, and answer 2 says `dominated` must not fire here.
-   Cost if wrong: one more sentinel to learn; because of the em dash, implementers must compare the whole stripped value before the dev checker's `_bare` split, as it already does for `none supported — see Robustness`.
-3. *Every Evidence row takes the sentinel in both cells; no row keeps a positive ratio under `resolved`.*
-   Mixed rows would leave odds-form numbers in a record that has left the odds form, with nothing consuming them.
-   Cost if wrong: corroborating evidence with a supportable ratio is recorded only by name and source, so if the exclusion later fails its ratio has to be reconstructed.
-4. *The surviving-state comparison reads a new two-row loss table, not the Consequences table or the Loss ratio slot.*
-   The Consequences table holds prose outcomes, and the loss ratio r is built from both states.
-   Cost if wrong: the surviving state's outcomes appear twice (Consequences prose and the table), and no checker compares them.
-5. *Unsupported losses are spelled with the paired `none supported`, borrowed from the missing-ratio form.*
-   One spelling for "no supportable number" across the record.
+1. *A separate resolved skeleton whose required sections and slots are verdict-dependent, omitting every odds-only field, with no sentinel* (orchestrator ruling A).
+   Both checkers need verdict-dependent requirements for `## Resolution` anyway, and the shipped `_required_slots(body, kind)` already varies its set by body for exploration records; the dev checker reads the verdict before `_require_slots` can choose a set.
+   Cost if wrong: two record shapes on one route, and an agent that starts from the ordinary skeleton and later reaches `resolved` must delete two sections and three slots, which the measured arm will show.
+2. *The loss comparison is a stated signed difference, checked against the marginal endpoint interval*, so that a shared parameter can give a strict preference or an exact tie that overlapping marginals cannot.
+   Cost if wrong: the difference's sign convention gives the Actions order a meaning it has nowhere else (§ Numeric Policy says the order carries none), and a difference narrower than the marginals rests on a pairing only a reviewer can check.
+3. *The marginal losses table stays beside the difference*, with exactly one row per framed action in both checkers, so a missing or duplicated action cannot pass and the difference has something to be checked against.
+   Cost if wrong: two statements of the same losses that the dev checker relates only by containment.
+4. *Unsupported losses use the paired `none supported`*, the missing-ratio form's spelling, and the difference then reads `none supported` bare.
    Cost if wrong: a reader may take it for the missing-ratio form; the column header disambiguates.
-6. *The model-review disposition is encoded as `Surviving state: none`, failing under every verdict.*
-   Answer 4 says the both-impossible case is never a verdict, so the record must fail whatever it claims, and a slot value gives both checkers something to key on.
-   Cost if wrong: an agent that sees both states excluded may write no Resolution section and an ordinary verdict, which no checker catches; that is a reviewer's call, as whether an exclusion is structural is.
-7. *Precedence over `dominated` is enforced structurally: a `## Resolution` section under any verdict other than `resolved` fails.*
-   Neither checker computes statewise domination from losses (the dev checker's docstring disclaims it), so there is no arithmetic `dominated` clause to switch off; the enforceable form is that a record stating an exclusion must take `resolved`.
-   Cost if wrong: a record that omits the Resolution section and takes `dominated` on eliminated-state losses passes both checkers.
-8. *Identification basis may read `structural exclusion — see Resolution`.*
-   DA-S12's proposition is causal, and the gate needs a non-`NONE` basis; the exclusion is what licenses the causal conclusion there, and its assumptions become the Identification conditions, so the gate's second clause still bites.
-   Cost if wrong: an exclusion becomes a self-licensing identification basis; if the owner wants a causal `resolved` record to need the causal-wording bar or an `identified-if` disposition as well, the value is withdrawn and the gate stays as it is.
-9. *The Resolution labels are a label constant of their own in the dev checker, required only under `resolved`, and `tests/test_template_parity_da.py` compares the template with the union of the checker's label sets.*
-   The parity test collects every top-level template bullet, so the new labels must be on the checker side, and adding them to `DECIDE_LABELS` would require them in every decide record.
-   Cost if wrong: none to behaviour; the parity test unions two checker-side sets.
-10. *The shipped validator checks that unsupported losses force `returned to owner`, but not strictness or ties.*
-    It parses no number (§ Positions, A), so the strict-advantage and exact-tie readings are the dev checker's alone.
-    Cost if wrong: a shipped-validator pass can carry a named action on overlapping ranges, as it can today carry a `robust` verdict whose arithmetic does not hold.
-11. *`Exclusion assumptions:` may not read `none`.*
-    Answer 4 makes exactness conditional on the stated model, so there is always a model to name.
-    Cost if wrong: a purely logical exclusion has to state the binary model as its assumption.
+5. *Source-backed observations are a two-column table in `## Resolution`*, replacing the Evidence table the resolved record omits.
+   Cost if wrong: an agent may duplicate the observations in prose and table, which no checker compares.
+6. *DA-S12's proposition is narrowed to direct modification by the job*, rather than requiring the packet to show every causal path needs local execution, because the narrowing is exact and keeps the decision non-trivial (the residual includes build 412 acting by another path, so rollback keeps value).
+   Cost if wrong: the scenario no longer tests an exclusion of a broad causal claim, which is the harder and commoner case.
+7. *`structural exclusion — see Resolution` stays an accepted basis, only with `Excluded state: proposition true` and only with § Numeric Policy's qualification*, because the dev gate checks presence, not adequacy.
+   Cost if wrong: an agent writes the basis for an exclusion that does not cover every named path, and only a reviewer catches it.
+8. *Exactly one visible Verdict line and a bare `resolved`*, because the shipped validator reads the first Verdict slot and validates the others only against the vocabulary, and both checkers read `resolved — note` as `resolved`.
+   Other verdicts keep their current tolerance of annotations in the shipped validator.
+   Cost if wrong: an annotation an agent adds out of habit fails the record.
+9. *The dev checker strips fenced code and HTML comments before locating sections*, matching the shipped validator, so a Resolution section in a fence or comment is absent.
+   Cost if wrong: the dev checker's section parse changes for every record kind it reads, which `test_ordinary_records_are_unchanged` must cover.
+10. *`Surviving state: none` stays a rejection under every verdict, and the no-verdict handoff is § The Decide Route's*, because `--final` requires a Verdict and a model-review case has none.
+    Cost if wrong: the delivered draft always reports a validator finding, which a reader may take for a defect.
+11. *The statewise LR gap is not tightened in this change*: `dominated` and `indifferent` records never read LR cells, so a `0` there passes today; it is filed separately.
+    Cost if wrong: a statewise record can carry an elimination-shaped `0` until that issue is fixed.
+12. *`Exclusion assumptions:` may not read `none`*, because answer 4 makes exactness conditional on a stated model.
+    Cost if wrong: a purely logical exclusion has to name the binary model as its assumption.
+13. *The resolved label sets are constants of their own in both checkers*, and both parity tests read the template's resolved block.
+    Cost if wrong: none to behaviour; each parity test unions two sets.
 
 ### The implementing change's tests, decided by the contract
 
-- `test_resolved_passes_with_exclusion_and_strict_surviving_preference`: § Shape, § Recommended action's first case, and the worked example.
-- `test_resolved_passes_in_the_other_direction`: § Shape, with `Excluded state: proposition false` and `Surviving state: proposition true`.
-- `test_resolved_exact_tie_reports_no_preference`: § Recommended action's second case.
-- `test_resolved_range_touching_zero_returns_to_owner`: § Recommended action's third case, intervals that touch.
-- `test_resolved_with_unsupported_losses_returns_to_owner`: § Recommended action's third case, a provenance cell not belief-grade or `none supported`.
-- `test_resolved_without_a_structural_exclusion_fails`: shipped items 2 and 3 (no Resolution section, or `Structural exclusion:` missing, empty, or `none`).
-- `test_resolved_carrying_an_odds_slot_fails`: the sentinel table and shipped item 4.
-- `test_evidence_impossible_under_both_states_fails_as_model_review`: `Surviving state: none` and shipped item 6.
-- `test_dominated_does_not_fire_on_losses_in_the_eliminated_state`: shipped item 7 and choice 7 (a Resolution section under `dominated` fails), with the same record passing as `resolved` with `no preference` on losses A = (1, 0) and B = (1, 5) over (surviving, eliminated), by § Recommended action's second case.
-- `test_ordinary_records_are_unchanged`: shipped items 7 and 8, and dev item 6.
-- `test_resolved_is_an_accepted_decide_verdict`: shipped item 1.
-- `test_resolved_requires_each_contract_statement`: shipped items 2 and 3.
-- `test_resolved_rejects_posterior_odds_and_crossover`: shipped item 4.
-- `test_resolved_recommendation_coupling`: shipped item 5.
-- `test_other_verdicts_keep_their_coupling`: shipped items 7 and 8.
+Dev checker (`tests/test_check_decision.py`):
+
+- `test_resolved_passes_with_exclusion_and_strict_surviving_preference`: § Shape and the worked example.
+- `test_resolved_passes_in_the_other_direction`: `Excluded state: proposition false`, with a non-causal claim class or an ordinary basis (§ Causal basis).
+- `test_resolved_exact_tie_reports_no_preference`: difference `0`, § The surviving-state comparison.
+- `test_resolved_range_touching_zero_returns_to_owner`: a difference range reaching zero.
+- `test_resolved_with_unsupported_losses_returns_to_owner`: a difference not belief-grade, or `none supported`.
+- `test_resolved_shared_parameter_strict_preference`: marginals 1–5 and 2–6, difference `-1`, names the first action.
+- `test_resolved_shared_parameter_exact_tie`: marginals 1–5 and 1–5, difference `0`, `no preference`.
+- `test_resolved_without_a_structural_exclusion_fails`: items 2 and 4.
+- `test_resolved_carrying_an_odds_slot_fails`: item 2, with an odds-only field present (each of the five sections or slots parametrized).
+- `test_resolved_missing_a_loss_row_fails` and `test_resolved_duplicate_loss_rows_fail`: item 5.
+- `test_duplicate_verdict_line_fails` and `test_annotated_resolved_fails`: item 1.
+- `test_fenced_resolution_counts_as_absent` and `test_commented_resolution_counts_as_absent`: the visible-Markdown rule and choice 9.
+- `test_evidence_impossible_under_both_states_fails_as_model_review`: item 3.
+- `test_dominated_does_not_fire_on_losses_in_the_eliminated_state`: losses over (surviving, eliminated) of A = (1, 0) and B = (1, 5) pass as `resolved` with difference `0` and `no preference`; the same record with `## Resolution` under `dominated` fails, item 2.
+- `test_ordinary_records_are_unchanged`: item 2's "nothing changes" and the unchanged LR invariant; every existing fixture keeps its findings.
+
+Shipped validator (its unit suite, test_check_record.py beside it):
+
+- `test_resolved_is_an_accepted_decide_verdict`: item 1.
+- `test_resolved_requires_each_contract_statement`: items 2 to 6.
+- `test_resolved_rejects_posterior_odds_and_crossover`: item 2, odds-only fields present.
+- `test_resolved_recommendation_coupling`: item 7.
+- `test_other_verdicts_keep_their_coupling`: item 2's "nothing changes" and item 7's `no preference` rule.
+- The missing-row, duplicate-row, duplicate-Verdict, annotated-`resolved`, odds-field, fenced, and commented cases above, each also against the shipped validator, by the same items.
