@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import json
 import os
 import re
@@ -66,8 +67,55 @@ CELLS: dict[str, tuple[Path, str]] = {
     "I4": (S15, ""),  # Scenario 15's prompt, from PROBLEM.md, data line rewritten
 }
 
+# The representative suite (issue #115). Its preregistration,
+# docs/evidence/integration/representative-v1/prereg.md, freezes these prompts
+# by hash; a change here without a dated note there breaks the freeze.
+REP = REPO / "docs/evidence/integration/representative-v1/fixtures"
+CELLS.update(
+    {
+        "R1": (
+            REP / "r-sales",
+            "How many orders did the Riverside store take in March 2026? "
+            "Our order export is `{DATA}/orders.csv`.",
+        ),
+        "R2": (
+            REP / "r-sales",
+            "Using `{DATA}/orders.csv`, what was the average order total at each "
+            "store in February 2026? An order's total is unit_price times quantity.",
+        ),
+        "R3": (REP, ""),  # placeholder: awaits an owner-supplied user request
+        "R4": (REP, ""),  # placeholder: awaits an owner-supplied user request
+        "X1": (
+            REP / "x1-supplier",
+            "We have to pick one supplier for all 100,000 units next year: stay "
+            "with Acme or move to Brightline. Brightline's trial batch, our Acme "
+            "history, and the contract terms are in `{DATA}`. Brightline's trial "
+            "had fewer defects than Acme usually has. Which supplier should we "
+            "sign with?",
+        ),
+        "X2": (
+            REP / "x2-forecast",
+            "Our analyst built a model for daily support ticket volume; the notes, "
+            "code, and two years of data are in `{DATA}`. They report under 4% "
+            "error on held-out days. We want to use it to set staffing for each of "
+            "the next three months, and staffing works if forecasts are within 10% "
+            "on average. Can we use it?",
+        ),
+        "X3": (
+            REP / "x3-churn",
+            "We have two candidate churn models scored on last quarter's holdout "
+            "customers, with who actually churned: `{DATA}/holdout_scores.csv`. "
+            "Our retention team can call 500 customers a month. Which model should "
+            "we deploy?",
+        ),
+    }
+)
+PLACEHOLDERS = frozenset({"R3", "R4"})
+
 
 def cell_prompt(cell: str, data: Path) -> str:
+    if cell in PLACEHOLDERS:
+        raise SystemExit(f"{cell} is a placeholder: its prompt awaits the owner (see the prereg)")
     fixture, template = CELLS[cell]
     if cell == "I4":
         text = (fixture / "PROBLEM.md").read_text(encoding="utf-8")
@@ -75,6 +123,11 @@ def cell_prompt(cell: str, data: Path) -> str:
         body = body.replace("in this directory:", f"in `{data}`:")
         return body
     return template.replace("{DATA}", str(data))
+
+
+def prompt_sha256(cell: str) -> str:
+    """The hash the prereg freezes: the prompt with `{DATA}` left unexpanded."""
+    return hashlib.sha256(cell_prompt(cell, Path("{DATA}")).encode("utf-8")).hexdigest()
 
 
 def build_release(dest: Path) -> None:
@@ -203,7 +256,7 @@ def model_of(events: list[dict], codex_home: str | None, host: str) -> str | Non
     return None
 
 
-def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cell", required=True, choices=sorted(CELLS))
     ap.add_argument("--host", required=True, choices=["claude", "codex"])
@@ -211,7 +264,24 @@ def main() -> None:
     ap.add_argument("--name", required=True)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--timeout", type=int, default=1800)
-    args = ap.parse_args()
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="stage the fixture, print the prompt and its hash, and stop before any host call",
+    )
+    return ap.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+    if args.dry_run:
+        digest = prompt_sha256(args.cell)  # a placeholder cell exits here, before staging
+        root = Path(tempfile.mkdtemp(prefix=f"int-dry-{args.name}-"))
+        shutil.copytree(CELLS[args.cell][0], root / "data")
+        prompt = cell_prompt(args.cell, root / "data")
+        print(f"cell={args.cell} sha256={digest} staged={root / 'data'}")
+        print(prompt)
+        return
 
     ref = subprocess.run(
         ["git", "-C", str(REPO), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
