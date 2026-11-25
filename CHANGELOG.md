@@ -10,7 +10,8 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 - Explicitly randomized comparisons can report the effect of assignment directly after checking outcome coverage.
   The routing instructions clarify that as-if-random natural experiments require identification review.
-- The record validator no longer treats a required heading that appears only inside a fenced block or an HTML comment as proof that a note is a record.
+- The record validator no longer treats a required heading that appears only inside a closed fenced block or a closed HTML comment as proof that a note is a record.
+  A heading after a fence or comment left open at the end of the file still counts, so the validator reports the unfinished block instead of going silent.
 
 ## [0.5.0] - 2026-11-18
 

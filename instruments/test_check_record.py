@@ -782,13 +782,13 @@ def test_comment_delimiter_inside_inline_code_is_visible_text():
         "- The token `<!--` opens a comment.\n\n"
         "## Hypotheses\n\n| id |\n| --- |\n| H1 |\n"
     )
-    visible, _, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" in visible, visible
 
 
 def test_a_real_comment_after_inline_code_still_hides_the_rest():
     doc = "# Investigation: x\n\n- token `<!--` here\n<!--\n## Hypotheses\n"
-    visible, _, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" not in visible, visible
 
 
@@ -830,13 +830,13 @@ def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
     """CommonMark forbids a backtick in a backtick fence's info string, so
     the line is ordinary text and the content after it stays visible."""
     doc = "# Investigation: x\n\n## Problem\n\n```bad`info\n\n## Hypotheses\n\n- a\n"
-    visible, _, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" in visible, visible
 
 
 def test_a_well_formed_unclosed_fence_still_hides_what_follows():
     doc = "# Investigation: x\n\n## Problem\n\n```python\n\n## Hypotheses\n\n- a\n"
-    visible, _, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" not in visible, visible
 
 
@@ -1864,5 +1864,30 @@ def test_heading_only_after_an_unterminated_fence_is_still_a_record():
 
 def test_comment_opener_inside_a_closed_fence_does_not_trigger_the_fallback():
     note = "# Investigation: sync notes\n\n```markdown\n<!--\n## Tests\n```\n\nNo actions.\n"
-    assert cr._strip_hidden(note)[1:] == (False, False)
+    assert cr._strip_hidden(note)[1:] == (False, False, None)
     assert cr.detect(note) is None
+
+
+def test_escaped_comment_opener_does_not_hide_a_record():
+    text = "# Investigation: x\n\n\\<!-- literal\n\n## Problem\n\nStill drafting.\n\n-->\n"
+    assert cr.detect(text) == "ledger"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "# Investigation: note\n\n~~~\n## Tests\n~~~\n\n<!-- unfinished\n",
+        "# Investigation: note\n\n<!--\n## Tests\n-->\n\n~~~\nunfinished\n",
+    ],
+)
+def test_unfinished_block_does_not_revive_a_heading_in_an_earlier_closed_block(text):
+    assert cr.detect(text) is None
+
+
+def test_heading_made_by_removing_an_inline_comment_does_not_count():
+    assert cr.detect("# Investigation: x\n\n##<!-- note --> Tests\n\nExample only.\n") is None
+
+
+def test_inline_comments_before_fence_openers_keep_in_progress_handling():
+    text = "# Investigation: x\n\n<!-- note -->~~~\n\n## Problem\n\n(pending)\n\n## Aside\n\n<!-- note -->~~~\n"
+    assert cr.check(text) == []

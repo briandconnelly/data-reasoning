@@ -364,18 +364,20 @@ def _opens_fence(line: str, m) -> bool:
     return not (m.group(1)[0] == "`" and "`" in line[m.end() :])
 
 
-def _strip_hidden(text: str) -> tuple[str, bool, bool]:
+def _strip_hidden(text: str) -> tuple[str, bool, bool, int | None]:
     """Blank out what a reader never sees — fenced code blocks and HTML
     comments — in one pass, so the two cannot hide each other's delimiters.
     Line count is preserved. Per CommonMark: a fence closes only on a same-
     character run at least as long as the opener with nothing but whitespace
     after it; `<!--` inside a fence is code; a comment never closed runs to
-    the end of the document. Returns
-    (body, fence_still_open_at_eof, comment_still_open_at_eof)."""
+    the end of the document. Returns (body, fence_still_open_at_eof,
+    comment_still_open_at_eof, index of the line where that unfinished block
+    opened, or None)."""
     out: list[str] = []
     fence: tuple[str, int] | None = None
     in_comment = False
-    for line in text.split("\n"):
+    opened_at: int | None = None
+    for i, line in enumerate(text.split("\n")):
         if fence is not None:
             m = FENCE.match(line)
             if (
@@ -395,13 +397,16 @@ def _strip_hidden(text: str) -> tuple[str, bool, bool]:
         m = FENCE.match(line)
         if m and _opens_fence(line, m):
             fence = (m.group(1)[0], len(m.group(1)))
+            opened_at = i
             out.append("")
             continue
         visible, opened = _strip_comment(line)
         if opened:
             in_comment = True
+            opened_at = i
         out.append(visible.rstrip())
-    return "\n".join(out), fence is not None, in_comment
+    still_open = fence is not None or in_comment
+    return "\n".join(out), fence is not None, in_comment, opened_at if still_open else None
 
 
 # The colon must be present, either inside the emphasis ("**Verdict:**") or
@@ -467,7 +472,8 @@ def _mask_code_pipes(line: str) -> str:
 def _strip_comment(line: str) -> tuple[str, bool]:
     """Drop HTML comments a reader never sees, ignoring `<!--` and `-->` that
     Markdown renders as code. Returns (visible, comment_left_open)."""
-    masked = _blank_code_spans(line, "\x01")
+    # A backslash-escaped `\<` is literal text, not a comment opener.
+    masked = _blank_code_spans(line, "\x01").replace("\\<", "\x01\x01")
     for m in reversed(list(INLINE_COMMENT.finditer(masked))):
         line = line[: m.start()] + line[m.end() :]
         masked = masked[: m.start()] + masked[m.end() :]
@@ -497,19 +503,23 @@ def detect(text: str) -> str | None:
     a reader: one quoted inside a closed fence or closed HTML comment does
     not count. An unterminated fence or comment blanks everything after it,
     so when either is open at EOF and nothing visible corroborates, the raw
-    body is searched instead: a malformed real record stays recognized and
-    check() reports what it could not see (fail closed)."""
+    text from where that block opened is searched instead: a malformed real
+    record stays recognized and check() reports what it could not see (fail
+    closed). A heading must have heading syntax in the raw line too, so
+    removing an inline comment cannot manufacture one."""
     text = strip_frontmatter(text)
     kind = title_kind(text.lstrip().split("\n", 1)[0])
     if kind is None:
         return None
 
-    def has_heading(src: str) -> bool:
-        body = "\n" + "\n".join(line.rstrip() for line in src.split("\n")) + "\n"
-        return any(("\n" + h + "\n") in body for h in REQUIRED_SECTIONS[kind])
-
-    visible, fence_open, comment_open = _strip_hidden(text)
-    if has_heading(visible) or ((fence_open or comment_open) and has_heading(text)):
+    required = REQUIRED_SECTIONS[kind]
+    raw = text.split("\n")
+    visible, _, _, opened_at = _strip_hidden(text)
+    for shown, line in zip(visible.split("\n"), raw, strict=True):
+        h = shown.rstrip()
+        if h in required and line.startswith(h.split(" ", 1)[0] + " "):
+            return kind
+    if opened_at is not None and any(line.rstrip() in required for line in raw[opened_at:]):
         return kind
     return None
 
@@ -981,7 +991,9 @@ def _check_assessments(section: str, heading: str, findings: list[str]) -> None:
             )
 
 
-def _in_progress(body: str) -> bool:
+def _in_progress(body: str, kind: str | None = None) -> bool:
+    """`body` is already stripped; pass the record's `kind` when known so it
+    is not re-detected from stripped text."""
     if any(v.strip() == "..." or _has_placeholder(v) for v in _slot_values(body)):
         return True
     # A slot value, or a required section's whole content, that says it is
@@ -989,7 +1001,7 @@ def _in_progress(body: str) -> bool:
     # with the word is not.
     if any(PENDING.match(v.strip()) for v in _bullet_slot_values(body)):
         return True
-    kind = detect(body) or ""
+    kind = kind or detect(body) or ""
     return any(
         SECTION_PENDING.match(_section(body, h).strip())
         for h in (_required_sections(body, kind) if kind else [])
@@ -1177,13 +1189,13 @@ def check(text: str, *, final: bool = False) -> list[str]:  # noqa: PLR0912, PLR
     if kind is None:
         raise ValueError("not a recognized record")
     findings: list[str] = []
-    body, unterminated_fence, _ = _strip_hidden(text)
+    body, unterminated_fence, _, _ = _strip_hidden(text)
     # An unterminated fence blanks everything after it (including any
     # genuinely-present later sections), so completeness findings there
     # would fail correct work — treat the record as in-progress instead.
     # Vocabulary checks still run on whatever body remains (the pre-fence
     # part).
-    in_progress = unterminated_fence or (not final and _in_progress(body))
+    in_progress = unterminated_fence or (not final and _in_progress(body, kind))
     if unterminated_fence:
         findings.append("unterminated code fence: completeness past it was not checked")
 
