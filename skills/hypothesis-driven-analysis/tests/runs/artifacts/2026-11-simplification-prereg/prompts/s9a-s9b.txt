@@ -1,0 +1,5 @@
+We randomly assigned 1,000 distinct visitors to each of two signup pages, A and B.
+The experiment tracked whether each visitor signed up within two weeks.
+The counts are in `{FIXTURE_PATH}/signups.csv`.
+What was the effect of assignment to B on the probability of signup within two weeks?
+We care about an absolute gain of at least one percentage point.
