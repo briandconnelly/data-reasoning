@@ -5,4 +5,4 @@
 - 03:10: on-call confirmed the partition's files were gone from db-03's local
   disk.
 
-The incident window is 01:40 to 03:10.
+The incident window is 01:40 to 03:10 on 2026-11-24.

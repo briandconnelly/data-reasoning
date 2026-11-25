@@ -14,16 +14,21 @@ imported from the generator or a checker.
 
 1. s12 states each exclusion fact in its own file: the partition was held
    only on db-03's local disk; the job modifies data only where it executes;
-   process accounting for the whole window shows no compaction process on
-   db-03; the deploy log shows db-03 never ran build 412 while other hosts
-   did; db-03's device log records a disk fault inside the window. The
-   README says the facts are verified and not in dispute.
+   process accounting, stated complete, covers the whole window and every
+   process in it ran the build db-03 was on at that moment, never 412, and
+   none is a compaction process; every db-03 deploy interval overlapping the
+   window runs 411 while build 412 ran elsewhere; db-03's device log records
+   a disk fault inside the window. The README says the facts are verified,
+   not in dispute, and that both logs are complete.
 2. s12's owner losses: neither action dominates across both states (so the
    odds form would need a ratio the packet never supplies), while in the
    surviving state the difference roll back - hotfix = 4 - 1 = 3 > 0 names
    the hotfix; the same table read across both states would not.
-3. s13's pilot is zero events over 100 host-weeks on 100 distinct hosts, and
-   the README states the independence and why.
+3. s13's pilot is 100 host-weeks on 100 distinct hosts, none with an event;
+   the README states the independence and why, defines each trial's outcome
+   as whether a host-week had at least one event, and says the two sourced
+   rates are the per-host-week probabilities of that outcome under the two
+   states.
 4. s13's rates 0.02 and 0.005 recompute the ratio (0.98 / 0.995)^100, about
    0.2189; with prior odds 1 and losses roll out = (10, 0), keep piloting =
    (1, 1), the threshold is 1/9, posterior odds 0.2189 lie above it (keep
@@ -34,7 +39,8 @@ imported from the generator or a checker.
 5. Nothing in s13 makes corruption impossible under the new firmware, and no
    s12 file states a probability or a likelihood ratio.
 6. Each prompt carries `{FIXTURE_PATH}` once, and the s12 prompt names the
-   narrowed proposition: direct modification by the job.
+   windowed proposition: the job wrote to or deleted partition files between
+   01:40 and 03:10.
 7. Regenerating from the committed generator reproduces every byte.
 """
 
@@ -47,6 +53,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from datetime import datetime
 from fractions import Fraction
 from pathlib import Path
 
@@ -106,6 +113,49 @@ def minutes(hhmm: str) -> int:
     return int(h) * 60 + int(m)
 
 
+WINDOW = (datetime(2026, 11, 24, 1, 40), datetime(2026, 11, 24, 3, 10))
+
+
+def build_at(deploys: list[tuple[datetime, str]], when: datetime) -> str | None:
+    """The build db-03 ran at `when`: the latest deploy at or before it."""
+    current = None
+    for at, build in deploys:
+        if at <= when:
+            current = build
+    return current
+
+
+def check_s12_builds(fx: Path) -> None:
+    """Every db-03 deploy interval that overlaps the window runs 411, and
+    every accounted process ran the build in effect when it ran, never 412."""
+    deploys = rows(fx, f"{S12}/evidence/deploy-log.csv")
+    if "412" not in {r["build"] for r in deploys}:
+        fail("the deploy log no longer shows build 412 running anywhere")
+    db03 = sorted(
+        (datetime.fromisoformat(r["deployed_at"]), r["build"])
+        for r in deploys
+        if r["host"] == "db-03"
+    )
+    if not db03 or db03[0][0] > WINDOW[0]:
+        fail("the deploy log does not say what db-03 ran when the window opened")
+    for i, (at, build) in enumerate(db03):
+        end = db03[i + 1][0] if i + 1 < len(db03) else datetime.max
+        if at <= WINDOW[1] and end > WINDOW[0] and build != "411":
+            fail(f"db-03 ran build {build} from {at:%Y-%m-%dT%H:%M}, inside the window")
+    procs = rows(fx, f"{S12}/evidence/process-accounting.csv")
+    if not procs or {r["host"] for r in procs} != {"db-03"}:
+        fail("process accounting must cover db-03 alone")
+    times = sorted(datetime.fromisoformat(r["time"]) for r in procs)
+    if times[0] > WINDOW[0] or times[-1] < WINDOW[1]:
+        fail("process accounting does not cover the whole incident window")
+    for r in procs:
+        at = datetime.fromisoformat(r["time"])
+        if r["build"] == "412" or r["build"] != build_at(db03, at):
+            fail(f"process {r['process']!r} at {r['time']} ran build {r['build']}, not db-03's 411")
+        if "compact" in r["process"]:
+            fail("a compaction process executed on db-03: the exclusion is gone")
+
+
 def check_s12(fx: Path) -> None:
     for rel, phrase in (
         (f"{S12}/README.md", "verified"),
@@ -113,21 +163,14 @@ def check_s12(fx: Path) -> None:
         (f"{S12}/evidence/storage-topology.md", "only on db-03's local disk"),
         (f"{S12}/evidence/storage-topology.md", "no replica"),
         (f"{S12}/evidence/compaction-design.md", "only by executing"),
-        (f"{S12}/evidence/incident-timeline.md", "01:40 to 03:10"),
+        (f"{S12}/evidence/incident-timeline.md", "01:40 to 03:10 on 2026-11-24"),
+        (f"{S12}/README.md", "The process accounting is complete"),
+        (f"{S12}/README.md", "The deploy log is complete"),
+        (f"{S12}/evidence/owner-losses.md", "wrote to or deleted a partition file in the window"),
     ):
         if phrase not in read(fx, rel):
             fail(f"{rel} lost {phrase!r}")
-    procs = rows(fx, f"{S12}/evidence/process-accounting.csv")
-    if not procs or {r["host"] for r in procs} != {"db-03"}:
-        fail("process accounting must cover db-03 alone")
-    times = sorted(minutes(r["time"]) for r in procs)
-    if times[0] > minutes("01:40") or times[-1] < minutes("03:10"):
-        fail("process accounting does not cover the whole incident window")
-    if any("compact" in r["process"] for r in procs):
-        fail("a compaction process executed on db-03: the exclusion is gone")
-    deploys = {r["host"]: r["build"] for r in rows(fx, f"{S12}/evidence/deploy-log.csv")}
-    if deploys.get("db-03") != "411" or "412" not in deploys.values():
-        fail("the deploy log must show db-03 on 411 while build 412 ran elsewhere")
+    check_s12_builds(fx)
     faults = [
         ln
         for ln in read(fx, f"{S12}/evidence/db-03-device-log.txt").splitlines()
@@ -159,17 +202,23 @@ def check_s13(fx: Path) -> None:  # noqa: PLR0912 -- one check per property
     pilot = rows(fx, f"{S13}/evidence/pilot-log.csv")
     if len(pilot) != N_WEEKS or len({r["host"] for r in pilot}) != N_WEEKS:
         fail("the pilot must be 100 host-weeks on 100 distinct hosts")
-    if any(r["corruption_events"] != "0" for r in pilot):
-        fail("the pilot is no longer zero events")
+    if any(r["had_corruption_event"] != "false" for r in pilot):
+        fail("the pilot no longer has zero host-weeks with an event")
     readme = read(fx, f"{S13}/README.md")
-    for phrase in ("independent", "no host contributes two weeks", "separate racks"):
+    for phrase in (
+        "independent trials",
+        "no host contributes two weeks",
+        "separate racks",
+        "at least one silent corruption event",
+        "applicable per-host-week",
+    ):
         if phrase not in readme:
             fail(f"s13 README lost {phrase!r}")
     defect = Fraction(
-        re.search(r"rate of ([\d.]+)", read(fx, f"{S13}/evidence/vendor-advisory.md"))[1]
+        re.search(r"rate of\s+([\d.]+)", read(fx, f"{S13}/evidence/vendor-advisory.md"))[1]
     )
     base = Fraction(
-        re.search(r"rate of ([\d.]+)", read(fx, f"{S13}/evidence/fleet-baseline.md"))[1]
+        re.search(r"rate of\s+([\d.]+)", read(fx, f"{S13}/evidence/fleet-baseline.md"))[1]
     )
     ratio = float(((1 - defect) / (1 - base)) ** N_WEEKS)
     if not RATIO[0] < ratio < RATIO[1]:
@@ -211,7 +260,7 @@ def check_prompts(prompts: Path) -> None:
         text = (prompts / name).read_text(encoding="utf-8")
         if text.count("{FIXTURE_PATH}") != 1:
             fail(f"{name} must carry {{FIXTURE_PATH}} exactly once")
-    if "directly modified" not in (prompts / "da-s12.txt").read_text(encoding="utf-8"):
+    if "wrote to or deleted files" not in (prompts / "da-s12.txt").read_text(encoding="utf-8"):
         fail("the s12 prompt lost the narrowed proposition")
 
 

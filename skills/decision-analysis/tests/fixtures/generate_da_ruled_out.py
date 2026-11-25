@@ -11,19 +11,23 @@ The pair separates a structural exclusion from a zero count (decisions/008).
   Each fact sits in its own file: the partition lived only on db-03's local
   disk (storage topology), the build-412 compaction job modifies data only on
   the host where it executes (its design document), the job never executed
-  on db-03 (process accounting) and db-03 never ran build 412 (deploy log),
-  and db-03's device log records a disk fault in the window. So direct
-  modification by the job is structurally impossible, and the loss is
-  possible without it. The owner's losses over (job directly modified the
-  partition, it did not) are roll back = (0, 4) and hotfix = (6, 1): neither
+  on db-03 (process accounting, complete for the window) and db-03 ran
+  build 411 throughout the window (deploy log, complete), and db-03's device
+  log records a disk fault in the window. H is that the job wrote to or
+  deleted a partition file between 01:40 and 03:10 on 2026-11-24; not-H is
+  its literal complement. H is structurally impossible, and the loss is
+  possible under not-H. The owner's losses over (H, not-H) are roll back =
+  (0, 4) and hotfix = (6, 1): neither
   action dominates across both states, so an odds analysis would need a
   ratio, while in the surviving state the difference 4 - 1 = 3 prefers the
   hotfix. Every fact is stated as verified, so `decide` is reachable without
   adjudication.
-- `s13-zero-events/`: zero corruption events over 100 host-weeks, one week on
-  each of 100 distinct hosts, which the packet treats as independent and
-  says why; sourced rates 0.02 (defective firmware, vendor advisory) and
-  0.005 (fleet baseline) with comparable reference classes; the owner's
+- `s13-zero-events/`: no host-week with a corruption event over 100
+  host-weeks, one week on each of 100 distinct hosts, which the packet treats
+  as independent trials and says why; the trial outcome is whether a
+  host-week had at least one event, and the sourced per-host-week
+  probabilities of that outcome are 0.02 (defective firmware, vendor
+  advisory) and 0.005 (fleet baseline), with comparable reference classes; the owner's
   prior odds 1, held fixed; losses over (defect, no defect) of roll out =
   (10, 0) and keep piloting = (1, 1). The ratio of zero events is
   (0.98 / 0.995)^100, about 0.2189, the threshold is 1/9, and the
@@ -54,12 +58,12 @@ S13_HOSTS = 100
 S13_DEFECT_RATE = "0.02"
 S13_BASELINE_RATE = "0.005"
 
-S12_PROMPT = """\
-We suspect the new compaction job in build 412 directly modified or deleted the orders \
-partition on db-03 last night, and we must choose by noon between rolling back to build 411 \
-and keeping build 412 with a hotfix. Here is the incident packet ({FIXTURE_PATH}). Roll back \
-or hotfix?
-"""
+S12_PROMPT = (
+    "We suspect the new compaction job in build 412 wrote to or deleted files of the orders "
+    "partition on db-03 between 01:40 and 03:10 last night (2026-11-24), and we must choose "
+    "by noon between rolling back to build 411 and keeping build 412 with a hotfix. Here is "
+    "the incident packet ({FIXTURE_PATH}). Roll back or hotfix?\n"
+)
 
 S13_PROMPT = """\
 The vendor's new disk firmware has shown zero corruption events in our pilot. Should we roll \
@@ -73,7 +77,10 @@ Last night the orders partition on `db-03` was lost. We must choose by noon
 between rolling back to build 411 and keeping build 412 with a hotfix.
 
 Every fact in these files was verified by the storage on-call lead this
-morning; none is in dispute.
+morning; none is in dispute. The process accounting is complete: it lists
+every process that executed on db-03 from 01:40 to 03:10 on 2026-11-24, with
+the build it ran from. The deploy log is complete: it lists every deploy to
+every database host since 2026-11-01.
 
 Files:
 
@@ -81,8 +88,9 @@ Files:
 - `evidence/storage-topology.md`: where the orders partition was held.
 - `evidence/compaction-design.md`: the build-412 compaction job's design.
 - `evidence/process-accounting.csv`: every process that executed on db-03
-  during the incident window.
-- `evidence/deploy-log.csv`: which build each database host was running.
+  during the incident window, and its build.
+- `evidence/deploy-log.csv`: every deploy to every database host, with the
+  build and when it was deployed.
 - `evidence/db-03-device-log.txt`: db-03's disk controller log for the window.
 - `evidence/owner-losses.md`: the decision owner's losses for each action.
 """
@@ -95,7 +103,7 @@ S12_TIMELINE = """\
 - 03:10: on-call confirmed the partition's files were gone from db-03's local
   disk.
 
-The incident window is 01:40 to 03:10.
+The incident window is 01:40 to 03:10 on 2026-11-24.
 """
 
 S12_TOPOLOGY = """\
@@ -128,7 +136,7 @@ S12_LOSSES = """\
 Supplied by the storage on-call lead, who decides, in hours of service impact.
 "The job" is the build-412 compaction job.
 
-| action | the job directly modified the partition | the job did not |
+| action | the job wrote to or deleted a partition file in the window | it did not |
 | --- | --- | --- |
 | roll back to build 411 | 0 | 4 |
 | keep build 412 with a hotfix | 6 | 1 |
@@ -154,7 +162,8 @@ another month.
 
 Files:
 
-- `evidence/pilot-log.csv`: the pilot, one row per host-week.
+- `evidence/pilot-log.csv`: the pilot, one row per host-week, recording
+  whether that host-week had at least one silent corruption event.
 - `evidence/vendor-advisory.md`: the vendor's advisory on the defect.
 - `evidence/fleet-baseline.md`: our fleet's measured corruption rate.
 - `evidence/owner-decision.md`: the decision owner's settled inputs.
@@ -164,19 +173,20 @@ S13_ADVISORY = f"""\
 # Vendor advisory VA-0417: silent-corruption defect
 
 Some builds of this firmware family carry a write-path defect. On firmware
-that carries it, the vendor's field data from its fleet census shows a silent
-corruption rate of {S13_DEFECT_RATE} per host-week, measured over host-weeks of
-the same drive model under comparable write loads. The advisory does not say
+that carries it, the vendor's field data from its fleet census shows that a
+host-week has at least one silent corruption event at a rate of
+{S13_DEFECT_RATE} per host-week, measured over host-weeks of the same drive
+model under comparable write loads. The advisory does not say
 whether the new firmware build carries the defect.
 """
 
 S13_BASELINE = f"""\
 # Fleet baseline
 
-Over the last two years our fleet, on firmware without the defect, measured a
-silent corruption rate of {S13_BASELINE_RATE} per host-week, from the integrity
-scanner's census of every host-week on the same drive model under the same
-write loads as the pilot.
+Over the last two years our fleet, on firmware without the defect, measured
+that a host-week has at least one silent corruption event at a rate of
+{S13_BASELINE_RATE} per host-week, from the integrity scanner's census of every
+host-week on the same drive model under the same write loads as the pilot.
 """
 
 S13_OWNER = """\
@@ -199,7 +209,11 @@ S13_SAMPLING = f"""\
 Each row of `pilot-log.csv` is one week on one host: {S13_HOSTS} distinct hosts,
 one week each, so no host contributes two weeks. The hosts were drawn from
 separate racks, power feeds, and drive batches, so the pilot treats the
-{S13_HOSTS} host-weeks as independent trials of the same corruption rate.
+{S13_HOSTS} host-weeks as independent trials. Each trial's outcome is whether
+that host-week had at least one silent corruption event. The vendor
+advisory's rate and the fleet baseline's rate are the applicable per-host-week
+probabilities of that outcome if the new firmware carries the defect and if it
+does not, respectively.
 """
 
 
@@ -210,7 +224,7 @@ def process_accounting() -> list[dict[str, str]]:
             rows.append(
                 {
                     "host": "db-03",
-                    "time": f"{minute // 60:02d}:{minute % 60:02d}",
+                    "time": f"2026-11-24T{minute // 60:02d}:{minute % 60:02d}",
                     "process": name,
                     "build": "411",
                 }
@@ -223,7 +237,7 @@ def deploy_log() -> list[dict[str, str]]:
         {
             "host": host,
             "build": "411" if host == "db-03" else "412",
-            "deployed": "2026-11-20" if host == "db-03" else "2026-11-23",
+            "deployed_at": "2026-11-20T14:00" if host == "db-03" else "2026-11-23T14:00",
         }
         for host in S12_HOSTS
     ]
@@ -235,7 +249,7 @@ def pilot_log() -> list[dict[str, str]]:
         {
             "host": f"host-{h}",
             "week": f"2026-W{40 + i % 6}",
-            "corruption_events": "0",
+            "had_corruption_event": "false",
         }
         for i, h in enumerate(hosts)
     ]
