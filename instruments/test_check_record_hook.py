@@ -131,6 +131,17 @@ def test_users_own_investigation_note_is_left_alone(tmp_path):
     assert not r.stderr
 
 
+def test_note_quoting_a_required_heading_in_a_fence_is_left_alone(tmp_path):
+    f = tmp_path / "sync.md"
+    f.write_text(
+        "# Investigation: sync notes\n\nExample:\n\n"
+        "```markdown\n## Tests\n| id | test |\n```\n\nNo actions.\n"
+    )
+    r = run_hook({"tool_input": {"file_path": str(f)}})
+    assert r.returncode == 0
+    assert not r.stderr
+
+
 def test_signature_match_without_required_heading_reaches_validator_and_is_silent(tmp_path):
     """Drives the validator-exit-2-with-empty-stderr branch, not the sniff branch."""
     f = tmp_path / "note.md"

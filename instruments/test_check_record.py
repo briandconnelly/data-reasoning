@@ -456,17 +456,17 @@ def test_required_headings_exist_in_shipped_templates():
 
 
 def test_html_commented_structure_is_not_record_content():
-    """A record whose headings and verdict sit only inside <!-- --> has none of
-    them: commented text is never loaded as content."""
+    """A file whose headings and verdict sit only inside <!-- --> has none of
+    them: commented text is never loaded as content, so nothing corroborates
+    the title and the file is not a record (#112)."""
     hidden = (
         "# Decision Record: d\n\n<!--\n## Decision frame\n\n## Decision-state model\n\n"
         "## Evidence and update\n\n## Robustness\n\n## Verdict\n\n- Verdict: robust\n\n"
         "## Handoff\n-->\n"
     )
-    findings = cr.check(hidden)
-    assert any("required section missing: ## Verdict" in f for f in findings)
-    assert any("required section missing: ## Decision frame" in f for f in findings)
-    assert not any("verdict 'robust'" in f for f in findings)
+    assert cr.detect(hidden) is None
+    with pytest.raises(ValueError, match="not a recognized record"):
+        cr.check(hidden)
 
 
 def test_comment_stripping_preserves_line_count():
@@ -480,6 +480,7 @@ def test_unclosed_html_comment_hides_everything_after_it():
         "## Evidence and update\n\nx\n\n## Robustness\n\nx\n\n## Verdict\n\n- Verdict: robust\n\n"
         "## Handoff\n\nx\n"
     )
+    assert cr.detect(rec) == "decision"
     findings = cr.check(rec)
     assert any("required section missing: ## Verdict" in f for f in findings)
 
@@ -781,13 +782,13 @@ def test_comment_delimiter_inside_inline_code_is_visible_text():
         "- The token `<!--` opens a comment.\n\n"
         "## Hypotheses\n\n| id |\n| --- |\n| H1 |\n"
     )
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" in visible, visible
 
 
 def test_a_real_comment_after_inline_code_still_hides_the_rest():
     doc = "# Investigation: x\n\n- token `<!--` here\n<!--\n## Hypotheses\n"
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" not in visible, visible
 
 
@@ -829,13 +830,13 @@ def test_a_backtick_fence_info_string_may_not_contain_a_backtick():
     """CommonMark forbids a backtick in a backtick fence's info string, so
     the line is ordinary text and the content after it stays visible."""
     doc = "# Investigation: x\n\n## Problem\n\n```bad`info\n\n## Hypotheses\n\n- a\n"
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" in visible, visible
 
 
 def test_a_well_formed_unclosed_fence_still_hides_what_follows():
     doc = "# Investigation: x\n\n## Problem\n\n```python\n\n## Hypotheses\n\n- a\n"
-    visible, _ = cr._strip_hidden(doc)
+    visible, _, _, _ = cr._strip_hidden(doc)
     assert "## Hypotheses" not in visible, visible
 
 
@@ -1829,3 +1830,79 @@ def test_validator_does_no_verdict_arithmetic():
         .replace("- Recommended action: returned to owner", "- Recommended action: wait")
     )
     assert cr.check(rec, final=True) == []
+
+
+NOTE_FENCED = "# Investigation: sync notes\n\nExample:\n\n```markdown\n## Tests\n| id | test |\n```\n\nNo actions.\n"
+NOTE_COMMENTED = "# Investigation: sync notes\n\n<!--\n## Tests\n-->\n\nNo actions.\n"
+
+
+def test_required_heading_only_inside_a_fence_is_not_a_record():
+    assert cr.detect(NOTE_FENCED) is None
+    with pytest.raises(ValueError, match="not a recognized record"):
+        cr.check(NOTE_FENCED)
+
+
+def test_required_heading_only_inside_a_comment_is_not_a_record():
+    assert cr.detect(NOTE_COMMENTED) is None
+
+
+def test_ordinary_title_quoting_a_required_heading_is_not_a_record():
+    assert cr.detect("# Meeting notes\n\n```markdown\n## Tests\n```\n") is None
+
+
+def test_visible_heading_before_an_unterminated_fence_is_still_a_record():
+    text = "# Investigation: x\n\n## Problem\n\n```\nnever closed\n"
+    assert cr.detect(text) == "ledger"
+    assert any("fence" in f for f in cr.check(text))
+
+
+def test_heading_only_after_an_unterminated_fence_is_still_a_record():
+    text = "# Investigation: x\n\n```\nnever closed\n\n## Problem\n"
+    assert cr.detect(text) == "ledger"
+    assert any("fence" in f for f in cr.check(text))
+
+
+def test_comment_opener_inside_a_closed_fence_does_not_trigger_the_fallback():
+    note = "# Investigation: sync notes\n\n```markdown\n<!--\n## Tests\n```\n\nNo actions.\n"
+    assert cr._strip_hidden(note)[1:] == (False, False, None)
+    assert cr.detect(note) is None
+
+
+def test_escaped_comment_opener_does_not_hide_a_record():
+    text = "# Investigation: x\n\n\\<!-- literal\n\n## Problem\n\nStill drafting.\n\n-->\n"
+    assert cr.detect(text) == "ledger"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "# Investigation: note\n\n~~~\n## Tests\n~~~\n\n<!-- unfinished\n",
+        "# Investigation: note\n\n<!--\n## Tests\n-->\n\n~~~\nunfinished\n",
+    ],
+)
+def test_unfinished_block_does_not_revive_a_heading_in_an_earlier_closed_block(text):
+    assert cr.detect(text) is None
+
+
+def test_heading_made_by_removing_an_inline_comment_does_not_count():
+    assert cr.detect("# Investigation: x\n\n##<!-- note --> Tests\n\nExample only.\n") is None
+
+
+def test_inline_comments_before_fence_openers_keep_in_progress_handling():
+    text = "# Investigation: x\n\n<!-- note -->~~~\n\n## Problem\n\n(pending)\n\n## Aside\n\n<!-- note -->~~~\n"
+    assert cr.check(text) == []
+
+
+def test_even_backslash_run_before_a_comment_opener_does_not_escape_it():
+    assert cr.detect("# Investigation: x\n\n\\\\<!--\n## Tests\n-->\n") is None
+
+
+def test_comment_reopened_on_the_closing_line_hides_its_heading():
+    assert cr.detect("# Investigation: x\n\n<!--\nfirst\n--> <!-- second\n## Tests\n-->\n") is None
+
+
+def test_comment_reopened_on_the_closing_line_and_left_open_fails_closed():
+    text = "# Investigation: x\n\n<!--\nfirst\n--> <!-- second\n## Tests\n"
+    reopened_on = text.split("\n").index("--> <!-- second")
+    assert cr._strip_hidden(text)[3] == reopened_on
+    assert cr.detect(text) == "ledger"
