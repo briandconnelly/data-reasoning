@@ -3,6 +3,31 @@
 What this plugin's skills claim versus what has been measured, as of 2026-11-25 (`dev` at `0187202`); § Scenario status was last checked at `5fc87dc`.
 This page carries the measurement status that the README used to; the decision records and run records it cites remain the authorities.
 
+## Capability map
+
+Look up the kind of question you have, then follow the pointer.
+`measured` means a row on this page records arms that ran on that kind of question; that row, not this map, gives the host, model, date, counts, and whether the measured wording ships.
+`guidance, unmeasured` means the plugin accepts the ask and the linked section governs it, but no arm has run that kind of question.
+`handoff, out of scope` means the linked line or decision record places the ask outside the plugin.
+
+| Kind of question | Example ask | Where it goes | Status | Pointer |
+| --- | --- | --- | --- | --- |
+| Orienting on a dataset | "Tell me about this account; everything we have is in this folder." | `exploratory-data-analysis` | `measured` | [§ exploratory-data-analysis](#exploratory-data-analysis), row B10 |
+| Adjudicating why something changed | "Why did checkout conversion drop last week?" | `hypothesis-driven-analysis` | `measured` | [§ hypothesis-driven-analysis](#hypothesis-driven-analysis), row S1 |
+| Estimating a difference under randomization | "Visitors were randomly assigned to A or B; is B better, and by how much?" | `hypothesis-driven-analysis` | `measured` | [§ hypothesis-driven-analysis](#hypothesis-driven-analysis), row S9 |
+| A causal effect with no design | "How much did launching the campaign improve conversion?" | `hypothesis-driven-analysis`, then `causal-identification-review` | `measured` | [§ hypothesis-driven-analysis](#hypothesis-driven-analysis), row S12; [§ Handoffs and routing](#handoffs-and-routing), cell I3 |
+| Reviewing a claimed design | "We rolled the new checkout flow out to one region; does that comparison identify its effect?" | `causal-identification-review` | `measured` | [§ causal-identification-review](#causal-identification-review), row CS3 |
+| A two-action decision | "Should we ship or wait?" | `decision-analysis` | `measured` | [§ decision-analysis](#decision-analysis), row DA-S1; [§ Handoffs and routing](#handoffs-and-routing), cell I4 |
+| A bare forecast | "What's the probability churn exceeds 5% next quarter?" | `decision-analysis` hands it to `hypothesis-driven-analysis` | `guidance, unmeasured` | [`decision-analysis` § Routing](../skills/decision-analysis/SKILL.md#routing), row "out: adjudicate" |
+| Forecasting from history | "How many support tickets should we staff for eight weeks from now?" | `hypothesis-driven-analysis` | `guidance, unmeasured` | [`hypothesis-driven-analysis` § Estimation Route](../skills/hypothesis-driven-analysis/SKILL.md#estimation-route) |
+| Choosing between predictive models | "Which churn model gives us the best list of 500 accounts to contact?" | `hypothesis-driven-analysis` | `guidance, unmeasured` | [`hypothesis-driven-analysis` § A causal question routes on its design, not its wording](../skills/hypothesis-driven-analysis/SKILL.md#a-causal-question-routes-on-its-design-not-its-wording) |
+| Survey to population | "What share of all customers supports this change, based on our voluntary survey?" | `hypothesis-driven-analysis` | `guidance, unmeasured` | [`hypothesis-driven-analysis` § Estimation Route](../skills/hypothesis-driven-analysis/SKILL.md#estimation-route) |
+| Retention and time-to-event | "Did 90-day retention improve for customers acquired last month?" | `hypothesis-driven-analysis` | `guidance, unmeasured` | [`hypothesis-driven-analysis` § Analysis](../skills/hypothesis-driven-analysis/SKILL.md#analysis) |
+| Prospective experiment design | "How many stores and weeks do we need, and can we stop early?" | outside the plugin | `handoff, out of scope` | [`causal-identification-review` § Non-Goals](../skills/causal-identification-review/SKILL.md#non-goals); [decision 003](../skills/causal-identification-review/decisions/003-scope-bounds-in-prospective-out.md) |
+| Allocation across more than two actions | "How should we divide a fixed budget across six channels?" | outside the plugin | `handoff, out of scope` | [`decision-analysis` § Non-Goals](../skills/decision-analysis/SKILL.md#non-goals); [decision 004](../skills/decision-analysis/decisions/004-binary-scope.md) |
+
+Issue #116 tracks the method-specific guidance the forecasting, predictive-model, survey, and retention rows lack.
+
 ## Handoffs and routing
 
 Exploration generates hypotheses and never confirms them; adjudication is `hypothesis-driven-analysis`'s work; `causal-identification-review` is the constructive continuation when adjudication concludes nothing identifies the effect, or when a claimed design needs its identifying assumptions checked before anyone trusts it.

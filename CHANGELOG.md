@@ -6,6 +6,10 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ## [Unreleased]
 
+### Added
+
+- The evidence page opens with a capability map: for each kind of question, whether the plugin offers a measured workflow, unmeasured guidance, or a handoff out of scope, with a pointer to the row, skill section, or decision record behind it.
+
 ### Changed
 
 - The evidence page reports the 2026-11-18 and 2026-11-25 Claude Code handoff runs beside the 2026-11-17 run, per cell, host version, and revision, and no longer calls the Claude Code handoff unverified.
