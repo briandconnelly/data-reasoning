@@ -34,3 +34,10 @@ I4's misses come from arms that loaded no skill, so neither changed text was in 
 - **I4:** first activation fails (tracked in #108); body text cannot reach it.
 
 n=3 per cell; these are counts, not rates.
+
+## Note, 2026-11-25: the prompt named the condition (#128)
+
+All 12 archived prompts here show an absolute data path inside a workspace named after the arm (`int-<cell>-claude-plugin-<n>-*`), so `plugin` appears in every one.
+This run is plugin-only, so the cue makes no difference between conditions within it.
+It matters only when these arms are compared with the 2026-11-17 full-catalog run, whose prompts carried the same cue for both conditions (`docs/evidence/integration/2026-11-17-full-catalog/results.md` § Note, 2026-11-25: the prompt named the condition).
+No count above changes.

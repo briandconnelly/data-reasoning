@@ -323,3 +323,9 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
 - The archived manifests are not rewritten: those of the six X2 and X3 Codex plugin arms and of `X2-codex-canary` still list `causal-identification-review` and `decision-analysis`, which the fixed extractor does not.
   `results.md` and `scores-primary.md` already score routing from hand-confirmed loads, so no score changes.
 - No prompt, fixture, or scoring rule changed; any arm run from here on records routes with the fixed extractor.
+
+2026-11-25, harness change for I1–I4 (#128):
+
+- The limit above held for the runs before it; I-cell runs from here on do not keep it.
+  `scripts/run_integration.py` now stages I1–I4 in a neutrally named `int-arm-*` workspace and renders their data path as the relative `data`, as it does for this suite's cells, so neither the arm's name nor its condition reaches the prompt or the working directory.
+- This file's cells, prompts, fixtures, and hashes are unchanged, and no count here changes.
