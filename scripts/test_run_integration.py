@@ -396,3 +396,28 @@ def test_codex_route_resolves_a_glob_read_from_the_frontmatter_it_printed():
 def test_codex_route_is_empty_when_no_skill_file_is_read():
     out = "skills/decision-analysis/SKILL.md\nskills/hypothesis-driven-analysis/SKILL.md"
     assert ri.observed_route([_codex_cmd("rg --files", out)], "codex") == []
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "cat /c/skills/*-analysis/SKILL.md",
+        "cat /c/skills/[dh]*-analysis/SKILL.md",
+        "cat /c/plugins/**/SKILL.md",
+        "cat /c/skills/decision-analysi?/SKILL.md /c/skills/hypo*/SKILL.md",
+    ],
+)
+def test_codex_route_resolves_a_glob_anywhere_in_the_skill_path(command):
+    out = (
+        "---\nname: decision-analysis\n---\nmentions causal-identification-review\n"
+        "---\nname: hypothesis-driven-analysis\n---\nbody\n"
+    )
+    assert ri.observed_route([_codex_cmd(command, out)], "codex") == [
+        "decision-analysis",
+        "hypothesis-driven-analysis",
+    ]
+
+
+def test_codex_route_ignores_a_glob_that_is_not_a_skill_read():
+    out = "---\nname: decision-analysis\n---\n"
+    assert ri.observed_route([_codex_cmd("ls data/*.csv; cat notes.md", out)], "codex") == []

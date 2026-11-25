@@ -277,7 +277,8 @@ def observed_route(events: list[dict], host: str) -> list[str]:
     return [s for i, s in enumerate(route) if i == 0 or s != route[i - 1]]
 
 
-GLOB_SKILL_READ = re.compile(r"[*?\]]/SKILL\.md")
+# A glob metacharacter anywhere in the path token that ends in SKILL.md.
+GLOB_SKILL_READ = re.compile(r"[^\s\"']*[*?\[][^\s\"']*SKILL\.md")
 FRONTMATTER_NAME = re.compile(r"^name: ([\w-]+)\s*$", re.M)
 
 
