@@ -41,8 +41,10 @@ The decision itself stands — that wave measured the widening against a two-ski
 ## Addendum 2026-11-25
 
 The Context above says every cross-skill routing seam rests on zero arms; since then integration runs have exposed the four-skill catalog to ordinary prompts, so that sentence no longer describes the evidence (issue #127).
+This also supersedes the 2026-08-22 addendum's "unmeasured against the shipped catalog", which stays above as dated history: routing has been observed with the full catalog, and a candidate description edit still needs the evidence § Decision requires.
 Those runs, their counts, and their limits are in `docs/evidence-status.md` § Handoffs and routing and § Owed evidence, including the first representative run (`docs/evidence/integration/representative-v1/results.md`).
-On cells I1–I4 of the 2026-11-17 and 2026-11-18 runs the arm's condition was visible in the prompt's data path, so those comparisons carry that second difference (issue #128).
-The forced-load diagnostic (`docs/evidence/integration/representative-v1/forced-load/results.md`) tested behaviour after a skill was loaded on instruction, not activation, on two synthetic asks; it bears only on whether activation work for those asks is a priority.
-None of these runs compared an edited description against the frozen one, so none is the measurement § Decision requires to unfreeze one.
+On cells I1–I4 of the 2026-11-17 run the arm's condition, `plugin` or `none`, was visible in the prompt's data path, so that run's plugin-versus-no-plugin contrasts carry a second difference (issue #128).
+The 2026-11-18 rerun was plugin-only, so its prompts all showed `plugin` and it has no within-run contrast for that cue to qualify.
+The forced-load diagnostic (`docs/evidence/integration/representative-v1/forced-load/results.md`) loaded a skill on instruction on Claude Code for two synthetic asks, and under its preregistered reading neither cell justified first-activation work there.
+None of the cited runs included a trigger arm covering an edit to a frozen description, which is what § Decision requires to unfreeze one.
 The procedure in § Decision is unchanged, and the freeze and its goldens stand.
