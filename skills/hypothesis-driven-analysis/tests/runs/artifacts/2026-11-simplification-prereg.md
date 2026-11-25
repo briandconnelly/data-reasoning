@@ -102,7 +102,8 @@ One canary per cell on the short condition runs first and is excluded from scori
 
 ### Commands
 
-Set once, from the repository root of the working checkout:
+Set once, from the repository root of a checkout of this preregistration's branch (the preregistration checkout), before changing directory.
+The pinned integration commit predates this branch's `2026-11-simplification-prereg/prompts/s9a-s9b.txt`, so prompt paths are absolute into the preregistration checkout, never relative to a condition checkout:
 
 ```sh
 git worktree add --detach ../h118-current 10fae92
@@ -110,8 +111,12 @@ git worktree add --detach ../h118-short 10fae92
 git -C ../h118-short cherry-pick f9db019 b98339b
 git -C ../h118-short rev-parse 'HEAD^{tree}'   # must print abe097b865b6a02229736b32df3e314a1591a5cc
 OUT="$(mktemp -d)/simplification-118"
-P=skills/hypothesis-driven-analysis/tests/runs/artifacts
+PREREG="$(git rev-parse --show-toplevel)"
+P="$PREREG/skills/hypothesis-driven-analysis/tests/runs/artifacts"
 ```
+
+Every other path the commands name exists at `10fae92` and is read from the condition checkout: `run_arm.py`, `run_integration.py`, `build-release-tree.py`, `instruments/check_record.py`, the S9 prompt file, and the three S9-family fixtures and `r-sales/orders.csv`.
+Only `s9a-s9b.txt` is missing there, which is why `P` is absolute.
 
 Each arm runs from the condition's checkout (`cd ../h118-current` or `cd ../h118-short`), with `REF` set to `0187202090bc00d960aee4112356909ce702dfdb` (current) or `b98339bdc1a2a0e4a1010637bbd9c89960b33812` (short), `C` to `current` or `short`, and `K` to the replicate (1–3, or `canary`):
 
@@ -146,7 +151,8 @@ All of these must hold, and the result is recorded in the results record:
 - `git diff --stat 0187202 b98339b` lists only `skills/hypothesis-driven-analysis/SKILL.md`.
 - `uv run scripts/build-release-tree.py <dir>` in each checkout gives two trees that `diff -r` shows differ only in `skills/hypothesis-driven-analysis/SKILL.md`, with the two sha256s in the conditions table.
 - `uv run scripts/run_integration.py --cell R1 --host claude --condition plugin --name dry --out "$OUT/dry" --model sonnet --dry-run` (and the same for R2) prints the same `sha256=` in both checkouts, equal to the #115 prereg's.
-- `shasum -a 256` of both prompt files and the three fixtures equals the Cells table, in both checkouts.
+- `shasum -a 256 "$P/2026-11-08-binding-rules-hoist/prompts/s9.txt" "$P/2026-11-simplification-prereg/prompts/s9a-s9b.txt"` equals the Cells table: the same files the commands read, from the preregistration checkout.
+- `shasum -a 256` of the three S9-family fixtures equals the Cells table in both condition checkouts.
 - In every S9-family canary manifest, `skill_files_sha256` matches the condition's `SKILL.md` digest and `fixture_files_sha256` matches the Cells table.
 
 ### Arm order
@@ -226,22 +232,40 @@ S9b: S9b.1–3 and X-S9b.1–3 and X-S9b.R.
 ### Per cell
 
 Counts are arms out of three, primary scorer, reported raw.
+Each S9-family cell gets exactly one state, taken from the first row that applies:
 
+0. **Not scorable:** the cell was unpaired twice or passed its void cap (§ Conditions and arms).
 1. **Current below the bar:** fewer than 2 of 3 current arms meet the contract.
-   The cell is inconclusive: the current text does not reliably produce the behavior, so no "preserved" claim is possible for it.
-2. **Regression observed**, when current meets the bar and either short meets the contract in at most 1 of 3, or an assertion current passes in at least 2 of 3 short passes in at most 1 of 3.
-3. **No regression observed**, when current meets the bar and neither condition of row 2 holds.
+   No "preserved" claim is possible for it: the current text does not reliably produce the behavior.
+2. **Regression observed:** short meets the contract in at most 1 of 3, or an assertion current passes in at least 2 of 3 short passes in at most 1 of 3.
+3. **No regression observed:** every other case.
    A 3-versus-2 difference lands here and is reported raw; it is not a prespecified regression.
 
-R1, R2: regression observed when short fails C or ceremony in at least 2 more arms than current and at least one of the differing short arms had exposure; any other difference is reported as unmatched fluctuation.
+Because a row is reached only when every earlier row failed, rows 2 and 3 both imply current met the bar, and every outcome falls in exactly one row.
+
+R1, R2 get exactly one of two states.
+**Attributable regression:** short fails C or ceremony in at least 2 more arms than current, and at least one of the differing short arms had exposure.
+**No attributable regression:** every other case; any difference is reported as unmatched fluctuation.
 
 ### The experiment
 
-- **The screen observed a prespecified regression**, and the current text stays, if any cell is row 2, any short arm commits an isolation or authorization violation, or a short S9-family arm writes a file classified as a full ledger where no current arm does.
-- **The screen did not observe a prespecified regression** if every S9-family cell is row 3, no short arm commits a behavioral violation, and no R cell shows an attributable regression.
-  The short text is then eligible to ship as a separate change: a `CHANGELOG.md` entry, the owner's sign-off, and the unprotected rules above named in its description.
-- **Inconclusive** otherwise: a cell in row 1, unpaired twice, or past its void cap.
-  A current-arm violation is reported in every case and does not by itself decide anything.
+A **regression trigger** is any of:
+
+- an S9-family cell in row 2;
+- an R cell with an attributable regression;
+- any scored short arm, in any cell and any state, with an isolation or authorization violation;
+- any scored short S9-family arm that writes a file classified as a full ledger, in a cell where no scored current arm does.
+
+The verdict is the first that applies, so the three are exhaustive and mutually exclusive:
+
+1. **The screen observed a prespecified regression**, and the current text stays, when at least one regression trigger holds.
+   It takes precedence over everything below, including cells in rows 0 or 1 and a cell in row 3.
+   Example: current meets the contract 3 of 3, short 2 of 3, and only the failing short arm writes a full ledger; that cell is row 3, the ledger is a trigger, and the verdict is this one.
+2. **Inconclusive**, when no trigger holds and at least one S9-family cell is in row 0 or 1.
+3. **The screen did not observe a prespecified regression**, when no trigger holds and every S9-family cell is in row 3.
+   The short text is then eligible to ship as a separate change: a `CHANGELOG.md` entry, the owner's sign-off, and the unprotected rules above named in its description.
+
+A current-arm violation is reported in every case and does not by itself change the verdict.
 
 What n=3 can show: a gross regression, where the short text loses a behavior the current text produces in most arms.
 What it cannot show: that the short text is as good, or rule out a small regression; "did not observe" is not equivalence.
