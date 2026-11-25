@@ -316,3 +316,10 @@ Stated before any arm; each signal acts only on a labelled, paired, complete com
 
 - Four further Claude Code no-plugin arms run out of block order for the forced-load diagnostic in `forced-load/prereg.md`: `X2-claude-none-2`, `X2-claude-none-3`, `X3-claude-none-2`, `X3-claude-none-3`.
   They are this file's own slots and are scored as written; Claude Code's plugin slots for blocks 2 and 3 stay unrun, so its suite comparisons stay incomplete.
+
+2026-11-25, harness change after the first run (#129):
+
+- `observed_route` in `scripts/run_integration.py` no longer searches a Codex command's output for skill names; it reads the command text, and the output only to resolve a glob read through each printed file's frontmatter `name:` line.
+- The archived manifests are not rewritten: those of the six X2 and X3 Codex plugin arms and of `X2-codex-canary` still list `causal-identification-review` and `decision-analysis`, which the fixed extractor does not.
+  `results.md` and `scores-primary.md` already score routing from hand-confirmed loads, so no score changes.
+- No prompt, fixture, or scoring rule changed; any arm run from here on records routes with the fixed extractor.
