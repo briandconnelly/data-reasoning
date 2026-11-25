@@ -182,6 +182,8 @@ Three pieces of evidence were named as owed by the external review of 2026-09-15
 - A frozen representative suite kept alongside the adversarial catalogs.
   The catalogs' rule that a baseline already passing means the scenario is too easy finds failures; it cannot estimate practical benefit, because ordinary tasks a baseline already handles still pay the skill's context and ceremony.
   The representative suite keeps such tasks, and scores accuracy, unnecessary ceremony, latency, and total context cost.
+  Preregistered 2026-11-24 (`docs/evidence/integration/representative-v1/prereg.md`, issue #115): five runnable cells (two routine, three challenge), their fixtures with validators that fail on degenerate copies, and harness support in `scripts/run_integration.py`.
+  Not yet built: the two representative cells, R3 and R4, which await real anonymized user requests from the owner; no arm, canary included, has run.
 - Measured simplification experiments: the repository's checkers preserve wording and provenance, but nothing yet establishes whether each accumulated rule still earns its context cost.
 
 Cell-level debts are the `unrun`, "no arm", and `withdrawn` rows above.
