@@ -39,15 +39,15 @@ Deferring to it wholesale is how a multi-explanation question gets answered as a
 ### A causal question routes on its design, not its wording
 
 Ask what assigned the exposure, and route on what you are *told* assigned it — not on what the phrasing implies.
-Randomization stated, or assignment stated to be plausibly independent of the outcome, with a comparison group that would have moved the same way had the cause been absent: the effect is identified and no rival explanations need telling apart, so the work is **estimation** — or `mini`, if someone has already stated a claim, numeric or qualitative, for you to check.
+For explicitly randomized comparisons, use **estimation**, or `mini` for a stated claim, subject to the coverage and completeness checks in [Estimation Route](#estimation-route).
 "Is B better than A, and by how much" over an assignment you have been told was random is an estimation task, however causal it sounds — the design already did the discriminating that the loop would otherwise have to do.
-Assigned by anything else — someone launched it, it shipped to whoever got it, it happened in a week when other things also happened: nothing identifies the effect, every co-occurring change is a live rival, and that is **full**.
-A stated quasi-experimental structure — a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: before estimating anything from it, load `causal-identification-review` in the same turn (on Claude Code, call the `Skill` tool with `data-reasoning:causal-identification-review`; on a host that exposes skills as files, read its `SKILL.md`), and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
+A stated quasi-experimental structure — an as-if-random natural experiment, a cutoff, an instrument, a comparison group with a pre-period — does not identify by being named: before estimating anything from it, load `causal-identification-review` in the same turn (on Claude Code, call the `Skill` tool with `data-reasoning:causal-identification-review`; on a host that exposes skills as files, read its `SKILL.md`), and treat the design as identifying only under that review's `identified-if` disposition with its probes run.
 A before/after or treated-vs-untreated comparison the user implies ("we rolled it out here, not there") is such a structure even when nobody calls it a design.
+For any other known assignment mechanism without an identifying design, including self-selection or targeted assignment, route **full** to investigate rival explanations.
 "How much did launching the campaign improve conversion" is the unidentified-assignment case wearing the identified one's clothes: a causal question carrying a number, with no design behind it.
 The loop's job there is not to produce the number — it is to establish that the number is not available from this data, and to report what is.
 
-**Causal estimate limit.** This holds whether or not `causal-identification-review` is installed or was loaded, and whatever the user says they need the number for.
+**Causal estimate limit for nonrandomized or unknown assignment.** This holds whether or not `causal-identification-review` is installed or was loaded, and whatever the user says they need the number for.
 Until an identification review ends `identified-if` with its probes run, give no point estimate, adjusted estimate, or sensitivity range as the effect or as a stand-in for it — a caveat beside a number does not make it associative.
 The direct answer is that the magnitude is not determinable from this data, which threats block it, and what design or data would identify it; observed contrasts may be reported only as labelled descriptive differences.
 
@@ -323,10 +323,9 @@ Apply the precommitted stop rule:
   When the user asks for a choice between actions that hangs on an `UNRESOLVED` set, load `decision-analysis` in the same turn before recommending (on Claude Code, call the `Skill` tool with `data-reasoning:decision-analysis`; on a host that exposes skills as files, read its `SKILL.md`) — whether any action is defensible across that uncertainty, and where the answer flips, is that skill's work to produce; when it is not installed, the report names it as the constructive continuation.
 
 Multiple contributing explanations are allowed; do not force a single winner.
-Use causal wording only when the design supports a counterfactual: exposure was randomized, or assigned by something plausibly independent of the outcome, and there is a comparison group or period that would have moved the same way had the cause been absent.
+Use causal wording only when the design meets the [causal routing requirements](#a-causal-question-routes-on-its-design-not-its-wording), and state the identifying assumptions as conditions of the conclusion.
 Controlling the intervention is not identifying its effect — you can own a global rollout end to end and still have no idea what would have happened without it, because time, concurrent changes, seasonality, and selection all moved too.
 Observational adjustment does not clear the bar either: temporal ordering and controlling for the confounders you happened to measure say nothing about unmeasured confounding, selection, or interference.
-A quasi-experimental design clears the bar only through an identification review ending `identified-if` with its probes run — the review names the assumptions the causal wording then carries as conditions.
 Absent such a design, associative language is mandatory and the limitations name which of those threats remain open.
 Do not invent numeric confidence values.
 A `decision-analysis` record's provenance-classed numbers are that skill's outputs under its own numeric policy, not confidence values invented here.
@@ -339,6 +338,8 @@ State the estimand, the population it describes, the uncertainty method, and the
 No competing hypotheses are required.
 The gates and the data rules above still apply, and so do the data-validity obligations the full route states: the coverage matrix and its baseline in § Plan, and completeness semantics and the confound check in § Analysis, each at the grain the estimate uses.
 Stated randomization identifies the assignment, not the analysis population: outcomes missing in a way that depends on assignment bias a randomized comparison, so an estimate stands only after the analysis population's coverage and the outcome's completeness are recorded against those obligations.
+For incomplete binary outcomes with known arm totals, bound the completed-sample difference (B minus A) by treating every unknown in B as a failure and every unknown in A as a success for the lower bound, then reversing those assignments for the upper bound.
+State which conclusions survive both the missing outcomes and sampling uncertainty.
 
 ## Record Delivery
 
