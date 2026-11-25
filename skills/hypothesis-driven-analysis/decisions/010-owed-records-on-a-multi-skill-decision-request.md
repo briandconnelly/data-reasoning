@@ -57,40 +57,9 @@ The cost objection is answered by the third clause: the user need not be shown t
 
 ## Scoring columns
 
-These are the columns a later preregistration references by name.
-Each is scored per arm from the arm's transcript (tool calls, file writes, file reads, and the final message) and the files the arm left in its workspace.
-"Results" means the first tool output that contains a computed value from the task's data (a count, mean, estimate, or model output); reading a schema, header, or file listing is not a result.
-
-- **First activation.**
-  Pass: the first data-reasoning skill load is a skill on the cell's designed route.
-  A skill load is a `Skill` tool call or a read of that skill's `SKILL.md` (Claude Code), or a read of `.agents/skills/<name>/SKILL.md` (Codex), as the prereg's extractor defines them.
-  Fail: the first load is a skill off the designed route.
-  Not applicable: the cell's designed route is none.
-  No skill load at all is a fail, recorded as `none`.
-- **Handoff taken.**
-  Scored once per handoff in the designed route.
-  Pass: the downstream skill is loaded after the upstream skill was loaded.
-  A batched read that loads both in one tool call counts as a pass and is annotated `batched`, per the measurement limit above.
-  Fail: the downstream skill is never loaded.
-  Not applicable: the designed route has no handoff, or the upstream skill was never loaded (then first activation already records the miss).
-- **Record written: `<record>`.**
-  One column per record that a skill on the observed route requires at the lines listed in § Where each route requires a record.
-  Pass: a file exists in the workspace at the end of the arm whose headings match that record's template (the template the owning skill line links).
-  Response text standing in for the file passes only where the owning skill allows it when no file tools exist, and the host had none.
-  Fail: no such file, or the record appears only in the final message while file tools were available.
-  Not applicable: the skill that requires it was not loaded (handoff taken or first activation records that miss).
-- **Record written before results: `<record>`.**
-  One column per record scored pass on record written.
-  Pass: the tool call that first creates the record's file occurs in the transcript before the first result.
-  Fail: it occurs after the first result.
-  Not applicable: record written is fail or not applicable.
-  Later edits to the file do not change this column; whether they were dated amendments is not scored here.
-- **Evidence boundary.**
-  The prereg's E, unchanged (`docs/evidence/integration/2026-11-17-full-catalog/prereg.md` line 74), read from the final message only.
-- **Task.**
-  The prereg's C, unchanged (same file, line 73), read from the final message only.
-
+The columns are first activation, handoff taken, record written, record written before results, evidence boundary, and task.
 Record columns and answer columns are reported side by side and never combined into one score; an arm can pass evidence boundary and task and fail every record column, which is the I4 memo-only case.
+Their definitions have one home, the representative-suite preregistration at `docs/evidence/integration/representative-v1/prereg.md`, which the #115 work creates and which does not exist yet.
 
 ## Reopening condition
 
@@ -100,4 +69,5 @@ Separately, a scoring method that can show ordering from the memo alone would re
 ## Where the rule lives
 
 The record requirements live at the skill lines listed in § Where each route requires a record.
+The scoring-column definitions live in the preregistration named in § Scoring columns.
 If this proposal is adopted unchanged, no skill text changes; if the alternative is adopted, the exemption gets one home in the skills, and this section points at it.
