@@ -41,6 +41,14 @@ numeric fields that do not parse, or violate their domain (ordered ranges,
 odds, LRs, and thresholds strictly positive), are gate failures -- never
 skipped checks.
 
+A `resolved` record (decisions/008) is dispatched before any of that: it
+carries no odds-only field, and the checker reads its Resolution section --
+the closed state tokens, the observations and losses tables, the
+surviving-state loss difference inside the losses' endpoint interval, and
+the recommendation that difference's sign gives (see _check_resolved). Every
+record is read as visible Markdown: fenced code and HTML comments are blanked
+first.
+
 Explicitly NOT this checker's claim: whether the record preceded reasoning
 (a transcript-level fact this file never sees), whether a likelihood ratio is
 calibrated or its named source real, whether the state model is exhaustive,
@@ -77,6 +85,7 @@ DECIDE_VERDICTS = frozenset(
         "evidence-sensitive",
         "dominated",
         "indifferent",
+        "resolved",
     }
 )
 VOI_VERDICTS = frozenset(
@@ -124,6 +133,50 @@ DECIDE_LABELS: dict[str, tuple[str, ...]] = {
     "Verdict": ("Verdict:", "Recommended action:", "Conditions:"),
     "Handoff": ("Open factual disputes:", "Identification gaps:", "VoI question:"),
 }
+# A resolved record's own set (decisions/008; SKILL.md § The Decide Route):
+# no odds-only field, and a Resolution section whose labels come in this order.
+RESOLVED_LABELS: dict[str, tuple[str, ...]] = {
+    "Decision frame": DECIDE_LABELS["Decision frame"][:6],
+    "Decision-state model": DECIDE_LABELS["Decision-state model"],
+    "Resolution": (
+        "Excluded state:",
+        "Surviving state:",
+        "Observations:",
+        "Accepted evidence:",
+        "Structural exclusion:",
+        "Exclusion assumptions:",
+        "Surviving-state possibility:",
+        "Surviving-state losses:",
+        "Surviving-state loss difference:",
+    ),
+    "Verdict": DECIDE_LABELS["Verdict"],
+    "Handoff": DECIDE_LABELS["Handoff"],
+}
+ODDS_ONLY_SECTIONS = ("Evidence and update", "Robustness")
+# Every odds-only slot label, rejected anywhere in a visible resolved record.
+ODDS_ONLY_LABELS = (
+    "Favored if true:",
+    "Loss ratio:",
+    "Decision threshold (posterior odds):",
+    *DECIDE_LABELS["Evidence and update"],
+    *DECIDE_LABELS["Robustness"],
+)
+RESOLVED_ORDER = tuple(RESOLVED_LABELS)
+# A `- Verdict:` line, with or without emphasis on the label, and its value.
+_VERDICT_LINE = re.compile(r"^\s*- (?:(\*\*|__|\*|_)Verdict(?::\1|\1:)|Verdict:)(.*)$")
+# A slot label written with emphasis (`- **Prior odds:** 0`, `- _Crossover_: x`):
+# presentation only, so the odds-only check reads it as the plain label.
+_EMPHASIZED_LABEL = re.compile(r"^- (\*\*|__|\*|_)(.+?)(?::\1|\1:)")
+_READS_RESOLVED = re.compile(r"^[`*_\s]*resolved(?![\w-])")
+STATES = ("proposition true", "proposition false")
+STRUCTURAL_BASIS = "structural exclusion — see Resolution"
+RESOLVED_PROSE = (
+    "Accepted evidence:",
+    "Structural exclusion:",
+    "Exclusion assumptions:",
+    "Surviving-state possibility:",
+)
+TABLE_HEADINGS = ("Consequences:", "Evidence:", "Observations:", "Surviving-state losses:")
 VOI_LABELS: dict[str, tuple[str, ...]] = {
     "VoI": (
         "Route:",
@@ -152,7 +205,55 @@ _PROVENANCE_MENTION = re.compile(r"provenance:\s*`?([a-z-]+)`?")
 _RANGE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*(?:[–-]\s*(\d+(?:\.\d+)?))?\s*$")  # noqa: RUF001
 _QUANTITY = re.compile(r"^\s*(\d+(?:\.\d+)?)\s+([A-Za-z][A-Za-z0-9 _/-]*)\s*$")
 _SEPARATOR_CELL = re.compile(r"^:?-+:?$")
+_SIGNED = r"-?\d+(?:\.\d+)?"
+_DIFFERENCE = re.compile(rf"^({_SIGNED})(?: to ({_SIGNED}))?$")
+# A template blank: angle brackets around words with a space, the template's
+# own placeholder shape; a single word (`<source>`) is an HTML tag name to the
+# shipped validator, so it is not one here either.
+_TEMPLATE_BLANK = re.compile(r"<[A-Za-z][^<>\n=]* [^<>\n=]*>")
+_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
 _REL_TOLERANCE = 0.01
+
+
+def visible(text: str) -> str:
+    """Blank fenced code and HTML comments, line count kept, so a section
+    quoted in either is absent -- the shipped validator's reading, simplified:
+    a fence closes on a run of its own character at least as long."""
+    out: list[str] = []
+    fence: str | None = None
+    in_comment = False
+    for line in text.split("\n"):
+        if fence is not None:
+            m = _FENCE.match(line)
+            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence):
+                fence = None
+            out.append("")
+            continue
+        shown = ""
+        rest = line
+        while rest:
+            if in_comment:
+                end = rest.find("-->")
+                if end < 0:
+                    rest = ""
+                    break
+                rest = rest[end + 3 :]
+                in_comment = False
+            else:
+                start = rest.find("<!--")
+                if start < 0:
+                    shown += rest
+                    break
+                shown += rest[:start]
+                rest = rest[start + 4 :]
+                in_comment = True
+        m = _FENCE.match(shown)
+        if m and not in_comment and shown == line:
+            fence = m.group(1)
+            out.append("")
+            continue
+        out.append(shown)
+    return "\n".join(out)
 
 
 def parse_sections(text: str) -> tuple[dict[str, str], list[str]]:
@@ -375,12 +476,13 @@ def _require_slots(
             )
             if value is None:
                 failures.append(f"section '{section_name}' is missing required slot '- {label}'")
-            elif not value and label not in ("Consequences:", "Evidence:"):
+            elif not value and label not in TABLE_HEADINGS:
                 failures.append(f"slot '- {label}' in '{section_name}' is empty")
 
 
-def check(text: str) -> list[str]:
+def check(text: str) -> list[str]:  # noqa: PLR0912 -- one pass per route
     failures: list[str] = []
+    text = visible(text)
     sections, duplicates = parse_sections(text)
     for name in duplicates:
         failures.append(f"duplicate section '## {name}'")
@@ -402,6 +504,26 @@ def check(text: str) -> list[str]:
             )
 
     if route == "decide":
+        failures.extend(_check_model_review(text))
+        raw_verdict = (field(sections.get("Verdict", ""), "Verdict:") or "").strip()
+        verdict_lines = [m for ln in text.splitlines() if (m := _VERDICT_LINE.match(ln))]
+        if any(_READS_RESOLVED.match(m.group(2)) for m in verdict_lines):
+            if (
+                len(verdict_lines) != 1
+                or verdict_lines[0].group(0).strip() != "- Verdict: resolved"
+            ):
+                failures.append(
+                    "a resolved record carries exactly one '- Verdict:' line, which must read "
+                    "exactly '- Verdict: resolved' (no emphasis, code, or annotation); found "
+                    f"{[m.group(0).strip() for m in verdict_lines]!r}"
+                )
+            failures.extend(_check_resolved(sections, text))
+            return failures
+        if "Resolution" in sections:
+            failures.append(
+                "'## Resolution' belongs only to a resolved record; found it under "
+                f"{_bare(raw_verdict)!r}"
+            )
         _require_slots(sections, DECIDE_LABELS, failures)
         if not any(f.startswith("record is missing") for f in failures):
             failures.extend(_check_decide(sections))
@@ -481,25 +603,8 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
     )
 
     model = sections["Decision-state model"]
-    claim = _bare(field(model, "Claim class:") or "")
-    basis = _bare(field(model, "Identification basis:") or "")
-    if claim not in CLAIM_CLASSES:
-        failures.append(
-            f"Claim class value {claim!r} is not in the closed set {sorted(CLAIM_CLASSES)}"
-        )
-    if claim == "causal" and (not basis or basis.upper() == "NONE"):
-        failures.append(
-            "Claim class 'causal' requires a non-NONE Identification basis "
-            "(HDA's causal-wording bar or a CIR identified-if, by pointer)"
-        )
-    if claim == "causal" and basis and basis.upper() != "NONE":
-        conditions = _bare(field(model, "Identification conditions:") or "")
-        if conditions.lower() == "none":
-            failures.append(
-                "Claim class 'causal' with a non-NONE Identification basis requires "
-                "'- Identification conditions:' to restate the identifying assumptions, "
-                "not 'none'"
-            )
+    failures.extend(_check_claim_class(model))
+    failures.extend(_check_structural_basis(model, None))
 
     evidence = sections["Evidence and update"]
     if "sensitivity-only" in evidence:
@@ -524,6 +629,268 @@ def _check_decide(sections: dict[str, str]) -> list[str]:
         )
 
     failures.extend(_check_decide_arithmetic(sections, verdict, belief_losses))
+    return failures
+
+
+def _check_claim_class(model: str) -> list[str]:
+    """The Claim class closed set and the causal-basis presence gate."""
+    failures: list[str] = []
+    claim = _bare(field(model, "Claim class:") or "")
+    basis = _bare(field(model, "Identification basis:") or "")
+    if claim not in CLAIM_CLASSES:
+        failures.append(
+            f"Claim class value {claim!r} is not in the closed set {sorted(CLAIM_CLASSES)}"
+        )
+    if claim == "causal" and (not basis or basis.upper() == "NONE"):
+        failures.append(
+            "Claim class 'causal' requires a non-NONE Identification basis "
+            "(HDA's causal-wording bar or a CIR identified-if, by pointer)"
+        )
+    if claim == "causal" and basis and basis.upper() != "NONE":
+        conditions = _bare(field(model, "Identification conditions:") or "")
+        if conditions.lower() == "none":
+            failures.append(
+                "Claim class 'causal' with a non-NONE Identification basis requires "
+                "'- Identification conditions:' to restate the identifying assumptions, "
+                "not 'none'"
+            )
+    return failures
+
+
+def _check_structural_basis(model: str, excluded: str | None) -> list[str]:
+    """`structural exclusion — see Resolution` is a basis only under resolved
+    with `Excluded state: proposition true` (SKILL.md § Numeric Policy);
+    `excluded` is None outside a resolved record."""
+    if (field(model, "Identification basis:") or "").strip() != STRUCTURAL_BASIS:
+        return []
+    if excluded == STATES[0]:
+        return []
+    return [
+        f"Identification basis {STRUCTURAL_BASIS!r} is accepted only under a resolved verdict "
+        "with 'Excluded state: proposition true'"
+    ]
+
+
+def _resolution_bodies(text: str) -> list[str]:
+    """Every visible `## Resolution` section, duplicates included."""
+    matches = list(_SECTION.finditer(text))
+    return [
+        text[m.end() : matches[i + 1].start() if i + 1 < len(matches) else len(text)]
+        for i, m in enumerate(matches)
+        if m.group(1) == "Resolution"
+    ]
+
+
+def _check_model_review(text: str) -> list[str]:
+    """Evidence impossible under both states reaches no verdict, under any;
+    every Resolution section is read, so a duplicate cannot hide the marker."""
+    if not any(
+        (field(body, "Surviving state:") or "").strip().lower() == "none"
+        for body in _resolution_bodies(text)
+    ):
+        return []
+    return [
+        "'- Surviving state:' reads 'none': evidence impossible under both states goes to "
+        "model review, never a verdict (SKILL.md § Numeric Policy)"
+    ]
+
+
+def _span(section: str, label: str) -> str:
+    """The lines nested under `- label` up to the next unindented bullet."""
+    lines = section.splitlines()
+    for i, line in enumerate(lines):
+        if line.strip().startswith(f"- {label}"):
+            rest = []
+            for nxt in lines[i + 1 :]:
+                if nxt.startswith("- "):
+                    break
+                rest.append(nxt)
+            return "\n".join(rest)
+    return ""
+
+
+def _difference(value: str) -> Interval | None:
+    m = _DIFFERENCE.match(value)
+    if not m:
+        return None
+    low = Fraction(m.group(1))
+    high = Fraction(m.group(2)) if m.group(2) else low
+    return (low, high) if low <= high else None
+
+
+def _check_resolved(sections: dict[str, str], text: str) -> list[str]:  # noqa: PLR0912, PLR0915 -- one pass over the resolved record
+    """A resolved record (SKILL.md § The Decide Route; § Numeric Policy for the
+    surviving-state comparison). The ordered rule never runs on it."""
+    failures: list[str] = []
+    for name in ODDS_ONLY_SECTIONS:
+        if name in sections:
+            failures.append(f"a resolved record carries no odds-only field; found '## {name}'")
+    plain = [_EMPHASIZED_LABEL.sub(r"- \2:", ln.strip()) for ln in text.splitlines()]
+    for label in ODDS_ONLY_LABELS:
+        if any(ln.startswith(f"- {label}") for ln in plain):
+            failures.append(f"a resolved record carries no odds-only field; found '- {label}'")
+    headings = [m.group(1) for m in _SECTION.finditer(text) if m.group(1) in RESOLVED_ORDER]
+    if [h for h in RESOLVED_ORDER if h in headings] != list(dict.fromkeys(headings)):
+        failures.append(
+            f"a resolved record's sections must appear in the order {list(RESOLVED_ORDER)}"
+        )
+    frame = sections.get("Decision frame", "")
+    _require_slots(sections, RESOLVED_LABELS, failures)
+    if any(f.startswith("record is missing") for f in failures):
+        return failures
+
+    actions = _bare(field(frame, "Actions:") or "")
+    names = _action_names(actions)
+    failures.extend(_check_frame_scope(frame, actions))
+    resolution = sections["Resolution"]
+    model = sections["Decision-state model"]
+    excluded = (field(resolution, "Excluded state:") or "").strip()
+    surviving = (field(resolution, "Surviving state:") or "").strip()
+    failures.extend(_check_claim_class(model))
+    failures.extend(_check_structural_basis(model, excluded))
+
+    order = [
+        next((i for i, ln in enumerate(resolution.splitlines()) if ln.startswith(f"- {lb}")), -1)
+        for lb in RESOLVED_LABELS["Resolution"]
+    ]
+    if order != sorted(order):
+        failures.append("the Resolution labels must appear in the skeleton's order")
+    if excluded not in STATES:
+        failures.append(f"'- Excluded state:' must read one of {list(STATES)}; found {excluded!r}")
+    if surviving.lower() != "none":
+        if surviving not in STATES:
+            failures.append(
+                f"'- Surviving state:' must read one of {list(STATES)} or 'none'; "
+                f"found {surviving!r}"
+            )
+        elif surviving == excluded:
+            failures.append("'- Excluded state:' and '- Surviving state:' must differ")
+    for label in RESOLVED_PROSE:
+        if (field(resolution, label) or "").strip().lower() == "none":
+            failures.append(f"'- {label}' in 'Resolution' must state its content, not 'none'")
+
+    observations = _table_rows(_span(resolution, "Observations:"))
+    if not observations:
+        failures.append("'- Observations:' must head a table with an observation and a source")
+    else:
+        if [c.lower() for c in observations[0]] != ["observation", "source"]:
+            failures.append("'- Observations:' table header must be exactly 'observation | source'")
+        rows = _data_rows(observations)
+        if not rows:
+            failures.append("'- Observations:' table must have at least one row")
+        for i, row in enumerate(rows, 1):
+            if len(row) != 2:  # noqa: PLR2004 -- two columns
+                failures.append(
+                    f"'- Observations:' row {i} must be exactly two cells; found {row!r}"
+                )
+            for cell in row:
+                if not cell or _TEMPLATE_BLANK.search(cell):
+                    failures.append(f"'- Observations:' row {i} cell still unfilled: {cell!r}")
+
+    losses_rows = _table_rows(_span(resolution, "Surviving-state losses:"))
+    losses: list[tuple[str, Interval | None, str]] = []
+    unsupported = False
+    if not losses_rows or [c.lower() for c in losses_rows[0]] != ["action", "loss", "provenance"]:
+        failures.append(
+            "'- Surviving-state losses:' table header must be exactly 'action | loss | provenance'"
+        )
+    else:
+        for row in _data_rows(losses_rows):
+            if len(row) != _SCOPE_TABLE_COLUMNS:
+                failures.append(f"'- Surviving-state losses:' row {row!r} must be three cells wide")
+                continue
+            action, loss, prov = row
+            if NO_LR in (loss, prov):
+                if not (loss == NO_LR and prov == NO_LR):
+                    failures.append(
+                        f"'- Surviving-state losses:' row {action!r}: {NO_LR!r} fills the loss "
+                        "and provenance cells together"
+                    )
+                unsupported = True
+                losses.append((action, None, prov))
+                continue
+            if prov not in PROVENANCE:
+                failures.append(
+                    f"'- Surviving-state losses:' row {action!r}: {prov!r} is not a "
+                    "provenance class"
+                )
+            parsed = parse_exact(loss)
+            if parsed is None:
+                failures.append(
+                    f"'- Surviving-state losses:' loss {loss!r} must parse as a nonnegative "
+                    "number or ordered range"
+                )
+            losses.append((action, parsed, prov))
+        listed = [a for a, _, _ in losses]
+        if sorted(listed) != sorted(names) or len(listed) != _SCOPE_ACTIONS:
+            failures.append(
+                "'- Surviving-state losses:' must carry exactly one row per framed action "
+                f"{names!r}; found {listed!r}"
+            )
+            losses = []
+
+    raw_diff = (field(resolution, "Surviving-state loss difference:") or "").strip()
+    diff: Interval | None = None
+    belief = False
+    if raw_diff == NO_LR:
+        if not unsupported:
+            failures.append(
+                "'- Surviving-state loss difference:' reads 'none supported' exactly when a "
+                "losses row does"
+            )
+    else:
+        if unsupported:
+            failures.append(
+                "'- Surviving-state loss difference:' reads 'none supported' exactly when a "
+                "losses row does"
+            )
+        provs = _PROVENANCE_MENTION.findall(raw_diff)
+        if len(provs) != 1:
+            failures.append(
+                "'- Surviving-state loss difference:' must carry exactly one provenance class"
+            )
+        belief = (
+            len(provs) == 1
+            and provs[0] in BELIEF_LOSS_PROVENANCE
+            and len(losses) == _SCOPE_ACTIONS
+            and all(prov in BELIEF_LOSS_PROVENANCE for _, _, prov in losses)
+        )
+        diff = _difference(_bare(raw_diff))
+        if diff is None:
+            failures.append(
+                f"'- Surviving-state loss difference:' {_bare(raw_diff)!r} must parse as a "
+                "signed number or ordered '<low> to <high>' range"
+            )
+    if diff is not None and len(losses) == _SCOPE_ACTIONS and all(loss for _, loss, _ in losses):
+        (_, first, _), (_, second, _) = losses
+        bound = (first[0] - second[1], first[1] - second[0])
+        if not (bound[0] <= diff[0] and diff[1] <= bound[1]):
+            failures.append(
+                f"Surviving-state loss difference {_bare(raw_diff)!r} lies outside the endpoint "
+                f"interval {_fmt(bound)} of the losses (first row minus second row)"
+            )
+
+    recommended = (field(sections["Verdict"], "Recommended action:") or "").strip()
+    if recommended not in (*names, "no preference", "returned to owner"):
+        failures.append(
+            "a resolved verdict's '- Recommended action:' must name one of the framed actions "
+            f"{names!r}, or read 'no preference' or 'returned to owner'; found {recommended!r}"
+        )
+    elif losses or raw_diff == NO_LR:
+        expected = "returned to owner"
+        if belief and diff is not None and losses:
+            if diff[1] < 0:
+                expected = losses[0][0]
+            elif diff[0] > 0:
+                expected = losses[1][0]
+            elif diff == (0, 0):
+                expected = "no preference"
+        if recommended != expected:
+            failures.append(
+                f"a resolved verdict with surviving-state loss difference {raw_diff!r} requires "
+                f"'- Recommended action:' to read {expected!r}; found {recommended!r} "
+                "(SKILL.md § Numeric Policy)"
+            )
     return failures
 
 

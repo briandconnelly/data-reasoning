@@ -1906,3 +1906,490 @@ def test_comment_reopened_on_the_closing_line_and_left_open_fails_closed():
     reopened_on = text.split("\n").index("--> <!-- second")
     assert cr._strip_hidden(text)[3] == reopened_on
     assert cr.detect(text) == "ledger"
+
+
+# Issue #114, decisions/008: the resolved record. RESOLVED_DECISION is the
+# record contract's worked example (DA-S12). The validator checks its shape and
+# the verdict-to-slot coupling only; the loss arithmetic is the dev checker's.
+
+RESOLVED_DECISION = """\
+# Decision Record: roll back to build 411 or keep build 412 with a hotfix after the db-03 partition loss
+
+## Decision frame
+
+- Route: decide
+- Actions: roll back to build 411 vs keep build 412 with a hotfix
+- Decision owner: the storage on-call lead
+- Reversibility: either action is undone by one redeploy, about an hour
+- Deadline or forcing event: noon today
+- Consequences:
+
+  | | the job wrote to or deleted a partition file in the window true | the job wrote to or deleted a partition file in the window false |
+  | --- | --- | --- |
+  | roll back to build 411 | the faulty job is removed | a build is withdrawn; any indirect build-412 cause is removed too |
+  | keep build 412 with a hotfix | the faulty job runs until the hotfix | the build stays and the hotfix work goes to the found cause |
+
+## Decision-state model
+
+- Proposition: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job, executing, wrote to or deleted a file of the orders partition on db-03
+- Residual reading: false: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job wrote to or deleted no file of the orders partition on db-03, so the loss came from anything else, including a disk fault, another process, build 412 acting by another path, and causes nobody named
+- Claim class: causal
+- Identification basis: structural exclusion — see Resolution
+- Identification conditions: the partition was held only on db-03's local disk; the job modifies data only on the host where it executes; process accounting and the deploy log are complete for the incident window
+- Ledger mapping: none
+
+## Resolution
+
+- Excluded state: proposition true
+- Surviving state: proposition false
+- Observations:
+
+  | observation | source |
+  | --- | --- |
+  | the orders partition on db-03 was lost overnight | packet file: incident timeline |
+  | the partition lived only on db-03's local disk, with no replica, shared volume, or network storage | packet file: storage topology |
+  | the compaction job modifies data only by executing on the host that holds it | packet file: compaction design |
+  | the job never executed on db-03, and db-03 never ran build 412 | packet files: process accounting, deploy log |
+  | db-03's device log records a disk fault in the window | packet file: db-03 device log |
+
+- Accepted evidence: the partition was lost while the compaction job never executed on db-03, the only host holding it
+- Structural exclusion: the job can modify data only where it executes and the partition existed only on db-03, where it never executed, so direct modification by the job is impossible
+- Exclusion assumptions: the storage topology, process accounting, and deploy log are complete for the incident window, and the design document's locality claim holds for build 412
+- Surviving-state possibility: a loss without the job's direct action is possible under not-H, and the device log names one such cause, a disk fault
+- Surviving-state losses:
+
+  | action | loss | provenance |
+  | --- | --- | --- |
+  | roll back to build 411 | 4 | user-elicited |
+  | keep build 412 with a hotfix | 1 | user-elicited |
+
+- Surviving-state loss difference: 3 — provenance: user-elicited
+
+## Verdict
+
+- Verdict: resolved
+- Recommended action: keep build 412 with a hotfix
+- Conditions: the exclusion assumptions in Resolution, and the owner's surviving-state losses of 4 and 1
+
+## Handoff
+
+- Open factual disputes: none
+- Identification gaps: what caused the loss is not identified; the device log's disk fault is a candidate, not an established cause
+- VoI question: none
+"""
+
+ROLLBACK, HOTFIX = "roll back to build 411", "keep build 412 with a hotfix"
+
+
+def _edit(old: str, new: str, text: str = RESOLVED_DECISION) -> str:
+    assert text.count(old) == 1, old
+    return text.replace(old, new)
+
+
+def _says(text: str, fragment: str, *, final: bool = True) -> bool:
+    return any(fragment in f for f in cr.check(text, final=final))
+
+
+def test_resolved_is_an_accepted_decide_verdict():
+    assert cr.detect(RESOLVED_DECISION) == "decision"
+    assert cr.check(RESOLVED_DECISION) == []
+    assert cr.check(RESOLVED_DECISION, final=True) == []
+    assert "resolved" in cr.DECIDE_VERDICTS
+
+
+def test_resolved_skeleton_is_in_progress_by_default_and_incomplete_when_final():
+    blocks = re.findall(
+        r"```markdown\n(.*?)```", TEMPLATE_FILES[-1].read_text(encoding="utf-8"), re.S
+    )
+    skeleton = next(b for b in blocks if "## Resolution" in b)
+    assert cr.check(skeleton) == []
+    assert _says(skeleton, "still unfilled")
+
+
+RESOLUTION_LABELS = (
+    "Excluded state",
+    "Surviving state",
+    "Observations",
+    "Accepted evidence",
+    "Structural exclusion",
+    "Exclusion assumptions",
+    "Surviving-state possibility",
+    "Surviving-state losses",
+    "Surviving-state loss difference",
+)
+
+
+@pytest.mark.parametrize("label", RESOLUTION_LABELS)
+def test_resolved_requires_each_contract_statement(label):
+    lines = RESOLVED_DECISION.splitlines(keepends=True)
+    gone = "".join(ln for ln in lines if not ln.startswith(f"- {label}:"))
+    assert _says(gone, f"'- {label}:' slot is missing"), cr.check(gone, final=True)
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "fragment"),
+    [
+        (
+            "- Excluded state: proposition true",
+            "- Excluded state: H",
+            "'- Excluded state:' must read",
+        ),
+        (
+            "- Surviving state: proposition false",
+            "- Surviving state: proposition true",
+            "must differ",
+        ),
+        (
+            "- Structural exclusion: the job",
+            "- Structural exclusion: none\n- Ignored: the job",
+            "'Structural exclusion' must state",
+        ),
+        (
+            "| observation | source |",
+            "| observation | file |",
+            "'- Observations:' table lacks a 'source' column",
+        ),
+        (
+            "| action | loss | provenance |",
+            "| action | provenance | loss |",
+            "header must be exactly",
+        ),
+        (
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | 1 |",
+            "three cells",
+        ),
+        (
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | 1 | guessed |",
+            "'guessed' is not a provenance class",
+        ),
+        (
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | 1 | none supported |",
+            "together",
+        ),
+        (
+            "- Surviving-state loss difference: 3 — provenance: user-elicited",
+            "- Surviving-state loss difference: 3",
+            "exactly one provenance class",
+        ),
+        (
+            "- Surviving-state loss difference: 3 — provenance: user-elicited",
+            "- Surviving-state loss difference: none supported",
+            "reads 'none supported' exactly when a losses row does",
+        ),
+        (
+            "- Excluded state: proposition true\n- Surviving state: proposition false",
+            "- Surviving state: proposition false\n- Excluded state: proposition true",
+            "in the skeleton's order",
+        ),
+    ],
+)
+def test_resolved_slot_grammar(old, new, fragment):
+    bad = _edit(old, new)
+    assert _says(bad, fragment), cr.check(bad, final=True)
+
+
+ODDS_ONLY_FIELDS = (
+    (
+        "- Ledger mapping: none\n",
+        "- Ledger mapping: none\n\n## Evidence and update\n\n- Posterior odds: 2\n",
+        "'## Evidence and update'",
+    ),
+    (
+        "- VoI question: none\n",
+        "- VoI question: none\n\n## Robustness\n\n- Crossover: flips at prior odds 0.5\n",
+        "'## Robustness'",
+    ),
+    (
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Favored if true: keep build 412 with a hotfix\n",
+        "'- Favored if true:'",
+    ),
+    (
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: 3 — provenance: user-elicited\n",
+        "'- Loss ratio:'",
+    ),
+    (
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Decision threshold (posterior odds): 0.3 — provenance: user-elicited\n",
+        "'- Decision threshold (posterior odds):'",
+    ),
+)
+
+
+@pytest.mark.parametrize(("old", "new", "named"), ODDS_ONLY_FIELDS)
+def test_resolved_rejects_posterior_odds_and_crossover(old, new, named):
+    bad = _edit(old, new)
+    assert _says(bad, f"carries no odds-only field; found {named}"), cr.check(bad, final=True)
+    assert _says(bad, f"carries no odds-only field; found {named}", final=False)
+
+
+def _recommend(rec: str, text: str = RESOLVED_DECISION) -> str:
+    return _edit(f"- Recommended action: {HOTFIX}", f"- Recommended action: {rec}", text)
+
+
+def test_resolved_recommendation_coupling():
+    # The sign of the difference is the dev checker's: any form passes here.
+    for rec in (HOTFIX, ROLLBACK, "no preference", "returned to owner"):
+        assert cr.check(_recommend(rec), final=True) == [], rec
+    assert _says(_recommend("hotfix"), "must name one of the framed actions")
+    hypothetical = _edit(
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        "- Surviving-state loss difference: 3 — provenance: sensitivity-only",
+    )
+    for rec in (HOTFIX, "no preference"):
+        assert _says(_recommend(rec, hypothetical), "'returned to owner'"), rec
+    assert cr.check(_recommend("returned to owner", hypothetical), final=True) == []
+    unsupported = _edit(
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        "- Surviving-state loss difference: none supported",
+        _edit(
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | none supported | none supported |",
+        ),
+    )
+    assert _says(_recommend(HOTFIX, unsupported), "'returned to owner'")
+    assert cr.check(_recommend("returned to owner", unsupported), final=True) == []
+
+
+def test_other_verdicts_keep_their_coupling():
+    assert cr.check(GOOD_DECISION, final=True) == []  # an annotated verdict stays accepted
+    robust_no_pref = _robust_decision("user-elicited", "user-elicited").replace(
+        "- Recommended action: ship", "- Recommended action: no preference"
+    )
+    assert any("'no preference'" in f for f in cr.check(robust_no_pref, final=True))
+    resolution = RESOLVED_DECISION[
+        RESOLVED_DECISION.index("## Resolution") : RESOLVED_DECISION.index("## Verdict")
+    ]
+    with_resolution = GOOD_DECISION.replace("## Verdict", resolution + "## Verdict")
+    findings = cr.check(with_resolution, final=True)
+    assert any("'## Resolution' belongs only to a resolved record" in f for f in findings), findings
+
+
+def test_resolved_missing_a_loss_row_fails():
+    bad = _edit("  | keep build 412 with a hotfix | 1 | user-elicited |\n", "")
+    assert _says(bad, "exactly one row per framed action")
+
+
+def test_resolved_duplicate_loss_rows_fail():
+    bad = _edit(
+        "| keep build 412 with a hotfix | 1 | user-elicited |",
+        "| roll back to build 411 | 1 | user-elicited |",
+    )
+    assert _says(bad, "exactly one row per framed action")
+
+
+def test_duplicate_verdict_line_fails():
+    bad = _edit("- Verdict: resolved\n", "- Verdict: resolved\n- Verdict: robust\n")
+    assert _says(bad, "exactly one '- Verdict:' line")
+
+
+@pytest.mark.parametrize("annotated", ["resolved — the job is excluded", "resolved (structural)"])
+def test_annotated_resolved_fails(annotated):
+    assert _says(
+        _edit("- Verdict: resolved", f"- Verdict: {annotated}"),
+        "must read exactly '- Verdict: resolved'",
+    )
+
+
+@pytest.mark.parametrize(("open_", "close"), [("```markdown", "```"), ("<!--", "-->")])
+def test_hidden_resolution_counts_as_absent(open_, close):
+    start = RESOLVED_DECISION.index("## Resolution")
+    end = RESOLVED_DECISION.index("## Verdict")
+    hidden = (
+        RESOLVED_DECISION[:start]
+        + f"{open_}\n"
+        + RESOLVED_DECISION[start:end]
+        + f"{close}\n\n"
+        + RESOLVED_DECISION[end:]
+    )
+    assert _says(hidden, "required section missing: ## Resolution")
+
+
+def test_model_review_is_never_a_verdict():
+    draft = _edit("- Surviving state: proposition false", "- Surviving state: none")
+    assert _says(draft, "model review, never a verdict")
+    unfilled = _edit("- Verdict: resolved", "- Verdict: <value>", draft)
+    assert _says(unfilled, "model review, never a verdict")
+    assert _says(unfilled, "still unfilled")
+
+
+def test_resolved_slots_exist_in_the_shipped_template():
+    """Parity for the resolved set: every section and slot the validator
+    requires of a resolved record is in the template's resolved block."""
+    text = TEMPLATE_FILES[-1].read_text(encoding="utf-8")
+    blocks = [b for b in re.findall(r"```markdown\n(.*?)```", text, re.S) if "## Resolution" in b]
+    assert len(blocks) == 1
+    assert cr.detect(blocks[0]) == "decision"
+    for heading in cr.RESOLVED_SECTIONS:
+        assert f"\n{heading}\n" in blocks[0], heading
+    for heading, labels in cr.RESOLVED_SLOTS.items():
+        for label in labels:
+            assert f"- {label}:" in cr._section(blocks[0], heading), (heading, label)
+    assert "Surviving-state loss difference" in cr.RESOLVED_SLOTS["## Resolution"]
+
+
+# PR #137 review round, mirrored in the dev suite: both checkers agree.
+
+_RESOLUTION = RESOLVED_DECISION[
+    RESOLVED_DECISION.index("## Resolution") : RESOLVED_DECISION.index("## Verdict")
+]
+
+
+@pytest.mark.parametrize(
+    ("row", "difference"),
+    [
+        ("| roll back to build 411 | 4 | sensitivity-only |", "user-elicited"),
+        ("| roll back to build 411 | 4 | estimated-from-data-in-hand |", "user-elicited"),
+        ("| roll back to build 411 | 4 | user-elicited |", "estimated-from-data-in-hand"),
+    ],
+)
+def test_resolved_named_action_needs_every_loss_belief_grade(row, difference):
+    mixed = _edit("| roll back to build 411 | 4 | user-elicited |", row)
+    mixed = _edit(
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        f"- Surviving-state loss difference: 3 — provenance: {difference}",
+        mixed,
+    )
+    assert _says(mixed, "'returned to owner'")
+    assert _says(_recommend("no preference", mixed), "'returned to owner'")
+    assert cr.check(_recommend("returned to owner", mixed), final=True) == []
+
+
+def test_a_second_resolution_section_fails_and_is_read_for_model_review():
+    second = _RESOLUTION.replace("- Surviving state: proposition false", "- Surviving state: none")
+    bad = _edit("## Verdict", second + "## Verdict")
+    assert _says(bad, "duplicate section '## Resolution'")
+    assert _says(bad, "model review, never a verdict")
+
+
+def test_observations_rows_are_exactly_two_cells_and_filled():
+    wide = _edit("| packet file: incident timeline |", "| packet file: incident timeline | extra |")
+    assert _says(wide, "'- Observations:' row 1 must be exactly two cells")
+    header = _edit("| observation | source |", "| observation | source | note |")
+    assert _says(header, "header must be exactly 'observation | source'")
+    blank = _edit("| packet file: incident timeline |", "| <file or source it comes from> |")
+    assert _says(blank, "still unfilled")
+    assert cr.check(_edit("| packet file: incident timeline |", "| <source> |"), final=True) == []
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- Posterior odds: 0",
+        "- Prior odds: 1 — provenance: user-elicited",
+        "- Crossover: none within swept class",
+        "- Independence: single item",
+    ],
+)
+def test_resolved_rejects_an_odds_only_label_anywhere(line):
+    bad = _edit("- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    label = line[2:].split(":", 1)[0]
+    assert _says(bad, f"found '- {label}:'")
+    prose = _edit(
+        "- VoI question: none\n", "- VoI question: none\n\nNo posterior odds were computed.\n"
+    )
+    assert cr.check(prose, final=True) == []
+
+
+@pytest.mark.parametrize(
+    ("line", "label"),
+    [
+        ("- **Prior odds:** 0", "Prior odds"),
+        ("- **Posterior odds**: 0", "Posterior odds"),
+        ("- _Crossover:_ none within swept class", "Crossover"),
+        ("- __Loss ratio:__ 2", "Loss ratio"),
+    ],
+)
+def test_resolved_rejects_an_emphasized_odds_only_label(line, label):
+    bad = _edit("- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    assert _says(bad, f"found '- {label}:'")
+
+
+def test_unfilled_difference_defers_the_recommendation_coupling_by_default():
+    draft = _edit(
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        "- Surviving-state loss difference: <signed number or range> — provenance: <class>",
+    )
+    assert not any("Recommended action" in f for f in cr.check(draft))
+    assert _says(draft, "still unfilled")
+
+
+def test_odds_only_field_in_template_state_waits_for_final():
+    leftover = _edit(
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: <multiple> — provenance: <class>\n",
+    )
+    assert not any("odds-only" in f for f in cr.check(leftover))
+    assert _says(leftover, "found '- Loss ratio:'")
+    filled = _edit(
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: 3 — provenance: user-elicited\n",
+    )
+    assert _says(filled, "found '- Loss ratio:'", final=False)
+
+
+def test_ordinary_records_keep_their_verdict_line_tolerance():
+    second = GOOD_DECISION.replace(
+        "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    assert cr.check(second, final=True) == []
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- **Verdict:** resolved",
+        "- Verdict: `resolved`",
+        "- Verdict: **resolved**",
+        "- Verdict: resolved (structural)",
+    ],
+)
+def test_a_resolved_verdict_line_is_exactly_the_bare_token(line):
+    assert _says(_edit("- Verdict: resolved", line), "must read exactly '- Verdict: resolved'")
+
+
+def test_a_second_verdict_line_beside_resolved_fails():
+    bad = _edit("- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n")
+    assert _says(bad, "exactly one '- Verdict:' line")
+
+
+def test_resolved_sections_keep_the_skeleton_order():
+    late = RESOLVED_DECISION.replace(_RESOLUTION, "") + "\n" + _RESOLUTION
+    assert _says(late, "sections must appear in the order")
+
+
+def _skeleton_labels(block: str) -> dict[str, list[str]]:
+    """Each `## Section` of a template block mapped to its top-level `- Label:` bullets."""
+    out: dict[str, list[str]] = {}
+    current = None
+    for line in block.splitlines():
+        if line.startswith("## "):
+            current = line.rstrip()
+            out[current] = []
+        elif current and (m := re.match(r"^- ([^<:\n]+):", line)):
+            out[current].append(m.group(1))
+    return out
+
+
+def test_each_decision_skeleton_matches_its_own_required_set():
+    """Per skeleton, per section: the template's labels equal the validator's
+    required slots plus that skeleton's nested-table labels, so dropping a
+    label from one skeleton fails even when another skeleton still has it."""
+    text = TEMPLATE_FILES[-1].read_text(encoding="utf-8")
+    blocks = [
+        b for b in re.findall(r"```markdown\n(.*?)```", text, re.S) if cr.detect(b) == "decision"
+    ]
+    assert len(blocks) == 2  # noqa: PLR2004 -- ordinary and resolved
+    for block in blocks:
+        resolved = "## Resolution" in block
+        required = cr.RESOLVED_SLOTS if resolved else cr.REQUIRED_SLOTS["decision"]
+        nested = cr.RESOLVED_NESTED_TABLES if resolved else cr.DECISION_NESTED_TABLES
+        expected = {h: set(labels) for h, labels in required.items()}
+        for heading, label in nested:
+            expected[heading].add(label)
+        got = {h: set(labels) for h, labels in _skeleton_labels(block).items()}
+        assert got == expected, (resolved, got, expected)

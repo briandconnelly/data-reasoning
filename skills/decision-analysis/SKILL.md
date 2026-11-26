@@ -26,6 +26,7 @@ Route on the inferential shape of the ask, not its phrasing or its price.
 | decide | A choice between named actions under uncertainty, with evidence in hand | Full decision record |
 
 `voi` outranks `decide` only as the narrower condition; a voi ask embedded in a bigger open decision takes `decide`.
+Evidence that would rule a state out (§ Numeric Policy) keeps an ask on `decide` only once it is verified and in hand; an exclusion that is itself disputed routes `out: adjudicate`.
 Cost never selects a route: a stated price makes a pull expensive, not a decision voi-shaped, and a free but slow experiment routes voi the same as a metered query.
 The costly-collection and authorization gates bind when a pull is executed, never for analyzing a hypothetical one.
 A co-loaded data-access, analytics, or visualization skill is a tool for collection and display on any route, never a route itself; compose with it and still run the route the ask selects.
@@ -83,7 +84,7 @@ Record provenance for every source, including the source of every number the rec
 This section is how the skill coexists with `hypothesis-driven-analysis`'s rule "Do not invent numeric confidence values": every number here is either sourced or explicitly hypothetical, and the two are never mixed.
 
 Every prior, likelihood ratio, loss, threshold, and signal-model number carries exactly one provenance class: `user-elicited`, `externally-sourced`, `estimated-from-data-in-hand`, or `sensitivity-only`.
-A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), and the voi route's bounds under § The VoI Route — never in Evidence and update as an update, and never reported as a probability the analysis holds.
+A `sensitivity-only` number is not a belief: it may appear only where a sweep or crossover consumes it — the Robustness block, the Decision frame's loss and threshold slots (where the loss rule below caps the verdict), a resolved record's surviving-state losses and difference (where the comparison below returns the choice to the owner), and the voi route's bounds under § The VoI Route — never in Evidence and update as an update, and never reported as a probability the analysis holds.
 An `externally-sourced` or `estimated-from-data-in-hand` likelihood ratio names its source, reference class, and conditioning set; a number that cannot name them is `sensitivity-only`, whatever it looks like.
 
 Priors are robustness-first: the analysis may posit reference or skeptical priors as `sensitivity-only`, and elicitation refines the prior class; it never gates the sensitivity analysis.
@@ -118,6 +119,17 @@ A range whose endpoints are equal is a point, and a point never flips the action
 When every input is a point and posterior odds equal the threshold exactly, neither action is preferred: the record is `prior-sensitive` and reports the stated prior odds as the crossover.
 A record where both the prior and the losses flip the action reports both crossovers.
 
+A state is eliminated only when a structural exclusion in the stated model (a logical or mechanical reason, never a frequency) makes the whole accepted evidence impossible under that state while it stays possible under the other; the record is then `resolved`, outside the odds form, and likelihood ratios stay strictly positive in every record.
+If doubt about an exclusion assumption leaves the evidence possible under both states, it is not elimination: use a supportable ratio, or the missing-ratio form.
+Zero events in a finite sample eliminates a state only when the stated model makes the complete zero-event observation impossible under it.
+An upper confidence bound on a rate is not a likelihood.
+Evidence impossible under both states reaches no verdict: the disposition is model review, because the binary model or its exclusion assumptions are wrong.
+`resolved` is decided before the ordered rule, which then does not run; only surviving-state losses enter the comparison below, so `dominated` never fires on losses in the eliminated state.
+
+The surviving-state comparison reads the loss difference: the first row of the Surviving-state losses table minus the second, computed jointly only when both losses depend on one uncertain quantity, which Conditions then names, and otherwise the endpoint interval [low(first) − high(second), high(first) − low(second)].
+With belief-grade provenance on both losses and the difference, a difference whose high endpoint is below 0 recommends the first row's action, one whose low endpoint is above 0 the second row's, and exactly the point 0 `no preference`; any other difference, including one reaching or spanning 0 and `none supported`, returns the choice to the owner.
+A structural exclusion licenses causal wording only for the negation of the excluded causal proposition, and only when every causal path it names requires a condition the accepted evidence shows absent; what did cause the outcome stays an identification gap, and asserting a cause needs an ordinary licensing basis.
+
 Evidence items multiplied together state why they are conditionally independent given each state, or are combined into one item; sequential multiplication of unconditional likelihood ratios double-counts shared evidence.
 
 A verdict is a recommendation, never an authorization: selecting an action, or pricing a pull as worth taking, licenses nothing — execution goes through whatever gates govern the action, and for pulls that means the costly-collection plan and the authorization gate.
@@ -126,7 +138,7 @@ This rule's home is this section; every other mention in this skill points here.
 ## The Decide Route
 
 Write the record to a file from [references/decision-record-template.md](references/decision-record-template.md) before the analysis that fills it; a record that first appears alongside its verdict was not an analysis, it was a write-up.
-Six blocks, in order:
+Six blocks, in order, except under `resolved` (below):
 
 **Decision frame.**
 The two actions, the decision owner, reversibility, the deadline or forcing event, each action's consequences under each state, and the action the proposition favors (§ Numeric Policy).
@@ -148,15 +160,20 @@ The prior class and loss range actually swept, and the crossover statements: at 
 This block is the skill's signature output, and it is where `sensitivity-only` numbers live.
 
 **Verdict.**
-The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `evidence-sensitive`, `dominated`, `indifferent` — and which value a record takes is settled by § Numeric Policy's ordered rule, which this block records and does not restate.
+The verdict set is closed — `robust`, `prior-sensitive`, `loss-sensitive`, `evidence-sensitive`, `dominated`, `indifferent`, `resolved` — and which value a record takes is settled by § Numeric Policy's elimination condition and then its ordered rule, which this block records and does not restate.
 
 The record names its recommendation directionally: under `robust` and `dominated` the Recommended action slot names the preferred action in the Actions slot's own words; under `prior-sensitive`, `loss-sensitive`, and `evidence-sensitive` it reads `returned to owner`, because the crossover locates the choice.
-Under `indifferent`, Recommended action reads `no preference`.
+Under `indifferent`, Recommended action reads `no preference`; under `resolved`, it reads what § Numeric Policy's surviving-state comparison gives.
 `optimal` is not a verdict, no verdict functions as a certification, and no verdict authorizes anything (§ Numeric Policy).
 
 **Handoff.**
 Filled last, from what the record established: unadjudicated factual disputes that would change the verdict (for `hypothesis-driven-analysis`), identification gaps behind any causal proposition (for `causal-identification-review`), and the VoI question when collecting more was on the table.
 The block states facts, crossovers, and open questions only; it never prescribes the receiving skill's route.
+
+**Resolution.**
+A `resolved` record uses the template's resolved skeleton: no Evidence and update or Robustness block and no Favored if true, Loss ratio, or Decision threshold, with a Resolution block before Verdict stating the excluded and surviving states, the observations with their sources, the accepted evidence, the structural exclusion and its assumptions, why the evidence is possible under the surviving state, and the surviving-state losses and their difference (§ Numeric Policy).
+When the evidence is impossible under both states, the draft keeps `Surviving state: none` and an unfilled Verdict, and is neither completed nor rewritten to clear a finding.
+The response then gives no recommendation: it states the accepted evidence, why it is impossible under each state, and which exclusion assumptions or binary framing must be wrong, with the draft's path, reports the record not validated with the model-review finding as the expected limitation (§ Record Delivery), and hands the dispute to `hypothesis-driven-analysis`.
 
 ## The VoI Route
 

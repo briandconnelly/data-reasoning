@@ -1,0 +1,1 @@
+We suspect the new compaction job in build 412 wrote to or deleted files of the orders partition on db-03 between 01:40 and 03:10 last night (2026-11-24), and we must choose by noon between rolling back to build 411 and keeping build 412 with a hotfix. Here is the incident packet ({FIXTURE_PATH}). Roll back or hotfix?

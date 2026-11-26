@@ -1,0 +1,4 @@
+2026-11-24T01:52:07Z db-03 sd1 controller: medium error, unrecovered read
+2026-11-24T01:52:09Z db-03 sd1 controller: remapping failed, sector range marked bad
+2026-11-24T02:31:44Z db-03 sd1 controller: filesystem journal write failed
+2026-11-24T02:54:58Z db-03 sd1 controller: device reset

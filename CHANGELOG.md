@@ -8,6 +8,7 @@ The version is the `version` field of the plugin manifests; installs track the `
 
 ### Added
 
+- Decision analysis can record a choice where verified evidence rules one state out: a `resolved` verdict states the structural exclusion and recommends from the losses in the surviving state, and the record validator checks that record's structure; whether an exclusion is truly structural, and not a zero count in a finite sample, is for a reviewer to judge.
 - The evidence page opens with a capability map: for each kind of question, whether the plugin offers a measured workflow, unmeasured guidance, or a handoff out of scope, with the host, model, and revision of each measured claim and a pointer to the run record, skill section, or decision record behind it.
 
 ### Changed

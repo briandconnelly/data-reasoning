@@ -1,6 +1,6 @@
 # 008 — A state that an observation rules out
 
-Status: proposed, 2026-11-24; owner decision pending (issue #114).
+Status: accepted, 2026-11-25 (proposed 2026-11-24; issue #114).
 
 ## Question
 
@@ -119,3 +119,68 @@ A measured arm shows agents recording a zero count with no structural exclusion 
 Nothing here is a rule yet.
 Once the owner decides, semantics go in `../SKILL.md` § Numeric Policy, routing in § Routing, the record shape and verdict list in § The Decide Route, the representation in `../references/decision-record-template.md` § Slot notes, and enforcement in `tests/check_decision.py` (and `instruments/check_record.py` if the form adds a sentinel, a slot, a verdict, or a verdict-to-slot coupling), each in its one home; this record will point at them.
 The paired scenario cells are DA-S12 and DA-S13 in `../tests/scenarios.md`.
+
+## Decision, 2026-11-25
+
+The owner accepts option C: a resolved proposition outside the odds form, recorded as a seventh decide verdict `resolved`, staying on the `decide` route, with option D deferred.
+The sections above stay as the proposal's history; this section and § Record contract below are the disposition.
+The owner's reasons, as the recommendation gave them: A and B spend their cost making arithmetic reproduce an answer the observation already gave, and A also creates undefined products (0 × unbounded); a verdict is what both checkers key on, so the coupling is enforceable, while `out: direct` would drop the loss comparison's provenance.
+
+The five open owner questions, answered (each rule's home is listed in § Record contract):
+
+1. *Accept C, or reverse to A or B?*
+   C; § Reversing the recommendation stays as the record of what A or B would cost.
+2. *Which form carries the surviving-state comparison?*
+   A seventh verdict, `resolved`, not a sentinel set on the belief slots or a ruling inside an existing verdict.
+3. *Does a resolved proposition stay on `decide`?*
+   Yes, behind `out: adjudicate` when the exclusion is disputed.
+4. *When an exclusion rests on an assumption, is the ratio exact?*
+   Exactness turns on whether the assumption's failure would make the whole observation possible under the excluded state, not on whether the assumption has any stated failure probability, as the draft said.
+5. *Is D wanted at all?*
+   Not now: D is deferred.
+
+## Record contract
+
+The record contract was drafted here on 2026-11-25, revised after a cross-model design review, and then implemented; its rules now live in their homes, and this section keeps only the choices and pointers (HDA decision 004).
+
+- Option C, as a seventh decide verdict `resolved`, for the reasons in § Decision, 2026-11-25.
+- The elimination condition, the unchanged positive-ratio rule, the zero-count guard, the both-impossible disposition, the precedence of `resolved` over the ordered rule, the surviving-state comparison, and the causal reach of a structural exclusion: `../SKILL.md` § Numeric Policy.
+- The adjudication-first ruling: `../SKILL.md` § Routing.
+- The verdict, the resolved record's blocks, its Recommended action, and the model-review handoff: `../SKILL.md` § The Decide Route.
+- The resolved skeleton and the spelling of its slots: `../references/decision-record-template.md`.
+- Enforcement: `tests/check_decision.py` (every structural item and the arithmetic: the losses' domain, the difference inside their endpoint interval, the recommendation its sign gives, and the structural-exclusion basis) and `instruments/check_record.py` at the plugin root (the structural items: the verdict set, one bare Verdict line, the verdict-dependent sections and slots, the state tokens, the two tables, the difference's provenance, and the owner-return coupling); their unit suites hold the cases this contract decided, including the worked DA-S12 record and a golden showing that every archived decide record keeps its findings.
+- The paired scenario cells, DA-S12 and DA-S13: `../tests/scenarios.md`.
+
+A reviewer checks what neither checker can: that an exclusion is structural and not a frequency, that the observations are the whole accepted evidence, that the exclusion is not itself disputed, that a causal exclusion covers every named path, and that a difference narrower than the losses' endpoint interval rests on the shared quantity Conditions names; no checker reads that statement, because whether it names a real pairing is not mechanically decidable.
+
+### Choices made
+
+1. *A separate resolved skeleton whose required sections and slots are verdict-dependent, omitting every odds-only field, with no sentinel* (orchestrator ruling A).
+   Both checkers need verdict-dependent requirements for `## Resolution` anyway, and the shipped `_required_slots(body, kind)` already varies its set by body for exploration records; the dev checker reads the verdict before `_require_slots` can choose a set.
+   Cost if wrong: two record shapes on one route, and an agent that starts from the ordinary skeleton and later reaches `resolved` must delete two sections and three slots, which the measured arm will show.
+2. *The loss comparison is a stated signed difference, checked against the marginal endpoint interval*, so that a shared parameter can give a strict preference or an exact tie that overlapping marginals cannot.
+   The difference is the first row of the Surviving-state losses table minus the second (orchestrator ruling, 2026-11-25, replacing the first draft's Actions order), so the table, local to the Resolution section, carries the sign convention and the Actions order keeps carrying no meaning.
+   Cost if wrong: a reader may read the difference against the Actions order rather than the table's, and a difference narrower than the marginals rests on a pairing only a reviewer can check.
+3. *The marginal losses table stays beside the difference*, with exactly one row per framed action in both checkers, so a missing or duplicated action cannot pass and the difference has something to be checked against.
+   Cost if wrong: two statements of the same losses that the dev checker relates only by containment.
+4. *Unsupported losses use the paired `none supported`*, the missing-ratio form's spelling, and the difference then reads `none supported` bare.
+   Cost if wrong: a reader may take it for the missing-ratio form; the column header disambiguates.
+5. *Source-backed observations are a two-column table in `## Resolution`*, replacing the Evidence table the resolved record omits.
+   Cost if wrong: an agent may duplicate the observations in prose and table, which no checker compares.
+6. *DA-S12's proposition is narrowed to the job writing to or deleting a partition file within the incident window, with its literal complement as not-H* (revised 2026-11-25 after review: the earlier "directly modified" against "lost by another cause" was not a partition), rather than requiring the packet to show every causal path needs local execution, because the narrowing is exact and keeps the decision non-trivial (the residual includes build 412 acting by another path, so rollback keeps value).
+   Cost if wrong: the scenario no longer tests an exclusion of a broad causal claim, which is the harder and commoner case.
+7. *`structural exclusion — see Resolution` stays an accepted basis, only with `Excluded state: proposition true` and only with § Numeric Policy's qualification*, because the dev gate checks presence, not adequacy.
+   Cost if wrong: an agent writes the basis for an exclusion that does not cover every named path, and only a reviewer catches it.
+8. *When any visible Verdict line reads `resolved`, the record carries exactly one Verdict line, written exactly `- Verdict: resolved`*, because the shipped validator reads the first Verdict slot and validates the others only against the vocabulary, and both checkers read `resolved — note` as `resolved`.
+   Ordinary records keep their old Verdict-line behaviour in both checkers (revised 2026-11-25 after review).
+   Cost if wrong: an annotation an agent adds out of habit fails the record.
+9. *The dev checker strips fenced code and HTML comments before locating sections*, matching the shipped validator, so a Resolution section in a fence or comment is absent.
+   Cost if wrong: the dev checker's section parse changes for every record kind it reads, which `test_ordinary_records_are_unchanged` must cover.
+10. *`Surviving state: none` stays a rejection under every verdict, and the no-verdict handoff is § The Decide Route's*, because `--final` requires a Verdict and a model-review case has none.
+    Cost if wrong: the delivered draft always reports a validator finding, which a reader may take for a defect.
+11. *The statewise LR gap is not tightened in this change*: `dominated` and `indifferent` records never read LR cells, so a `0` there passes today; it is filed separately.
+    Cost if wrong: a statewise record can carry an elimination-shaped `0` until that issue is fixed.
+12. *`Exclusion assumptions:` may not read `none`*, because answer 4 makes exactness conditional on a stated model.
+    Cost if wrong: a purely logical exclusion has to name the binary model as its assumption.
+13. *The resolved label sets are constants of their own in both checkers*, and both parity tests read the template's resolved block.
+    Cost if wrong: none to behaviour; each parity test compares every skeleton's per-section labels with its own set.

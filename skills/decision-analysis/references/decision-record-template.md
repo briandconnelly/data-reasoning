@@ -3,7 +3,7 @@
 This template records a decision analysis's content.
 `../SKILL.md` governs what that content means.
 Every closed-vocabulary slot below — route, verdict, provenance — names only the slot: which value applies, what values exist, and what each value means are `../SKILL.md`'s to state, not this template's.
-Fill one record per decision; use the Decide blocks for the decide route and the VoI block alone for the voi route.
+Fill one record per decision; use the Decide blocks for the decide route, the Resolved blocks instead when the verdict is `resolved`, and the VoI block alone for the voi route.
 The skeletons show the exact label and the bare shape of each value; everything else a slot needs to know is in § Slot notes below, outside the record, so that none of it is copied into one.
 
 ```markdown
@@ -85,6 +85,68 @@ It does not recommend or prescribe which route a receiving skill takes.
 - Verdict: <value>
 ```
 
+```markdown
+# Decision Record: <one-line decision>
+
+## Decision frame
+
+- Route: decide
+- Actions: <action A> vs <action B>
+- Decision owner: <who decides and acts>
+- Reversibility: <what undoing each action costs>
+- Deadline or forcing event: <date or event, or none>
+- Consequences:
+
+  | | <proposition> true | <proposition> false |
+  | --- | --- | --- |
+  | <action A> | <outcome> | <outcome> |
+  | <action B> | <outcome> | <outcome> |
+
+## Decision-state model
+
+- Proposition: <the binary proposition the decision turns on>
+- Residual reading: <what "false" includes, covering explanations nobody named>
+- Claim class: <value>
+- Identification basis: <design or review licensing the causal conclusion, structural exclusion — see Resolution, or NONE>
+- Identification conditions: <identifying assumptions as explicit conditions, or none>
+- Ledger mapping: <which UNRESOLVED rows fold into which state and what the residual absorbs, or none>
+
+## Resolution
+
+- Excluded state: <proposition true or proposition false>
+- Surviving state: <the other one, or none>
+- Observations:
+
+  | observation | source |
+  | --- | --- |
+  | <one verified part of the accepted evidence> | <file or source it comes from> |
+
+- Accepted evidence: <the whole observation, as the conjunction of the rows above>
+- Structural exclusion: <the logical or mechanical reason the accepted evidence is impossible under the excluded state>
+- Exclusion assumptions: <the assumptions of the stated model the exclusion rests on>
+- Surviving-state possibility: <why the accepted evidence is possible under the surviving state>
+- Surviving-state losses:
+
+  | action | loss | provenance |
+  | --- | --- | --- |
+  | <action A> | <loss or range> | <class> |
+  | <action B> | <loss or range> | <class> |
+
+- Surviving-state loss difference: <signed number or range> — provenance: <class>
+
+## Verdict
+
+- Verdict: resolved
+- Recommended action: <action A or action B exactly as written in Actions, or returned to owner, or no preference>
+- Conditions: <the exclusion assumptions and loss provenance the verdict is conditional on>
+
+## Handoff
+
+- Open factual disputes: <what would change the verdict and needs adjudication, or none>
+- Identification gaps: <causal propositions lacking a licensing design or review, or none>
+- VoI question: <the collect-more option worth pricing, or none>
+```
+
 ## Slot notes
 
 These notes are read once and never copied into a record.
@@ -108,6 +170,13 @@ An evidence item with no supportable ratio writes `none supported` in both its L
 When each applies is `../SKILL.md` § The Decide Route's and § Numeric Policy's to say; a stated Crossover is a bare number or ordered range, optionally introduced by `flips at prior odds`, `flips at loss ratio`, or `flips at likelihood ratio`, and which quantity the slot carries under each verdict is § Numeric Policy's to say.
 
 The evidence table has exactly four cells per row, and a pipe inside a cell is written `\|`.
+
+The resolved record's Verdict line is exactly `- Verdict: resolved`, and its Resolution labels appear once each, in the skeleton's order.
+Excluded state and Surviving state each read `proposition true` or `proposition false`; Surviving state reads `none` only on a model-review draft (`../SKILL.md` § The Decide Route).
+The Observations table has exactly the columns `observation` and `source`, one observation per row, every cell filled.
+The Surviving-state losses table has exactly the columns `action`, `loss`, and `provenance`, in that order, one row per action written as Actions writes it; a loss is a nonnegative number or `<low>–<high>` range, and an unsupplied loss writes `none supported` in both its loss and provenance cells.
+The Surviving-state loss difference is a signed decimal (`-1`, `0`, `2.5`) or a `<low> to <high>` range, with an ASCII `-` sign and one provenance suffix, or `none supported` bare; what it is the difference of is `../SKILL.md` § Numeric Policy's.
+The four prose slots never read `none`.
 
 The VoI record's slots are not bare-value slots: `../SKILL.md` § The VoI Route says what each carries, including which VoI numbers carry a provenance class and where a missing input's explanation goes (the Value calculation slot, whose continuation paragraphs may follow the line).
 Those rules are not restated here.

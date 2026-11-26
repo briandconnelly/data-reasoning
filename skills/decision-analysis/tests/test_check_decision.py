@@ -16,9 +16,12 @@ actually contains.
 # ruff: noqa: E501, RUF001
 
 import importlib.util
+import json
+import re
 from fractions import Fraction
 from pathlib import Path
 
+import pytest
 from base_check_decision_cac2464 import check as base_check
 from check_decision import (
     DECIDE_VERDICTS,
@@ -1921,3 +1924,695 @@ def test_indifferent_record_contract_in_both_checkers():
         bad = replace_once(record, f"- {label}: {expected}", f"- {label}: {wrong}")
         assert any(label in finding for finding in check(bad))
         assert any(label in finding for finding in cr.check(bad, final=True))
+
+
+# Issue #114, decisions/008: a resolved proposition. The record below is the
+# record contract's worked example (DA-S12); every case edits it the least
+# its point needs, and each asserts the finding's text in both checkers where
+# both enforce the item.
+
+ROLLBACK, HOTFIX = "roll back to build 411", "keep build 412 with a hotfix"
+
+RESOLVED = """\
+# Decision Record: roll back to build 411 or keep build 412 with a hotfix after the db-03 partition loss
+
+## Decision frame
+
+- Route: decide
+- Actions: roll back to build 411 vs keep build 412 with a hotfix
+- Decision owner: the storage on-call lead
+- Reversibility: either action is undone by one redeploy, about an hour
+- Deadline or forcing event: noon today
+- Consequences:
+
+  | | the job wrote to or deleted a partition file in the window true | the job wrote to or deleted a partition file in the window false |
+  | --- | --- | --- |
+  | roll back to build 411 | the faulty job is removed | a build is withdrawn; any indirect build-412 cause is removed too |
+  | keep build 412 with a hotfix | the faulty job runs until the hotfix | the build stays and the hotfix work goes to the found cause |
+
+## Decision-state model
+
+- Proposition: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job, executing, wrote to or deleted a file of the orders partition on db-03
+- Residual reading: false: between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job wrote to or deleted no file of the orders partition on db-03, so the loss came from anything else, including a disk fault, another process, build 412 acting by another path, and causes nobody named
+- Claim class: causal
+- Identification basis: structural exclusion — see Resolution
+- Identification conditions: the partition was held only on db-03's local disk; the job modifies data only on the host where it executes; process accounting and the deploy log are complete for the incident window
+- Ledger mapping: none
+
+## Resolution
+
+- Excluded state: proposition true
+- Surviving state: proposition false
+- Observations:
+
+  | observation | source |
+  | --- | --- |
+  | the orders partition on db-03 was lost overnight | packet file: incident timeline |
+  | the partition lived only on db-03's local disk, with no replica, shared volume, or network storage | packet file: storage topology |
+  | the compaction job modifies data only by executing on the host that holds it | packet file: compaction design |
+  | the job never executed on db-03, and db-03 never ran build 412 | packet files: process accounting, deploy log |
+  | db-03's device log records a disk fault in the window | packet file: db-03 device log |
+
+- Accepted evidence: the partition was lost while the compaction job never executed on db-03, the only host holding it
+- Structural exclusion: the job can modify data only where it executes and the partition existed only on db-03, where it never executed, so direct modification by the job is impossible
+- Exclusion assumptions: the storage topology, process accounting, and deploy log are complete for the incident window, and the design document's locality claim holds for build 412
+- Surviving-state possibility: a loss without the job's direct action is possible under not-H, and the device log names one such cause, a disk fault
+- Surviving-state losses:
+
+  | action | loss | provenance |
+  | --- | --- | --- |
+  | roll back to build 411 | 4 | user-elicited |
+  | keep build 412 with a hotfix | 1 | user-elicited |
+
+- Surviving-state loss difference: 3 — provenance: user-elicited
+
+## Verdict
+
+- Verdict: resolved
+- Recommended action: keep build 412 with a hotfix
+- Conditions: the exclusion assumptions in Resolution, and the owner's surviving-state losses of 4 and 1
+
+## Handoff
+
+- Open factual disputes: none
+- Identification gaps: what caused the loss is not identified; the device log's disk fault is a candidate, not an established cause
+- VoI question: none
+"""
+
+
+def _resolved(
+    *,
+    losses: tuple[str, str] = ("4", "1"),
+    provs: tuple[str, str] = ("user-elicited", "user-elicited"),
+    difference: str = "3 — provenance: user-elicited",
+    rec: str = HOTFIX,
+) -> str:
+    """RESOLVED with its surviving-state losses, difference, and recommendation
+    replaced; the losses rows stay in the order roll back, hotfix."""
+    text = replace_once(
+        RESOLVED,
+        "  | roll back to build 411 | 4 | user-elicited |\n"
+        "  | keep build 412 with a hotfix | 1 | user-elicited |",
+        f"  | roll back to build 411 | {losses[0]} | {provs[0]} |\n"
+        f"  | keep build 412 with a hotfix | {losses[1]} | {provs[1]} |",
+    )
+    text = replace_once(
+        text,
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        f"- Surviving-state loss difference: {difference}",
+    )
+    return replace_once(
+        text,
+        "- Recommended action: keep build 412 with a hotfix",
+        f"- Recommended action: {rec}",
+    )
+
+
+def _other_direction() -> str:
+    """Evidence that excludes not-H, with a descriptive claim and no basis."""
+    text = replace_once(
+        RESOLVED, "- Excluded state: proposition true", "- Excluded state: proposition false"
+    )
+    text = replace_once(
+        text, "- Surviving state: proposition false", "- Surviving state: proposition true"
+    )
+    text = replace_once(text, "- Claim class: causal", "- Claim class: descriptive")
+    text = replace_once(
+        text,
+        "- Identification basis: structural exclusion — see Resolution",
+        "- Identification basis: NONE",
+    )
+    return re.sub(r"- Identification conditions: .*", "- Identification conditions: none", text)
+
+
+def _both(text: str) -> tuple[list[str], list[str]]:
+    return check(text), cr.check(text, final=True)
+
+
+def _both_say(text: str, dev: str, shipped: str) -> None:
+    findings, shipped_findings = _both(text)
+    assert any(dev in f for f in findings), findings
+    assert any(shipped in f for f in shipped_findings), shipped_findings
+
+
+def test_resolved_passes_with_exclusion_and_strict_surviving_preference():
+    assert _both(RESOLVED) == ([], [])
+    assert cr.check(RESOLVED) == []
+    assert "resolved" in DECIDE_VERDICTS
+
+
+def test_resolved_passes_in_the_other_direction():
+    assert _both(_other_direction()) == ([], [])
+
+
+def test_resolved_exact_tie_reports_no_preference():
+    tie = _resolved(
+        losses=("2", "2"), difference="0 — provenance: user-elicited", rec="no preference"
+    )
+    assert _both(tie) == ([], [])
+    named = _resolved(losses=("2", "2"), difference="0 — provenance: user-elicited", rec=HOTFIX)
+    assert _says(named, "requires '- Recommended action:' to read 'no preference'")
+
+
+def test_resolved_range_touching_zero_returns_to_owner():
+    touching = _resolved(
+        losses=("1–3", "1"), difference="0 to 2 — provenance: user-elicited", rec=OWNER
+    )
+    assert _both(touching) == ([], [])
+    named = _resolved(
+        losses=("1–3", "1"), difference="0 to 2 — provenance: user-elicited", rec=HOTFIX
+    )
+    assert _says(named, "requires '- Recommended action:' to read 'returned to owner'")
+    spanning = _resolved(
+        losses=("1–3", "2"), difference="-1 to 1 — provenance: user-elicited", rec=OWNER
+    )
+    assert _both(spanning) == ([], [])
+
+
+def test_resolved_with_unsupported_losses_returns_to_owner():
+    hypothetical = _resolved(
+        provs=("sensitivity-only", "sensitivity-only"),
+        difference="3 — provenance: sensitivity-only",
+        rec=OWNER,
+    )
+    assert _both(hypothetical) == ([], [])
+    _both_say(
+        replace_once(
+            hypothetical, f"- Recommended action: {OWNER}", f"- Recommended action: {HOTFIX}"
+        ),
+        "requires '- Recommended action:' to read 'returned to owner'",
+        "'returned to owner'",
+    )
+    missing = _resolved(
+        losses=("none supported", "1"),
+        provs=("none supported", "user-elicited"),
+        difference="none supported",
+        rec=OWNER,
+    )
+    assert _both(missing) == ([], [])
+    _both_say(
+        replace_once(missing, f"- Recommended action: {OWNER}", f"- Recommended action: {HOTFIX}"),
+        "requires '- Recommended action:' to read 'returned to owner'",
+        "'returned to owner'",
+    )
+
+
+def test_resolved_shared_parameter_strict_preference():
+    """Marginals 1-5 and 2-6 overlap, but a shared parameter makes the
+    difference -1 throughout: the first row's action is preferred."""
+    shared = _resolved(
+        losses=("1–5", "2–6"), difference="-1 — provenance: user-elicited", rec=ROLLBACK
+    )
+    assert _both(shared) == ([], [])
+    assert _says(
+        replace_once(shared, f"- Recommended action: {ROLLBACK}", f"- Recommended action: {OWNER}"),
+        f"to read {ROLLBACK!r}",
+    )
+    unpaired = _resolved(
+        losses=("1–5", "2–6"), difference="-5 to 3 — provenance: user-elicited", rec=OWNER
+    )
+    assert _both(unpaired) == ([], [])
+
+
+def test_resolved_shared_parameter_exact_tie():
+    tie = _resolved(
+        losses=("1–5", "1–5"), difference="0 — provenance: user-elicited", rec="no preference"
+    )
+    assert _both(tie) == ([], [])
+
+
+def test_resolved_difference_must_lie_in_the_endpoint_interval():
+    for wrong in ("2", "-3", "3 to 4"):
+        bad = _resolved(difference=f"{wrong} — provenance: user-elicited")
+        assert _says(bad, "outside the endpoint interval [3, 3]"), (wrong, check(bad))
+
+
+def test_resolved_without_a_structural_exclusion_fails():
+    gone = re.sub(r"- Structural exclusion: .*\n", "", RESOLVED)
+    _both_say(
+        gone,
+        "section 'Resolution' is missing required slot '- Structural exclusion:'",
+        "'- Structural exclusion:' slot is missing",
+    )
+    for label in (
+        "Accepted evidence",
+        "Structural exclusion",
+        "Exclusion assumptions",
+        "Surviving-state possibility",
+    ):
+        nothing = re.sub(rf"- {label}: .*", f"- {label}: none", RESOLVED)
+        _both_say(nothing, f"'- {label}:' in 'Resolution' must state", f"'{label}' must state")
+    no_table = re.sub(r"(- Observations:\n)\n(  \|.*\n)+", r"\1", RESOLVED)
+    _both_say(no_table, "'- Observations:' must head a table", "'- Observations:' has no table")
+
+
+ODDS_ONLY = (
+    (
+        "- Ledger mapping: none\n",
+        "- Ledger mapping: none\n\n## Evidence and update\n\n- Prior odds: 1 — provenance: user-elicited\n",
+        "'## Evidence and update'",
+    ),
+    (
+        "- VoI question: none\n",
+        "- VoI question: none\n\n## Robustness\n\n- Crossover: none within swept class\n",
+        "'## Robustness'",
+    ),
+    (
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Favored if true: keep build 412 with a hotfix\n",
+        "'- Favored if true:'",
+    ),
+    (
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: 3 — provenance: user-elicited\n",
+        "'- Loss ratio:'",
+    ),
+    (
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Decision threshold (posterior odds): 0.3 — provenance: user-elicited\n",
+        "'- Decision threshold (posterior odds):'",
+    ),
+)
+
+
+@pytest.mark.parametrize(("old", "new", "named"), ODDS_ONLY)
+def test_resolved_carrying_an_odds_slot_fails(old, new, named):
+    bad = replace_once(RESOLVED, old, new)
+    _both_say(
+        bad,
+        f"a resolved record carries no odds-only field; found {named}",
+        f"carries no odds-only field; found {named}",
+    )
+
+
+def test_resolved_missing_a_loss_row_fails():
+    bad = replace_once(RESOLVED, "  | keep build 412 with a hotfix | 1 | user-elicited |\n", "")
+    _both_say(bad, "exactly one row per framed action", "exactly one row per framed action")
+
+
+def test_resolved_duplicate_loss_rows_fail():
+    bad = replace_once(
+        RESOLVED,
+        "  | keep build 412 with a hotfix | 1 | user-elicited |",
+        "  | roll back to build 411 | 1 | user-elicited |",
+    )
+    _both_say(bad, "exactly one row per framed action", "exactly one row per framed action")
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "dev", "shipped"),
+    [
+        (
+            "| action | loss | provenance |",
+            "| action | provenance | loss |",
+            "header must be exactly",
+            "header must be exactly",
+        ),
+        (
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | 1 |",
+            "three cells",
+            "three cells",
+        ),
+        (
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | 1 | derived |",
+            "'derived' is not a provenance class",
+            "'derived' is not a provenance class",
+        ),
+        (
+            "| keep build 412 with a hotfix | 1 | user-elicited |",
+            "| keep build 412 with a hotfix | none supported | user-elicited |",
+            "together",
+            "together",
+        ),
+        (
+            "- Surviving-state loss difference: 3 — provenance: user-elicited",
+            "- Surviving-state loss difference: 3",
+            "exactly one provenance class",
+            "exactly one provenance class",
+        ),
+        (
+            "- Surviving-state loss difference: 3 — provenance: user-elicited",
+            "- Surviving-state loss difference: 3 — provenance: user-elicited, provenance: externally-sourced",
+            "exactly one provenance class",
+            "exactly one provenance class",
+        ),
+        (
+            "- Surviving-state loss difference: 3 — provenance: user-elicited",
+            "- Surviving-state loss difference: none supported",
+            "reads 'none supported' exactly when a losses row does",
+            "reads 'none supported' exactly when a losses row does",
+        ),
+        (
+            "- Recommended action: keep build 412 with a hotfix",
+            "- Recommended action: hotfix",
+            "must name one of the framed actions",
+            "must name one of the framed actions",
+        ),
+    ],
+)
+def test_resolved_losses_and_difference_grammar(old, new, dev, shipped):
+    _both_say(replace_once(RESOLVED, old, new), dev, shipped)
+
+
+def test_resolved_numeric_domain_is_the_dev_checkers():
+    for loss in ("-1", "lots", "5–4"):
+        bad = replace_once(
+            RESOLVED, "| roll back to build 411 | 4 |", f"| roll back to build 411 | {loss} |"
+        )
+        assert _says(bad, "must parse as a nonnegative number or ordered range"), loss
+    for diff in ("three", "3 to 1", "−3"):  # a Unicode minus is not the ASCII sign
+        bad = _resolved(difference=f"{diff} — provenance: user-elicited")
+        assert _says(bad, "must parse as a signed number or ordered '<low> to <high>' range"), diff
+
+
+def test_resolved_labels_keep_the_skeleton_order():
+    swapped = replace_once(
+        RESOLVED,
+        "- Excluded state: proposition true\n- Surviving state: proposition false",
+        "- Surviving state: proposition false\n- Excluded state: proposition true",
+    )
+    _both_say(swapped, "in the skeleton's order", "in the skeleton's order")
+
+
+@pytest.mark.parametrize(
+    ("excluded", "surviving", "fragment"),
+    [
+        ("proposition true", "proposition true", "must differ"),
+        ("H", "proposition false", "'- Excluded state:' must read"),
+        ("proposition true", "not-H", "'- Surviving state:' must read"),
+    ],
+)
+def test_resolved_state_tokens_are_closed(excluded, surviving, fragment):
+    bad = replace_once(
+        RESOLVED, "- Excluded state: proposition true", f"- Excluded state: {excluded}"
+    )
+    bad = replace_once(
+        bad, "- Surviving state: proposition false", f"- Surviving state: {surviving}"
+    )
+    _both_say(bad, fragment, fragment)
+
+
+def test_duplicate_verdict_line_fails():
+    bad = replace_once(
+        RESOLVED, "- Verdict: resolved\n", "- Verdict: resolved\n- Verdict: robust\n"
+    )
+    _both_say(bad, "exactly one '- Verdict:' line", "exactly one '- Verdict:' line")
+    elsewhere = replace_once(
+        RESOLVED, "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    _both_say(elsewhere, "exactly one '- Verdict:' line", "exactly one '- Verdict:' line")
+
+
+@pytest.mark.parametrize("annotated", ["resolved — the job is excluded", "resolved (structural)"])
+def test_annotated_resolved_fails(annotated):
+    bad = replace_once(RESOLVED, "- Verdict: resolved", f"- Verdict: {annotated}")
+    _both_say(
+        bad, "must read exactly '- Verdict: resolved'", "must read exactly '- Verdict: resolved'"
+    )
+
+
+def _hide_resolution(open_: str, close: str) -> str:
+    start = RESOLVED.index("## Resolution")
+    end = RESOLVED.index("## Verdict")
+    return RESOLVED[:start] + f"{open_}\n" + RESOLVED[start:end] + f"{close}\n\n" + RESOLVED[end:]
+
+
+def test_fenced_resolution_counts_as_absent():
+    _both_say(
+        _hide_resolution("```markdown", "```"),
+        "record is missing required section '## Resolution'",
+        "required section missing: ## Resolution",
+    )
+
+
+def test_commented_resolution_counts_as_absent():
+    _both_say(
+        _hide_resolution("<!--", "-->"),
+        "record is missing required section '## Resolution'",
+        "required section missing: ## Resolution",
+    )
+
+
+def test_evidence_impossible_under_both_states_fails_as_model_review():
+    draft = replace_once(
+        RESOLVED, "- Surviving state: proposition false", "- Surviving state: none"
+    )
+    _both_say(draft, "model review, never a verdict", "model review, never a verdict")
+    unfilled = replace_once(draft, "- Verdict: resolved", "- Verdict: <value>")
+    assert _says(unfilled, "model review, never a verdict")
+    assert any("model review, never a verdict" in f for f in cr.check(unfilled, final=True))
+    under_robust = replace_once(draft, "- Verdict: resolved", "- Verdict: robust")
+    _both_say(under_robust, "model review, never a verdict", "model review, never a verdict")
+
+
+def test_dominated_does_not_fire_on_losses_in_the_eliminated_state():
+    """Losses over (surviving, eliminated): A = (1, 0), B = (1, 5). Across both
+    states A dominates B, but in the surviving state the actions tie."""
+    tie = replace_once(
+        _resolved(
+            losses=("1", "1"), difference="0 — provenance: user-elicited", rec="no preference"
+        ),
+        "  | roll back to build 411 | the faulty job is removed | a build is withdrawn; any indirect build-412 cause is removed too |\n"
+        "  | keep build 412 with a hotfix | the faulty job runs until the hotfix | the build stays and the hotfix work goes to the found cause |",
+        "  | roll back to build 411 | 0 | 1 |\n  | keep build 412 with a hotfix | 5 | 1 |",
+    )
+    assert _both(tie) == ([], [])
+    as_dominated = replace_once(
+        replace_once(tie, "- Verdict: resolved", "- Verdict: dominated"),
+        "- Recommended action: no preference",
+        f"- Recommended action: {ROLLBACK}",
+    )
+    _both_say(
+        as_dominated,
+        "'## Resolution' belongs only to a resolved record",
+        "'## Resolution' belongs only to a resolved record",
+    )
+
+
+def test_structural_exclusion_basis_is_bound_to_an_excluded_true_state():
+    flipped = replace_once(
+        replace_once(
+            RESOLVED, "- Excluded state: proposition true", "- Excluded state: proposition false"
+        ),
+        "- Surviving state: proposition false",
+        "- Surviving state: proposition true",
+    )
+    assert _says(
+        flipped, "accepted only under a resolved verdict with 'Excluded state: proposition true'"
+    )
+    no_conditions = re.sub(
+        r"- Identification conditions: .*", "- Identification conditions: none", RESOLVED
+    )
+    assert _says(no_conditions, "requires '- Identification conditions:' to restate")
+    ordinary = replace_once(
+        replace_once(VALID_DECIDE, "- Claim class: descriptive", "- Claim class: causal"),
+        "- Identification basis: NONE",
+        "- Identification basis: structural exclusion — see Resolution",
+    )
+    ordinary = replace_once(
+        ordinary,
+        "- Identification conditions: none",
+        "- Identification conditions: the build manifest is complete",
+    )
+    assert _says(ordinary, "accepted only under a resolved verdict")
+
+
+def test_no_preference_stays_a_finding_outside_indifferent_and_resolved():
+    bad = replace_once(
+        VALID_DECIDE, "- Recommended action: hold one week", "- Recommended action: no preference"
+    )
+    findings, shipped = _both(bad)
+    assert any("Recommended action" in f for f in findings), findings
+    assert any("'no preference'" in f for f in shipped), shipped
+
+
+ORDINARY_FINDINGS = FIXTURES / "ordinary_record_findings.json"
+
+
+def test_ordinary_records_are_unchanged():
+    """Every archived decide record keeps, finding for finding, what both
+    checkers reported before `resolved` existed. The golden was captured from
+    origin/dev b5724c1's check_decision.py and check_record.py (`--final`),
+    never from the checkers under test, so it cannot drift with them."""
+    golden = json.loads(ORDINARY_FINDINGS.read_text(encoding="utf-8"))
+    repo = FIXTURES.parents[2]
+    assert len(golden) > 50  # noqa: PLR2004 -- the archive must not shrink into vacuity
+    assert any(v["dev"] for v in golden.values())  # a positive: findings exist to keep
+    for path, before in golden.items():
+        text = (repo / path).read_text(encoding="utf-8")
+        assert _without_resolved(check(text)) == before["dev"], path
+        assert _without_resolved(cr.check(text, final=True)) == before["shipped_final"], path
+
+
+def _without_resolved(findings: list[str]) -> list[str]:
+    """A finding that prints the closed verdict set now lists `resolved`; that
+    is the only change the seventh verdict may make to an ordinary record."""
+    return [
+        f.replace("'prior-sensitive', 'resolved', 'robust'", "'prior-sensitive', 'robust'")
+        for f in findings
+    ]
+
+
+# PR #137 review round: each case below failed in at least one checker
+# before its fix, and both checkers must agree on it.
+
+_ROLLBACK_ROW = "| roll back to build 411 | 4 | user-elicited |"
+_RESOLUTION = RESOLVED[RESOLVED.index("## Resolution") : RESOLVED.index("## Verdict")]
+
+
+@pytest.mark.parametrize(
+    ("rows", "difference"),
+    [
+        (("sensitivity-only", "user-elicited"), "user-elicited"),
+        (("user-elicited", "estimated-from-data-in-hand"), "user-elicited"),
+        (("user-elicited", "user-elicited"), "estimated-from-data-in-hand"),
+    ],
+)
+def test_resolved_named_action_needs_every_loss_belief_grade(rows, difference):
+    mixed = _resolved(provs=rows, difference=f"3 — provenance: {difference}")
+    _both_say(
+        mixed, "requires '- Recommended action:' to read 'returned to owner'", "'returned to owner'"
+    )
+    tie = _resolved(
+        losses=("2", "2"),
+        provs=rows,
+        difference=f"0 — provenance: {difference}",
+        rec="no preference",
+    )
+    _both_say(
+        tie, "requires '- Recommended action:' to read 'returned to owner'", "'returned to owner'"
+    )
+    owner = _resolved(provs=rows, difference=f"3 — provenance: {difference}", rec=OWNER)
+    assert _both(owner) == ([], [])
+
+
+def test_a_second_resolution_section_fails_and_is_read_for_model_review():
+    second = _RESOLUTION.replace("- Surviving state: proposition false", "- Surviving state: none")
+    bad = replace_once(RESOLVED, "## Verdict", second + "## Verdict")
+    _both_say(bad, "duplicate section '## Resolution'", "duplicate section '## Resolution'")
+    _both_say(bad, "model review, never a verdict", "model review, never a verdict")
+
+
+def test_observations_rows_are_exactly_two_cells_and_filled():
+    wide = replace_once(
+        RESOLVED, "| packet file: incident timeline |", "| packet file: incident timeline | extra |"
+    )
+    _both_say(
+        wide,
+        "'- Observations:' row 1 must be exactly two cells",
+        "'- Observations:' row 1 must be exactly two cells",
+    )
+    header = replace_once(RESOLVED, "| observation | source |", "| observation | source | note |")
+    _both_say(
+        header,
+        "header must be exactly 'observation | source'",
+        "header must be exactly 'observation | source'",
+    )
+    blank = replace_once(
+        RESOLVED, "| packet file: incident timeline |", "| <file or source it comes from> |"
+    )
+    _both_say(blank, "still unfilled", "still unfilled")
+    # `<source>` is an HTML element name, not a template blank, to both.
+    tag = replace_once(RESOLVED, "| packet file: incident timeline |", "| <source> |")
+    assert _both(tag) == ([], [])
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- Posterior odds: 0",
+        "- Prior odds: 1 — provenance: user-elicited",
+        "- Crossover: none within swept class",
+        "- Independence: single item",
+    ],
+)
+def test_resolved_rejects_an_odds_only_label_anywhere(line):
+    bad = replace_once(RESOLVED, "- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    label = line[2:].split(":", 1)[0]
+    _both_say(bad, f"found '- {label}:'", f"found '- {label}:'")
+    prose = replace_once(
+        RESOLVED,
+        "- VoI question: none\n",
+        "- VoI question: none\n\nNo posterior odds were computed.\n",
+    )
+    assert _both(prose) == ([], [])
+
+
+@pytest.mark.parametrize(
+    ("line", "label"),
+    [
+        ("- **Prior odds:** 0", "Prior odds"),
+        ("- **Posterior odds**: 0", "Posterior odds"),
+        ("- _Crossover:_ none within swept class", "Crossover"),
+        ("- __Loss ratio:__ 2", "Loss ratio"),
+    ],
+)
+def test_resolved_rejects_an_emphasized_odds_only_label(line, label):
+    # Emphasis on a label is presentation only; both checkers must see through it.
+    bad = replace_once(RESOLVED, "- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    _both_say(bad, f"found '- {label}:'", f"found '- {label}:'")
+
+
+def test_unfilled_difference_defers_the_recommendation_coupling_by_default():
+    draft = replace_once(
+        RESOLVED,
+        "- Surviving-state loss difference: 3 — provenance: user-elicited",
+        "- Surviving-state loss difference: <signed number or range> — provenance: <class>",
+    )
+    assert not any("Recommended action" in f for f in cr.check(draft))
+    assert any("still unfilled" in f for f in cr.check(draft, final=True))
+    assert _says(draft, "must parse as a signed number")
+
+
+def test_odds_only_field_in_template_state_waits_for_final():
+    leftover = replace_once(
+        RESOLVED,
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: <multiple> — provenance: <class>\n",
+    )
+    assert not any("odds-only" in f for f in cr.check(leftover))
+    _both_say(leftover, "found '- Loss ratio:'", "found '- Loss ratio:'")
+    filled = replace_once(
+        RESOLVED,
+        "- Deadline or forcing event: noon today\n",
+        "- Deadline or forcing event: noon today\n- Loss ratio: 3 — provenance: user-elicited\n",
+    )
+    assert any("found '- Loss ratio:'" in f for f in cr.check(filled))
+
+
+def test_ordinary_records_keep_their_verdict_line_tolerance():
+    second = replace_once(
+        VALID_DECIDE, "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    assert check(second) == []
+    assert cr.check(second, final=True) == []
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "- **Verdict:** resolved",
+        "- Verdict: `resolved`",
+        "- Verdict: **resolved**",
+        "- Verdict: resolved (structural)",
+    ],
+)
+def test_a_resolved_verdict_line_is_exactly_the_bare_token(line):
+    bad = replace_once(RESOLVED, "- Verdict: resolved", line)
+    _both_say(
+        bad, "must read exactly '- Verdict: resolved'", "must read exactly '- Verdict: resolved'"
+    )
+
+
+def test_a_second_verdict_line_beside_resolved_fails():
+    bad = replace_once(
+        RESOLVED, "- VoI question: none\n", "- VoI question: none\n- Verdict: robust\n"
+    )
+    _both_say(bad, "exactly one '- Verdict:' line", "exactly one '- Verdict:' line")
+
+
+def test_resolved_sections_keep_the_skeleton_order():
+    late = RESOLVED.replace(_RESOLUTION, "") + "\n" + _RESOLUTION
+    _both_say(late, "sections must appear in the order", "sections must appear in the order")

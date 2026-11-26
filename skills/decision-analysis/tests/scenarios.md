@@ -3,7 +3,7 @@
 Behavioral test scenarios for this skill, following the repo's baseline/with-skill methodology: run each scenario with a fresh subagent that does NOT have the skill loaded (baseline), then with the skill loaded (treatment), and compare against the assertions.
 **Status (2026-11-17, except where a clause is dated):** DA-S1, DA-S1x, DA-S3, DA-S6, DA-S8, DA-S9, and DA-S10 have scored arms, recorded under `runs/` and summarized per cell in `docs/evidence-status.md`, which is the authority on what each measured and which wording ships; DA-S2, DA-S4, DA-S5, DA-S7, and DA-S11 have no arm; DA-S12 and DA-S13 (added 2026-11-24) are unrun.
 Separate, focused VoI wording checks are recorded in `runs/2026-09-04-voi-pricing.md`; they do not complete this scenario suite.
-Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8) and `da-sweep` (DA-S9, DA-S10), each with a validator in the house pattern and a prek hook; the fixtures DA-S2, DA-S4, DA-S12, and DA-S13 name are still to be generated.
+Generated fixtures: `da-s1-ledger` (DA-S1, DA-S1x, DA-S3, DA-S8), `da-sweep` (DA-S9, DA-S10), and `da-ruled-out` (DA-S12, DA-S13), each with a validator in the house pattern and a prek hook; the fixtures DA-S2 and DA-S4 name are still to be generated.
 A fixture must be validated to still encode its stated properties before any run scored against it is trusted.
 A baseline run that already satisfies every assertion means the scenario is too easy; tighten it.
 Trigger scenarios load a catalog containing this skill's description AND the three siblings', because the failure under test is collision; record which skill activated and, if this one, which route it took.
@@ -179,33 +179,34 @@ Added 2026-11-17 for #94.
 
 ### DA-S12 — an observation impossible under one state (ruled-out state)
 
-**Status:** unrun; added 2026-11-24 for issue #114 and `decisions/008`, which is proposed, so no wording it would measure exists yet.
-**Prompt:** "We suspect last night's loss of the orders partition on db-03 came from the new compaction job in build 412, and we must choose by noon between rolling back to build 411 and keeping 412 with a hotfix. Here is the incident packet (`{FIXTURE_PATH}`). Roll back or hotfix?"
-**Proposition:** H = the build-412 compaction job caused the loss of the orders partition on db-03; not-H = something other than that job caused it.
-**Fixture sketch:** to be generated with a validator; the packet must establish, each from its own file:
-- the lost partition lived only on db-03's local disk, with no replica, shared volume, or network storage holding it (a storage-topology document);
-- the compaction job can modify data only by executing on the host that holds it (the job's design document), and no component able to touch the partition ran the job (process accounting for db-03 and the deploy log showing db-03 never ran build 412);
-- the full observation, the loss together with the job's absence from db-03, is possible under not-H, with a named alternative such as a disk fault in db-03's device log;
-- a four-cell loss table supplied by the owner whose losses strictly separate the two actions in the surviving state.
+**Status:** unrun; added 2026-11-24 for issue #114 and `decisions/008`, whose accepted form, the `resolved` verdict, this cell measures.
+**Prompt:** `fixtures/da-ruled-out-prompts/da-s12.txt`, with `{FIXTURE_PATH}` the staged `fixtures/da-ruled-out/s12-partition-loss/` packet: "We suspect the new compaction job in build 412 wrote to or deleted files of the orders partition on db-03 between 01:40 and 03:10 last night (2026-11-24) … Roll back or hotfix?"
+**Proposition:** H = between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job, executing, wrote to or deleted a file of the orders partition on db-03; not-H = between 01:40 and 03:10 on 2026-11-24, the build-412 compaction job wrote to or deleted no file of the orders partition on db-03.
+not-H is H's literal complement, so the two states partition every history; H is about the job touching the partition in the window, not about causing the loss, and a loss under not-H came from something else, including build 412 acting by another path.
+**Fixture:** `da-ruled-out/s12-partition-loss`, each fact from its own file, all stated as verified: the partition lived only on db-03's local disk with no replica (storage topology); the job modifies data only by executing on the host that holds it (design document); process accounting, stated complete for the window, shows every process on db-03 ran build 411 and none is the compaction job; the deploy log, stated complete, shows db-03 on build 411 throughout the window; db-03's device log records a disk fault in the window; the owner's losses over (H, not-H) are roll back = (0, 4) and hotfix = (6, 1), so neither action dominates across both states and the surviving-state difference 4 − 1 = 3 names the hotfix.
+Validated by `uv run skills/decision-analysis/tests/fixtures/validate_da_ruled_out.py skills/decision-analysis/tests/fixtures/da-ruled-out`.
 
 So the accepted evidence has zero likelihood under H by a structural exclusion and positive likelihood under not-H.
-**Expected:** the route the owner's answer to `decisions/008`'s routing question selects; the response states the accepted evidence, the structural reason it is impossible under H, and why it is possible under not-H, and compares the two actions in the surviving state under whichever form the owner adopts in `decisions/008`.
+**Expected:** decide route; a `resolved` record (`../SKILL.md` § The Decide Route) excluding `proposition true`, citing each observation by file, with surviving-state losses 4 and 1, difference `3 — provenance: user-elicited`, and Recommended action `keep build 412 with a hotfix`.
 
+- [ ] Route `decide`, with a decision record written to a file.
+- [ ] Verdict `resolved`, and the record passes `check_decision.py` and `instruments/check_record.py --final` in the resolved shape: no Evidence and update or Robustness block, and a Resolution block.
+- [ ] Excluded state `proposition true`; the Observations table covers the whole accepted evidence (the loss, the local-only topology, the job's locality, the process accounting, and the deploy log), each row citing its packet file.
 - [ ] No evidence row carries an invented small positive ratio standing in for impossibility.
 - [ ] The decisive observation is not discarded as `none supported`.
-- [ ] The recommendation follows from the losses in the surviving state, with the eliminating observation cited by file.
+- [ ] The recommendation follows from the losses in the surviving state: difference 3, `user-elicited`, Recommended action `keep build 412 with a hotfix`.
 - [ ] Baseline expectation: writes a token ratio such as 0.01, or drops the observation and returns an undecided record.
+
+DA-S12 and DA-S13 together do not exercise: a disputed exclusion (the `out: adjudicate` route), evidence impossible under both states (model review), precedence over real two-state dominance, a jointly computed difference narrower than the endpoint interval, an exact surviving-state tie, or an unsupported surviving-state loss; those branches are covered only by the checkers' unit suites.
+A scorer reading a difference narrower than its losses' endpoint interval (losses 1–5 and 2–6 with a difference of `-1`, say) needs the record's Conditions to name the shared quantity; containment alone passes it, and no checker reads that statement (`decisions/008`).
 
 ### DA-S13 — zero events in a finite sample (must keep its uncertainty)
 
 **Status:** unrun; added 2026-11-24 as DA-S12's pair for issue #114 and `decisions/008`.
-**Prompt:** "The vendor's new disk firmware has shown zero corruption events in our pilot. Should we roll it out fleet-wide this week or keep piloting another month? Packet: `{FIXTURE_PATH}`."
+**Prompt:** `fixtures/da-ruled-out-prompts/da-s13.txt`, with `{FIXTURE_PATH}` the staged `fixtures/da-ruled-out/s13-zero-events/` packet: "The vendor's new disk firmware has shown zero corruption events in our pilot. Should we roll it out fleet-wide this week or keep piloting another month?"
 **Proposition:** H = the new firmware carries the defect the vendor's advisory describes; not-H = it does not.
-**Fixture sketch:** to be generated with a validator; the packet must supply:
-- a pilot log of zero corruption events over 100 host-weeks, one week on each of 100 distinct hosts, so the sampling model is 100 independent Bernoulli trials and no host contributes two weeks;
-- the vendor advisory's corruption rate of 0.02 per host-week for firmware with the defect, and the fleet's measured baseline of 0.005 per host-week for firmware without it, each with its source and reference class;
-- the owner's prior odds of H, 1, stated as settled so the prior class is held fixed at 1, and losses over (H, not-H) of roll out = (10, 0) and keep piloting = (1, 1);
-- nothing that makes corruption mechanically impossible under the new firmware.
+**Fixture:** `da-ruled-out/s13-zero-events`: a pilot log of 100 host-weeks, one week on each of 100 distinct hosts, none with a corruption event, with the README stating that the host-weeks are treated as independent trials and why (separate racks, power feeds, and drive batches), that each trial's outcome is whether a host-week had at least one event, and that the two sourced rates are the per-host-week probabilities of that outcome with and without the defect; the vendor advisory's 0.02 and the fleet's measured baseline of 0.005, each with its source and a comparable reference class; the owner's prior odds of H, 1, stated as settled, and losses over (H, not-H) of roll out = (10, 0) and keep piloting = (1, 1); nothing that makes corruption mechanically impossible under the new firmware.
+Validated by `uv run skills/decision-analysis/tests/fixtures/validate_da_ruled_out.py skills/decision-analysis/tests/fixtures/da-ruled-out`, which recomputes the ratio (≈ 0.2189) and the prior-odds crossover (≈ 0.5075).
 
 **Expected:** decide route; the likelihood ratio of zero events is (0.98 / 0.995)^100 ≈ 0.219, `externally-sourced`; posterior odds ≈ 0.219.
 Keep piloting is favored if H is true, the loss ratio is (10 − 1) / (1 − 0) = 9, and the threshold is 1/9 ≈ 0.111, so posterior odds above it prefer keep piloting; the prior-odds crossover is (1/9) / 0.219 ≈ 0.508, outside the fixed prior class of 1, and with point losses and a point ratio nothing else flips, so the verdict is `robust` and the action keep piloting.
