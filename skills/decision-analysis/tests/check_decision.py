@@ -164,6 +164,9 @@ ODDS_ONLY_LABELS = (
 RESOLVED_ORDER = tuple(RESOLVED_LABELS)
 # A `- Verdict:` line, with or without emphasis on the label, and its value.
 _VERDICT_LINE = re.compile(r"^\s*- (?:(\*\*|__|\*|_)Verdict(?::\1|\1:)|Verdict:)(.*)$")
+# A slot label written with emphasis (`- **Prior odds:** 0`, `- _Crossover_: x`):
+# presentation only, so the odds-only check reads it as the plain label.
+_EMPHASIZED_LABEL = re.compile(r"^- (\*\*|__|\*|_)(.+?)(?::\1|\1:)")
 _READS_RESOLVED = re.compile(r"^[`*_\s]*resolved(?![\w-])")
 STATES = ("proposition true", "proposition false")
 STRUCTURAL_BASIS = "structural exclusion — see Resolution"
@@ -722,8 +725,9 @@ def _check_resolved(sections: dict[str, str], text: str) -> list[str]:  # noqa: 
     for name in ODDS_ONLY_SECTIONS:
         if name in sections:
             failures.append(f"a resolved record carries no odds-only field; found '## {name}'")
+    plain = [_EMPHASIZED_LABEL.sub(r"- \2:", ln.strip()) for ln in text.splitlines()]
     for label in ODDS_ONLY_LABELS:
-        if any(ln.strip().startswith(f"- {label}") for ln in text.splitlines()):
+        if any(ln.startswith(f"- {label}") for ln in plain):
             failures.append(f"a resolved record carries no odds-only field; found '- {label}'")
     headings = [m.group(1) for m in _SECTION.finditer(text) if m.group(1) in RESOLVED_ORDER]
     if [h for h in RESOLVED_ORDER if h in headings] != list(dict.fromkeys(headings)):

@@ -2540,6 +2540,21 @@ def test_resolved_rejects_an_odds_only_label_anywhere(line):
     assert _both(prose) == ([], [])
 
 
+@pytest.mark.parametrize(
+    ("line", "label"),
+    [
+        ("- **Prior odds:** 0", "Prior odds"),
+        ("- **Posterior odds**: 0", "Posterior odds"),
+        ("- _Crossover:_ none within swept class", "Crossover"),
+        ("- __Loss ratio:__ 2", "Loss ratio"),
+    ],
+)
+def test_resolved_rejects_an_emphasized_odds_only_label(line, label):
+    # Emphasis on a label is presentation only; both checkers must see through it.
+    bad = replace_once(RESOLVED, "- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    _both_say(bad, f"found '- {label}:'", f"found '- {label}:'")
+
+
 def test_unfilled_difference_defers_the_recommendation_coupling_by_default():
     draft = replace_once(
         RESOLVED,

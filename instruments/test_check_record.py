@@ -2295,6 +2295,20 @@ def test_resolved_rejects_an_odds_only_label_anywhere(line):
     assert cr.check(prose, final=True) == []
 
 
+@pytest.mark.parametrize(
+    ("line", "label"),
+    [
+        ("- **Prior odds:** 0", "Prior odds"),
+        ("- **Posterior odds**: 0", "Posterior odds"),
+        ("- _Crossover:_ none within swept class", "Crossover"),
+        ("- __Loss ratio:__ 2", "Loss ratio"),
+    ],
+)
+def test_resolved_rejects_an_emphasized_odds_only_label(line, label):
+    bad = _edit("- VoI question: none\n", f"- VoI question: none\n{line}\n")
+    assert _says(bad, f"found '- {label}:'")
+
+
 def test_unfilled_difference_defers_the_recommendation_coupling_by_default():
     draft = _edit(
         "- Surviving-state loss difference: 3 — provenance: user-elicited",
