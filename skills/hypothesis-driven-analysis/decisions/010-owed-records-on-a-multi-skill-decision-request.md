@@ -1,6 +1,6 @@
 # 010 — Which records a multi-skill decision request owes
 
-Status: proposed, 2026-11-24; awaiting an owner decision (issue #119).
+Status: accepted, 2026-11-25 (issue #119); proposed 2026-11-24.
 
 ## Question
 
@@ -129,3 +129,34 @@ The record requirements and the reporting obligations live at the skill sections
 The scoring-column definitions live in the preregistration named in § Scoring columns.
 If this proposal is adopted, its retrievability part needs skill-text changes that are not made here (see § Open questions for the owner), and this section then points at their home.
 If the alternative is adopted, the exemption gets one home in the skills, and this section points at it.
+
+Added 2026-11-25, on acceptance: the retrievability rule has no home yet; its draft home is `scripts/shared-sections/record-delivery.md`, rendered into each skill's § Record Delivery, if issue #138 is taken up.
+The record-form, timing, and reporting requirements stay at the skill sections listed above.
+
+## Decision, 2026-11-25
+
+Accepted by the owner on 2026-11-25:
+
+- A record is owed in the form and at the time its owning route sets, at the sections listed in § Where each route requires a record.
+- The ledger and exploration-log templates keep their scratch-space defaults.
+- No waiver class is created.
+- Records are scored separately from the answer, with creation, route-specific timing, and delivery kept apart; `scratch`, `retained`, and `delivered` stay as the historical labels.
+
+Retrievability, meaning a named path the user can still open after the turn, is accepted as the delivery target.
+Its implementation is deferred and tracked in issue #138.
+No skill text changes in this decision: `hypothesis-driven-analysis` § Conclusion keeps its existing durable-artifact pointer, and § Record Delivery is unchanged.
+
+It is deferred for cost and for the lack of a safe way to measure it, not on a finding that it makes no difference.
+The delivery gap is observed: in § What the transcripts show, one of the five records created on I2 was named in a final message, and none of the four upstream files created on I4 was.
+The rule's natural home is the shared record-delivery source, rendered into all four skills, so under the measurement protocol it reaches roughly forty record-writing cells.
+The representative and forced-load runs did not test a delivery rule.
+
+The open questions, answered in order:
+
+- Timing: the boundary for "record written before results" is set per owning route and will be defined in whatever preregistration takes up #138.
+  The representative-suite preregistration, `docs/evidence/integration/representative-v1/prereg.md`, remains the historical authority for the columns scored under it.
+- Missed activation or handoff: record columns stay on the observed route, and records missed because the designed route was skipped are reported separately.
+- Reconciliation of the owning instructions: none is made now; if #138 is taken up, the rule's draft home is the shared record-delivery source.
+- "Retrievable": the accepted target above, not yet a rule.
+
+What reopens the delivery rule: a cheap, safe directional pilot (one Codex cell with an isolated filesystem per arm), or a real audit blocked by a missing or stale path; #138 holds the detail.
